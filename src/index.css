@@ -1,0 +1,142 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'DSEG7Classic';
+  src: url('/fonts/DSEG7Classic-Bold.woff2') format('woff2'),
+       url('/fonts/DSEG7Classic-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@layer base {
+  body {
+    /* Apply a light purple background and dark purple text for better contrast */
+    @apply bg-purple-50 text-purple-900 dark:bg-purple-950 dark:text-purple-50;
+    font-family: 'Inter', sans-serif; /* Using a modern sans-serif font */
+  }
+
+  /* Global styles for form elements to ensure contrast */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  textarea,
+  select {
+    /* Ensure form elements have good contrast */
+    @apply bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100;
+  }
+
+  /* React Big Calendar overrides for better contrast */
+  .rbc-calendar {
+    @apply text-purple-900 dark:text-purple-100;
+  }
+
+  .rbc-header {
+    @apply text-purple-700 dark:text-purple-300;
+  }
+
+  .rbc-day-bg {
+    @apply bg-purple-50 dark:bg-purple-900;
+  }
+
+  .rbc-off-range-bg {
+    @apply bg-purple-100 dark:bg-purple-800;
+  }
+
+  .rbc-event {
+    /* Use a vibrant purple for events */
+    @apply bg-purple-600 text-white;
+  }
+
+  .rbc-toolbar button {
+    @apply text-purple-800 dark:text-purple-200;
+  }
+
+  /* More specific overrides for react-big-calendar */
+  .rbc-month-view .rbc-header,
+  .rbc-time-view .rbc-header {
+    @apply text-purple-800 dark:text-purple-200;
+  }
+
+  .rbc-date-cell {
+    @apply text-purple-800 dark:text-purple-200;
+  }
+
+  .rbc-event-content {
+    @apply text-white;
+  }
+
+  .rbc-today {
+    /* Use a distinct color for today's date */
+    @apply bg-purple-200 dark:bg-purple-700;
+  }
+
+  .rbc-current-time-indicator {
+    @apply bg-red-500; /* Keep red for time indicator */
+  }
+
+  /* Ensure all text within calendar is readable */
+  .rbc-calendar * {
+    @apply text-purple-900 dark:text-purple-100;
+  }
+
+  /* Custom scrollbar for a modern look */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+/* Wavy Border Animation */
+.wavy-border-animation {
+  position: relative;
+  overflow: hidden; /* Hide parts of the wave that go outside */
+}
+
+.wavy-border-animation::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%; /* Make it wider to allow for movement */
+  height: 3px; /* Thickness of the wave */
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.8) 10%, /* White wave */
+    transparent 20%,
+    transparent 80%,
+    rgba(255, 255, 255, 0.8) 90%,
+    transparent 100%
+  );
+  background-size: 50% 100%; /* Control the wave pattern repetition */
+  animation: wave-move 2s linear infinite; /* Animation duration and type */
+}
+
+@keyframes wave-move {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%); /* Move the wave across */
+  }
+}

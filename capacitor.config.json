@@ -1,0 +1,9 @@
+{
+  "appId": "com.smartteaching.app",
+  "appName": "Smart Teaching",
+  "webDir": "dist",
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "https"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Smart Teaching",
+  "short_name": "SmartTeaching",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "description": "Smart Teaching Application",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
