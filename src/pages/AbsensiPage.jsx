@@ -1,26 +1,33 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import moment from 'moment';
-import { collection, getDocs, query, where, writeBatch, doc, serverTimestamp, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where, writeBatch, doc, serverTimestamp, orderBy, limit } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import StyledTable from '../components/StyledTable'; // Assuming you have a StyledTable component
 import ClockDisplay from '../components/ClockDisplay';
+import { useSettings } from '../utils/SettingsContext';
+
+import RunningText from '../components/RunningText';
 
 const AbsensiPage = () => {
-  
+
   const [activeSchedule, setActiveSchedule] = useState(null);
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({}); // { studentId: "Hadir" }
-
-  
+  const [previousMaterial, setPreviousMaterial] = useState(null); // State for previous material
+  const [previousLearningActivities, setPreviousLearningActivities] = useState(null); // State for previous learning activities
+  const { activeSemester, academicYear } = useSettings();
 
   const autoSaveTimeout = useRef(null);
 
   useEffect(() => {
     const fetchActiveScheduleAndStudentsAndAttendance = async () => {
-      if (!auth.currentUser) return;
+      if (!auth.currentUser) {
+        return;
+      }
 
       const userId = auth.currentUser.uid;
+
       const now = moment();
       const todayDayName = now.format('dddd');
       const dayMap = {
@@ -45,9 +52,9 @@ const AbsensiPage = () => {
 
       scheduleSnapshot.docs.forEach(doc => {
         const schedule = doc.data();
-        const className = typeof schedule.class === 'object' && schedule.class !== null
-          ? schedule.class.rombel
-          : schedule.class;
+        const className = schedule.className || (typeof schedule.class === 'object' && schedule.class !== null ? schedule.class.rombel : schedule.class);
+        const classId = schedule.classId || '';
+        const subjectId = schedule.subjectId || '';
 
         let startTime = moment(schedule.startTime, 'HH:mm');
         let endTime = moment(schedule.endTime, 'HH:mm');
@@ -57,30 +64,97 @@ const AbsensiPage = () => {
         }
 
         if (now.isBetween(startTime, endTime, null, '[]')) {
-          foundActiveSchedule = { id: doc.id, ...schedule, class: className };
+          foundActiveSchedule = { id: doc.id, ...schedule, class: className, classId, subjectId };
         }
       });
 
       setActiveSchedule(foundActiveSchedule);
+      console.log("Active Schedule:", foundActiveSchedule);
 
       if (foundActiveSchedule) {
         const rombelName = foundActiveSchedule.class;
+        console.log("Active Schedule Rombel Name:", rombelName);
+
         if (rombelName) {
-          const studentsQuery = query(
+          // Fetch the last teaching journal entry for the active class
+          let lastJournalQuery = query(
+            collection(db, 'teachingJournals'),
+            where('userId', '==', userId),
+            where('classId', '==', foundActiveSchedule.classId || rombelName),
+            where('subjectId', '==', foundActiveSchedule.subjectId || foundActiveSchedule.subject),
+            where('semester', '==', activeSemester),
+            where('academicYear', '==', academicYear),
+            orderBy('timestamp', 'desc'),
+            limit(1)
+          );
+          let lastJournalSnapshot = await getDocs(lastJournalQuery);
+
+          // Fallback for journal if first query is empty
+          if (lastJournalSnapshot.empty) {
+            lastJournalQuery = query(
+              collection(db, 'teachingJournals'),
+              where('userId', '==', userId),
+              where(foundActiveSchedule.classId ? 'className' : 'classId', '==', rombelName),
+              where(foundActiveSchedule.subjectId ? 'subjectName' : 'subjectId', '==', foundActiveSchedule.subject),
+              where('semester', '==', activeSemester),
+              where('academicYear', '==', academicYear),
+              orderBy('timestamp', 'desc'),
+              limit(1)
+            );
+            lastJournalSnapshot = await getDocs(lastJournalQuery);
+          }
+
+          if (!lastJournalSnapshot.empty) {
+            const lastJournalEntry = lastJournalSnapshot.docs[0].data();
+            console.log("Last Journal Entry:", lastJournalEntry);
+            setPreviousMaterial(lastJournalEntry.material || 'Tidak ada materi sebelumnya');
+            setPreviousLearningActivities(lastJournalEntry.learningActivities || 'Tidak ada aktivitas pembelajaran sebelumnya');
+          } else {
+            setPreviousMaterial('Tidak ada materi sebelumnya');
+            setPreviousLearningActivities('Tidak ada aktivitas pembelajaran sebelumnya');
+            console.log("No previous journal found.");
+          }
+        } else {
+          setPreviousMaterial(null); // Clear if no relevant active schedule info
+          setPreviousLearningActivities(null); // Clear if no relevant active schedule info
+          console.log("No rombelName in active schedule, clearing previous material.");
+        }
+
+        // ... existing code for fetching students and attendance ...
+        if (rombelName) {
+          console.log("Fetching students for rombel:", rombelName, "or classId:", foundActiveSchedule.classId);
+          let studentsQuery = query(
             collection(db, 'students'),
             where('userId', '==', userId),
-            where('rombel', '==', rombelName),
+            where('classId', '==', foundActiveSchedule.classId || rombelName),
             orderBy('absen')
           );
-          const studentsSnapshot = await getDocs(studentsQuery);
+          let studentsSnapshot = await getDocs(studentsQuery);
+
+          // Fallback for students if first query is empty (check rombel field)
+          if (studentsSnapshot.empty) {
+            console.log("Fallback search for students using rombel name:", rombelName);
+            studentsQuery = query(
+              collection(db, 'students'),
+              where('userId', '==', userId),
+              where('rombel', '==', rombelName),
+              orderBy('absen')
+            );
+            studentsSnapshot = await getDocs(studentsQuery);
+          }
           const fetchedStudents = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setStudents(fetchedStudents);
+          console.log("Fetched Students:", fetchedStudents);
+          console.log("Number of students fetched:", fetchedStudents.length);
+
 
           const existingAttendanceQuery = query(
             collection(db, 'attendance'),
             where('userId', '==', userId),
             where('date', '==', attendanceDate),
-            where('rombel', '==', rombelName)
+            where('classId', '==', foundActiveSchedule.classId || rombelName),
+            where('semester', '==', activeSemester),
+            where('academicYear', '==', academicYear)
           );
           const existingAttendanceSnapshot = await getDocs(existingAttendanceQuery);
           const loadedAttendance = {};
@@ -89,15 +163,31 @@ const AbsensiPage = () => {
             loadedAttendance[data.studentId] = data.status;
           });
 
-          const initialAttendance = {};
-          fetchedStudents.forEach(student => {
-            initialAttendance[student.id] = loadedAttendance[student.id] || 'Hadir';
+          // FIXED: Only reset attendance if it's a DIFFERENT schedule or first load
+          // We check if the student list length is different or if the schedule ID changed
+          setAttendance(prev => {
+            // If we already have attendance data for these students, keep it.
+            // Only if it's a fresh load (empty prev) or different class logic would we want to reset?
+            // Actually, the best check is: if we are in the same schedule, DO NOT overwrite local state with DB state
+            // unless the DB state has "newer" info? But here local > DB until saved.
+            // So we effectively just initialize "Hadir" for keys that don't exist.
+
+            const newAttendance = { ...prev };
+            fetchedStudents.forEach(student => {
+              if (!newAttendance[student.id]) {
+                newAttendance[student.id] = loadedAttendance[student.id] || 'Hadir';
+              }
+              // If it exists in prev (local state), we KEEP it, ignoring loadedAttendance (server state)
+              // This acts as a "draft" mode.
+            });
+            return newAttendance;
           });
-          setAttendance(initialAttendance);
         }
       } else {
         setStudents([]);
         setAttendance({});
+        setPreviousMaterial(null); // Clear previous material if no active schedule
+        console.log("No active schedule, clearing students, attendance, and previous material.");
       }
     };
 
@@ -105,7 +195,7 @@ const AbsensiPage = () => {
     const interval = setInterval(fetchActiveScheduleAndStudentsAndAttendance, 60000); // Check every minute
 
     return () => clearInterval(interval);
-  }, []);
+  }, [activeSemester, academicYear]);
 
   const handleAttendanceChange = (studentId, status) => {
     setAttendance(prev => ({ ...prev, [studentId]: status }));
@@ -125,13 +215,16 @@ const AbsensiPage = () => {
       for (const student of studentsToSave) {
         const status = attendanceToSave[student.id];
         if (status) { // Only save if a status exists for the student
-          const attendanceRef = doc(db, 'attendance', `${attendanceDate}-${rombelName}-${student.id}`);
+          const attendanceRef = doc(db, 'attendance', `${attendanceDate}-${scheduleToSave.classId || rombelName}-${student.id}`);
           batch.set(attendanceRef, {
             userId: auth.currentUser.uid,
             date: attendanceDate,
             rombel: rombelName,
+            classId: scheduleToSave.classId || '',
             studentId: student.id,
             status: status,
+            semester: activeSemester,
+            academicYear: academicYear,
             timestamp: serverTimestamp(),
           }, { merge: true });
         }
@@ -207,21 +300,24 @@ const AbsensiPage = () => {
     {
       header: { label: 'Absen' },
       accessor: row => (
-        <div className="flex space-x-2">
-          {[ { label: 'Hadir', value: 'Hadir', abbr: 'H' },
-             { label: 'Sakit', value: 'Sakit', abbr: 'S' },
-             { label: 'Ijin', value: 'Ijin', abbr: 'I' },
-             { label: 'Alpha', value: 'Alpha', abbr: 'A' }].map(statusOption => (
-            <label key={statusOption.value} className="inline-flex items-center">
+        <div className="flex items-center gap-1 sm:gap-3">
+          {[{ label: 'Hadir', value: 'Hadir', color: 'peer-checked:bg-green-500 peer-checked:text-white', bg: 'bg-green-50' },
+          { label: 'Sakit', value: 'Sakit', color: 'peer-checked:bg-yellow-500 peer-checked:text-white', bg: 'bg-yellow-50' },
+          { label: 'Ijin', value: 'Ijin', color: 'peer-checked:bg-blue-500 peer-checked:text-white', bg: 'bg-blue-50' },
+          { label: 'Alpha', value: 'Alpha', color: 'peer-checked:bg-red-500 peer-checked:text-white', bg: 'bg-red-50' }].map(statusOption => (
+            <label key={statusOption.value} className="relative flex flex-col items-center cursor-pointer group">
               <input
                 type="radio"
-                className="form-radio text-primary"
+                className="sr-only peer"
                 name={`attendance-${row.id}`}
                 value={statusOption.value}
                 checked={attendance[row.id] === statusOption.value}
                 onChange={() => handleAttendanceChange(row.id, statusOption.value)}
               />
-              <span className="ml-2 text-text-light dark:text-text-dark">{statusOption.abbr}</span>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-600 ${statusOption.bg} dark:bg-gray-800 transition-all duration-300 ${statusOption.color} shadow-sm group-hover:scale-110 active:scale-95`}>
+                <span className="text-xs sm:text-sm font-black">{statusOption.label.charAt(0)}</span>
+              </div>
+              <span className="text-[10px] hidden sm:block mt-1 font-bold text-gray-500 uppercase">{statusOption.label}</span>
             </label>
           ))}
         </div>
@@ -229,20 +325,29 @@ const AbsensiPage = () => {
     },
   ];
 
-  
-
-
-
   return (
-    <div className="p-6 bg-background-light dark:bg-background-dark min-h-screen">
-      <h1 className="text-3xl font-bold text-primary-dark dark:text-primary-light mb-6">Absensi Siswa</h1>
+    <div className="p-3 sm:p-6 bg-background-light dark:bg-background-dark min-h-screen">
+      <h1 className="text-2xl sm:text-3xl font-bold text-primary-dark dark:text-primary-light mb-6">Absensi Siswa</h1>
 
-      <div className="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-md mb-6 flex justify-between items-center">
-        
+      <div className="p-4 sm:p-6 rounded-2xl shadow-xl mb-6 flex flex-col items-center border-2 border-slate-800 dark:border-slate-700" style={{ backgroundColor: '#5E716A' }}>
+
         {activeSchedule && (
-          <h2 className="text-xl font-semibold text-text-light dark:text-text-dark">
+          <h2 className="text-xl font-semibold text-white mb-2">
             Kelas Aktif: {activeSchedule.class} ({activeSchedule.subject})
           </h2>
+        )}
+        <div className={!activeSchedule ? 'w-full text-center' : ''}>
+          <ClockDisplay />
+        </div>
+        {previousMaterial && (
+          <p className="text-sm text-white mt-2">
+            Materi Sebelumnya: {previousMaterial}
+          </p>
+        )}
+        {previousLearningActivities && (
+          <p className="text-sm text-white mt-2">
+            {previousLearningActivities}
+          </p>
         )}
       </div>
 
@@ -273,9 +378,7 @@ const AbsensiPage = () => {
           </button>
         </>
       ) : (
-        <div className="text-center text-text-muted-light dark:text-text-muted-dark p-10 bg-surface-light dark:bg-surface-dark rounded-lg shadow-md">
-          <p className="text-lg">Tidak ada jadwal aktif saat ini. Silakan cek jadwal Anda.</p>
-        </div>
+        <RunningText text="Tidak ada jadwal aktif saat ini. Silakan cek jadwal Anda." />
       )}
     </div>
   );

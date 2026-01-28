@@ -1,35 +1,42 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { runEarlyWarningAnalysis, getAllStudents } from '../utils/analysis';
-import Modal from '../components/Modal';
-import StudentWarningDetails from '../components/StudentWarningDetails';
 import StyledSelect from '../components/StyledSelect';
+import { useSettings } from '../utils/SettingsContext';
+import {
+  BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
+import {
+  ShieldAlert, TrendingUp, Users, AlertTriangle, BookOpen,
+  Calendar, UserX, Eye
+} from 'lucide-react';
+
+const COLORS = ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899'];
 
 const EarlyWarningPage = () => {
+  const navigate = useNavigate();
   const [flaggedStudents, setFlaggedStudents] = useState([]);
-  const [allStudents, setAllStudents] = useState([]); // To store all students for class filtering
+  const [allStudents, setAllStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedClass, setSelectedClass] = useState(''); // State for selected class filter
-
-  const handleOpenModal = (student) => {
-    setSelectedStudent(student);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedStudent(null);
-  };
+  const [classes, setClasses] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const { activeSemester, academicYear, geminiModel } = useSettings();
 
   useEffect(() => {
     const performAnalysis = async () => {
       if (auth.currentUser) {
-        setIsLoading(true);
-        const [flaggedResults, allStudentsData] = await Promise.all([
-          runEarlyWarningAnalysis(auth.currentUser.uid),
-          getAllStudents(auth.currentUser.uid)
+        const [flaggedResults, allStudentsData, classesData, subjectsData] = await Promise.all([
+          runEarlyWarningAnalysis(auth.currentUser.uid, activeSemester, academicYear, geminiModel),
+          getAllStudents(auth.currentUser.uid),
+          getDocs(query(collection(db, 'classes'), where('userId', '==', auth.currentUser.uid))),
+          getDocs(query(collection(db, 'subjects'), where('userId', '==', auth.currentUser.uid)))
         ]);
         setFlaggedStudents(flaggedResults);
         setAllStudents(allStudentsData);
+        setClasses(classesData.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.rombel.localeCompare(b.rombel)));
+        setSubjects(subjectsData.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.name.localeCompare(b.name)));
         setIsLoading(false);
       }
     };
@@ -45,19 +52,84 @@ const EarlyWarningPage = () => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [activeSemester, academicYear, geminiModel]);
 
-  const uniqueClasses = useMemo(() => {
-    const classes = new Set(allStudents.map(student => student.rombel));
-    return ['', ...Array.from(classes).sort()]; // Add empty string for "All Classes" option
-  }, [allStudents]);
-
+  // Filter Logic
   const filteredFlaggedStudents = useMemo(() => {
-    if (selectedClass === '') {
-      return flaggedStudents;
-    }
-    return flaggedStudents.filter(student => student.rombel === selectedClass);
-  }, [flaggedStudents, selectedClass]);
+    return flaggedStudents.filter(student => {
+      const classMatch = selectedClass === '' || student.classId === selectedClass || student.rombel === selectedClass;
+      const subjectMatch = selectedSubject === '' ||
+        (student.subjectsWithWarnings && student.subjectsWithWarnings.some(s => s.id === selectedSubject || s.name === selectedSubject));
+      return classMatch && subjectMatch;
+    });
+  }, [flaggedStudents, selectedClass, selectedSubject]);
+
+  // Unique Classes & Subjects
+  const uniqueClassesFiltered = useMemo(() => {
+    return classes;
+  }, [classes]);
+
+  const uniqueSubjectsFiltered = useMemo(() => {
+    return subjects;
+  }, [subjects]);
+
+  // Statistics Calculations
+  const stats = useMemo(() => {
+    const total = filteredFlaggedStudents.length;
+
+    // Most common warning type
+    const warningTypes = {};
+    filteredFlaggedStudents.forEach(student => {
+      student.warnings.forEach(warning => {
+        const type = warning.includes('Nilai') || warning.includes('akademik') ? 'Academic' :
+          warning.includes('Alpha') || warning.includes('Kehadiran') ? 'Attendance' : 'Behavior';
+        warningTypes[type] = (warningTypes[type] || 0) + 1;
+      });
+    });
+    const mostCommon = Object.keys(warningTypes).reduce((a, b) =>
+      warningTypes[a] > warningTypes[b] ? a : b, 'N/A'
+    );
+
+    // Class with most issues
+    const classCount = {};
+    filteredFlaggedStudents.forEach(s => {
+      classCount[s.rombel] = (classCount[s.rombel] || 0) + 1;
+    });
+    const problematicClass = Object.keys(classCount).reduce((a, b) =>
+      classCount[a] > classCount[b] ? a : b, 'N/A'
+    );
+
+    return { total, mostCommon, problematicClass };
+  }, [filteredFlaggedStudents]);
+
+  // Chart Data: Students per Class
+  const classChartData = useMemo(() => {
+    const classCount = {};
+    filteredFlaggedStudents.forEach(s => {
+      classCount[s.rombel] = (classCount[s.rombel] || 0) + 1;
+    });
+    return Object.keys(classCount).map(cls => ({
+      class: cls,
+      students: classCount[cls]
+    })).sort((a, b) => b.students - a.students);
+  }, [filteredFlaggedStudents]);
+
+  // Chart Data: Warning Types Distribution
+  const warningTypeData = useMemo(() => {
+    const types = { Academic: 0, Attendance: 0, Behavior: 0 };
+    filteredFlaggedStudents.forEach(student => {
+      student.warnings.forEach(warning => {
+        if (warning.includes('Nilai') || warning.includes('akademik')) types.Academic++;
+        else if (warning.includes('Alpha') || warning.includes('Kehadiran')) types.Attendance++;
+        else types.Behavior++;
+      });
+    });
+    return [
+      { name: 'Academic', value: types.Academic },
+      { name: 'Attendance', value: types.Attendance },
+      { name: 'Behavior', value: types.Behavior }
+    ].filter(d => d.value > 0);
+  }, [filteredFlaggedStudents]);
 
   if (isLoading) {
     return (
@@ -69,52 +141,229 @@ const EarlyWarningPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Sistem Peringatan Dini</h1>
-      
-      <div className="mb-4">
-        <label htmlFor="class-filter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filter berdasarkan Kelas</label>
+    <div className="container mx-auto p-4 space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+            <ShieldAlert className="text-red-500" size={32} />
+            Dashboard Monitoring Siswa
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            Sistem peringatan dini & analisis komprehensif
+          </p>
+          <div className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-wider font-bold text-red-600 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded border border-red-100 dark:border-red-800 w-fit">
+            <ShieldAlert size={12} /> Intelligence Engine Integrated: BSKAP 2025
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <StyledSelect
-          id="class-filter"
           value={selectedClass}
           onChange={(e) => setSelectedClass(e.target.value)}
         >
-          {uniqueClasses.map(cls => (
-            <option key={cls} value={cls}>
-              {cls === '' ? 'Semua Kelas' : cls}
+          <option value="">Semua Kelas</option>
+          {classes.map(cls => (
+            <option key={cls.id} value={cls.id}>
+              {cls.rombel}
+            </option>
+          ))}
+        </StyledSelect>
+        <StyledSelect
+          value={selectedSubject}
+          onChange={(e) => setSelectedSubject(e.target.value)}
+        >
+          <option value="">Semua Mata Pelajaran</option>
+          {subjects.map(sub => (
+            <option key={sub.id} value={sub.id}>
+              {sub.name}
             </option>
           ))}
         </StyledSelect>
       </div>
 
-      {filteredFlaggedStudents.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFlaggedStudents.map(student => (
-            <button 
-              key={student.id} 
-              onClick={() => handleOpenModal(student)}
-              className="bg-white text-left dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-red-500 hover:shadow-xl hover:border-red-700 transition-all duration-200">
-              <h2 className="text-xl font-bold text-red-500">{student.name}</h2>
-              <p className="text-sm text-gray-500 mb-4">Kelas: {student.rombel}</p>
-              <ul className="list-disc list-inside space-y-2">
-                {student.warnings.map((warning, index) => (
-                  <li key={index} className="text-gray-700 dark:text-gray-300">{warning}</li>
-                ))}
-              </ul>
-            </button>
-          ))}
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-red-500 to-red-600 text-white p-6 rounded-2xl shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-red-100 text-sm font-semibold">Siswa Berisiko</p>
+              <p className="text-4xl font-black mt-2">{stats.total}</p>
+            </div>
+            <UserX size={40} className="opacity-50" />
+          </div>
         </div>
-      ) : (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-          <p className="text-lg">Tidak ada siswa yang teridentifikasi memerlukan perhatian khusus saat ini.</p>
-        </div>
-      )}
 
-      {selectedStudent && (
-        <Modal onClose={handleCloseModal}>
-          <StudentWarningDetails student={selectedStudent} />
-        </Modal>
-      )}
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-2xl shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-100 text-sm font-semibold">Peringatan Terbanyak</p>
+              <p className="text-2xl font-black mt-2">{stats.mostCommon}</p>
+            </div>
+            <AlertTriangle size={40} className="opacity-50" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-2xl shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm font-semibold">Kelas Bermasalah</p>
+              <p className="text-2xl font-black mt-2">{stats.problematicClass}</p>
+            </div>
+            <Users size={40} className="opacity-50" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-semibold">Periode Aktif</p>
+              <p className="text-lg font-bold mt-2">{activeSemester}</p>
+              <p className="text-xs text-blue-100">{academicYear}</p>
+            </div>
+            <Calendar size={40} className="opacity-50" />
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Bar Chart: Students per Class */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+          <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
+            <Users size={20} className="text-blue-500" />
+            Siswa Berisiko per Kelas
+          </h3>
+          {classChartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={classChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="class" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="students" fill="#3b82f6" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-center text-gray-500 py-20">Tidak ada data</p>
+          )}
+        </div>
+
+        {/* Pie Chart: Warning Types */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+          <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
+            <AlertTriangle size={20} className="text-orange-500" />
+            Distribusi Tipe Peringatan
+          </h3>
+          {warningTypeData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={warningTypeData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={entry => `${entry.name}: ${entry.value}`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {warningTypeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-center text-gray-500 py-20">Tidak ada data</p>
+          )}
+        </div>
+      </div>
+
+      {/* Quick Access Table */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+        <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
+          <BookOpen size={20} className="text-green-500" />
+          Daftar Siswa Memerlukan Perhatian ({filteredFlaggedStudents.length})
+        </h3>
+        {filteredFlaggedStudents.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-gray-100 dark:bg-gray-700">
+                <tr>
+                  <th className="p-3 font-semibold">Nama</th>
+                  <th className="p-3 font-semibold">Kelas</th>
+                  <th className="p-3 font-semibold">Peringatan</th>
+                  <th className="p-3 font-semibold">Poin</th>
+                  <th className="p-3 font-semibold text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredFlaggedStudents
+                  .sort((a, b) => {
+                    // Sort by class first
+                    if (a.rombel !== b.rombel) {
+                      return a.rombel.localeCompare(b.rombel);
+                    }
+                    // Then by name
+                    return a.name.localeCompare(b.name);
+                  })
+                  .map(student => (
+                    <tr key={student.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="p-3 font-semibold text-gray-800 dark:text-white">{student.name}</td>
+                      <td className="p-3 text-gray-600 dark:text-gray-400">{student.rombel}</td>
+                      <td className="p-3">
+                        <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400">
+                          {student.warnings.slice(0, 2).map((w, i) => (
+                            <li key={i}>{w}</li>
+                          ))}
+                          {student.warnings.length > 2 && (
+                            <li className="text-xs text-gray-500">+{student.warnings.length - 2} lainnya</li>
+                          )}
+                        </ul>
+                      </td>
+                      <td className="p-3">
+                        {student.totalPointsDeducted > 0 && (
+                          <span className="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded-full dark:bg-red-900/40 dark:text-red-400">
+                            -{student.totalPointsDeducted}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3 text-center">
+                        <button
+                          onClick={() => navigate('/rekap-individu', {
+                            state: {
+                              studentId: student.id,
+                              classId: student.rombel,
+                              subject: selectedSubject
+                            }
+                          })}
+                          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition flex items-center gap-2 mx-auto"
+                        >
+                          <Eye size={16} />
+                          Detail
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <TrendingUp size={64} className="mx-auto text-green-500 mb-4" />
+            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+              Tidak ada siswa yang teridentifikasi memerlukan perhatian khusus! 🎉
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Semua siswa dalam kondisi baik sesuai kriteria peringatan dini.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, query, where, getDocs, doc, getDoc, deleteDoc, orderBy } from 'firebase/firestore';
+import { useLocation } from 'react-router-dom';
+import { collection, query, where, getDocs, addDoc, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import toast from 'react-hot-toast';
+import { useSettings } from '../utils/SettingsContext';
+import Modal from '../components/Modal';
+import { Trash2 } from 'lucide-react';
+import StyledInput from '../components/StyledInput';
 
 const PelanggaranPage = () => {
   const [classes, setClasses] = useState([]);
@@ -14,6 +19,9 @@ const PelanggaranPage = () => {
   const [attitude, setAttitude] = useState('Sangat Baik');
   const [customInfraction, setCustomInfraction] = useState('');
   const [customPoints, setCustomPoints] = useState('');
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+  const { activeSemester, academicYear } = useSettings();
+  const location = useLocation();
 
   const infractionTypes = {
     'Tidur': { points: 5, sanction: 'Teguran lisan' },
@@ -47,18 +55,50 @@ const PelanggaranPage = () => {
     fetchClasses();
   }, []);
 
+  // Handle incoming navigation state for pre-selection
+  useEffect(() => {
+    if (location.state && location.state.classId) {
+      setSelectedClass(location.state.classId);
+      if (location.state.studentId) {
+        // We set the student ID directly, but the students list needs to be loaded first
+        // Fortunately, the student fetcher useEffect handles loading the list when selectedClass changes.
+        setSelectedStudent(location.state.studentId);
+      }
+    }
+  }, [location.state]);
+
   useEffect(() => {
     const fetchStudents = async () => {
       if (selectedClass) {
-        const q = query(collection(db, 'students'), where('userId', '==', auth.currentUser.uid), where('rombel', '==', selectedClass), orderBy('name', 'asc'));
-        const querySnapshot = await getDocs(q);
+        const classObj = classes.find(c => c.rombel === selectedClass || c.id === selectedClass);
+        const classIdToUse = classObj?.id || selectedClass;
+
+        const q = query(
+          collection(db, 'students'),
+          where('userId', '==', auth.currentUser.uid),
+          where('classId', '==', classIdToUse),
+          orderBy('name', 'asc')
+        );
+        let querySnapshot = await getDocs(q);
+
+        // Fallback for legacy students
+        if (querySnapshot.empty && classObj?.rombel) {
+          const fallbackQ = query(
+            collection(db, 'students'),
+            where('userId', '==', auth.currentUser.uid),
+            where('rombel', '==', classObj.rombel),
+            orderBy('name', 'asc')
+          );
+          querySnapshot = await getDocs(fallbackQ);
+        }
+
         setStudents(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       } else {
         setStudents([]);
       }
     };
     fetchStudents();
-  }, [selectedClass]);
+  }, [selectedClass, classes]);
 
   const handleSaveInfraction = async () => {
     if (!selectedStudent || !infractionType) {
@@ -68,6 +108,10 @@ const PelanggaranPage = () => {
 
     let infractionData = {};
 
+    const classObj = classes.find(c => c.rombel === selectedClass || c.id === selectedClass);
+    const classIdToSave = classObj?.id || selectedClass;
+    const rombelToSave = classObj?.rombel || selectedClass;
+
     if (infractionType === 'Lainnya') {
       if (!customInfraction || !customPoints) {
         toast.error('Untuk pelanggaran "Lainnya", detail dan poin harus diisi.');
@@ -76,30 +120,34 @@ const PelanggaranPage = () => {
       infractionData = {
         userId: auth.currentUser.uid,
         studentId: selectedStudent,
-        classId: selectedClass,
+        classId: classIdToSave,
+        rombel: rombelToSave,
         date: new Date().toISOString(),
-        infractionType: customInfraction, // Use custom infraction type
-        points: parseInt(customPoints, 10), // Use custom points
-        sanction: 'Dicatat sesuai kebijakan', // Or a custom sanction input
+        infractionType: customInfraction,
+        points: parseInt(customPoints, 10),
+        sanction: 'Dicatat sesuai kebijakan',
+        semester: activeSemester,
+        academicYear: academicYear
       };
     } else {
       infractionData = {
         userId: auth.currentUser.uid,
         studentId: selectedStudent,
-        classId: selectedClass,
+        classId: classIdToSave,
+        rombel: rombelToSave,
         date: new Date().toISOString(),
         infractionType,
         points: infractionTypes[infractionType].points,
         sanction: infractionTypes[infractionType].sanction,
+        semester: activeSemester,
+        academicYear: academicYear
       };
     }
 
     try {
       await addDoc(collection(db, 'infractions'), infractionData);
       toast.success('Pelanggaran berhasil dicatat.');
-      // Refresh data
       fetchInfractions(selectedStudent);
-      // Reset custom fields
       setCustomInfraction('');
       setCustomPoints('');
       setInfractionType('');
@@ -109,23 +157,36 @@ const PelanggaranPage = () => {
     }
   };
 
-  const handleDeleteInfraction = async (infractionId) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus pelanggaran ini?')) {
-      try {
-        await deleteDoc(doc(db, 'infractions', infractionId));
-        toast.success('Pelanggaran berhasil dihapus.');
-        // Refresh data
-        fetchInfractions(selectedStudent);
-      } catch (error) {
-        toast.error('Gagal menghapus pelanggaran.');
-        console.error("Error removing document: ", error);
-      } 
-    }
+  const handleDeleteInfraction = (infractionId) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Pelanggaran',
+      message: 'Apakah Anda yakin ingin menghapus catatan pelanggaran ini?',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, 'infractions', infractionId));
+          toast.success('Pelanggaran berhasil dihapus.');
+          fetchInfractions(selectedStudent);
+        } catch (error) {
+          toast.error('Gagal menghapus pelanggaran.');
+          console.error("Error removing document: ", error);
+        } finally {
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        }
+      }
+    });
   };
 
   const fetchInfractions = async (studentId) => {
     if (studentId) {
-      const q = query(collection(db, 'infractions'), where('userId', '==', auth.currentUser.uid), where('studentId', '==', studentId), orderBy('date', 'desc'));
+      const q = query(
+        collection(db, 'infractions'),
+        where('userId', '==', auth.currentUser.uid),
+        where('studentId', '==', studentId),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear),
+        orderBy('date', 'desc')
+      );
       const querySnapshot = await getDocs(q);
       const fetchedInfractions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setInfractions(fetchedInfractions);
@@ -138,9 +199,6 @@ const PelanggaranPage = () => {
     const currentScore = 100 - totalPointsDeducted;
     setStudentScore(currentScore);
 
-    // Menentukan nilai sikap berdasarkan skor saat ini.
-    // Skor awal adalah 100, dan setiap pelanggaran mengurangi poin.
-    // Semakin rendah skor, semakin banyak pelanggaran yang dilakukan.
     if (currentScore > 90) setAttitude('Sangat Baik');
     else if (currentScore >= 75) setAttitude('Baik');
     else if (currentScore >= 60) setAttitude('Cukup');
@@ -155,7 +213,7 @@ const PelanggaranPage = () => {
       setStudentScore(100);
       setAttitude('Sangat Baik');
     }
-  }, [selectedStudent]);
+  }, [selectedStudent, activeSemester, academicYear]);
 
   return (
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
@@ -170,7 +228,7 @@ const PelanggaranPage = () => {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Kelas</label>
           <select onChange={(e) => setSelectedClass(e.target.value)} value={selectedClass} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             <option value="">Pilih Kelas</option>
-            {classes.map(c => <option key={c.id} value={c.rombel}>{c.rombel}</option>)}
+            {classes.map(c => <option key={c.id} value={c.id}>{c.rombel}</option>)}
           </select>
         </div>
         <div>
@@ -185,23 +243,23 @@ const PelanggaranPage = () => {
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Jenis Pelanggaran</label>
         <div className="flex flex-wrap gap-2 mt-2">
-            {Object.keys(infractionTypes).map(type => (
-                <button key={type} onClick={() => setInfractionType(type)} className={`px-4 py-2 rounded-full text-sm font-semibold border-2 ${infractionType === type ? 'bg-blue-500 text-white border-blue-500' : 'bg-transparent text-blue-500 border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900'}`}>
-                    {type}
-                </button>
-            ))}
+          {Object.keys(infractionTypes).map(type => (
+            <button key={type} onClick={() => setInfractionType(type)} className={`px-4 py-2 rounded-full text-sm font-semibold border-2 ${infractionType === type ? 'bg-blue-500 text-white border-blue-500' : 'bg-transparent text-blue-500 border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900'}`}>
+              {type}
+            </button>
+          ))}
         </div>
       </div>
       {infractionType === 'Lainnya' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Detail Pelanggaran</label>
-            <input
+          <div className="space-y-1.5">
+            <StyledInput
+              label="Detail Pelanggaran"
               type="text"
               value={customInfraction}
               onChange={(e) => setCustomInfraction(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               placeholder="Tuliskan pelanggaran spesifik"
+              voiceEnabled
             />
           </div>
           <div>
@@ -216,7 +274,7 @@ const PelanggaranPage = () => {
           </div>
         </div>
       )}
-      
+
       <button onClick={handleSaveInfraction} className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 mb-6">Simpan Pelanggaran</button>
 
       {selectedStudent && (
@@ -224,30 +282,73 @@ const PelanggaranPage = () => {
           <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-white">Detail Pelanggaran Siswa</h3>
           <div className="flex justify-between items-center mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
             <div className="text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-300">Poin Awal</p>
-                <p className="text-2xl font-bold text-gray-800 dark:text-white">100</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Poin Awal</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-white">100</p>
             </div>
             <div className="text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-300">Nilai Poin Pelanggaran</p>
-                <p className="text-2xl font-bold text-red-500">{studentScore}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Nilai Poin Pelanggaran</p>
+              <p className="text-2xl font-bold text-red-500">{studentScore}</p>
             </div>
             <div className="text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-300">Nilai Sikap</p>
-                <p className="text-2xl font-bold text-blue-500">{attitude}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Nilai Sikap</p>
+              <p className="text-2xl font-bold text-blue-500">{attitude}</p>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white dark:bg-gray-800"><thead className="bg-gray-50 dark:bg-gray-700">
-                <tr><th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Tanggal</th><th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Pelanggaran</th><th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Poin</th><th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Sanksi</th><th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Aksi</th> {/* New column header */}</tr>
-              </thead><tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <table className="min-w-full bg-white dark:bg-gray-800">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Tanggal</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Pelanggaran</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Poin</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Sanksi</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {infractions.map(inf => (
-                  <tr key={inf.id}><td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900 dark:text-white">{new Date(inf.date).toLocaleDateString('id-ID')}</td><td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900 dark:text-white">{inf.infractionType}</td><td className="py-4 px-6 whitespace-nowrap text-sm text-red-500">{inf.points}</td><td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900 dark:text-white">{inf.sanction}</td><td className="py-4 px-6 whitespace-nowrap text-sm"> {/* New column for action */}<button onClick={() => handleDeleteInfraction(inf.id)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200">Hapus</button></td></tr>
+                  <tr key={inf.id}>
+                    <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900 dark:text-white">{new Date(inf.date).toLocaleDateString('id-ID')}</td>
+                    <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900 dark:text-white">{inf.infractionType}</td>
+                    <td className="py-4 px-6 whitespace-nowrap text-sm text-red-500">{inf.points}</td>
+                    <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900 dark:text-white">{inf.sanction}</td>
+                    <td className="py-4 px-6 whitespace-nowrap text-sm">
+                      <button onClick={() => handleDeleteInfraction(inf.id)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200">Hapus</button>
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <Modal onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+              <Trash2 className="h-8 w-8 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{confirmModal.title}</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">{confirmModal.message}</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+              >
+                Batal
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className="px-6 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 dark:shadow-none transition"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

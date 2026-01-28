@@ -21,13 +21,28 @@ import {
   Loader,
   Info,
   BarChart,
-  Bot, // Import Bot icon
-  ShieldAlert, // Import ShieldAlert icon
+  Bot,
+  ShieldAlert,
   ShieldX,
+  Trophy,
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  Zap,
+  Edit3,
+  ShieldCheck,
+  PieChart,
+  Settings2,
+  Sparkles,
+  BrainCircuit,
+  ListTodo,
 } from 'lucide-react';
 import useDarkMode from '../hooks/useDarkMode';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import OfflineIndicator from './OfflineIndicator'; // Import OfflineIndicator component
 import { LocalNotifications } from '@capacitor/local-notifications';
+import useTaskNotifications from '../hooks/useTaskNotifications';
+import { useSettings } from '../utils/SettingsContext';
 
 export default function DashboardLayout({ children, user }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -35,10 +50,90 @@ export default function DashboardLayout({ children, user }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const [pendingNotifications, setPendingNotifications] = useState([]);
+  const [unseenNotificationsCount, setUnseenNotificationsCount] = useState(0);
   const [profileStatus, setProfileStatus] = useState('loading');
   const [userProfile, setUserProfile] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { activeSemester, academicYear } = useSettings();
+
+  useTaskNotifications(activeSemester, academicYear);
+
+  // Categories definitions
+  const navCategories = [
+    {
+      title: 'Utama',
+      icon: <Zap size={14} />,
+      items: [
+        { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
+        { name: 'Asisten Guru', icon: <Bot size={20} />, path: '/asisten-guru' },
+      ]
+    },
+    {
+      title: 'Perencanaan',
+      icon: <Edit3 size={14} />,
+      items: [
+        { name: 'Jadwal Mengajar', icon: <Calendar size={20} />, path: '/jadwal' },
+        { name: 'Program Mengajar', icon: <BookOpen size={20} />, path: '/program-mengajar' },
+        { name: 'Penyusunan RPP', icon: <Sparkles size={20} />, path: '/rpp' },
+        { name: 'Generator LKPD', icon: <ClipboardList size={20} />, path: '/lkpd-generator' },
+        { name: 'Generator Bahan Ajar', icon: <BookOpen size={20} />, path: '/handout-generator' },
+        { name: 'Generator Soal', icon: <BrainCircuit size={20} />, path: '/quiz-generator' },
+      ]
+    },
+    {
+      title: 'Akademik',
+      icon: <BookOpen size={14} />,
+      items: [
+        { name: 'Absensi Siswa', icon: <ClipboardList size={20} />, path: '/absensi' },
+        { name: 'Jurnal Mengajar', icon: <FileText size={20} />, path: '/jurnal' },
+        { name: 'Input Nilai', icon: <GraduationCap size={20} />, path: '/nilai' },
+        { name: 'Penugasan Siswa', icon: <ListTodo size={20} />, path: '/penugasan' },
+      ]
+    },
+    {
+      title: 'Kedisiplinan',
+      icon: <ShieldCheck size={14} />,
+      items: [
+        { name: 'Catatan Pelanggaran', icon: <ShieldX size={20} />, path: '/pelanggaran' },
+        { name: 'Leaderboard', icon: <Trophy size={20} />, path: '/leaderboard' },
+      ]
+    },
+    {
+      title: 'Analisis & Rekap',
+      icon: <PieChart size={14} />,
+      items: [
+        { name: 'Rekapitulasi', icon: <Archive size={20} />, path: '/rekapitulasi' },
+        { name: 'Rekap Individu', icon: <User size={20} />, path: '/rekap-individu' },
+        { name: 'Analisis Kelas', icon: <ClipboardCheck size={20} />, path: '/analisis-kelas' },
+        { name: 'Sistem Peringatan Dini', icon: <ShieldAlert size={20} />, path: '/sistem-peringatan' },
+      ]
+    },
+    {
+      title: 'Sistem',
+      icon: <Settings2 size={14} />,
+      items: [
+        { name: 'Master Data', icon: <Settings size={20} />, path: '/master-data' },
+        { name: 'Tentang Aplikasi', icon: <Info size={20} />, path: '/about' },
+      ]
+    }
+  ];
+
+  // State for expanded categories
+  const [expandedCategories, setExpandedCategories] = useState(() => {
+    // Find category that contains the current path to expand it by default
+    const activeCategory = navCategories.find(cat =>
+      cat.items.some(item => item.path === location.pathname)
+    );
+    return activeCategory ? { [activeCategory.title]: true } : { 'Utama': true };
+  });
+
+  const toggleCategory = (title) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
 
   const handleLogout = async () => {
     try {
@@ -65,45 +160,60 @@ export default function DashboardLayout({ children, user }) {
     checkUserProfile();
   }, [user, profileStatus]);
 
-  const navItems = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
-    { name: 'Jadwal Mengajar', icon: <Calendar size={20} />, path: '/jadwal' },
-    { name: 'Absensi Siswa', icon: <ClipboardList size={20} />, path: '/absensi' },
-    { name: 'Input Nilai', icon: <GraduationCap size={20} />, path: '/nilai' },
-    { name: 'Jurnal Mengajar', icon: <FileText size={20} />, path: '/jurnal' },
-    { name: 'Catatan Pelanggaran', icon: <ShieldX size={20} />, path: '/pelanggaran' },
-    { name: 'Rekapitulasi', icon: <Archive size={20} />, path: '/rekapitulasi' },
-    { name: 'Analisis Siswa', icon: <BarChart size={20} />, path: '/analisis-siswa' },
-    { name: 'Analisis Kelas', icon: <ClipboardCheck size={20} />, path: '/analisis-kelas' },
-    { name: 'Sistem Peringatan Dini', icon: <ShieldAlert size={20} />, path: '/sistem-peringatan' },
-    { name: 'Asisten Guru', icon: <Bot size={20} />, path: '/asisten-guru' },
-    { name: 'Master Data', icon: <Settings size={20} />, path: '/master-data' },
-    { name: 'Tentang Aplikasi', icon: <Info size={20} />, path: '/about' },
-  ];
+  useEffect(() => {
+    const fetchAndSetUnseenNotifications = async () => {
+      try {
+        const { notifications } = await LocalNotifications.getPending();
+        const seenNotificationIds = JSON.parse(localStorage.getItem('seenNotifications')) || [];
+        const newUnseenNotifications = notifications.filter(n => !seenNotificationIds.includes(n.id.toString()));
+        setUnseenNotificationsCount(newUnseenNotifications.length);
+      } catch (error) {
+        console.error("Error fetching notifications for unseen count:", error);
+      }
+    };
 
-  const NavItem = ({ item, isMobile }) => (
-    <Link
-      to={item.path}
-      onClick={() => {
-        if (isMobile) setIsSidebarOpen(false);
-      }}
-      className={`flex items-center w-full gap-3 p-3 rounded-lg transition-colors duration-200 ${
-        location.pathname === item.path
-          ? 'bg-primary text-white shadow-lg'
-          : 'text-text-muted-light dark:text-text-muted-dark hover:bg-primary-50 dark:hover:bg-surface-dark hover:text-primary'
-      }`}
-    >
-      {item.icon}
-      <span className="font-semibold">{item.name}</span>
-    </Link>
-  );
+    fetchAndSetUnseenNotifications();
+  }, []);
+
+  const NavItem = ({ item, isMobile }) => {
+    const isActive = location.pathname === item.path;
+
+    return (
+      <Link
+        to={item.path}
+        onClick={() => {
+          if (isMobile) setIsSidebarOpen(false);
+        }}
+        className={`flex items-center w-full gap-3 p-2.5 rounded-xl transition-all duration-500 group relative overflow-hidden ${isActive
+          ? 'text-white scale-[1.02]'
+          : 'text-text-muted-light dark:text-text-muted-dark hover:bg-primary/5 dark:hover:bg-primary/10 hover:text-primary'
+          }`}
+      >
+        {/* Active Background Pill */}
+        {isActive && (
+          <div className="absolute inset-0 bg-primary shadow-lg shadow-primary/20 animate-fade-in-up" />
+        )}
+
+        {/* Content */}
+        <span className={`relative z-10 ${isActive ? 'text-white' : 'text-primary'} transition-transform duration-500 group-hover:scale-110`}>
+          {item.icon}
+        </span>
+        <span className="relative z-10 text-sm font-bold tracking-tight">{item.name}</span>
+
+        {/* Glow effect for active item */}
+        {isActive && (
+          <div className="absolute -inset-1 bg-white/20 blur-xl rounded-full opacity-50 z-0 pointer-events-none" />
+        )}
+      </Link>
+    );
+  };
 
   const footerNavItems = [
-    navItems.find(item => item.path === '/'), // Dashboard
-    navItems.find(item => item.path === '/absensi'), // Absensi Siswa
-    navItems.find(item => item.path === '/nilai'), // Input Nilai
-    navItems.find(item => item.path === '/jurnal'), // Jurnal Mengajar
-    navItems.find(item => item.path === '/asisten-guru') // Asisten Guru
+    navCategories[0].items[0], // Dashboard
+    navCategories[2].items[0], // Absensi Siswa
+    navCategories[2].items[2], // Input Nilai
+    navCategories[2].items[1], // Jurnal Mengajar
+    navCategories[0].items[1]  // Asisten Guru
   ].filter(Boolean);
 
   if (profileStatus === 'loading') {
@@ -119,21 +229,52 @@ export default function DashboardLayout({ children, user }) {
   }
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans">
-      {/* Desktop Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-surface-light dark:bg-surface-dark p-4 shadow-2xl md:flex">
-        <div className="mb-8 flex flex-col items-center justify-center p-4">
-          <img src="/Logo Smart Teaching Baru_.png" alt="Logo" className="h-16" />
-          <h1 className="mt-4 font-sans text-2xl font-bold text-blue-600 drop-shadow-lg">Smart Teaching</h1>
+    <div className="h-screen flex flex-col bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans overflow-hidden">
+      {/* Desktop Sidebar - Premium Glassmorphic Refresh */}
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-white/80 dark:bg-black/80 backdrop-blur-2xl border-r border-gray-100 dark:border-gray-800/50 p-4 shadow-2xl md:flex">
+        <div className="mb-6 flex items-center gap-3 px-4 py-2 h-20 border-b border-gray-100 dark:border-gray-800/50">
+          <img src="/Logo Smart Teaching Baru_.png" alt="Logo" className="h-10 w-auto" />
+          <div className="flex flex-col">
+            <h1 className="font-sans text-lg font-extrabold text-blue-600 dark:text-blue-500 tracking-tight leading-tight">Smart</h1>
+            <h1 className="font-sans text-lg font-extrabold text-gray-800 dark:text-white tracking-tight leading-tight -mt-1">Teaching</h1>
+          </div>
         </div>
-        <nav className="flex-1 h-full overflow-y-auto">
-          <ul className="space-y-2">
-            {navItems.map((item) => (
-              <li key={item.path}>
-                <NavItem item={item} isMobile />
-              </li>
-            ))}
-          </ul>
+        <nav className="flex-1 h-full overflow-y-auto pr-2 custom-scrollbar">
+          {navCategories.map((category, idx) => {
+            const isExpanded = expandedCategories[category.title];
+            const hasActiveItem = category.items.some(item => item.path === location.pathname);
+
+            return (
+              <div key={category.title} className={idx > 0 ? 'mt-4' : ''}>
+                <button
+                  onClick={() => toggleCategory(category.title)}
+                  className={`flex items-center justify-between w-full px-4 py-3 mb-1 text-xs font-bold uppercase tracking-wider transition-all duration-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800/50 group ${hasActiveItem
+                    ? 'text-primary bg-primary/10 dark:bg-primary/20 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                    }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`transition-transform duration-300 ${isExpanded ? 'scale-110' : 'opacity-70'}`}>
+                      {category.icon}
+                    </span>
+                    <span>{category.title}</span>
+                  </div>
+                  <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                    <ChevronDown size={14} />
+                  </div>
+                </button>
+                <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                  <ul className="space-y-1.5 ml-2.5 pl-2 border-l-2 border-primary/10 dark:border-primary/5">
+                    {category.items.map((item) => (
+                      <li key={item.path}>
+                        <NavItem item={item} isMobile={false} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            );
+          })}
         </nav>
         <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="mb-4 flex items-center gap-3">
@@ -157,14 +298,16 @@ export default function DashboardLayout({ children, user }) {
       </aside>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-lg p-4 shadow-sm md:left-64">
+      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-lg p-4 shadow-sm md:left-64">
         <div className="flex items-center gap-4">
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 md:hidden">
             <Menu size={24} />
           </button>
-          <h1 className="text-2xl font-bold">
-            {navItems.find((item) => item.path === location.pathname)?.name || 'Dashboard'}
-          </h1>
+          <div className="flex flex-col md:flex-row md:items-baseline md:gap-2">
+            <h1 className="text-2xl font-bold">
+              {navCategories.flatMap(c => c.items).find((item) => item.path === location.pathname)?.name || 'Dashboard'}
+            </h1>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <button onClick={() => setTheme(colorTheme)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -173,28 +316,40 @@ export default function DashboardLayout({ children, user }) {
           <div className="relative">
             <button
               onClick={async () => {
-                setShowNotificationsDropdown(!showNotificationsDropdown);
-                if (!showNotificationsDropdown) {
+                if (showNotificationsDropdown) {
+                  setShowNotificationsDropdown(false);
+                  // Cancel all displayed notifications when closing the dropdown
+                  if (pendingNotifications.length > 0) {
+                    await LocalNotifications.cancel({ notifications: pendingNotifications.map(n => ({ id: n.id })) });
+                  }
+                  setPendingNotifications([]);
+                } else {
                   try {
                     const { notifications } = await LocalNotifications.getPending();
-                    console.log("Pending notifications:", notifications);
                     setPendingNotifications(notifications);
+                    const notificationIds = notifications.map(n => n.id.toString());
+                    localStorage.setItem('seenNotifications', JSON.stringify(notificationIds));
+                    setUnseenNotificationsCount(0);
+                    setShowNotificationsDropdown(true);
                   } catch (error) {
-                    console.error("Error fetching pending notifications:", error);
+                    console.error("Error handling notifications:", error);
                   }
                 }
               }}
-              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               <Bell size={24} />
+              {unseenNotificationsCount > 0 && (
+                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+              )}
             </button>
             {showNotificationsDropdown && (
               <div className="absolute right-0 mt-2 w-72 rounded-md bg-surface-light dark:bg-surface-dark shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
                 <div className="py-1">
                   <h3 className="px-4 py-2 text-sm font-semibold text-text-light dark:text-text-dark border-b border-gray-200 dark:border-gray-700">Notifikasi</h3>
                   {pendingNotifications.length > 0 ? (
-                    pendingNotifications.map((notification) => (
-                      <div key={notification.id} className="px-4 py-2 text-sm text-text-muted-light dark:text-text-muted-dark border-b border-gray-100 dark:border-gray-800 last:border-b-0">
+                    pendingNotifications.map((notification, index) => (
+                      <div key={notification.id || index} className="px-4 py-2 text-sm text-text-muted-light dark:text-text-muted-dark border-b border-gray-100 dark:border-gray-800 last:border-b-0">
                         <p className="font-medium text-text-light dark:text-text-dark">{notification.title}</p>
                         <p>{notification.body}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -233,7 +388,7 @@ export default function DashboardLayout({ children, user }) {
                       handleLogout();
                       setIsDropdownOpen(false);
                     }}
-                    className="flex w-full items-center px-4 py-2 text-sm text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 dark:hover:text-white" 
+                    className="flex w-full items-center px-4 py-2 text-sm text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 dark:hover:text-white"
                     role="menuitem"
                   >
                     <LogOut size={16} className="mr-2" />
@@ -246,9 +401,11 @@ export default function DashboardLayout({ children, user }) {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="md:ml-64 pt-20 pb-20 md:pb-6">
-        <div className={`w-full ${location.pathname === '/asisten-guru' ? '' : 'p-6'} overflow-x-auto`}>{children}</div>
+      {/* Main Content with Entry Animation */}
+      <main className={`md:ml-64 pt-20 pb-24 md:pb-6 flex-1 ${location.pathname === '/asisten-guru' ? '' : 'overflow-y-auto'}`}>
+        <div key={location.pathname} className={`w-full animate-fade-in-up ${location.pathname === '/asisten-guru' ? '' : 'p-3 sm:p-6'}`}>
+          {children}
+        </div>
       </main>
 
       {/* Mobile Bottom Navigation */}
@@ -257,9 +414,8 @@ export default function DashboardLayout({ children, user }) {
           <Link
             key={item.path}
             to={item.path}
-            className={`flex flex-col items-center justify-center flex-1 min-w-0 p-2 rounded-lg transition-colors duration-200 ${
-              location.pathname === item.path ? 'text-primary' : 'text-text-muted-light dark:text-text-muted-dark'
-            }`}
+            className={`flex flex-col items-center justify-center flex-1 min-w-0 p-2 rounded-lg transition-colors duration-200 ${location.pathname === item.path ? 'text-primary' : 'text-text-muted-light dark:text-text-muted-dark'
+              }`}
           >
             {item.icon}
             <span className="text-xs font-medium text-center">{item.name}</span>
@@ -275,29 +431,55 @@ export default function DashboardLayout({ children, user }) {
         ></div>
       )}
       <div
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-surface-light dark:bg-surface-dark p-4 shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-surface-light dark:bg-surface-dark p-4 shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
-        <div className="mb-8 flex items-center justify-between p-4">
-            <div className="flex items-center">
-                <img src="/Logo Smart Teaching Baru_.png" alt="Logo" className="h-12" />
-                <h1 className="ml-4 font-sans text-xl font-bold text-blue-600 drop-shadow-lg">Smart Teaching</h1>
-            </div>
-            <button onClick={() => setIsSidebarOpen(false)}>
-                <X size={24} />
-            </button>
+        <div className="mb-6 flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800/50">
+          <div className="flex items-center gap-3">
+            <img src="/Logo Smart Teaching Baru_.png" alt="Logo" className="h-8 w-auto" />
+            <h1 className="font-sans text-lg font-extrabold text-blue-600 dark:text-blue-500 tracking-tight">Smart Teaching</h1>
+          </div>
+          <button onClick={() => setIsSidebarOpen(false)}>
+            <X size={24} />
+          </button>
         </div>
-        <nav className="flex-1 overflow-y-auto">
-          <ul className="space-y-2">
-            {navItems.map((item) => (
-              <li key={item.path}>
-                <NavItem item={item} isMobile />
-              </li>
-            ))}
-          </ul>
+        <nav className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+          {navCategories.map((category, idx) => {
+            const isExpanded = expandedCategories[category.title];
+            const hasActiveItem = category.items.some(item => item.path === location.pathname);
+
+            return (
+              <div key={category.title} className={idx > 0 ? 'mt-4' : ''}>
+                <button
+                  onClick={() => toggleCategory(category.title)}
+                  className={`flex items-center justify-between w-full px-4 py-2.5 mb-1 text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800/50 group ${hasActiveItem ? 'text-primary bg-primary/5 dark:bg-primary/10' : 'text-gray-400 dark:text-gray-500'
+                    }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`transition-transform duration-300 ${isExpanded ? 'scale-110' : 'opacity-70'}`}>
+                      {category.icon}
+                    </span>
+                    <span>{category.title}</span>
+                  </div>
+                  <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                    <ChevronDown size={14} />
+                  </div>
+                </button>
+                <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                  <ul className="space-y-1.5 ml-2.5 pl-2 border-l-2 border-primary/10 dark:border-primary/5">
+                    {category.items.map((item) => (
+                      <li key={item.path}>
+                        <NavItem item={item} isMobile />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            );
+          })}
         </nav>
       </div>
+      <OfflineIndicator />
     </div>
   );
 }

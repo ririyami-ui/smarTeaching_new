@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 import { collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase'; // Import auth
 import StyledInput from './StyledInput';
 import StyledButton from './StyledButton';
 import StyledTable from './StyledTable';
-import { Plus, Upload, Download, Trash2, Edit } from 'lucide-react';
+import { Plus, Trash2, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Modal from './Modal';
+import bskapData from '../utils/bskap_2025_intel.json';
 
 export default function SubjectMasterData() {
   const [subjects, setSubjects] = useState([]);
@@ -16,7 +16,11 @@ export default function SubjectMasterData() {
   const [editingSubjectId, setEditingSubjectId] = useState(null); // State for editing
   const [editedSubjectCode, setEditedSubjectCode] = useState('');
   const [editedSubjectName, setEditedSubjectName] = useState('');
-  const [file, setFile] = useState(null);
+  const [selectedSchoolLevel, setSelectedSchoolLevel] = useState('SD');
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [editedRegion, setEditedRegion] = useState('');
+
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
   const subjectsCollectionRef = collection(db, 'subjects');
 
@@ -41,23 +45,62 @@ export default function SubjectMasterData() {
       return;
     }
 
+    if (!newSubjectName.trim() || !newSubjectCode.trim()) {
+      toast.error('Kode dan Nama mata pelajaran wajib diisi.');
+      return;
+    }
+
+    const trimmedName = newSubjectName.trim();
     if (editingSubjectId) { // Update existing subject
-      if (editedSubjectCode && editedSubjectName) {
+      if (editedSubjectCode.trim() && editedSubjectName.trim()) {
         const subjectDoc = doc(db, 'subjects', editingSubjectId);
-        await updateDoc(subjectDoc, { code: editedSubjectCode, name: editedSubjectName });
+        let finalName = editedSubjectName.trim();
+        if (finalName === 'Bahasa Daerah' && editedRegion) {
+          finalName = `Bahasa Daerah (${editedRegion})`;
+        }
+
+        const isDuplicate = subjects.some(s => s.name.trim().toLowerCase() === finalName.toLowerCase() && s.id !== editingSubjectId);
+        if (isDuplicate) {
+          toast.error(`Mata pelajaran "${finalName}" sudah ada.`);
+          return;
+        }
+
+        await updateDoc(subjectDoc, {
+          code: editedSubjectCode.trim(),
+          name: finalName,
+          schoolLevel: selectedSchoolLevel
+        });
         toast.success('Mata pelajaran berhasil diperbarui!');
         setEditingSubjectId(null);
         setEditedSubjectCode('');
         setEditedSubjectName('');
+        setEditedRegion('');
       } else {
-        toast.error('Please enter both subject code and name.');
+        toast.error('Kode dan Nama mata pelajaran wajib diisi.');
       }
     } else { // Add new subject
       if (newSubjectCode && newSubjectName) {
-        await addDoc(subjectsCollectionRef, { code: newSubjectCode, name: newSubjectName, userId: auth.currentUser.uid });
+        let finalName = newSubjectName.trim();
+        if (finalName === 'Bahasa Daerah' && selectedRegion) {
+          finalName = `Bahasa Daerah (${selectedRegion})`;
+        }
+
+        const isDuplicate = subjects.some(s => s.name.trim().toLowerCase() === finalName.toLowerCase());
+        if (isDuplicate) {
+          toast.error(`Mata pelajaran "${finalName}" sudah ada.`);
+          return;
+        }
+
+        await addDoc(subjectsCollectionRef, {
+          code: newSubjectCode.trim(),
+          name: finalName,
+          userId: auth.currentUser.uid,
+          schoolLevel: selectedSchoolLevel
+        });
         toast.success('Mata pelajaran berhasil ditambahkan!');
         setNewSubjectCode('');
         setNewSubjectName('');
+        setSelectedRegion('');
       } else {
         toast.error('Please enter both subject code and name.');
       }
@@ -69,59 +112,46 @@ export default function SubjectMasterData() {
   };
 
   const deleteSubject = (id) => {
-    if (!auth.currentUser) {
-      toast.error('Please log in to delete subjects.');
-      return;
-    }
-
-    const deleteToast = toast.loading(
-      (t) => (
-        <div className="flex flex-col items-center gap-2">
-          <p>Apakah Anda yakin ingin menghapus mata pelajaran ini?</p>
-          <div className="flex gap-2">
-            <StyledButton
-              variant="danger"
-              size="sm"
-              onClick={() => {
-                performDelete(id);
-                toast.dismiss(deleteToast);
-              }}
-            >
-              Ya, Hapus
-            </StyledButton>
-            <StyledButton
-              variant="secondary"
-              size="sm"
-              onClick={() => toast.dismiss(deleteToast)}
-            >
-              Batal
-            </StyledButton>
-          </div>
-        </div>
-      ),
-      { duration: Infinity } // Keep the toast open until dismissed
-    );
-  };
-
-  const performDelete = async (id) => {
-    try {
-      const subjectDoc = doc(db, 'subjects', id);
-      await deleteDoc(subjectDoc);
-      toast.success('Mata pelajaran berhasil dihapus!');
-      // Re-fetch subjects after deleting
-      const q = query(subjectsCollectionRef, where('userId', '==', auth.currentUser.uid));
-      const data = await getDocs(q);
-      setSubjects(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-    } catch (error) {
-      toast.error('Gagal menghapus mata pelajaran.');
-      console.error("Error deleting document: ", error);
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Mata Pelajaran',
+      message: 'Apakah Anda yakin ingin menghapus mata pelajaran ini? Data terkait (seperti rencana pembelajaran) mungkin akan terpengaruh.',
+      onConfirm: async () => {
+        try {
+          const subjectDoc = doc(db, 'subjects', id);
+          await deleteDoc(subjectDoc);
+          toast.success('Mata pelajaran berhasil dihapus!');
+          // Re-fetch subjects after deleting
+          const q = query(subjectsCollectionRef, where('userId', '==', auth.currentUser.uid));
+          const data = await getDocs(q);
+          setSubjects(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+        } catch (error) {
+          toast.error('Gagal menghapus mata pelajaran.');
+          console.error("Error deleting document: ", error);
+        } finally {
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        }
+      }
+    });
   };
 
   const startEditing = (subject) => {
     setEditingSubjectId(subject.id);
     setEditedSubjectCode(subject.code);
-    setEditedSubjectName(subject.name);
+
+    // Parse Bahasa Daerah (Region)
+    if (subject.name.startsWith('Bahasa Daerah (')) {
+      const region = subject.name.match(/\(([^)]+)\)/)?.[1];
+      setEditedSubjectName('Bahasa Daerah');
+      setEditedRegion(region || '');
+    } else {
+      setEditedSubjectName(subject.name);
+      setEditedRegion('');
+    }
+
+    if (subject.schoolLevel) {
+      setSelectedSchoolLevel(subject.schoolLevel);
+    }
   };
 
   const cancelEditing = () => {
@@ -130,49 +160,9 @@ export default function SubjectMasterData() {
     setEditedSubjectName('');
   };
 
-  const handleFileUpload = (event) => {
-    setFile(event.target.files[0]);
-  };
 
-  const importSubjects = async () => {
-    if (file && auth.currentUser) {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json(worksheet);
 
-        for (const row of json) {
-          if (row['Kode Mata Pelajaran'] && row['Nama Mata Pelajaran']) {
-            await addDoc(subjectsCollectionRef, { code: row['Kode Mata Pelajaran'], name: row['Nama Mata Pelajaran'], userId: auth.currentUser.uid });
-          }
-        }
-        toast.success('Data imported successfully!');
-        setFile(null);
-        // Re-fetch subjects after importing
-        const q = query(subjectsCollectionRef, where('userId', '==', auth.currentUser.uid));
-        const updatedData = await getDocs(q);
-        setSubjects(updatedData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      };
-      reader.readAsArrayBuffer(file);
-    } else if (!auth.currentUser) {
-      toast.error('Please log in to import subjects.');
-    } else {
-      toast.error('Please select an Excel file to import.');
-    }
-  };
-
-  const downloadTemplate = () => {
-    const ws = XLSX.utils.json_to_sheet([{ 'Kode Mata Pelajaran': '', 'Nama Mata Pelajaran': '' }]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Mata Pelajaran');
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'template_mata_pelajaran.xlsx');
-  };
-
-  const tableHeaders = ['Kode', 'Nama', 'Aksi'];
+  const tableHeaders = ['Jenjang', 'Kode', 'Nama', 'Aksi'];
 
   return (
     <div className="space-y-6">
@@ -180,38 +170,82 @@ export default function SubjectMasterData() {
         <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">
           {editingSubjectId ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran Baru'}
         </h3>
-        <div className="flex flex-col md:flex-row gap-4">
-          <StyledInput
-            type="text"
-            placeholder="Kode Mata Pelajaran"
-            value={editingSubjectId ? editedSubjectCode : newSubjectCode}
-            onChange={(e) => (editingSubjectId ? setEditedSubjectCode(e.target.value) : setNewSubjectCode(e.target.value))}
-          />
-          <StyledInput
-            type="text"
-            placeholder="Nama Mata Pelajaran"
-            value={editingSubjectId ? editedSubjectName : newSubjectName}
-            onChange={(e) => (editingSubjectId ? setEditedSubjectName(e.target.value) : setNewSubjectName(e.target.value))}
-          />
-          <StyledButton onClick={saveSubject}>
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Jenjang Sekolah</label>
+          <select
+            value={selectedSchoolLevel}
+            onChange={(e) => setSelectedSchoolLevel(e.target.value)}
+            className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all dark:text-white"
+          >
+            {['SD', 'SMP', 'SMA', 'SMK'].map((level) => (
+              <option key={level} value={level}>{level}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col md:flex-row gap-4 items-end">
+          <div className="w-full">
+            <StyledInput
+              type="text"
+              label="Kode Mata Pelajaran"
+              placeholder="Contoh: MAT, IPA"
+              value={editingSubjectId ? editedSubjectCode : newSubjectCode}
+              onChange={(e) => (editingSubjectId ? setEditedSubjectCode(e.target.value) : setNewSubjectCode(e.target.value))}
+            />
+          </div>
+          <div className="w-full">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1 mb-1.5">Nama Mata Pelajaran</label>
+            <div className="flex flex-col gap-2">
+              <select
+                value={editingSubjectId ? editedSubjectName : newSubjectName}
+                onChange={(e) => (editingSubjectId ? setEditedSubjectName(e.target.value) : setNewSubjectName(e.target.value))}
+                className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 outline-none transition-all dark:text-white"
+              >
+                <option value="">Pilih Mata Pelajaran</option>
+                {(() => {
+                  const level = selectedSchoolLevel === 'SMK' ? 'SMA' : selectedSchoolLevel; // Fallback SMA subjects for SMK
+                  const subjectsList = bskapData.subjects[level] ? Object.keys(bskapData.subjects[level]) : [];
+                  return subjectsList.map((subject) => (
+                    <option key={subject} value={subject}>
+                      {subject}
+                    </option>
+                  ));
+                })()}
+                {/* Allow keeping current value if not in list during edit */}
+                {editingSubjectId && editedSubjectName &&
+                  (!bskapData.subjects[selectedSchoolLevel === 'SMK' ? 'SMA' : selectedSchoolLevel] ||
+                    !Object.keys(bskapData.subjects[selectedSchoolLevel === 'SMK' ? 'SMA' : selectedSchoolLevel]).includes(editedSubjectName)) && (
+                    <option value={editedSubjectName}>{editedSubjectName}</option>
+                  )}
+              </select>
+
+              {(editingSubjectId ? editedSubjectName === 'Bahasa Daerah' : newSubjectName === 'Bahasa Daerah') && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <select
+                    value={editingSubjectId ? editedRegion : selectedRegion}
+                    onChange={(e) => (editingSubjectId ? setEditedRegion(e.target.value) : setSelectedRegion(e.target.value))}
+                    className="w-full px-4 py-2 bg-purple-50 dark:bg-purple-900/10 border-2 border-purple-200 dark:border-purple-800/50 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all dark:text-white text-sm font-medium"
+                  >
+                    <option value="">-- Pilih Daerah --</option>
+                    {bskapData.standards.regional_languages.map((lang) => (
+                      <option key={lang} value={lang}>{lang}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          </div>
+          <StyledButton onClick={saveSubject} className="mb-0.5 h-[42px]">
             {editingSubjectId ? 'Perbarui' : 'Tambah'}
           </StyledButton>
           {editingSubjectId && (
-            <StyledButton onClick={cancelEditing} variant="secondary">
+            <StyledButton onClick={cancelEditing} variant="secondary" className="mb-0.5 h-[42px]">
               Batal
             </StyledButton>
           )}
         </div>
       </div>
 
-      <div className="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl shadow-lg">
-        <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Impor/Ekspor Data</h3>
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <StyledInput type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
-          <StyledButton onClick={importSubjects} variant="secondary"><Upload className="mr-2" size={16} />Impor</StyledButton>
-          <StyledButton onClick={downloadTemplate} variant="outline"><Download className="mr-2" size={16} />Unduh Template</StyledButton>
-        </div>
-      </div>
+
 
       <div>
         <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Daftar Mata Pelajaran</h3>
@@ -221,6 +255,7 @@ export default function SubjectMasterData() {
           <StyledTable headers={tableHeaders}>
             {subjects.map((subject) => (
               <tr key={subject.id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted-light dark:text-text-muted-dark">{subject.schoolLevel || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-light dark:text-text-dark">{subject.code}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted-light dark:text-text-muted-dark">{subject.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -232,6 +267,31 @@ export default function SubjectMasterData() {
           </StyledTable>
         )}
       </div>
+      {confirmModal.isOpen && (
+        <Modal onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+              <Trash2 className="h-8 w-8 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{confirmModal.title}</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">{confirmModal.message}</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+              >
+                Batal
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className="px-6 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 dark:shadow-none transition"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

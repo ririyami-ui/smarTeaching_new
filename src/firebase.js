@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore"; // enableIndexedDbPersistence removed
 import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -10,8 +10,9 @@ import { getStorage } from "firebase/storage";
 // Your web app's Firebase configuration.
 // It first tries to get the config from a global variable (for Canvas environment)
 // and falls back to environment variables for local development.
-const firebaseConfig =
-  typeof __firebase_config !== 'undefined'
+const firebaseConfig = 
+// eslint-disable-next-line no-undef
+  typeof __firebase_config !== 'undefined' 
     ? JSON.parse(__firebase_config)
     : {
         apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -37,7 +38,16 @@ const app = initializeApp(firebaseConfig);
 // Initialize and export Firebase services
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = getFirestore(app, '(default)', {
+  cache: {
+    kind: 'persistent', // Enable IndexedDB persistence
+    synchronizeTabs: true // Handle multi-tab scenarios
+  }
+});
 const storage = getStorage(app);
+
+// Persistensi offline sekarang dikonfigurasi langsung di getFirestore.
+// Error handling untuk multi-tab ditangani oleh synchronizeTabs: true.
+// Error lain akan ditangani secara global atau saat inisialisasi.
 
 export { app, analytics, auth, db, storage };

@@ -13,71 +13,155 @@ import JurnalPage from './pages/JurnalPage.jsx';
 import MasterDataPage from './pages/MasterDataPage.jsx';
 import RekapitulasiPage from './pages/RekapitulasiPage.jsx';
 import AboutPage from './pages/AboutPage.jsx';
-import AnalisisSiswaPage from './pages/AnalisisDataPage.jsx';
 import AsistenGuruPage from './pages/AsistenGuruPage.jsx';
 import EarlyWarningPage from './pages/EarlyWarningPage.jsx';
-import AnalisisRombelPage from './pages/AnalisisRombelPage.jsx';
 import PelanggaranPage from './pages/PelanggaranPage.jsx';
 import AnalisisKelasPage from './pages/AnalisisKelasPage.jsx';
+import LeaderboardPage from './pages/LeaderboardPage.jsx';
+import ProgramMengajarPage from './pages/ProgramMengajarPage.jsx';
+import LessonPlanPage from './pages/LessonPlanPage.jsx';
+import LkpdGeneratorPage from './pages/LkpdGeneratorPage.jsx';
+import QuizGeneratorPage from './pages/QuizGeneratorPage.jsx';
+import PenugasanPage from './pages/PenugasanPage.jsx';
+import RekapIndividuPage from './pages/RekapIndividuPage.jsx';
+import HandoutGeneratorPage from './pages/HandoutGeneratorPage.jsx';
+import DatabaseCleanupPage from './pages/DatabaseCleanupPage.jsx';
 import { ChatProvider } from './utils/ChatContext.jsx';
+import { SettingsProvider } from './utils/SettingsContext.jsx';
+import useScheduleNotifications from './hooks/useScheduleNotifications';
+import InstallPwaCard from './components/InstallPwaCard.jsx';
+import WelcomeScreen from './components/WelcomeScreen.jsx';
 
 import './index.css';
 
 function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isWelcomeVisible, setIsWelcomeVisible] = useState(true);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallCard, setShowInstallCard] = useState(false);
+
+  useScheduleNotifications();
+
+  useEffect(() => {
+    const cachedUser = JSON.parse(localStorage.getItem('user'));
+    if (cachedUser) {
+      setUser(cachedUser);
+    }
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      if (currentUser) {
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        setUser(currentUser);
+      } else {
+        localStorage.removeItem('user');
+        setUser(null);
+      }
       setIsLoading(false);
     });
-    return () => unsubscribe();
+
+    // Ensure welcome screen is visible for at least 3.5 seconds
+    const timer = setTimeout(() => {
+      setIsWelcomeVisible(false);
+    }, 3500);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timer);
+    };
   }, []);
 
-  if (isLoading) {
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstallCard(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstall = () => {
+    if (!installPrompt) {
+      return;
+    }
+    installPrompt.prompt();
+    installPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      }
+      setShowInstallCard(false);
+      setInstallPrompt(null);
+    });
+  };
+
+  const handleDismiss = () => {
+    setShowInstallCard(false);
+  };
+
+  if (isWelcomeVisible || (isLoading && !user)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background-light dark:bg-background-dark">
-        <div className="h-16 w-16 animate-spin rounded-full border-4 border-t-primary"></div>
+      <div className={!isWelcomeVisible ? 'animate-welcome-fade-out' : ''}>
+        <WelcomeScreen />
       </div>
     );
   }
 
   return (
     <Router>
-      <Toaster position="top-center" reverseOrder={false} />
-      <Routes>
-        <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
-        <Route 
-          path="/*" 
-          element={
-            user ? (
-              <ChatProvider>
-                <DashboardLayout user={user}>
-                  <Routes>
-                    <Route path="/" element={<DashboardPage />} />
-                    <Route path="/jadwal" element={<JadwalPage />} />
-                    <Route path="/absensi" element={<AbsensiPage />} />
-                    <Route path="/nilai" element={<NilaiPage />} />
-                    <Route path="/jurnal" element={<JurnalPage />} />
-                    <Route path="/master-data" element={<MasterDataPage />} />
-                    <Route path="/rekapitulasi" element={<RekapitulasiPage />} />
-                    <Route path="/analisis-siswa" element={<AnalisisSiswaPage />} />
-                    <Route path="/analisis-kelas" element={<AnalisisKelasPage />} />
-                    <Route path="/sistem-peringatan" element={<EarlyWarningPage />} />
-                    <Route path="/asisten-guru" element={<AsistenGuruPage />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/analisis-rombel/:rombel" element={<AnalisisRombelPage />} />
-                    <Route path="/pelanggaran" element={<PelanggaranPage />} />
-                  </Routes>
-                </DashboardLayout>
-              </ChatProvider>
+      <Toaster position="bottom-center" reverseOrder={false} />
+      <SettingsProvider>
+        <ChatProvider>
+          <div className="min-h-screen bg-background-light dark:bg-background-dark font-sans transition-colors duration-200">
+            {user ? (
+              <DashboardLayout user={user}>
+                <Routes>
+                  <Route path="/" element={<DashboardPage />} />
+                  <Route path="/jadwal" element={<JadwalPage />} />
+                  <Route path="/absensi" element={<AbsensiPage />} />
+                  <Route path="/nilai" element={<NilaiPage />} />
+                  <Route path="/jurnal" element={<JurnalPage />} />
+                  <Route path="/rekapitulasi" element={<RekapitulasiPage />} />
+                  <Route path="/rekap-individu" element={<RekapIndividuPage />} />
+                  <Route path="/master-data" element={<MasterDataPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/analisis-kelas" element={<AnalisisKelasPage />} />
+                  <Route path="/sistem-peringatan" element={<EarlyWarningPage />} />
+                  <Route path="/asisten-guru" element={<AsistenGuruPage />} />
+                  <Route path="/analisis-rombel/:rombel" element={<AnalisisKelasPage />} />
+                  <Route path="/pelanggaran" element={<PelanggaranPage />} />
+                  <Route path="/leaderboard" element={<LeaderboardPage />} />
+                  <Route path="/program-mengajar" element={<ProgramMengajarPage />} />
+                  <Route path="/rpp" element={<LessonPlanPage />} />
+                  <Route path="/lkpd-generator" element={<LkpdGeneratorPage />} />
+                  <Route path="/handout-generator" element={<HandoutGeneratorPage />} />
+                  <Route path="/quiz-generator" element={<QuizGeneratorPage />} />
+                  <Route path="/penugasan" element={<PenugasanPage />} />
+                  <Route path="/database-cleanup" element={<DatabaseCleanupPage />} />
+                </Routes>
+              </DashboardLayout>
             ) : (
-              <Navigate to="/login" />
-            )
-          } 
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="*" element={<Navigate to="/login" replace />} />
+              </Routes>
+            )}
+          </div>
+        </ChatProvider>
+      </SettingsProvider>
+      {showInstallCard && (
+        <InstallPwaCard
+          onInstall={handleInstall}
+          onDismiss={handleDismiss}
         />
-      </Routes>
+      )}
     </Router>
   );
 }

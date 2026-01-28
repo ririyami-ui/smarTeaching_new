@@ -1,0 +1,1534 @@
+{
+    "version": "2025.8",
+    "name": "Inteligensi Kurikulum Merdeka BSKAP 2025 (Kepka 046/2025)",
+    "last_updated": "2026-01-27",
+    "standards": {
+        "regulation": "Keputusan Kepala BSKAP No. 046/H/KR/2025",
+        "foundation": "Permendikbudristek No. 13 Tahun 2025",
+        "profile_regulation": "Permendikdasmen No. 10 Tahun 2025",
+        "philosophy": {
+            "name": "Deep Learning",
+            "pillars": [
+                {
+                    "name": "Mindful",
+                    "description": "Membangun kesadaran penuh, fokus, dan kehadiran utuh peserta didik dalam proses belajar (Sense of Awareness)."
+                },
+                {
+                    "name": "Meaningful",
+                    "description": "Relevansi dunia nyata, kedalaman pemahaman, dan kebermanfaatan jangka panjang (Sense of Purpose)."
+                },
+                {
+                    "name": "Joyful",
+                    "description": "Motivasi intrinsik, rasa ingin tahu yang terjaga, dan kesejahteraan emosional (Well-being) peserta didik."
+                }
+            ]
+        },
+        "profile_lulusan_2025": [
+            {
+                "id": 1,
+                "dimensi": "Keimanan & Ketakwaan",
+                "deskripsi": "Berakhlak mulia terhadap Tuhan YME, sesama, dan alam."
+            },
+            {
+                "id": 2,
+                "dimensi": "Kewargaan",
+                "deskripsi": "Kesadaran berbangsa dan berperan aktif sebagai warga global."
+            },
+            {
+                "id": 3,
+                "dimensi": "Penalaran Kritis",
+                "deskripsi": "Kemampuan menganalisis informasi secara logis dan objektif."
+            },
+            {
+                "id": 4,
+                "dimensi": "Kreativitas",
+                "deskripsi": "Mampu menghasilkan gagasan orisinal dan inovatif."
+            },
+            {
+                "id": 5,
+                "dimensi": "Kolaborasi",
+                "deskripsi": "Kecakapan bekerja sama dan bergotong royong."
+            },
+            {
+                "id": 6,
+                "dimensi": "Kemandirian",
+                "deskripsi": "Bertanggung jawab atas proses dan hasil belajarnya sendiri."
+            },
+            {
+                "id": 7,
+                "dimensi": "Kesehatan",
+                "deskripsi": "Menjaga kebugaran fisik serta keseimbangan kesehatan mental."
+            },
+            {
+                "id": 8,
+                "dimensi": "Komunikasi",
+                "deskripsi": "Kemampuan menyampaikan ide secara efektif baik lisan maupun tulisan."
+            }
+        ],
+        "industry_competencies_2025_2026": [
+            {
+                "name": "Literasi AI & Teknologi",
+                "description": "Pemahaman dasar tentang Generative AI, analisis data, dan keamanan siber."
+            },
+            {
+                "name": "Kecerdasan Emosional (EQ)",
+                "description": "Empati, kesadaran diri, dan kepemimpinan transformasional."
+            },
+            {
+                "name": "Adaptabilitas",
+                "description": "Kemampuan untuk terus belajar (lifelong learning) dan fleksibel di lingkungan kerja hybrid."
+            }
+        ],
+        "phases": [
+            {
+                "phase": "A",
+                "grades": [
+                    1,
+                    2
+                ],
+                "level": "SD"
+            },
+            {
+                "phase": "B",
+                "grades": [
+                    3,
+                    4
+                ],
+                "level": "SD"
+            },
+            {
+                "phase": "C",
+                "grades": [
+                    5,
+                    6
+                ],
+                "level": "SD"
+            },
+            {
+                "phase": "D",
+                "grades": [
+                    7,
+                    8,
+                    9
+                ],
+                "level": "SMP"
+            },
+            {
+                "phase": "E",
+                "grades": [
+                    10
+                ],
+                "level": "SMA/SMK"
+            },
+            {
+                "phase": "F",
+                "grades": [
+                    11,
+                    12
+                ],
+                "level": "SMA/SMK"
+            }
+        ],
+        "duration_per_jp": {
+            "SD": 35,
+            "SMP": 40,
+            "SMA": 45,
+            "SMK": 45
+        },
+        "cognitive_levels": [
+            {
+                "id": "L1",
+                "level": "Pengetahuan & Pemahaman",
+                "description": "Mengingat kembali informasi dan memahami konsep dasar (C1-C2)."
+            },
+            {
+                "id": "L2",
+                "level": "Aplikasi",
+                "description": "Menerapkan pengetahuan dalam situasi konkret atau masalah rutin (C3)."
+            },
+            {
+                "id": "L3",
+                "level": "Penalaran (HOTS)",
+                "description": "Menganalisis, mengevaluasi, dan mencipta. Berpikir kritis dan kreatif (C4-C6)."
+            }
+        ],
+        "assessment_item_types": [
+            {
+                "id": "pg",
+                "name": "Pilihan Ganda",
+                "description": "Memilih satu jawaban benar dari beberapa opsi."
+            },
+            {
+                "id": "pg_complex",
+                "name": "Pilihan Ganda Kompleks",
+                "description": "Memilih lebih dari satu jawaban benar atau pernyataan Benar/Salah."
+            },
+            {
+                "id": "matching",
+                "name": "Menjodohkan",
+                "description": "Memasangkan stimulus/pernyataan dengan respon yang tepat."
+            },
+            {
+                "id": "true_false",
+                "name": "Benar/Salah",
+                "description": "Menentukan validitas sebuah pernyataan."
+            },
+            {
+                "id": "essay",
+                "name": "Isian Singkat",
+                "description": "Menjawab dengan kata, frasa, atau angka pendek."
+            },
+            {
+                "id": "uraian",
+                "name": "Uraian",
+                "description": "Menjelaskan atau menganalisis secara naratif mendalam."
+            }
+        ],
+        "early_warning_standards": {
+            "low_grade_threshold": 65,
+            "high_absence_threshold": 3,
+            "infraction_score_threshold": 95,
+            "descriptions": {
+                "academic": "Batas nilai rata-rata per mata pelajaran dimana peserta didik dianggap memerlukan intervensi kognitif.",
+                "attendance": "Jumlah kumulatif ketidakhadiran tanpa keterangan (Alpha) yang memicu peringatan administrasi.",
+                "behavior": "Skor predikat sikap minimum (dari basis 100) sebelum sistem merilis peringatan kedisiplinan."
+            }
+        },
+        "teaching_instruction_standards": {
+            "assessment": "Memprioritaskan asesmen formatif untuk umpan balik berkelanjutan, menghapus KKM angka tunggal, dan beralih ke kriteria deskriptif.",
+            "planning": "Menuntut integrasi Deep Learning dalam setiap langkah: Pembukaan (Koneksi), Inti (Aksi/Aplikasi), dan Penutup (Refleksi)."
+        },
+        "semester_logic": {
+            "ganjil": {
+                "focus": "Fondasi & Konseptual",
+                "description": "Penekanan pada pemahaman dasar, teori, dan pengenalan elemen inti."
+            },
+            "genap": {
+                "focus": "Aplikasi & Projek",
+                "description": "Penekanan pada penerapan konsep, integrasi lintas elemen, dan projek."
+            }
+        },
+        "regional_languages": [
+            "Jawa",
+            "Sunda",
+            "Madura",
+            "Bali",
+            "Bugis",
+            "Makassar",
+            "Batak",
+            "Minang",
+            "Banjar",
+            "Aceh",
+            "Dayak",
+            "Papua",
+            "Lainnya"
+        ]
+    },
+    "subjects": {
+        "SD": {
+            "Matematika": {
+                "ganjil": {
+                    "elemen": [
+                        "Bilangan",
+                        "Aljabar",
+                        "Pengukuran"
+                    ],
+                    "materi_inti": [
+                        "Bilangan Cacah (0-100/1000)",
+                        "Operasi Penjumlahan & Pengurangan",
+                        "Pecahan (setengah, seperempat)",
+                        "Pola Gambar & Bilangan",
+                        "Satuan Panjang & Berat Konkret"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Geometri",
+                        "Analisis Data"
+                    ],
+                    "materi_inti": [
+                        "Ciri Bangun Datar & Ruang",
+                        "Lokasi & Denah",
+                        "Penyajian Data (Piktogram, Diagram Batang)",
+                        "Peluang Kejadian Sederhana"
+                    ]
+                }
+            },
+            "Bahasa Indonesia": {
+                "ganjil": {
+                    "elemen": [
+                        "Menyimak",
+                        "Membaca dan Memirsa"
+                    ],
+                    "materi_inti": [
+                        "Instruksi Lisan Sederhana",
+                        "Analisis Teks Cerita Pendek",
+                        "Kosakata Lingkungan Sekolah",
+                        "Interpretasi Gambar & Ilustrasi"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Berbicara dan Mempresentasikan",
+                        "Menulis"
+                    ],
+                    "materi_inti": [
+                        "Menceritakan Pengalaman Pribadi",
+                        "Penulisan Kalimat Efektif",
+                        "Deskripsi Benda Kesayangan",
+                        "Penggunaan Huruf Kapital & Titik"
+                    ]
+                }
+            },
+            "IPAS": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman IPAS (Sains)",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Bagian Tubuh Tumbuhan & Hewan",
+                        "Wujud Zat & Perubahannya",
+                        "Siklus Hidup Makhluk Hidup",
+                        "Energi dan Bentuknya"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman IPAS (Sosial)",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Peta & Kompas Sederhana",
+                        "Sejarah Lokal Daerah",
+                        "Kebutuhan vs Keinginan",
+                        "Keragaman Budaya Indonesia"
+                    ]
+                }
+            },
+            "Pendidikan Pancasila": {
+                "ganjil": {
+                    "elemen": [
+                        "Pancasila",
+                        "UUD 1945"
+                    ],
+                    "materi_inti": [
+                        "Simbol & Makna Sila Pancasila",
+                        "Sejarah Kelahiran Pancasila",
+                        "Aturan di Rumah & Sekolah",
+                        "Hak & Kewajiban Anak"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Bhinneka Tunggal Ika",
+                        "NKRI"
+                    ],
+                    "materi_inti": [
+                        "Identitas Diri & Budaya Suku",
+                        "Keragaman Suku & Agama",
+                        "Cinta Tanah Air",
+                        "Gotong Royong & Karakteristik Wilayah"
+                    ]
+                }
+            },
+            "Prakarya": {
+                "ganjil": {
+                    "elemen": [
+                        "Kerajinan",
+                        "Rekayasa"
+                    ],
+                    "materi_inti": [
+                        "Mengenal Bahan Alam & Buatan",
+                        "Teknik Potong, Lipat, Sambung",
+                        "Kreasi Benda Fungsional Sederhana",
+                        "Eksplorasi Tekstur & Warna"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Budidaya",
+                        "Pengolahan"
+                    ],
+                    "materi_inti": [
+                        "Menanam Tanaman Hias Sederhana",
+                        "Pengolahan Makanan Sehat & Minuman Segar",
+                        "Kebersihan Diri & Lingkungan",
+                        "Kreasi dari Barang Bekas"
+                    ]
+                }
+            },
+            "Pendidikan Agama Islam": {
+                "ganjil": {
+                    "elemen": [
+                        "Al-Qur'an Hadis",
+                        "Aqidah"
+                    ],
+                    "materi_inti": [
+                        "Huruf Hijaiyah & Surah Pendek",
+                        "Rukun Iman",
+                        "Sifat Wajib Allah",
+                        "Kisah Nabi & Rasul"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Akhlak",
+                        "Fikih",
+                        "Sejarah Peradaban Islam"
+                    ],
+                    "materi_inti": [
+                        "Perilaku Terpuji (Jujur, Hormat)",
+                        "Tata Cara Bersuci (Thaharah)",
+                        "Salat Fardu & Bacaannya",
+                        "Kisah Keteladanan Sahabat"
+                    ]
+                }
+            },
+            "Pendidikan Agama Kristen": {
+                "ganjil": {
+                    "elemen": [
+                        "Allah Berkarya",
+                        "Manusia dan Nilai"
+                    ],
+                    "materi_inti": [
+                        "Allah Pencipta Alam Semesta",
+                        "Aku Ciptaan Allah yang Istimewa",
+                        "Mengasihi Keluarga & Teman",
+                        "Mensyukuri Tubuhku"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Gereja dan Masyarakat",
+                        "Alam dan Lingkungan"
+                    ],
+                    "materi_inti": [
+                        "Kerukunan di Sekolah & Rumah",
+                        "Menjaga Lingkungan Ciptaan Allah",
+                        "Berdoa & Membaca Alkitab",
+                        "Kisah Tokoh Alkitab"
+                    ]
+                }
+            },
+            "Pendidikan Agama Katolik": {
+                "ganjil": {
+                    "elemen": [
+                        "Pribadi Peserta Didik",
+                        "Yesus Kristus"
+                    ],
+                    "materi_inti": [
+                        "Diriku Citra Allah",
+                        "Kemampuanku Anugerah Allah",
+                        "Kisah Kelahiran Yesus",
+                        "Yesus Teladan Doa"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Gereja",
+                        "Masyarakat"
+                    ],
+                    "materi_inti": [
+                        "Sakramen Baptis & Ekaristi",
+                        "Komunitas Gereja",
+                        "Mewujudkan Kerukunan",
+                        "Melestarikan Alam Ciptaan"
+                    ]
+                }
+            },
+            "PJOK": {
+                "ganjil": {
+                    "elemen": [
+                        "Terampil Bergerak",
+                        "Belajar Melalui Gerak"
+                    ],
+                    "materi_inti": [
+                        "Gerak Dasar Lokomotor (Jalan, Lari)",
+                        "Gerak Non-Lokomotor (Tekuk, Ayun)",
+                        "Gerak Manipulatif (Lempar, Tangkap)",
+                        "Senam Irama Sederhana"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Gaya Hidup Aktif",
+                        "Memilih Hidup Sehat"
+                    ],
+                    "materi_inti": [
+                        "Aktivitas Air (Pengenalan)",
+                        "Kebugaran Jasmani Sederhana",
+                        "Kebersihan Tubuh & Pakaian",
+                        "Pola Makan Sehat & Gizi"
+                    ]
+                }
+            },
+            "Seni Rupa": {
+                "ganjil": {
+                    "elemen": [
+                        "Mengalami",
+                        "Menciptakan"
+                    ],
+                    "materi_inti": [
+                        "Unsur Garis, Bentuk & Warna",
+                        "Menggambar Ekspresi Bebas",
+                        "Kolase dari Bahan Alam",
+                        "Mengenal Tekstur"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Merefleksikan",
+                        "Berpikir dan Bekerja Artistik"
+                    ],
+                    "materi_inti": [
+                        "Membentuk dengan Lempung/Plastisin",
+                        "Pola & Motif Hias",
+                        "Daur Ulang Kertas/Kardus",
+                        "Apresiasi Karya Teman"
+                    ]
+                }
+            },
+            "Seni Musik": {
+                "ganjil": {
+                    "elemen": [
+                        "Mengalami",
+                        "Menciptakan"
+                    ],
+                    "materi_inti": [
+                        "Bunyi Alam & Buatan",
+                        "Irama & Ketukan Sederhana",
+                        "Bernyanyi Lagu Anak & Nasional",
+                        "Bermain Alat Musik Perkusi"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Merefleksikan",
+                        "Berpikir dan Bekerja Artistik"
+                    ],
+                    "materi_inti": [
+                        "Tinggi Rendah Nada (Pitch)",
+                        "Dinamika Keras Lembut",
+                        "Ansambel Musik Sederhana",
+                        "Pertunjukan Kelas"
+                    ]
+                }
+            },
+            "Bahasa Inggris": {
+                "ganjil": {
+                    "elemen": [
+                        "Menyimak - Berbicara",
+                        "Membaca - Memirsa"
+                    ],
+                    "materi_inti": [
+                        "Greetings & Introduction",
+                        "Numbers, Colors & Shapes",
+                        "Parts of Body",
+                        "Family Members"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Menulis - Mempresentasikan",
+                        "Menyimak - Berbicara"
+                    ],
+                    "materi_inti": [
+                        "Things in the Classroom",
+                        "Animals & Pets",
+                        "Fruits & Vegetables",
+                        "My Daily Activities"
+                    ]
+                }
+            },
+            "Bahasa Daerah": {
+                "ganjil": {
+                    "elemen": [
+                        "Menyimak",
+                        "Membaca dan Memirsa"
+                    ],
+                    "materi_inti": [
+                        "Teks Sapaan & Unggah-ungguh/Tatakarama Dasar",
+                        "Dongeng/Fabel Lokal (Cerita Hewan)",
+                        "Teks Deskripsi Benda & Dolanan Tradisional",
+                        "Puisi Anak/Tembang Dolanan (Lagu Daerah)"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Berbicara dan Mempresentasikan",
+                        "Menulis"
+                    ],
+                    "materi_inti": [
+                        "Dialog Kehidupan Sehari-hari (Pacelathon)",
+                        "Menulis Aksara Daerah Dasar (Legena/Ngalagena)",
+                        "Laporan Observasi Budaya Lokal Sederhana",
+                        "Cerita Pengalaman Pribadi (Bahasa Daerah)"
+                    ]
+                }
+            }
+        },
+        "SMP": {
+            "Matematika": {
+                "ganjil": {
+                    "elemen": [
+                        "Bilangan",
+                        "Aljabar"
+                    ],
+                    "materi_inti": [
+                        "Bilangan Bulat & Rasional",
+                        "Operasi Pangkat (Diskrit) & Akar",
+                        "Bentuk Aljabar",
+                        "Persamaan & Pertidaksamaan Linear Satu Variabel"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Geometri",
+                        "Statistika dan Peluang"
+                    ],
+                    "materi_inti": [
+                        "Garis & Sudut",
+                        "Teorema Pythagoras",
+                        "Luas & Volume Bangun Ruang",
+                        "Penyajian Data & Peluang Empirik"
+                    ]
+                }
+            },
+            "Bahasa Indonesia": {
+                "ganjil": {
+                    "elemen": [
+                        "Menyimak",
+                        "Membaca dan Memirsa"
+                    ],
+                    "materi_inti": [
+                        "Teks Deskripsi & Observasi",
+                        "Puisi Rakyat & Pantun",
+                        "Teks Narasi (Cerita Fantasi)",
+                        "Buku Fiksi & Nonfiksi"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Berbicara dan Mempresentasikan",
+                        "Menulis"
+                    ],
+                    "materi_inti": [
+                        "Teks Berita & Eksposisi",
+                        "Surat Pribadi & Dinas",
+                        "Diskusi & Debat Sederhana",
+                        "Literasi Digital & Media Sosial"
+                    ]
+                }
+            },
+            "Bahasa Inggris": {
+                "ganjil": {
+                    "elemen": [
+                        "Menyimak - Berbicara",
+                        "Membaca - Memirsa"
+                    ],
+                    "materi_inti": [
+                        "Greetings & Introductions (Self & Others)",
+                        "Describing People, Things, & Places",
+                        "Procedure Text (Recipe/Manual)",
+                        "Simple Present & Continuous Tense"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Menulis - Mempresentasikan",
+                        "Menyimak - Berbicara"
+                    ],
+                    "materi_inti": [
+                        "Recount Text (Personal Experience)",
+                        "Narrative Text (Fables/Legends)",
+                        "Asking & Giving Opinion",
+                        "Simple Past Tense"
+                    ]
+                }
+            },
+            "Prakarya": {
+                "ganjil": {
+                    "elemen": [
+                        "Kerajinan",
+                        "Rekayasa"
+                    ],
+                    "materi_inti": [
+                        "Kerajinan Bahan Alam Lunak/Keras",
+                        "Teknologi Konstruksi Miniatur Rumah/Jembatan",
+                        "Desain Produk & Kemasan",
+                        "Wawasan Teknologi Tepat Guna"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Budidaya",
+                        "Pengolahan"
+                    ],
+                    "materi_inti": [
+                        "Budidaya Tanaman Obat/Sayuran",
+                        "Pengolahan Bahan Pangan Buah/Sayuran",
+                        "Pengolahan Hasil Samping Pangan",
+                        "Analisis Kelayakan Usaha Sederhana"
+                    ]
+                }
+            },
+            "IPA": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman IPA",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Hakikat Ilmu Sains & Lab",
+                        "Sel & Mikroskop",
+                        "Suhu, Kalor & Pemuaian",
+                        "Gerak & Gaya"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman IPA",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Klasifikasi Makhluk Hidup",
+                        "Ekosistem & Lingkungan",
+                        "Bumi & Tata Surya",
+                        "Struktur Lapisan Bumi"
+                    ]
+                }
+            },
+            "IPS": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman Konsep",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Keluarga Awal Kehidupan",
+                        "Kondisi Geografis Indonesia",
+                        "Potensi Sumber Daya Alam",
+                        "Zaman Pra-aksara & Jalur Rempah"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman Konsep",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Interaksi Sosial & Sosialisasi",
+                        "Kegiatan Ekonomi Dasar & Digital",
+                        "Sejarah Kerajaan Hindu-Buddha/Islam",
+                        "Pembangunan Berkelanjutan (SDGs)"
+                    ]
+                }
+            },
+            "Informatika": {
+                "ganjil": {
+                    "elemen": [
+                        "Berpikir Komputasional",
+                        "Teknologi Informasi dan Komunikasi",
+                        "Sistem Komputer",
+                        "Jaringan Komputer dan Internet"
+                    ],
+                    "materi_inti": [
+                        "Algoritma, Dekomposisi & Logika Data Diskrit",
+                        "Integrasi Aplikasi Perkantoran (Office), Email & Web Browser",
+                        "Komponen Perangkat Keras, Kodifikasi Data & Sistem Operasi",
+                        "Topologi Jaringan, Koneksi Internet & Keamanan Siber Dasar"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Analisis Data",
+                        "Algoritma dan Pemrograman",
+                        "Dampak Sosial Informatika",
+                        "Praktik Lintas Bidang"
+                    ],
+                    "materi_inti": [
+                        "Pengolahan Data (Spreadsheet Dasar & Lanjut) & Pengenalan CMS",
+                        "Lingkungan Kerja Coding Visual (Scratch/Blockly) & Struktur Kontrol",
+                        "Cyber Law, Etika Berinternet, Fitur Literasi & Keamanan Digital",
+                        "Proyek Kolaboratif Teknologi & Pengembangan Solusi Digital Dasar"
+                    ]
+                }
+            },
+            "Pendidikan Pancasila": {
+                "ganjil": {
+                    "elemen": [
+                        "Pancasila",
+                        "UUD 1945"
+                    ],
+                    "materi_inti": [
+                        "Kedudukan Pancasila Dasar Negara",
+                        "Sejarah Perumus Pancasila",
+                        "Norma & Aturan Hukum",
+                        "Hak & Kewajiban Warga Negara"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Bhinneka Tunggal Ika",
+                        "NKRI"
+                    ],
+                    "materi_inti": [
+                        "Pelestarian Tradisi & Kearifan Lokal",
+                        "Prinsip Gotong Royong",
+                        "Wilayah Negara Kesatuan Republik Indonesia",
+                        "Ancaman, Tantangan, Hambatan & Gangguan (ATHG)"
+                    ]
+                }
+            },
+            "Pendidikan Agama Islam": {
+                "ganjil": {
+                    "elemen": [
+                        "Al-Qur'an Hadis",
+                        "Aqidah",
+                        "Akhlak"
+                    ],
+                    "materi_inti": [
+                        "Q.S. An-Nisa/An-Nahl (Ilmu Pengetahuan)",
+                        "Asmaul Husna (Al-Alim, Al-Khabir)",
+                        "Hormat & Patuh Orang Tua/Guru"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Fikih",
+                        "Sejarah Peradaban Islam"
+                    ],
+                    "materi_inti": [
+                        "Ketentuan Salat Berjamaah & Munfarid",
+                        "Sejarah Bani Umayyah & Abbasiyah",
+                        "Makanan & Minuman Halal Haram"
+                    ]
+                }
+            },
+            "Pendidikan Agama Kristen": {
+                "ganjil": {
+                    "elemen": [
+                        "Allah Berkarya",
+                        "Manusia dan Nilai Kristen"
+                    ],
+                    "materi_inti": [
+                        "Allah Mengampuni & Memulihkan",
+                        "Menjaga Integritas Diri",
+                        "Nilai Kristiani dalam Pergaulan"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Gereja dan Masyarakat Majemuk",
+                        "Alam dan Lingkungan Hidup"
+                    ],
+                    "materi_inti": [
+                        "Toleransi Antar Umat Beragama",
+                        "Gereja yang Memperbarui Diri",
+                        "Tanggung Jawab terhadap Alam"
+                    ]
+                }
+            },
+            "Pendidikan Agama Katolik": {
+                "ganjil": {
+                    "elemen": [
+                        "Pribadi Peserta Didik",
+                        "Yesus Kristus"
+                    ],
+                    "materi_inti": [
+                        "Keunikan Diri & Citra Allah",
+                        "Sengsara, Wafat, & Kebangkitan Yesus",
+                        "Kitab Suci Perjanjian Baru"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Gereja",
+                        "Masyarakat"
+                    ],
+                    "materi_inti": [
+                        "Sifat-sifat Gereja",
+                        "Sakramen Inisiasi",
+                        "Hak & Kewajiban Warga Negara",
+                        "Dialog Antar Agama"
+                    ]
+                }
+            },
+            "Bahasa Daerah": {
+                "ganjil": {
+                    "elemen": [
+                        "Menyimak",
+                        "Membaca dan Memirsa"
+                    ],
+                    "materi_inti": [
+                        "Teks Pidato Resmi (Sesorah/Biantara)",
+                        "Analisis Cerita Pendek (Cerkak/Carpon)",
+                        "Teks Deskripsi Upacara Adat & Tradisi",
+                        "Logika & Paramasastra (Tata Bahasa Daerah)"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Berbicara dan Mempresentasikan",
+                        "Menulis"
+                    ],
+                    "materi_inti": [
+                        "Menulis Aksara Daerah (Sandhangan/Rarangken)",
+                        "Apresiasi Puisi Tradisional (Geguritan/Sajak)",
+                        "Presentasi Kreatif Budaya Daerah",
+                        "Menulis Surat Resmi & Formal (Serat/Layang)"
+                    ]
+                }
+            },
+            "PJOK": {
+                "ganjil": {
+                    "elemen": [
+                        "Terampil Bergerak",
+                        "Belajar Melalui Gerak"
+                    ],
+                    "materi_inti": [
+                        "Permainan Bola Besar (Sepak Bola, Voli, Basket)",
+                        "Permainan Bola Kecil (Kasti, Bulutangkis)",
+                        "Atletik (Lari Jarak Pendek)"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Gaya Hidup Aktif",
+                        "Memilih Hidup Sehat"
+                    ],
+                    "materi_inti": [
+                        "Aktivitas Senam Lantai",
+                        "Aktivitas Gerak Berirama",
+                        "Pencegahan Pergaulan Bebas",
+                        "P3K Sederhana"
+                    ]
+                }
+            },
+            "Seni Budaya": {
+                "ganjil": {
+                    "elemen": [
+                        "Seni Rupa (Mengalami)",
+                        "Seni Musik (Menciptakan)"
+                    ],
+                    "materi_inti": [
+                        "Menggambar Flora, Fauna & Alam Benda",
+                        "Ragam Hias Nusantara",
+                        "Bernyanyi Unisono",
+                        "Musik Ansambel Sejenis"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Seni Tari (Merefleksikan)",
+                        "Seni Teater (Berpikir Artistik)"
+                    ],
+                    "materi_inti": [
+                        "Elemen Gerak Tari & Ruang Waktu",
+                        "Tari Tradisional Daerah",
+                        "Teknik Dasar Akting & Pantomim",
+                        "Menyusun Naskah Drama Pendek"
+                    ]
+                }
+            }
+        },
+        "SMA": {
+            "Matematika": {
+                "ganjil": {
+                    "elemen": [
+                        "Bilangan",
+                        "Aljabar dan Fungsi"
+                    ],
+                    "materi_inti": [
+                        "Eksponen & Logaritma",
+                        "Barisan & Deret",
+                        "Persamaan & Fungsi Kuadrat (Akar Imajiner)",
+                        "Sistem Persamaan & Pertidaksamaan Linear"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Geometri",
+                        "Analisis Data dan Peluang"
+                    ],
+                    "materi_inti": [
+                        "Trigonometri Dasar (Sudut Lancip)",
+                        "Vektor Dasar",
+                        "Diagram Box Plot & Interpretasi Data",
+                        "Konsep Peluang Bersyarat & Majemuk"
+                    ]
+                }
+            },
+            "Informatika": {
+                "ganjil": {
+                    "elemen": [
+                        "BK",
+                        "TIK",
+                        "SK",
+                        "JKI"
+                    ],
+                    "materi_inti": [
+                        "Analisa Algoritma & Pemodelan Komputasi",
+                        "Cloud Computing & Layanan Digital",
+                        "Arsitektur Komputer Modern",
+                        "Network Routing & Protokol"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "AD",
+                        "AP",
+                        "DSI",
+                        "PLB"
+                    ],
+                    "materi_inti": [
+                        "Big Data & Statistika Komputasi",
+                        "Python Programming (Lanjutan)",
+                        "Artificial Intelligence Ethics & Deep Learning",
+                        "Software Development Life Cycle (SDLC)"
+                    ]
+                }
+            },
+            "Biologi": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman Biologi",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Virus & Peranannya",
+                        "Inovasi Teknologi Biologi",
+                        "Komponen Ekosistem & Interaksi",
+                        "Keanekaragaman Hayati"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman Biologi",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Struktur & Bioproses Sel",
+                        "Sistem Organ & Kelainan",
+                        "Enzim & Metabolisme",
+                        "Pewarisan Sifat & Evolusi"
+                    ]
+                }
+            },
+            "Fisika": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman Fisika",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Vektor & Kinematika Gerak",
+                        "Dinamika Gerak & Fluida",
+                        "Gejala Gelombang (Bunyi & Cahaya)",
+                        "Kalor & Termodinamika"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman Fisika",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Kelistrikan Statis & Dinamis",
+                        "Kemagnetan & Gelombang Elektromagnetik",
+                        "Gerbang Logika & Teori Relativitas",
+                        "Fisika Inti & Radioaktivitas"
+                    ]
+                }
+            },
+            "Kimia": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman Kimia",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Struktur Atom & Nanoteknologi",
+                        "Sistem Periodik Unsur",
+                        "Ikatan Kimia & Gaya Antarmolekul",
+                        "Hukum Dasar Kimia & Reaksi"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman Kimia",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Termokimia & Kinetika Kimia",
+                        "Kimia Larutan & Asam-Basa",
+                        "Elektrokimia & Korosi",
+                        "Kimia Organik & Makromolekul"
+                    ]
+                }
+            },
+            "Ekonomi": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman Konsep",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Masalah Ekonomi & Kelangkaan",
+                        "Kegiatan Ekonomi & Pelaku",
+                        "Pasar & Keseimbangan Harga",
+                        "Eksplorasi Literasi Keuangan"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman Konsep",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Kebijakan Fiskal & Moneter",
+                        "Badan Usaha & Koperasi",
+                        "Perdagangan Internasional",
+                        "Perekonomian Digital & Global"
+                    ]
+                }
+            },
+            "Geografi": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman Geografi",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Konsep Dasar & Pemetaan",
+                        "Litosfer & Pedosfer",
+                        "Atmosfer & Perubahan Iklim",
+                        "Hidrosfer & Pengairan"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman Geografi",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Biosfer & Sebaran Flora Fauna",
+                        "Antroposfer & Kependudukan",
+                        "Pola Tata Ruang Wilayah",
+                        "Sistem Informasi Geografis (SIG)"
+                    ]
+                }
+            },
+            "Sosiologi": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman Konsep",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Fungsi Sosiologi di Masyarakat",
+                        "Identitas Diri & Kelompok Sosial",
+                        "Interaksi Sosial & Nilai",
+                        "Lembaga Sosial & Perannya"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman Konsep",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Dinamika Kelompok Sosial",
+                        "Perubahan Sosial & Modernisasi",
+                        "Masalah Sosial & Eksklusi",
+                        "Pemberdayaan Komunitas Lokal"
+                    ]
+                }
+            },
+            "Sejarah": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman Konsep",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Konsep Dasar Ilmu Sejarah",
+                        "Manusia, Ruang & Waktu",
+                        "Sumber & Historiografi",
+                        "Zaman Kerajaan Hindu-Buddha"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman Konsep",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Sejarah Kerajaan Islam Nusantara",
+                        "Kolonialisme & Perlawanan",
+                        "Perkembangan Dunia Mederen",
+                        "Proyek Sejarah Lokal Digital"
+                    ]
+                }
+            },
+            "Bahasa Indonesia": {
+                "ganjil": {
+                    "elemen": [
+                        "Menyimak",
+                        "Membaca dan Memirsa"
+                    ],
+                    "materi_inti": [
+                        "Teks Laporan Hasil Observasi",
+                        "Analisis Teks Negosiasi",
+                        "Interpretasi Teks Biografi",
+                        "Evaluasi Argumentasi Logis"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Berbicara dan Mempresentasikan",
+                        "Menulis"
+                    ],
+                    "materi_inti": [
+                        "Penyampaian Orasi & Pidato",
+                        "Penulisan Artikel Ilmiah",
+                        "Apresiasi Sastra Indonesia/Dunia",
+                        "Publikasi Karya Kreatif Digital"
+                    ]
+                }
+            },
+            "Bahasa Daerah": {
+                "ganjil": {
+                    "elemen": [
+                        "Menyimak",
+                        "Membaca dan Memirsa"
+                    ],
+                    "materi_inti": [
+                        "Kajian Teks Teater Tradisional (Wayang/Kethoprak)",
+                        "Falsafah Hidup & Kearifan Lokal (Local Wisdom)",
+                        "Artikel Eksplanasi Fenomena Budaya Daerah",
+                        "Evaluasi & Kritik Sastra Serta Etika Berbahasa"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Berbicara dan Mempresentasikan",
+                        "Menulis"
+                    ],
+                    "materi_inti": [
+                        "Orasi Ilmiah & Budaya (Rhetoric Formal)",
+                        "Penulisan Kreatif: Lakon Drama & Sastra Modern",
+                        "Digitalisasi Aksara & Konten Budaya (Podcast/Video)",
+                        "Kajian Filologi & Naskah Kuno Bahasa Daerah"
+                    ]
+                }
+            },
+            "Bahasa Inggris": {
+                "ganjil": {
+                    "elemen": [
+                        "Menyimak - Berbicara",
+                        "Membaca - Memirsa"
+                    ],
+                    "materi_inti": [
+                        "Analytical Exposition Text",
+                        "Passive Voice",
+                        "Hortatory Exposition Text",
+                        "Caption Text & Visual Aids"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Menulis - Mempresentasikan",
+                        "Menyimak - Berbicara"
+                    ],
+                    "materi_inti": [
+                        "Songs & Poems Interpretation",
+                        "Explanation Text",
+                        "Review Text (Movie/Book)",
+                        "Public Speaking Basics"
+                    ]
+                }
+            },
+            "Pendidikan Pancasila": {
+                "ganjil": {
+                    "elemen": [
+                        "Pancasila",
+                        "UUD 1945"
+                    ],
+                    "materi_inti": [
+                        "Ideologi Terbuka vs Tertutup",
+                        "Peluang & Tantangan Pancasila Global",
+                        "Amandemen UUD 1945",
+                        "Hierarki Peraturan Perundang-undangan"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Bhinneka Tunggal Ika",
+                        "NKRI"
+                    ],
+                    "materi_inti": [
+                        "Sengketa Batas Wilayah",
+                        "Sistem Pertahanan & Keamanan",
+                        "Peran Indonesia di Hubungan Internasional",
+                        "Harmoni Keberagaman"
+                    ]
+                }
+            },
+            "Prakarya dan Kewirausahaan": {
+                "ganjil": {
+                    "elemen": [
+                        "Observasi & Eksplorasi",
+                        "Desain/Perencanaan"
+                    ],
+                    "materi_inti": [
+                        "Perencanaan Usaha Kerajinan Pasar Lokal/Global",
+                        "Sistem Produksi Kerajinan",
+                        "Perhitungan Titik Impas (BEP) Usaha",
+                        "Media Promosi Produk Usaha"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Produksi",
+                        "Refleksi & Evaluasi"
+                    ],
+                    "materi_inti": [
+                        "Strategi Pemasaran Produk",
+                        "Laporan Kegiatan Usaha Kerajinan",
+                        "Evaluasi Hasil Usaha",
+                        "Pengembangan Produk Kreatif & Inovatif"
+                    ]
+                }
+            },
+            "Prakarya (Budidaya)": {
+                "ganjil": {
+                    "elemen": [
+                        "Observasi dan Eksplorasi",
+                        "Desain/Perencanaan"
+                    ],
+                    "materi_inti": [
+                        "Pemilihan Bibit & Varietas Unggul",
+                        "Penyiapan Media Tanam (Organik/Hidroponik)",
+                        "Desain Sistem Budidaya Efisien",
+                        "Analisis Lingkungan Tumbuh"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Produksi",
+                        "Refleksi dan Evaluasi"
+                    ],
+                    "materi_inti": [
+                        "Teknik Penanaman & Pemupukan",
+                        "Pengendalian Hama Terpadu",
+                        "Panen & Penanganan Pasca Panen",
+                        "Evaluasi Kelayakan Usaha Budidaya"
+                    ]
+                }
+            },
+            "Pendidikan Agama Islam": {
+                "ganjil": {
+                    "elemen": [
+                        "Al-Qur'an Hadis",
+                        "Aqidah",
+                        "Akhlak"
+                    ],
+                    "materi_inti": [
+                        "Q.S. Al-Maidah/At-Taubah (Kompetisi Kebaikan)",
+                        "Syubabul Iman (Cabang Iman)",
+                        "Manfaat Menghindari Akhlak Mazmumah"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Fikih",
+                        "Sejarah Peradaban Islam"
+                    ],
+                    "materi_inti": [
+                        "Hukum Waris & Pernikahan",
+                        "Peran Tokoh Islam di Indonesia",
+                        "Dakwah Islam & Kearifan Lokal"
+                    ]
+                }
+            },
+            "Pendidikan Agama Kristen": {
+                "ganjil": {
+                    "elemen": [
+                        "Allah Berkarya",
+                        "Manusia dan Nilai"
+                    ],
+                    "materi_inti": [
+                        "Allah Pembaharu Kehidupan",
+                        "Menjadi Manusia Dewasa Iman",
+                        "Nilai Kristiani dalam Pernikahan"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Gereja dan Masyarakat",
+                        "Alam dan Lingkungan"
+                    ],
+                    "materi_inti": [
+                        "Gereja sebagai Umat Allah",
+                        "Hak Asasi Manusia",
+                        "Demokrasi dalam Perspektif Kristen",
+                        "Keadilan Sosial"
+                    ]
+                }
+            },
+            "Pendidikan Agama Katolik": {
+                "ganjil": {
+                    "elemen": [
+                        "Pribadi Peserta Didik",
+                        "Yesus Kristus"
+                    ],
+                    "materi_inti": [
+                        "Panggilan Hidup (Berkeluarga/Membiara)",
+                        "Yesus Mewartakan Kerajaan Allah",
+                        "Sifat-sifat Gereja"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Gereja",
+                        "Masyarakat"
+                    ],
+                    "materi_inti": [
+                        "Ajaran Sosial Gereja",
+                        "Keterlibatan Gereja di Dunia",
+                        "Cinta Kasih & Kebenaran",
+                        "Dialog Kerukunan"
+                    ]
+                }
+            },
+            "PJOK": {
+                "ganjil": {
+                    "elemen": [
+                        "Terampil Bergerak",
+                        "Belajar Melalui Gerak"
+                    ],
+                    "materi_inti": [
+                        "Taktik Permainan Bola (Sepak Bola, Basket)",
+                        "Taktik Permainan Net (Voli, Bulutangkis)",
+                        "Pencak Silat (Bela Diri)"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Gaya Hidup Aktif",
+                        "Memilih Hidup Sehat"
+                    ],
+                    "materi_inti": [
+                        "Merancang Program Latihan Fisik",
+                        "Renang Pertolongan",
+                        "Bahaya HIV/AIDS & Narkoba",
+                        "Kesehatan Reproduksi"
+                    ]
+                }
+            },
+            "Seni Budaya": {
+                "ganjil": {
+                    "elemen": [
+                        "Seni Rupa (Mengalami)",
+                        "Seni Musik (Menciptakan)"
+                    ],
+                    "materi_inti": [
+                        "Apresiasi Karya Seni Rupa Mancanegara",
+                        "Pameran Seni Rupa Sekolah",
+                        "Aransemen Musik Kreasi",
+                        "Musik Kontemporer"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Seni Tari (Merefleksikan)",
+                        "Seni Teater (Berpikir Artistik)"
+                    ],
+                    "materi_inti": [
+                        "Manajemen Produksi Tari",
+                        "Kritik Tari",
+                        "Merancang Pementasan Teater",
+                        "Analisis Naskah Drama Modern"
+                    ]
+                }
+            },
+            "Antropologi": {
+                "ganjil": {
+                    "elemen": [
+                        "Pemahaman Konsep",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Konsep Dasar Antropologi",
+                        "Diferensiasi & Stratifikasi Sosial",
+                        "Kebudayaan & Perubahan",
+                        "Etnografi Sederhana"
+                    ]
+                },
+                "genap": {
+                    "elemen": [
+                        "Pemahaman Konsep",
+                        "Keterampilan Proses"
+                    ],
+                    "materi_inti": [
+                        "Religi & Kepercayaan",
+                        "Kekerabatan & Sistem Sosial",
+                        "Bahasa & Komunikasi Budaya",
+                        "Globalisasi & Identitas Lokal"
+                    ]
+                }
+            }
+        }
+    },
+    "pedagogis": {
+        "preferred_models": [
+            {
+                "name": "Problem Based Learning (PBL)",
+                "suitability": "Materi berbasis masalah nyata dan analisis kritis."
+            },
+            {
+                "name": "Project Based Learning (PjBL)",
+                "suitability": "Materi yang menghasilkan artefak atau produk jangka panjang."
+            },
+            {
+                "name": "Discovery Learning",
+                "suitability": "Materi konsep yang perlu ditemukan pola oleh peserta didik."
+            },
+            {
+                "name": "Inquiry Learning",
+                "suitability": "Materi yang berbasis pada keingintahuan dan investigasi mendalam."
+            }
+        ]
+    },
+    "kktp_standards": {
+        "methods": [
+            {
+                "type": "Deskripsi Kriteria",
+                "logic": "Mengidentifikasi muncul/tidaknya indikator tertentu dalam karya peserta didik."
+            },
+            {
+                "type": "Rubrik",
+                "logic": "Mendeskripsikan kualitas performa dalam skala bertingkat (misal: 1-4)."
+            },
+            {
+                "type": "Interval Nilai",
+                "logic": "Menggunakan persentase keberhasilan untuk menentukan tindak lanjut (bukan sekadar lulus/gagal)."
+            }
+        ],
+        "follow_up_logic": {
+            "0-40": "Remedial di seluruh bagian materi.",
+            "41-65": "Remedial di bagian yang belum tuntas.",
+            "66-85": "Sudah tuntas, pelajari materi selanjutnya.",
+            "86-100": "Tuntas, perlu pengayaan atau menjadi tutor sebaya."
+        }
+    },
+    "glossary": {
+        "CP": "Capaian Pembelajaran (Kompetensi yang harus dicapai di akhir fase).",
+        "TP": "Tujuan Pembelajaran (Sasaran spesifik untuk mencapai CP).",
+        "ATP": "Alur Tujuan Pembelajaran (Urutan logis TP yang disusun sekuensial).",
+        "KKTP": "Kriteria Ketercapaian Tujuan Pembelajaran (Standar ukur tuntasnya TP).",
+        "Deep Learning": "Pendekatan pembelajaran berkesadaran (Mindful), bermakna (Meaningful), dan menggembirakan (Joyful)."
+    }
+}

@@ -6,7 +6,7 @@ import StyledButton from './StyledButton';
 import StyledSelect from './StyledSelect';
 import toast from 'react-hot-toast';
 
-export default function StudentEditor({ studentData, onSave, onClose, rombels }) {
+export default function StudentEditor({ studentData, onSave, onClose, rombels, classes }) {
   const [code, setCode] = useState('');
   const [nis, setNis] = useState('');
   const [nisn, setNisn] = useState('');
@@ -14,7 +14,7 @@ export default function StudentEditor({ studentData, onSave, onClose, rombels })
   const [gender, setGender] = useState('');
   const [birthPlace, setBirthPlace] = useState('');
   const [birthDate, setBirthDate] = useState('');
-  const [rombel, setRombel] = useState('');
+  const [classId, setClassId] = useState('');
   const [absen, setAbsen] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -27,24 +27,36 @@ export default function StudentEditor({ studentData, onSave, onClose, rombels })
       setGender(studentData.gender || '');
       setBirthPlace(studentData.birthPlace || '');
 
-      // Convert Indonesian date format to yyyy-MM-dd for input type="date"
+      // Convert date format to yyyy-MM-dd for input type="date"
       if (studentData.birthDate) {
-        const parts = studentData.birthDate.split(' ');
-        const day = parseInt(parts[0]);
-        const monthNames = {
-          'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5,
-          'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11
-        };
-        const month = monthNames[parts[1]];
-        const year = parseInt(parts[2]);
-        const date = new Date(year, month, day);
-        const formattedDate = date.toISOString().split('T')[0]; // yyyy-MM-dd
-        setBirthDate(formattedDate);
+        let date = new Date(studentData.birthDate);
+        // Check if the date is valid. If not, try parsing the Indonesian format.
+        if (isNaN(date.getTime())) {
+          const parts = studentData.birthDate.split(' ');
+          if (parts.length === 3) {
+            const day = parseInt(parts[0]);
+            const monthNames = {
+              'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5,
+              'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11
+            };
+            const month = monthNames[parts[1]];
+            const year = parseInt(parts[2]);
+            date = new Date(year, month, day);
+          }
+        }
+
+        if (!isNaN(date.getTime())) { // Check if the date is valid
+          const formattedDate = date.toISOString().split('T')[0]; // yyyy-MM-dd
+          setBirthDate(formattedDate);
+        } else {
+          console.error("Invalid birthDate format:", studentData.birthDate);
+          setBirthDate(''); // Set to empty if invalid to prevent error
+        }
       } else {
         setBirthDate('');
       }
 
-      setRombel(studentData.rombel || '');
+      setClassId(studentData.classId || studentData.rombel || '');
       setAbsen(studentData.absen || '');
     }
   }, [studentData]);
@@ -53,13 +65,15 @@ export default function StudentEditor({ studentData, onSave, onClose, rombels })
     e.preventDefault();
     setSaving(true);
 
-    if (!code || !nis || !nisn || !name || !gender || !birthPlace || !birthDate || !rombel || !absen) {
+    if (!code || !nis || !nisn || !name || !gender || !birthPlace || !birthDate || !classId || !absen) {
       toast.error('Lengkapi semua detail siswa.');
       setSaving(false);
       return;
     }
 
     const studentDocRef = doc(db, 'students', studentData.id);
+    const selectedClassObj = classes.find(c => c.id === classId);
+
     try {
       await updateDoc(studentDocRef, {
         code,
@@ -69,7 +83,8 @@ export default function StudentEditor({ studentData, onSave, onClose, rombels })
         gender,
         birthPlace,
         birthDate,
-        rombel,
+        classId,
+        rombel: selectedClassObj?.rombel || classId, // Fallback if name not found
         absen,
       });
       toast.success('Siswa berhasil diperbarui!');
@@ -140,10 +155,10 @@ export default function StudentEditor({ studentData, onSave, onClose, rombels })
         onChange={(e) => setBirthDate(e.target.value)}
         required
       />
-      <StyledSelect value={rombel} onChange={(e) => setRombel(e.target.value)} required>
-        <option value="">Pilih Rombel</option>
-        {rombels.map((r) => (
-          <option key={r} value={r}>{r}</option>
+      <StyledSelect value={classId} onChange={(e) => setClassId(e.target.value)} required>
+        <option value="">Pilih Rombel (Kelas)</option>
+        {classes.map((c) => (
+          <option key={c.id} value={c.id}>{c.rombel}</option>
         ))}
       </StyledSelect>
       <div className="md:col-span-2 flex justify-end space-x-2">

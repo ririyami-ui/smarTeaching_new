@@ -12,11 +12,68 @@ service cloud.firestore {
       allow read, write: if request.auth.uid == userId;
     }
 
-    // All other collections are secured by a userId field
+    match /teachingPrograms/{docId} {
+      allow read, write: if request.auth != null && docId.matches(request.auth.uid + '_.*');
+    }
+
+    match /classes/{docId} {
+      allow read, write: if request.auth != null && 
+        (resource == null || resource.data.userId == request.auth.uid) &&
+        (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+
+    // Explicit Rules for Teacher-Specific Data
+    match /teachingJournals/{docId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow write: if request.auth != null && (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+
+    match /absensi/{docId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow write: if request.auth != null && (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+
+    match /teachingSchedules/{docId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow write: if request.auth != null && (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+
+    match /students/{docId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow write: if request.auth != null && (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+
+    match /lessonPlans/{docId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow write: if request.auth != null && (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+
+    match /studentNotes/{docId} {
+      // Allow read if document doesn't exist or if user is the owner
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+
+    match /grades/{docId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow write: if request.auth != null && (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+
+    match /attendance/{docId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow write: if request.auth != null && (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+
+    match /infractions/{docId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow write: if request.auth != null && (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+
+    // Catch-all for other collections secured by userId
     match /{collection}/{docId} {
-      allow read: if request.auth.uid == resource.data.userId;
-      allow create: if request.auth.uid == request.resource.data.userId;
-      allow update, delete: if request.auth.uid == resource.data.userId;
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }

@@ -7,14 +7,15 @@ import StyledSelect from '../components/StyledSelect';
 import StyledButton from '../components/StyledButton';
 import StyledTable from '../components/StyledTable';
 import RiwayatNilai from '../components/RiwayatNilai'; // Import komponen baru
+import { useSearchParams } from 'react-router-dom';
+import { useSettings } from '../utils/SettingsContext';
 
 const TabButton = ({ label, isActive, onClick }) => (
   <button
-    className={`w-full py-2.5 px-4 text-sm font-semibold rounded-lg transition-all duration-300 ease-in-out focus:outline-none ${
-      isActive
-        ? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
-        : 'text-gray-500 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-gray-900/60'
-    }`}
+    className={`w-full py-2.5 px-4 text-sm font-semibold rounded-lg transition-all duration-300 ease-in-out focus:outline-none ${isActive
+      ? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
+      : 'text-gray-500 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-gray-900/60'
+      }`}
     onClick={onClick}
   >
     {label}
@@ -46,12 +47,17 @@ export default function NilaiPage() {
   const [editGrades, setEditGrades] = useState({});
   const [isFetchingEditData, setIsFetchingEditData] = useState(false);
 
-  const assessmentTypes = ["Harian", "Ulangan", "Tengah Semester", "Akhir Semester"];
+  const assessmentTypes = ["Harian", "Ulangan", "Tengah Semester", "Akhir Semester", "Praktik"];
 
   const classesCollectionRef = collection(db, 'classes');
   const subjectsCollectionRef = collection(db, 'subjects');
   const studentsCollectionRef = collection(db, 'students');
   const gradesCollectionRef = collection(db, 'grades');
+
+  const [searchParams] = useSearchParams();
+  const classIdFromUrl = searchParams.get('classId');
+  const subjectIdFromUrl = searchParams.get('subjectId');
+  const { activeSemester, academicYear } = useSettings();
 
   useEffect(() => {
     const today = new Date();
@@ -71,11 +77,29 @@ export default function NilaiPage() {
       try {
         const classesQuery = query(classesCollectionRef, where('userId', '==', auth.currentUser.uid), orderBy('rombel', 'asc'));
         const classesData = await getDocs(classesQuery);
-        setClasses(classesData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const fetchedClasses = classesData.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setClasses(fetchedClasses);
 
         const subjectsQuery = query(subjectsCollectionRef, where('userId', '==', auth.currentUser.uid), orderBy('name', 'asc'));
         const subjectsData = await getDocs(subjectsQuery);
-        setSubjects(subjectsData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const fetchedSubjects = subjectsData.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setSubjects(fetchedSubjects);
+
+        // Pre-select class and subject if provided in URL
+        if (classIdFromUrl) {
+          const preselectedClass = fetchedClasses.find(cls => cls.rombel === classIdFromUrl || cls.id === classIdFromUrl);
+          if (preselectedClass) {
+            setSelectedClass(preselectedClass.id);
+            setEditSelectedClass(preselectedClass.id);
+          }
+        }
+        if (subjectIdFromUrl) {
+          const preselectedSubject = fetchedSubjects.find(sub => sub.name === subjectIdFromUrl || sub.id === subjectIdFromUrl);
+          if (preselectedSubject) {
+            setSelectedSubject(preselectedSubject.id);
+            setEditSelectedSubject(preselectedSubject.id);
+          }
+        }
 
       } catch (error) {
         console.error("Error fetching initial data: ", error);
@@ -97,7 +121,7 @@ export default function NilaiPage() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [classIdFromUrl, subjectIdFromUrl]);
 
   const fetchStudents = useCallback(async () => {
     if (!selectedClass || !auth.currentUser) {
@@ -107,13 +131,27 @@ export default function NilaiPage() {
     }
     setIsLoading(true);
     try {
-      const studentsQuery = query(
+      const classObj = classes.find(c => c.id === selectedClass);
+
+      let studentsQuery = query(
         studentsCollectionRef,
         where('userId', '==', auth.currentUser.uid),
-        where('rombel', '==', selectedClass),
+        where('classId', '==', selectedClass),
         orderBy('name', 'asc')
       );
-      const studentsData = await getDocs(studentsQuery);
+      let studentsData = await getDocs(studentsQuery);
+
+      // Fallback for legacy students (using rombel name)
+      if (studentsData.empty && classObj) {
+        studentsQuery = query(
+          studentsCollectionRef,
+          where('userId', '==', auth.currentUser.uid),
+          where('rombel', '==', classObj.rombel),
+          orderBy('name', 'asc')
+        );
+        studentsData = await getDocs(studentsQuery);
+      }
+
       const fetchedStudents = studentsData.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setStudents(fetchedStudents);
       const initialGrades = {};
@@ -143,15 +181,36 @@ export default function NilaiPage() {
         return;
       }
       try {
-        const q = query(
+        const classObj = classes.find(c => c.id === editSelectedClass);
+        const subjectObj = subjects.find(s => s.id === editSelectedSubject);
+
+        let q = query(
           gradesCollectionRef,
           where('userId', '==', auth.currentUser.uid),
-          where('className', '==', editSelectedClass),
-          where('subjectName', '==', editSelectedSubject),
+          where('classId', '==', editSelectedClass),
+          where('subjectId', '==', editSelectedSubject),
           where('assessmentType', '==', editAssessmentType),
-          where('date', '==', editDate)
+          where('date', '==', editDate),
+          where('semester', '==', activeSemester),
+          where('academicYear', '==', academicYear)
         );
-        const querySnapshot = await getDocs(q);
+        let querySnapshot = await getDocs(q);
+
+        // Fallback for legacy grades (using names)
+        if (querySnapshot.empty && classObj && subjectObj) {
+          q = query(
+            gradesCollectionRef,
+            where('userId', '==', auth.currentUser.uid),
+            where('className', '==', classObj.rombel),
+            where('subjectName', '==', subjectObj.name),
+            where('assessmentType', '==', editAssessmentType),
+            where('date', '==', editDate),
+            where('semester', '==', activeSemester),
+            where('academicYear', '==', academicYear)
+          );
+          querySnapshot = await getDocs(q);
+        }
+
         const uniqueMaterials = [...new Set(querySnapshot.docs.map(doc => doc.data().material))];
         setMaterialsForEdit(uniqueMaterials);
         if (uniqueMaterials.length > 0 && !uniqueMaterials.includes(editSelectedMaterial)) {
@@ -165,7 +224,7 @@ export default function NilaiPage() {
     if (activeTab === 'input' && showEditMode) {
       fetchMaterials();
     }
-  }, [editDate, editSelectedClass, editSelectedSubject, editAssessmentType, auth.currentUser, showEditMode, editSelectedMaterial, activeTab]);
+  }, [editDate, editSelectedClass, editSelectedSubject, editAssessmentType, auth.currentUser, showEditMode, editSelectedMaterial, activeTab, activeSemester, academicYear]);
 
   const fetchEditGrades = useCallback(async () => {
     if (!editDate || !editSelectedClass || !editSelectedSubject || !editAssessmentType || !editSelectedMaterial || !auth.currentUser) {
@@ -175,16 +234,38 @@ export default function NilaiPage() {
     }
     setIsFetchingEditData(true);
     try {
-      const q = query(
+      const classObj = classes.find(c => c.id === editSelectedClass);
+      const subjectObj = subjects.find(s => s.id === editSelectedSubject);
+
+      let q = query(
         gradesCollectionRef,
         where('userId', '==', auth.currentUser.uid),
         where('date', '==', editDate),
-        where('className', '==', editSelectedClass),
-        where('subjectName', '==', editSelectedSubject),
+        where('classId', '==', editSelectedClass),
+        where('subjectId', '==', editSelectedSubject),
         where('assessmentType', '==', editAssessmentType),
-        where('material', '==', editSelectedMaterial)
+        where('material', '==', editSelectedMaterial),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear)
       );
-      const querySnapshot = await getDocs(q);
+      let querySnapshot = await getDocs(q);
+
+      // Fallback for legacy grades (using names)
+      if (querySnapshot.empty && classObj && subjectObj) {
+        q = query(
+          gradesCollectionRef,
+          where('userId', '==', auth.currentUser.uid),
+          where('date', '==', editDate),
+          where('className', '==', classObj.rombel),
+          where('subjectName', '==', subjectObj.name),
+          where('assessmentType', '==', editAssessmentType),
+          where('material', '==', editSelectedMaterial),
+          where('semester', '==', activeSemester),
+          where('academicYear', '==', academicYear)
+        );
+        querySnapshot = await getDocs(q);
+      }
+
       if (querySnapshot.empty) {
         toast.error('Belum ada nilai untuk materi ini.');
         setEditStudents([]);
@@ -196,13 +277,26 @@ export default function NilaiPage() {
         const data = doc.data();
         fetchedGradesData[data.studentId] = data.score;
       });
-      const allStudentsInClassQuery = query(
+
+      let allStudentsInClassQuery = query(
         studentsCollectionRef,
         where('userId', '==', auth.currentUser.uid),
-        where('rombel', '==', editSelectedClass),
+        where('classId', '==', editSelectedClass),
         orderBy('name', 'asc')
       );
-      const allStudentsInClassSnapshot = await getDocs(allStudentsInClassQuery);
+      let allStudentsInClassSnapshot = await getDocs(allStudentsInClassQuery);
+
+      // Fallback for legacy students in class
+      if (allStudentsInClassSnapshot.empty && classObj) {
+        allStudentsInClassQuery = query(
+          studentsCollectionRef,
+          where('userId', '==', auth.currentUser.uid),
+          where('rombel', '==', classObj.rombel),
+          orderBy('name', 'asc')
+        );
+        allStudentsInClassSnapshot = await getDocs(allStudentsInClassQuery);
+      }
+
       const allStudentsInClass = allStudentsInClassSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const finalStudents = allStudentsInClass.map(student => ({
         ...student,
@@ -216,7 +310,7 @@ export default function NilaiPage() {
     } finally {
       setIsFetchingEditData(false);
     }
-  }, [editDate, editSelectedClass, editSelectedSubject, editAssessmentType, editSelectedMaterial]);
+  }, [editDate, editSelectedClass, editSelectedSubject, editAssessmentType, editSelectedMaterial, activeSemester, academicYear]);
 
   useEffect(() => {
     if (activeTab === 'input' && showEditMode) {
@@ -245,9 +339,11 @@ export default function NilaiPage() {
       return;
     }
     const batch = writeBatch(db);
-    const classId = classes.find(cls => cls.rombel === selectedClass)?.id || '';
-    const subjectId = subjects.find(sub => sub.name === selectedSubject)?.id || '';
-    if (!classId || !subjectId) {
+    const classId = selectedClass;
+    const subjectId = selectedSubject;
+    const classData = classes.find(cls => cls.id === classId);
+    const subjectData = subjects.find(sub => sub.id === subjectId);
+    if (!classData || !subjectData) {
       toast.error('Kelas atau Mata Pelajaran tidak ditemukan.');
       return;
     }
@@ -260,9 +356,9 @@ export default function NilaiPage() {
         const gradeRef = doc(db, 'grades', uniqueGradeId);
         batch.set(gradeRef, {
           classId: classId,
-          className: selectedClass,
+          className: classData.rombel,
           subjectId: subjectId,
-          subjectName: selectedSubject,
+          subjectName: subjectData.name,
           studentId: studentId,
           studentName: students.find(s => s.id === studentId)?.name || '',
           date: currentDate,
@@ -270,6 +366,8 @@ export default function NilaiPage() {
           assessmentType: assessmentType,
           score: parseFloat(score),
           userId: auth.currentUser.uid,
+          semester: activeSemester,
+          academicYear: academicYear,
           timestamp: new Date(),
         }, { merge: true });
       }
@@ -308,9 +406,11 @@ export default function NilaiPage() {
       return;
     }
     const batch = writeBatch(db);
-    const classId = classes.find(cls => cls.rombel === editSelectedClass)?.id || '';
-    const subjectId = subjects.find(sub => sub.name === editSelectedSubject)?.id || '';
-    if (!classId || !subjectId) {
+    const classId = editSelectedClass;
+    const subjectId = editSelectedSubject;
+    const classData = classes.find(cls => cls.id === classId);
+    const subjectData = subjects.find(sub => sub.id === subjectId);
+    if (!classData || !subjectData) {
       toast.error('Kelas atau Mata Pelajaran tidak ditemukan.');
       return;
     }
@@ -323,9 +423,9 @@ export default function NilaiPage() {
         const gradeRef = doc(db, 'grades', uniqueGradeId);
         batch.set(gradeRef, {
           classId: classId,
-          className: editSelectedClass,
+          className: classData.rombel,
           subjectId: subjectId,
-          subjectName: editSelectedSubject,
+          subjectName: subjectData.name,
           studentId: student.id,
           studentName: student.name,
           date: editDate,
@@ -333,6 +433,8 @@ export default function NilaiPage() {
           assessmentType: editAssessmentType,
           score: parseFloat(score),
           userId: auth.currentUser.uid,
+          semester: activeSemester,
+          academicYear: academicYear,
           timestamp: new Date(),
         }, { merge: true });
       }
@@ -386,123 +488,126 @@ export default function NilaiPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Manajemen Nilai</h1>
-        
-        {/* Tab Navigator */}
-        <div className="max-w-md mx-auto sm:mx-0 mb-6">
-          <div className="flex space-x-2 p-1.5 bg-gray-200 dark:bg-gray-900 rounded-xl">
-            <TabButton label="Input & Edit Nilai" isActive={activeTab === 'input'} onClick={() => setActiveTab('input')} />
-            <TabButton label="Riwayat Input Nilai" isActive={activeTab === 'history'} onClick={() => setActiveTab('history')} />
-          </div>
+    <div className="p-3 sm:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Manajemen Nilai</h1>
+
+      {/* Tab Navigator */}
+      <div className="max-w-md mx-auto sm:mx-0 mb-6">
+        <div className="flex space-x-1 p-1 bg-gray-200 dark:bg-gray-900 rounded-xl">
+          <TabButton label="Input & Edit" isActive={activeTab === 'input'} onClick={() => setActiveTab('input')} />
+          <TabButton label="Riwayat Nilai" isActive={activeTab === 'history'} onClick={() => setActiveTab('history')} />
         </div>
+      </div>
 
-        {/* Tab Content */}
-        {activeTab === 'input' && (
-          <div className="rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                {showEditMode ? 'Edit Nilai' : 'Input Nilai'}
-              </h2>
-              <StyledButton onClick={handleToggleMode}>
-                {showEditMode ? 'Kembali ke Input Nilai' : 'Edit Nilai'}
-              </StyledButton>
-            </div>
+      {/* Tab Content */}
+      {activeTab === 'input' && (
+        <div className="rounded-2xl bg-white p-4 sm:p-6 shadow-lg dark:bg-gray-800">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100">
+              {showEditMode ? 'Edit Nilai' : 'Input Nilai'}
+            </h2>
+            <button
+              onClick={handleToggleMode}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-bold text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700/50 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
+            >
+              {showEditMode ? 'Kembali ke Input Nilai' : 'Edit Nilai'}
+            </button>
+          </div>
 
-            {!showEditMode ? (
-              // Input Nilai Form
-              <>
-                <div className="space-y-4 mb-6">
-                  <StyledInput type="date" label="Tanggal Penilaian" value={currentDate} onChange={(e) => setCurrentDate(e.target.value)} readOnly />
-                  <StyledSelect label="Kelas" value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
-                    <option value="">Pilih Kelas</option>
-                    {classes.map(cls => <option key={cls.id} value={cls.rombel}>{cls.rombel}</option>)}
-                  </StyledSelect>
-                  <StyledSelect label="Mata Pelajaran" value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}>
-                    <option value="">Pilih Mata Pelajaran</option>
-                    {subjects.map(sub => <option key={sub.id} value={sub.name}>{sub.name}</option>)}
-                  </StyledSelect>
-                  <StyledInput type="text" label="Materi" placeholder="Contoh: Bab 1 - Pengenalan Aljabar" value={material} onChange={(e) => setMaterial(e.target.value)} />
-                  <StyledSelect label="Jenis Penilaian" value={assessmentType} onChange={(e) => setAssessmentType(e.target.value)}>
-                    <option value="">Pilih Jenis Penilaian</option>
-                    {assessmentTypes.map(type => <option key={type} value={type}>{type}</option>)}
-                  </StyledSelect>
+          {!showEditMode ? (
+            // Input Nilai Form
+            <>
+              <div className="space-y-4 mb-6">
+                <StyledInput type="date" label="Tanggal Penilaian" value={currentDate} onChange={(e) => setCurrentDate(e.target.value)} />
+                <StyledSelect label="Kelas" value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
+                  <option value="">Pilih Kelas</option>
+                  {classes.map(cls => <option key={cls.id} value={cls.id}>{cls.rombel}</option>)}
+                </StyledSelect>
+                <StyledSelect label="Mata Pelajaran" value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}>
+                  <option value="">Pilih Mata Pelajaran</option>
+                  {subjects.map(sub => <option key={sub.id} value={sub.id}>{sub.name}</option>)}
+                </StyledSelect>
+                <StyledInput type="text" label="Materi" placeholder="Contoh: Bab 1 - Pengenalan Aljabar" value={material} onChange={(e) => setMaterial(e.target.value)} voiceEnabled />
+                <StyledSelect label="Jenis Penilaian" value={assessmentType} onChange={(e) => setAssessmentType(e.target.value)}>
+                  <option value="">Pilih Jenis Penilaian</option>
+                  {assessmentTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                </StyledSelect>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Daftar Siswa dan Nilai</h3>
+              {students.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <StyledTable headers={[{ label: 'No.', className: 'w-12 sm:w-16' }, { label: 'Nama Siswa', className: 'w-auto' }, { label: 'Nilai', className: 'w-24 sm:w-32' }]}>
+                    {students.map((student, index) => (
+                      <tr key={student.id}>
+                        <td className="px-3 py-4 whitespace-nowrap text-xs sm:px-6 sm:text-sm font-medium text-text-light dark:text-text-dark">{index + 1}</td>
+                        <td className="px-3 py-4 text-xs sm:px-6 sm:text-sm text-text-muted-light dark:text-text-muted-dark">{student.name}</td>
+                        <td className="px-3 py-4 whitespace-nowrap text-xs sm:px-6 sm:text-sm">
+                          <StyledInput type="number" value={grades[student.id]} onChange={(e) => handleGradeChange(student.id, e.target.value)} className="!px-2.5" containerClassName="w-full" min="0" max="100" />
+                        </td>
+                      </tr>
+                    ))}
+                  </StyledTable>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Daftar Siswa dan Nilai</h3>
-                {students.length > 0 ? (
+              ) : (
+                <p className="text-text-muted-light dark:text-text-muted-dark">Pilih kelas untuk menampilkan daftar siswa.</p>
+              )}
+              <div className="mt-6 flex justify-end">
+                <StyledButton onClick={handleSaveGrades}>Simpan Nilai</StyledButton>
+              </div>
+            </>
+          ) : (
+            // Edit Nilai Form
+            <div className="space-y-4 mb-6">
+              <StyledInput type="date" label="Tanggal Penilaian" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+              <StyledSelect label="Kelas" value={editSelectedClass} onChange={(e) => setEditSelectedClass(e.target.value)}>
+                <option value="">Pilih Kelas</option>
+                {classes.map(cls => <option key={cls.id} value={cls.id}>{cls.rombel}</option>)}
+              </StyledSelect>
+              <StyledSelect label="Mata Pelajaran" value={editSelectedSubject} onChange={(e) => setEditSelectedSubject(e.target.value)}>
+                <option value="">Pilih Mata Pelajaran</option>
+                {subjects.map(sub => <option key={sub.id} value={sub.id}>{sub.name}</option>)}
+              </StyledSelect>
+              <StyledSelect label="Jenis Penilaian" value={editAssessmentType} onChange={(e) => setEditAssessmentType(e.target.value)}>
+                <option value="">Pilih Jenis Penilaian</option>
+                {assessmentTypes.map(type => <option key={type} value={type}>{type}</option>)}
+              </StyledSelect>
+              <StyledSelect label="Materi" value={editSelectedMaterial} onChange={(e) => setEditSelectedMaterial(e.target.value)} disabled={materialsForEdit.length === 0}>
+                <option value="">Pilih Materi</option>
+                {materialsForEdit.map(mat => <option key={mat} value={mat}>{mat}</option>)}
+              </StyledSelect>
+              {isFetchingEditData ? (
+                <div className="text-center text-text-muted-light dark:text-text-muted-dark">Memuat data nilai...</div>
+              ) : editStudents.length > 0 ? (
+                <>
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Daftar Siswa dan Nilai</h3>
                   <div className="overflow-x-auto">
-                    <StyledTable headers={[{label: 'No.', className: 'w-1/12'}, {label: 'Nama Siswa', className: 'w-7/12'}, {label: 'Nilai', className: 'w-4/12'}]}>
-                      {students.map((student, index) => (
+                    <StyledTable headers={[{ label: 'No.', className: 'w-12 sm:w-16' }, { label: 'Nama Siswa', className: 'w-auto' }, { label: 'Nilai', className: 'w-24 sm:w-32' }]}>
+                      {editStudents.map((student, index) => (
                         <tr key={student.id}>
                           <td className="px-3 py-4 whitespace-nowrap text-xs sm:px-6 sm:text-sm font-medium text-text-light dark:text-text-dark">{index + 1}</td>
                           <td className="px-3 py-4 text-xs sm:px-6 sm:text-sm text-text-muted-light dark:text-text-muted-dark">{student.name}</td>
                           <td className="px-3 py-4 whitespace-nowrap text-xs sm:px-6 sm:text-sm">
-                            <StyledInput type="number" value={grades[student.id]} onChange={(e) => handleGradeChange(student.id, e.target.value)} className="w-full" min="0" max="100" />
+                            <StyledInput type="number" value={editGrades[student.id]} onChange={(e) => setEditGrades(prev => ({ ...prev, [student.id]: e.target.value }))} className="!px-2.5" containerClassName="w-full" min="0" max="100" />
                           </td>
                         </tr>
                       ))}
                     </StyledTable>
                   </div>
-                ) : (
-                  <p className="text-text-muted-light dark:text-text-muted-dark">Pilih kelas untuk menampilkan daftar siswa.</p>
-                )}
-                <div className="mt-6 flex justify-end">
-                  <StyledButton onClick={handleSaveGrades}>Simpan Nilai</StyledButton>
-                </div>
-              </>
-            ) : (
-              // Edit Nilai Form
-              <div className="space-y-4 mb-6">
-                <StyledInput type="date" label="Tanggal Penilaian" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
-                <StyledSelect label="Kelas" value={editSelectedClass} onChange={(e) => setEditSelectedClass(e.target.value)}>
-                  <option value="">Pilih Kelas</option>
-                  {classes.map(cls => <option key={cls.id} value={cls.rombel}>{cls.rombel}</option>)}
-                </StyledSelect>
-                <StyledSelect label="Mata Pelajaran" value={editSelectedSubject} onChange={(e) => setEditSelectedSubject(e.target.value)}>
-                  <option value="">Pilih Mata Pelajaran</option>
-                  {subjects.map(sub => <option key={sub.id} value={sub.name}>{sub.name}</option>)}
-                </StyledSelect>
-                <StyledSelect label="Jenis Penilaian" value={editAssessmentType} onChange={(e) => setEditAssessmentType(e.target.value)}>
-                  <option value="">Pilih Jenis Penilaian</option>
-                  {assessmentTypes.map(type => <option key={type} value={type}>{type}</option>)}
-                </StyledSelect>
-                <StyledSelect label="Materi" value={editSelectedMaterial} onChange={(e) => setEditSelectedMaterial(e.target.value)} disabled={materialsForEdit.length === 0}>
-                  <option value="">Pilih Materi</option>
-                  {materialsForEdit.map(mat => <option key={mat} value={mat}>{mat}</option>)}
-                </StyledSelect>
-                {isFetchingEditData ? (
-                  <div className="text-center text-text-muted-light dark:text-text-muted-dark">Memuat data nilai...</div>
-                ) : editStudents.length > 0 ? (
-                  <>
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Daftar Siswa dan Nilai</h3>
-                    <div className="overflow-x-auto">
-                      <StyledTable headers={[{label: 'No.', className: 'w-1/12'}, {label: 'Nama Siswa', className: 'w-7/12'}, {label: 'Nilai', className: 'w-4/12'}]}>
-                        {editStudents.map((student, index) => (
-                          <tr key={student.id}>
-                            <td className="px-3 py-4 whitespace-nowrap text-xs sm:px-6 sm:text-sm font-medium text-text-light dark:text-text-dark">{index + 1}</td>
-                            <td className="px-3 py-4 text-xs sm:px-6 sm:text-sm text-text-muted-light dark:text-text-muted-dark">{student.name}</td>
-                            <td className="px-3 py-4 whitespace-nowrap text-xs sm:px-6 sm:text-sm">
-                              <StyledInput type="number" value={editGrades[student.id]} onChange={(e) => setEditGrades(prev => ({ ...prev, [student.id]: e.target.value }))} className="w-full" min="0" max="100" />
-                            </td>
-                          </tr>
-                        ))}
-                      </StyledTable>
-                    </div>
-                    <div className="mt-6 flex justify-end">
-                      <StyledButton onClick={handleSaveEditedGrades}>Simpan Perubahan</StyledButton>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-text-muted-light dark:text-text-muted-dark">Pilih kriteria di atas untuk menampilkan nilai.</p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                  <div className="mt-6 flex justify-end">
+                    <StyledButton onClick={handleSaveEditedGrades}>Simpan Perubahan</StyledButton>
+                  </div>
+                </>
+              ) : (
+                <p className="text-text-muted-light dark:text-text-muted-dark">Pilih kriteria di atas untuk menampilkan nilai.</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
-        {activeTab === 'history' && (
-          <RiwayatNilai classes={classes} subjects={subjects} />
-        )}
+      {activeTab === 'history' && (
+        <RiwayatNilai classes={classes} subjects={subjects} />
+      )}
     </div>
   );
 }

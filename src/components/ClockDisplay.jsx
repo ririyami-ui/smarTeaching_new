@@ -13,9 +13,13 @@ const ClockDisplay = () => {
   }, []);
 
   return (
-    <div className="text-center">
-      <p className="text-4xl font-bold text-primary-dark dark:text-primary-light transition-opacity duration-500 ease-in-out"
-         style={{ fontFamily: 'DSEG7Classic, monospace' }}>
+    <div className="text-center relative">
+      <span className="absolute inset-0 flex items-center justify-center text-4xl font-bold text-gray-400 dark:text-gray-600 opacity-30"
+            style={{ fontFamily: 'DSEG7Classic, monospace' }}>
+        88:88:88
+      </span>
+      <p className="relative z-10 text-4xl font-bold transition-opacity duration-500 ease-in-out"
+         style={{ fontFamily: 'DSEG7Classic, monospace', color: '#111111' }}>
         {currentTime.format('HH:mm:ss')}
       </p>
     </div>

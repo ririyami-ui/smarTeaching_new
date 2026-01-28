@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { collection, getDocs, query, where, writeBatch, doc, serverTimestamp, orderBy } from 'firebase/firestore';
+import { BookOpen, Calendar, List, Clock, Save, ChevronDown, Check, Trash, Upload, Download, FileSpreadsheet, Plus, Zap, RefreshCw } from 'lucide-react';
+import { collection, getDocs, query, where, writeBatch, doc, serverTimestamp, orderBy, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
+import moment from 'moment';
 import { analyzeTeachingJournals } from '../utils/gemini'; // Add this line
 import toast from 'react-hot-toast';
 import StyledInput from '../components/StyledInput';
 import StyledSelect from '../components/StyledSelect';
 import StyledButton from '../components/StyledButton';
 import StyledTable from '../components/StyledTable';
+import { useSearchParams } from 'react-router-dom';
+import { useSettings } from '../utils/SettingsContext';
+import { getTopicForSchedule } from '../utils/topicUtils';
 
 export default function JurnalPage() {
   const [currentDate, setCurrentDate] = useState('');
@@ -16,6 +21,7 @@ export default function JurnalPage() {
   const [learningObjectives, setLearningObjectives] = useState('');
   const [learningActivities, setLearningActivities] = useState('');
   const [reflection, setReflection] = useState('');
+  const [isImplemented, setIsImplemented] = useState(true); // New state for status
   const [challenges, setChallenges] = useState('');
   const [followUp, setFollowUp] = useState('');
   const [classes, setClasses] = useState([]);
@@ -27,10 +33,18 @@ export default function JurnalPage() {
   const [aiSentimentPercentage, setAiSentimentPercentage] = useState(0);
   const [aiSentimentExplanation, setAiSentimentExplanation] = useState('');
   const [isAnalyzingAI, setIsAnalyzingAI] = useState(false); // New state for AI analysis loading
+  const [programs, setPrograms] = useState([]);
+  const [carryOverSuggestion, setCarryOverSuggestion] = useState(null); // New state for carry-over
+  const { activeSemester, academicYear, geminiModel } = useSettings();
 
-  const classesCollectionRef = collection(db, 'classes');
-  const subjectsCollectionRef = collection(db, 'subjects');
-  const journalsCollectionRef = collection(db, 'teachingJournals');
+  const classesCollectionRef = React.useMemo(() => collection(db, 'classes'), []);
+  const subjectsCollectionRef = React.useMemo(() => collection(db, 'subjects'), []);
+  const journalsCollectionRef = React.useMemo(() => collection(db, 'teachingJournals'), []);
+  const teachingProgramsCollectionRef = React.useMemo(() => collection(db, 'teachingPrograms'), []);
+
+  const [searchParams] = useSearchParams();
+  const classIdFromUrl = searchParams.get('classId');
+  const subjectIdFromUrl = searchParams.get('subjectId');
 
   // Set current date on component mount
   useEffect(() => {
@@ -51,11 +65,31 @@ export default function JurnalPage() {
       try {
         const classesQuery = query(classesCollectionRef, where('userId', '==', auth.currentUser.uid));
         const classesData = await getDocs(classesQuery);
-        setClasses(classesData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const fetchedClasses = classesData.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setClasses(fetchedClasses);
 
         const subjectsQuery = query(subjectsCollectionRef, where('userId', '==', auth.currentUser.uid));
         const subjectsData = await getDocs(subjectsQuery);
-        setSubjects(subjectsData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const fetchedSubjects = subjectsData.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setSubjects(fetchedSubjects);
+
+        // Pre-select class and subject if provided in URL
+        if (classIdFromUrl) {
+          const preselectedClass = fetchedClasses.find(cls => cls.rombel === classIdFromUrl || cls.id === classIdFromUrl);
+          if (preselectedClass) {
+            setSelectedClass(preselectedClass.id);
+          }
+        }
+        if (subjectIdFromUrl) {
+          const preselectedSubject = fetchedSubjects.find(sub => sub.name === subjectIdFromUrl || sub.id === subjectIdFromUrl);
+          if (preselectedSubject) {
+            setSelectedSubject(preselectedSubject.id);
+          }
+        }
+
+        const programsQuery = query(teachingProgramsCollectionRef, where('userId', '==', auth.currentUser.uid));
+        const programsData = await getDocs(programsQuery);
+        setPrograms(programsData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
       } catch (error) {
         console.error("Error fetching initial data: ", error);
@@ -76,21 +110,27 @@ export default function JurnalPage() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [classIdFromUrl, subjectIdFromUrl]); // Re-run if URL params change
 
   // Fetch journal entries
-  const fetchJournalEntries = useCallback(async () => {
+  const fetchJournalEntries = useCallback(async (silent = false) => {
     if (!auth.currentUser) return;
-    setIsLoading(true);
+    if (!silent) setIsLoading(true);
     try {
-      const q = query(journalsCollectionRef, where('userId', '==', auth.currentUser.uid), orderBy('date', 'asc'));
+      const q = query(
+        journalsCollectionRef,
+        where('userId', '==', auth.currentUser.uid),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear),
+        orderBy('date', 'asc')
+      );
       const querySnapshot = await getDocs(q);
       const fetchedJournals = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setJournals(fetchedJournals);
 
       // --- Start AI Analysis ---
       setIsAnalyzingAI(true);
-      const aiResults = await analyzeTeachingJournals(fetchedJournals);
+      const aiResults = await analyzeTeachingJournals(fetchedJournals, geminiModel);
       setAiSummary(aiResults.summary);
       setAiSentimentPercentage(aiResults.sentiment.percentage);
       setAiSentimentExplanation(aiResults.sentiment.explanation);
@@ -101,13 +141,33 @@ export default function JurnalPage() {
       console.error("Error fetching journal entries: ", error);
       toast.error('Gagal memuat jurnal mengajar.');
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
-  }, [auth.currentUser, analyzeTeachingJournals]);
+  }, [auth.currentUser, activeSemester, academicYear, geminiModel, journalsCollectionRef]);
 
   useEffect(() => {
     fetchJournalEntries();
-  }, [fetchJournalEntries]);
+  }, [fetchJournalEntries, activeSemester, academicYear]);
+
+  // Logic for Carry-over suggestion
+  useEffect(() => {
+    if (selectedClass && selectedSubject && currentDate && journals.length > 0) {
+      // Find the latest "Tidak Terlaksana" entry before current date for this class/subject
+      const carryOver = journals
+        .filter(j => {
+          const classMatch = j.classId === selectedClass || j.className === selectedClass || (classes.find(c => c.id === selectedClass)?.rombel === j.className);
+          const subjectMatch = j.subjectId === selectedSubject || j.subjectName === selectedSubject || (subjects.find(s => s.id === selectedSubject)?.name === j.subjectName);
+          return classMatch && subjectMatch &&
+            j.isImplemented === false &&
+            moment(j.date).isBefore(currentDate);
+        })
+        .sort((a, b) => moment(b.date).diff(moment(a.date)))[0];
+
+      setCarryOverSuggestion(carryOver || null);
+    } else {
+      setCarryOverSuggestion(null);
+    }
+  }, [selectedClass, selectedSubject, currentDate, journals]);
 
   const handleSaveJournal = async () => {
     if (!selectedClass || !selectedSubject || !material || !learningObjectives || !learningActivities) {
@@ -120,8 +180,8 @@ export default function JurnalPage() {
       return;
     }
 
-    const classData = classes.find(cls => cls.rombel === selectedClass);
-    const subjectData = subjects.find(sub => sub.name === selectedSubject);
+    const classData = classes.find(cls => cls.id === selectedClass);
+    const subjectData = subjects.find(sub => sub.id === selectedSubject);
 
     if (!classData || !subjectData) {
       toast.error('Kelas atau Mata Pelajaran tidak ditemukan.');
@@ -139,9 +199,12 @@ export default function JurnalPage() {
       learningObjectives: learningObjectives,
       learningActivities: learningActivities,
       reflection: reflection,
-      challenges: challenges,
+      isImplemented: isImplemented,
+      challenges: isImplemented ? '' : challenges,
       followUp: followUp,
       timestamp: serverTimestamp(),
+      semester: activeSemester,
+      academicYear: academicYear,
     };
 
     const batch = writeBatch(db);
@@ -170,10 +233,11 @@ export default function JurnalPage() {
         setLearningObjectives('');
         setLearningActivities('');
         setReflection('');
+        setIsImplemented(true);
         setChallenges('');
         setFollowUp('');
         setEditingJournalId(null);
-        fetchJournalEntries(); // Refresh the list
+        fetchJournalEntries(true); // Silent refresh
         return editingJournalId ? 'Perubahan jurnal berhasil disimpan!' : 'Jurnal berhasil disimpan!';
       },
       error: (err) => {
@@ -186,14 +250,20 @@ export default function JurnalPage() {
   const handleEditJournal = (journal) => {
     setEditingJournalId(journal.id);
     setCurrentDate(journal.date);
-    setSelectedClass(journal.className);
-    setSelectedSubject(journal.subjectName);
+
+    // Resolve IDs from names if IDs are missing (legacy support)
+    const resolvedClassId = journal.classId || classes.find(c => c.rombel === journal.className)?.id || journal.className;
+    const resolvedSubjectId = journal.subjectId || subjects.find(s => s.name === journal.subjectName)?.id || journal.subjectName;
+
+    setSelectedClass(resolvedClassId);
+    setSelectedSubject(resolvedSubjectId);
+
     setMaterial(journal.material);
     setLearningObjectives(journal.learningObjectives);
     setLearningActivities(journal.learningActivities);
     setReflection(journal.reflection);
-    setChallenges(journal.challenges);
-    setFollowUp(journal.followUp);
+    setChallenges(journal.challenges || '');
+    setFollowUp(journal.followUp || '');
     // Scroll to top or form to make editing easier
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -210,7 +280,7 @@ export default function JurnalPage() {
     toast.promise(promise, {
       loading: 'Menghapus jurnal...',
       success: () => {
-        fetchJournalEntries(); // Refresh the list
+        fetchJournalEntries(true); // Silent refresh
         return 'Jurnal berhasil dihapus!';
       },
       error: (err) => {
@@ -241,7 +311,6 @@ export default function JurnalPage() {
               label="Tanggal"
               value={currentDate}
               onChange={(e) => setCurrentDate(e.target.value)}
-              readOnly
             />
 
             <StyledSelect
@@ -251,7 +320,7 @@ export default function JurnalPage() {
             >
               <option value="">Pilih Kelas</option>
               {classes.slice().sort((a, b) => a.rombel.localeCompare(b.rombel)).map(cls => (
-                <option key={cls.id} value={cls.rombel}>{cls.rombel}</option>
+                <option key={cls.id} value={cls.id}>{cls.rombel}</option>
               ))}
             </StyledSelect>
 
@@ -262,17 +331,87 @@ export default function JurnalPage() {
             >
               <option value="">Pilih Mata Pelajaran</option>
               {subjects.map(sub => (
-                <option key={sub.id} value={sub.name}>{sub.name}</option>
+                <option key={sub.id} value={sub.id}>{sub.name}</option>
               ))}
             </StyledSelect>
 
-            <StyledInput
-              type="text"
-              label="Materi"
-              placeholder="Materi yang diajarkan"
-              value={material}
-              onChange={(e) => setMaterial(e.target.value)}
-            />
+            <div className="relative">
+              <StyledInput
+                type="text"
+                label="Materi"
+                placeholder="Materi yang diajarkan"
+                value={material}
+                onChange={(e) => setMaterial(e.target.value)}
+              />
+              {/* Carry-over Suggestion */}
+              {carryOverSuggestion && (
+                <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-red-50/50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800 shadow-sm transition-all animate-bounce-short">
+                  <RefreshCw size={14} className="text-red-600 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[9px] font-black text-red-800 dark:text-red-400 uppercase tracking-tighter leading-none mb-0.5">Materi Tertunda ({moment(carryOverSuggestion.date).format('DD/MM')}):</p>
+                    <p className="text-[11px] font-bold text-red-700 dark:text-red-300 truncate italic">
+                      {carryOverSuggestion.material}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMaterial(carryOverSuggestion.material);
+                      setLearningObjectives(carryOverSuggestion.learningObjectives || '');
+                      setLearningActivities(carryOverSuggestion.learningActivities || '');
+                    }}
+                    className="shrink-0 text-[10px] bg-red-600 hover:bg-red-700 text-white font-bold px-2.5 py-1 rounded-md shadow-sm active:scale-95 transition-all"
+                  >
+                    Lanjutkan
+                  </button>
+                </div>
+              )}
+
+              {/* Planned Topic Suggestion */}
+              {(() => {
+                const classInfo = classes.find(c => c.id === selectedClass);
+                const subjectInfo = subjects.find(s => s.id === selectedSubject);
+                const schedule = {
+                  subject: subjectInfo?.name || '',
+                  class: classInfo?.rombel || '',
+                  subjectId: selectedSubject,
+                  classId: selectedClass
+                };
+
+                const plannedTopic = getTopicForSchedule(
+                  schedule,
+                  currentDate,
+                  programs,
+                  classes,
+                  activeSemester,
+                  academicYear
+                );
+
+                if (plannedTopic) {
+                  return (
+                    <div className="mt-1 flex items-center gap-2 px-3 py-2 bg-green-50/50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800 shadow-sm transition-all animate-in slide-in-from-top-1 duration-300">
+                      <Zap size={14} className="text-green-600 shrink-0" fill="currentColor" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[9px] font-black text-green-800 dark:text-green-400 uppercase tracking-tighter leading-none mb-0.5">Rencana Materi Promes:</p>
+                        <p className="text-[11px] font-bold text-green-700 dark:text-green-300 truncate italic">
+                          {plannedTopic}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setMaterial(plannedTopic.split(',')[0]); // Use first topic if multiple
+                        }}
+                        className="shrink-0 text-[10px] bg-green-600 hover:bg-green-700 text-white font-bold px-2.5 py-1 rounded-md shadow-sm active:scale-95 transition-all"
+                      >
+                        Gunakan
+                      </button>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+            </div>
 
             <StyledInput
               type="textarea"
@@ -280,6 +419,7 @@ export default function JurnalPage() {
               placeholder="Tujuan pembelajaran hari ini"
               value={learningObjectives}
               onChange={(e) => setLearningObjectives(e.target.value)}
+              voiceEnabled
             />
 
             <StyledInput
@@ -288,6 +428,7 @@ export default function JurnalPage() {
               placeholder="Deskripsi kegiatan di kelas"
               value={learningActivities}
               onChange={(e) => setLearningActivities(e.target.value)}
+              voiceEnabled
             />
 
             <StyledInput
@@ -296,15 +437,33 @@ export default function JurnalPage() {
               placeholder="Refleksi diri setelah mengajar"
               value={reflection}
               onChange={(e) => setReflection(e.target.value)}
+              voiceEnabled
             />
 
-            <StyledInput
-              type="textarea"
-              label="Hambatan"
-              placeholder="Hambatan yang dihadapi"
-              value={challenges}
-              onChange={(e) => setChallenges(e.target.value)}
-            />
+            <StyledSelect
+              label="Keterlaksanaan Pembelajaran"
+              value={isImplemented ? 'true' : 'false'}
+              onChange={(e) => {
+                const val = e.target.value === 'true';
+                setIsImplemented(val);
+                if (val) setChallenges('');
+              }}
+            >
+              <option value="true">Terlaksana</option>
+              <option value="false">Tidak Terlaksana</option>
+            </StyledSelect>
+
+            {!isImplemented && (
+              <StyledInput
+                type="textarea"
+                label="Alasan Tidak Terlaksana"
+                placeholder="Jelaskan alasan materi tidak terlaksana (misal: hari libur, rapat guru, dll)"
+                value={challenges}
+                onChange={(e) => setChallenges(e.target.value)}
+                voiceEnabled
+                className="animate-in slide-in-from-top-2 duration-300"
+              />
+            )}
 
             <StyledInput
               type="textarea"
@@ -312,6 +471,7 @@ export default function JurnalPage() {
               placeholder="Rencana tindak lanjut"
               value={followUp}
               onChange={(e) => setFollowUp(e.target.value)}
+              voiceEnabled
             />
 
             <div className="mt-6 flex justify-end">
@@ -319,7 +479,14 @@ export default function JurnalPage() {
                 {editingJournalId ? 'Simpan Perubahan' : 'Simpan Jurnal'}
               </StyledButton>
               {editingJournalId && (
-                <StyledButton onClick={() => setEditingJournalId(null)} className="ml-2 bg-gray-500 hover:bg-gray-600">
+                <StyledButton
+                  onClick={() => {
+                    setEditingJournalId(null);
+                    setIsImplemented(true);
+                    setChallenges('');
+                  }}
+                  className="ml-2 bg-gray-500 hover:bg-gray-600"
+                >
                   Batal Edit
                 </StyledButton>
               )}
@@ -348,10 +515,10 @@ export default function JurnalPage() {
                 <div>
                   <h4 className="font-semibold text-gray-700 dark:text-gray-200">Analisis Sentimen Keseluruhan</h4>
                   <div className="mt-2 flex items-center gap-4">
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                          <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${aiSentimentPercentage}%` }}></div>
-                      </div>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{aiSentimentPercentage}% Positif</span>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                      <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${aiSentimentPercentage}%` }}></div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{aiSentimentPercentage}% Positif</span>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {aiSentimentExplanation || "Tidak ada analisis sentimen tersedia."}
@@ -361,12 +528,12 @@ export default function JurnalPage() {
             )}
           </div>
           {/* AI Analysis Section End */}
-          
+
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Daftar Jurnal Mengajar</h3>
           {journals.length > 0 ? (
             <div className="overflow-y-auto h-96">
-              <StyledTable headers={['Tanggal', 'Kelas', 'Mata Pelajaran', 'Materi', 'Aksi']}>
-                {journals.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10).map(journal => (
+              <StyledTable headers={['Tanggal', 'Kelas', 'Mata Pelajaran', 'Materi', 'Keterlaksanaan Pembelajaran', 'Aksi']}>
+                {journals.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).map(journal => (
                   <tr key={journal.id}>
                     <td className="px-3 py-4 whitespace-nowrap text-xs sm:px-6 sm:text-sm font-medium text-text-light dark:text-text-dark">
                       {journal.date}
@@ -379,6 +546,17 @@ export default function JurnalPage() {
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap text-xs sm:px-6 sm:text-sm text-text-muted-light dark:text-text-muted-dark">
                       {journal.material}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-xs sm:px-6 sm:text-sm">
+                      {journal.isImplemented !== false ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                          Terlaksana
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                          Tidak Terlaksana
+                        </span>
+                      )}
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap text-xs sm:px-6 sm:text-sm">
                       <StyledButton onClick={() => handleEditJournal(journal)} className="mr-2">Edit</StyledButton>

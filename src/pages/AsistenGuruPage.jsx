@@ -1,23 +1,97 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, Loader } from 'lucide-react';
+import { Send, Bot, User, Loader, Mic, MicOff, Image as ImageIcon, X, Trash2, Volume2, VolumeX, StopCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import 'katex/dist/katex.min.css';
+import remarkGfm from 'remark-gfm';
+import 'katex/dist/katex.min.css'; // Import KaTeX CSS
 import { generateChatResponse } from '../utils/gemini';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import toast from 'react-hot-toast';
 import { useChat } from '../utils/ChatContext.jsx';
+import { useSettings } from '../utils/SettingsContext';
+import '../components/TypingIndicator.css'; // Import the CSS for the typing indicator
+import './MarkdownStyles.css'; // Import the CSS for markdown styles
+import Modal from '../components/Modal';
 
 const AsistenGuruPage = () => {
-  const { chatHistory, loadingHistory, addMessageToHistory, setChatHistory } = useChat();
+  const { geminiModel } = useSettings();
+  const { chatHistory, loadingHistory, addMessageToHistory, setChatHistory, clearChat } = useChat();
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const [isListening, setIsListening] = useState(false); // State for voice input
+  const [selectedImage, setSelectedImage] = useState(null); // State for image upload
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
   const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
+  const recognitionRef = useRef(null); // Ref for SpeechRecognition instance
+  const fileInputRef = useRef(null); // Ref for file input
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(false);
+
+  // --- TTS Logic ---
+  const speakText = (text) => {
+    if (!window.speechSynthesis) {
+      toast.error("Browser tidak mendukung fitur suara");
+      return;
+    }
+
+    // Stop listening if speaking to avoid feedback loop
+    if (isListening) setIsListening(false);
+    window.speechSynthesis.cancel();
+
+    // Clean Markdown for speech (remove **, *, #, `, etc.)
+    const cleanText = text
+      .replace(/\*\*/g, '')      // Remove bold **
+      .replace(/\*/g, '')        // Remove italic *
+      .replace(/#/g, '')         // Remove headers #
+      .replace(/`/g, '')         // Remove code ticks `
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links, keep text
+      .replace(/[-_]{3,}/g, '')  // Remove horizontal lines
+      .replace(/\$/g, '')        // Remove dollar signs (LaTeX)
+      .trim();
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'id-ID';
+    utterance.rate = 1.0; // Normal speed for better flow
+    utterance.pitch = 1;
+
+    // Try to find a specific "Google Bahasa Indonesia" voice if available as it sounds more natural
+    const voices = window.speechSynthesis.getVoices();
+    const indonesianVoice = voices.find(v => v.name.includes('Google Bahasa Indonesia')) ||
+      voices.find(v => v.lang.includes('id-ID') || v.lang.includes('ind'));
+
+    if (indonesianVoice) {
+      utterance.voice = indonesianVoice;
+    }
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+  };
+
+  // Auto-speak effect
+  useEffect(() => {
+    if (autoSpeak && chatHistory.length > 0) {
+      const lastMessage = chatHistory[chatHistory.length - 1];
+      if (lastMessage.role === 'model' && !loading) {
+        // Simple heuristic: if message is long, maybe wait or just speak
+        // Ideally we check if it was just added.
+        // For now, let's just speak if it's the latest and we aren't already speaking it
+        speakText(lastMessage.parts[0].text);
+      }
+    }
+  }, [chatHistory, autoSpeak, loading]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -48,51 +122,214 @@ const AsistenGuruPage = () => {
   }, []);
 
   useEffect(() => {
-    if (userProfile && chatHistory.length === 1 && chatHistory[0].parts[0].text.includes("Selamat datang")) {
-        const hour = new Date().getHours();
-        let greetingTime;
-        if (hour < 11) greetingTime = "pagi";
-        else if (hour < 15) greetingTime = "siang";
-        else if (hour < 19) greetingTime = "sore";
-        else greetingTime = "malam";
+    // Check for prompt in query parameters
+    const params = new URLSearchParams(window.location.search);
+    const initialPrompt = params.get('prompt');
 
-        const userName = userProfile.name || userProfile.email.split('@')[0];
-        const greetingMessage = {
-          role: 'model',
-          parts: [{
-            text: `Selamat ${greetingTime}, Bpk/Ibu ${userName}. Ada yang bisa kami bantu terkait pembelajaran? 😊`
-          }]
-        };
-        setChatHistory([greetingMessage]);
+    if (initialPrompt && userProfile && !loading && !loadingHistory) {
+      // Clear the prompt from URL to avoid re-triggering
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+
+      // Trigger message send
+      setInput(initialPrompt);
+      // We need a small delay or use a separate effect because setInput is async
+    }
+  }, [userProfile, loading, loadingHistory]);
+
+  // Effect to handle auto-sending when input is set from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const initialPrompt = params.get('prompt');
+    if (input === initialPrompt && initialPrompt && !loading && !loadingHistory) {
+      handleSendMessage();
+    }
+  }, [input]);
+
+  useEffect(() => {
+    if (userProfile && chatHistory.length === 1 && chatHistory[0].parts[0].text.includes("Selamat datang")) {
+      const hour = new Date().getHours();
+      let greetingTime;
+      if (hour < 11) greetingTime = "pagi";
+      else if (hour < 15) greetingTime = "siang";
+      else if (hour < 19) greetingTime = "sore";
+      else greetingTime = "malam";
+
+      const userName = userProfile.name || userProfile.email.split('@')[0];
+      const greetingMessage = {
+        role: 'model',
+        parts: [{
+          text: `Selamat ${greetingTime}, Bpk/Ibu ${userName}. Ada yang bisa kami bantu terkait pembelajaran? 😊`
+        }]
+      };
+      setChatHistory([greetingMessage]);
     }
   }, [userProfile, chatHistory, setChatHistory]);
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
-    // Auto-resize textarea
+    autoResizeTextarea();
+  };
+
+  const autoResizeTextarea = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
+  // --- Voice Input Logic ---
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    const userMessage = { role: 'user', parts: [{ text: input }] };
-    addMessageToHistory(userMessage);
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false; // Stop after one sentence/phrase for better UX in chat
+      recognition.interimResults = false;
+      recognition.lang = 'id-ID'; // Indonesian
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(prev => {
+          const newValue = prev ? `${prev} ${transcript}` : transcript;
+          return newValue;
+        });
+        // Trigger resize after state update
+        setTimeout(autoResizeTextarea, 0);
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error", event.error);
+        setIsListening(false);
+        toast.error("Gagal mengenali suara. Pastikan izin mikrofon aktif.");
+      };
+
+      recognitionRef.current = recognition;
+    } else {
+      console.warn("Browser does not support Speech Recognition");
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      toast.error("Browser Anda tidak mendukung fitur suara.");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      recognitionRef.current.start();
+    }
+  };
+
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_WIDTH = 1024;
+          const MAX_HEIGHT = 1024;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG with 0.7 quality
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(dataUrl);
+        };
+      };
+    });
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Basic size check before processing (allow large files to be processed, but maybe warn if HUGE)
+      // Removing strict 5MB limit check here as we will compress it anyway, 
+      // but let's keep a sanity check for extremely large files that might crash browser memory
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error("File terlalu besar (Maks 20MB)");
+        return;
+      }
+
+      const toastId = toast.loading("Mengompresi gambar...");
+      try {
+        const compressedBase64 = await compressImage(file);
+        setSelectedImage(compressedBase64);
+        toast.dismiss(toastId);
+      } catch (error) {
+        console.error("Compression failed", error);
+        toast.error("Gagal memproses gambar");
+        toast.dismiss(toastId);
+      }
+    }
+  };
+
+  const clearImage = () => {
+    setSelectedImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+  // -------------------------
+
+  const handleSendMessage = async () => {
+    if (!input.trim() && !selectedImage) return;
+
+    // Construct user message object, potentially with image
+    const userMessageContent = { role: 'user', parts: [{ text: input }] };
+    if (selectedImage) {
+      // Store image in history for display (optional: you might want to optimize this for long history)
+      // For display purposes, we can add a local property or just use the base64
+      userMessageContent.image = selectedImage;
+    }
+
+    addMessageToHistory(userMessageContent);
 
     const currentInput = input;
+    const currentImage = selectedImage;
+
     setInput('');
+    setSelectedImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+
     if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = 'auto';
     }
     setLoading(true);
 
     try {
       // Pass the updated history to the generate function
-      const updatedHistory = [...chatHistory, userMessage];
-      const responseText = await generateChatResponse(updatedHistory, currentInput, userProfile);
+      const updatedHistory = [...chatHistory, userMessageContent];
+      // Pass image explicitly to the service
+      const responseText = await generateChatResponse(updatedHistory, currentInput, userProfile, geminiModel, currentImage);
 
       const modelMessage = { role: 'model', parts: [{ text: responseText }] };
       addMessageToHistory(modelMessage);
@@ -108,60 +345,201 @@ const AsistenGuruPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-160px)] md:h-[calc(100vh-104px)] bg-gray-50 dark:bg-gray-900">
-      <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex flex-col h-[calc(100vh-180px)] sm:h-[calc(100vh-160px)] md:h-[calc(100vh-104px)] bg-gray-50 dark:bg-gray-900 overflow-hidden">
+
+      {/* Header with Clear Chat */}
+      <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+            <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h2 className="font-bold text-gray-800 dark:text-gray-200 text-sm">Asisten Cerdas</h2>
+            <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+              Online • {geminiModel}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (isSpeaking) {
+                stopSpeaking();
+              } else {
+                setAutoSpeak(!autoSpeak);
+                toast.success(autoSpeak ? 'Suara otomatis MATI' : 'Suara otomatis NYALA');
+              }
+            }}
+            className={`p-2 rounded-lg transition-all ${isSpeaking
+              ? 'bg-purple-100 text-purple-600 animate-pulse'
+              : autoSpeak
+                ? 'bg-blue-50 text-blue-600'
+                : 'text-gray-400 hover:bg-gray-100'
+              }`}
+            title={isSpeaking ? "Matikan Suara" : "Auto Read (Suara)"}
+          >
+            {isSpeaking ? <StopCircle size={18} /> : (autoSpeak ? <Volume2 size={18} /> : <VolumeX size={18} />)}
+          </button>
+
+          <button
+            onClick={() => {
+              setConfirmModal({
+                isOpen: true,
+                title: 'Hapus Chat',
+                message: 'Apakah Anda yakin ingin menghapus seluruh riwayat percakapan ini secara permanen?',
+                onConfirm: () => {
+                  clearChat();
+                  toast.success('Chat dibersihkan');
+                  setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                }
+              });
+            }}
+            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+            title="Hapus Riwayat Chat"
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      </div>
+
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 custom-scrollbar">
         {loadingHistory ? (
-            <div className="flex justify-center items-center h-full">
-                <Loader className="w-8 h-8 text-blue-500 animate-spin" />
-                <p className="ml-2 text-gray-500">Memuat riwayat percakapan...</p>
-            </div>
+          <div className="flex justify-center items-center h-full">
+            <Loader className="w-8 h-8 text-blue-500 animate-spin" />
+            <p className="ml-2 text-gray-500">Memuat riwayat percakapan...</p>
+          </div>
         ) : (
-            <>
-                {chatHistory.map((message, index) => (
-                <div key={index} className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    {message.role === 'model' && <Bot className="w-8 h-8 text-blue-500 flex-shrink-0" />}
-                    <div className={`chat-message p-3 rounded-lg max-w-lg whitespace-pre-wrap break-words overflow-x-auto ${message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'}`}>
-                    {message.parts[0].text && <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{message.parts[0].text}</ReactMarkdown>}
+          <>
+            {chatHistory.map((message, index) => (
+              <div key={index} className={`flex items-start gap-2 sm:gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+                {message.role === 'model' && <Bot className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 flex-shrink-0" />}
+                <div className={`chat-message p-3 rounded-[1.2rem] max-w-[85%] sm:max-w-lg break-words overflow-x-auto relative group ${message.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white rounded-tl-none'}`}>
+                  {message.role === 'model' && (
+                    <button
+                      onClick={() => speakText(message.parts[0].text)}
+                      className="absolute -right-8 top-0 p-1 text-gray-400 hover:text-purple-600 opacity-0 group-hover:opacity-100 transition-all bg-white/80 dark:bg-gray-900/80 rounded-full shadow-sm"
+                      title="Bacakan"
+                    >
+                      <Volume2 size={14} />
+                    </button>
+                  )}
+                  {message.image && (
+                    <div className="mb-2">
+                      <img src={message.image} alt="User Upload" className="max-w-full rounded-lg max-h-60 border border-white/20" />
                     </div>
-                    {message.role === 'user' && <User className="w-8 h-8 text-gray-500 flex-shrink-0" />}
+                  )}
+                  {message.parts[0].text && <div className="markdown-content text-sm sm:text-base"><ReactMarkdown remarkPlugins={[remarkMath, remarkGfm]} rehypePlugins={[rehypeKatex]}>{message.parts[0].text}</ReactMarkdown></div>}
                 </div>
-                ))}
-                {loading && (
-                    <div className="flex items-start gap-3 justify-start">
-                        <Bot className="w-8 h-8 text-blue-500 flex-shrink-0 animate-pulse" />
-                        <div className="p-3 rounded-lg bg-gray-200 dark:bg-gray-700">
-                            <div className="typing-indicator">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </>
+                {message.role === 'user' && <User className="w-6 h-6 sm:w-8 sm:h-8 text-gray-500 flex-shrink-0" />}
+              </div>
+            ))}
+            {loading && (
+              <div className="flex items-start gap-3 justify-start">
+                <Bot className="w-8 h-8 text-blue-500 flex-shrink-0 animate-pulse" />
+                <div className="p-3 rounded-lg bg-gray-200 dark:bg-gray-700">
+                  <div className="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
       <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+        {selectedImage && (
+          <div className="mb-2 relative inline-block">
+            <img src={selectedImage} alt="Preview" className="h-20 w-auto rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm" />
+            <button
+              onClick={clearImage}
+              className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-md"
+            >
+              <X size={12} />
+            </button>
+          </div>
+        )}
         <div className="flex items-center gap-2">
+          {/* File Input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+            accept="image/*"
+            className="hidden"
+          />
+
+          {/* Image Upload Button */}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading || loadingHistory}
+            className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center transition-all"
+            title="Upload Gambar / Scan Soal"
+          >
+            <ImageIcon className="w-5 h-5" />
+          </button>
+
+          {/* Voice Input Button */}
+          <button
+            onClick={toggleListening}
+            disabled={loading || loadingHistory}
+            className={`p-2 rounded-lg flex items-center justify-center transition-all duration-300 ${isListening
+              ? 'bg-red-500 text-white animate-pulse shadow-lg ring-2 ring-red-300'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
+              }`}
+            title="Input Suara (Voice-to-Text)"
+          >
+            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </button>
+
           <textarea
             ref={textareaRef}
             value={input}
             onChange={handleInputChange}
             onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && !loading && handleSendMessage()}
-            placeholder="Ketik pesan Anda..."
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none"
+            placeholder={isListening ? "Mendengarkan..." : "Ketik pesan atau upload soal..."}
+            className={`w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none ${isListening ? 'ring-2 ring-red-400 border-red-400 bg-red-50 dark:bg-red-900/20 placeholder-red-400' : ''
+              }`}
             disabled={loading || loadingHistory}
             rows={1}
           />
           <button
             onClick={handleSendMessage}
-            disabled={loading || loadingHistory}
+            disabled={loading || loadingHistory || (!input.trim() && !selectedImage)}
             className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 flex items-center justify-center transition-colors"
           >
             <Send className="w-5 h-5" />
           </button>
         </div>
       </div>
+      {confirmModal.isOpen && (
+        <Modal onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+              <Trash2 className="h-8 w-8 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{confirmModal.title}</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">{confirmModal.message}</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+              >
+                Batal
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className="px-6 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 dark:shadow-none transition"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

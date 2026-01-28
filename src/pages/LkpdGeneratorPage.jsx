@@ -1,0 +1,494 @@
+
+import React, { useState, useEffect } from 'react';
+import { db, auth } from '../firebase';
+import { collection, query, where, orderBy, onSnapshot, getDocs, doc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { generateLKPDFromRPP } from '../utils/gemini';
+import BSKAP_DATA from '../utils/bskap_2025_intel.json';
+import { toast } from 'react-hot-toast';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import { saveAs } from 'file-saver';
+import { asBlob } from 'html-docx-js-typescript';
+import { useSettings } from '../utils/SettingsContext';
+import {
+    Sparkles,
+    Loader2,
+    History,
+    FileText,
+    Download,
+    ClipboardList,
+    Search,
+    BookOpen,
+    Trash2,
+    Save,
+    Clock
+} from 'lucide-react';
+import Modal from '../components/Modal';
+
+// Reusing Styled Components for consistency (Keep it simple with Tailwind)
+const StyledSelect = ({ label, value, onChange, children, disabled }) => (
+    <div className="space-y-1.5">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">{label}</label>
+        <div className="relative">
+            <select
+                value={value}
+                onChange={onChange}
+                disabled={disabled}
+                className="w-full p-3 pl-4 pr-10 appearance-none bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+                {children}
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+        </div>
+    </div>
+);
+
+const LkpdGeneratorPage = () => {
+    const { geminiModel } = useSettings();
+
+    // Data States
+    const [savedRPPs, setSavedRPPs] = useState([]);
+    const [savedLKPDs, setSavedLKPDs] = useState([]); // New state for LKPD history
+    const [classes, setClasses] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(true);
+    const [isSaving, setIsSaving] = useState(false); // New state for saving status
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+
+    // Selection States
+    const [selectedRPP, setSelectedRPP] = useState(null);
+    const [selectedClass, setSelectedClass] = useState('');
+    const [assessmentModel, setAssessmentModel] = useState('Rubrik'); // New State
+
+    // Generation States
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [lkpdContent, setLkpdContent] = useState('');
+
+    // User Context
+    const [userProfile, setUserProfile] = useState({ name: '', school: '', nip: '' });
+
+    // Load User Profile
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            if (auth.currentUser) {
+                const docRef = doc(db, 'users', auth.currentUser.uid);
+                // We might need to import getDoc here if not using snapshot
+                // reusing logic from other pages, assuming basic user data is needed for header? 
+                // Wait, LKPD doesn't utilize userProfile for the header actually, it's mostly in the content.
+                // But for safety let's skip for now if not strictly needed.
+            }
+        };
+        fetchUserProfile();
+    }, []);
+
+    // Load RPP History, LKPD History & Classes
+    useEffect(() => {
+        if (!auth.currentUser) return;
+
+        // Fetch Saved RPPs
+        const rppQuery = query(
+            collection(db, 'lessonPlans'),
+            where('userId', '==', auth.currentUser.uid),
+            orderBy('createdAt', 'desc')
+        );
+
+        const unsubRPP = onSnapshot(rppQuery, (snapshot) => {
+            const rpps = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setSavedRPPs(rpps);
+            setLoadingHistory(false);
+        });
+
+        // Fetch Saved LKPDs
+        const lkpdQuery = query(
+            collection(db, 'lkpd_history'),
+            where('userId', '==', auth.currentUser.uid),
+            orderBy('createdAt', 'desc')
+        );
+
+        const unsubLKPD = onSnapshot(lkpdQuery, (snapshot) => {
+            const lkpds = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setSavedLKPDs(lkpds);
+        });
+
+        // Fetch Classes
+        const classesQuery = query(
+            collection(db, 'classes'),
+            where('userId', '==', auth.currentUser.uid),
+            orderBy('rombel')
+        );
+
+        const unsubClasses = onSnapshot(classesQuery, (snapshot) => {
+            setClasses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        });
+
+        return () => {
+            unsubRPP();
+            unsubLKPD();
+            unsubClasses();
+        };
+    }, []);
+
+    const handleGenerateLKPD = async () => {
+        if (!selectedRPP) {
+            toast.error("Pilih RPP terlebih dahulu");
+            return;
+        }
+        if (!selectedClass) {
+            toast.error("Pilih Kelas terlebih dahulu");
+            return;
+        }
+
+        setIsGenerating(true);
+        try {
+            // 1. Fetch Students
+            const studentsQuery = query(
+                collection(db, 'students'),
+                where('userId', '==', auth.currentUser.uid),
+                where('classId', '==', selectedClass),
+                orderBy('name')
+            );
+            let snapshot = await getDocs(studentsQuery);
+
+            // Fallback for legacy students
+            if (snapshot.empty) {
+                const classObj = classes.find(c => c.id === selectedClass);
+                if (classObj) {
+                    const fallbackQ = query(
+                        collection(db, 'students'),
+                        where('userId', '==', auth.currentUser.uid),
+                        where('rombel', '==', classObj.rombel),
+                        orderBy('name')
+                    );
+                    snapshot = await getDocs(fallbackQ);
+                }
+            }
+
+            const students = snapshot.docs.map(doc => doc.data());
+
+            // 2. Generate LKPD Content
+            const studentNames = students.map(s => s.name);
+            const lkpdResult = await generateLKPDFromRPP(selectedRPP.content, assessmentModel, geminiModel, studentNames);
+
+            setLkpdContent(lkpdResult);
+            toast.success("LKPD Berhasil dibuat!");
+
+        } catch (error) {
+            console.error(error);
+            toast.error("Gagal membuat LKPD: " + error.message);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+
+    const handleDownloadDocx = async () => {
+        const content = document.getElementById('lkpd-preview-content');
+        if (!content) {
+            toast.error("Belum ada konten LKPD untuk diunduh");
+            return;
+        }
+
+        const contentHtml = content.innerHTML;
+
+        const htmlString = `
+            <!DOCTYPE html>
+            <html lang="id">
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body { font-family: 'Arial', sans-serif; font-size: 11pt; line-height: 1.5; color: #000; }
+                    h1, h2, h3 { color: #000; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+                    th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .page-break { page-break-before: always; }
+                    table:last-of-type { page-break-inside: avoid; }
+                </style>
+            </head>
+            <body>
+                ${contentHtml}
+            </body>
+            </html>
+        `;
+
+        try {
+            const converted = await asBlob(htmlString);
+            const fileName = `LKPD-${selectedRPP?.gradeLevel || 'Kelas'}-${selectedClass || 'General'}.docx`;
+            saveAs(converted, fileName);
+            toast.success("LKPD sedang didownload (.docx)");
+        } catch (error) {
+            console.error("Download error:", error);
+            toast.error("Gagal membuat file Word");
+        }
+    };
+
+    const handleSaveLKPD = async () => {
+        if (!lkpdContent || !selectedRPP || !selectedClass) return;
+        setIsSaving(true);
+        try {
+            const classObj = classes.find(c => c.id === selectedClass);
+
+            await addDoc(collection(db, 'lkpd_history'), {
+                userId: auth.currentUser.uid,
+                rppId: selectedRPP.id,
+                rppTopic: selectedRPP.topic,
+                subject: selectedRPP.subject,
+                gradeLevel: selectedRPP.gradeLevel,
+                classId: selectedClass,
+                classRoom: classObj?.rombel || selectedClass,
+                content: lkpdContent,
+                createdAt: serverTimestamp()
+            });
+            toast.success("LKPD berhasil disimpan!");
+        } catch (error) {
+            console.error("Error saving LKPD:", error);
+            toast.error("Gagal menyimpan LKPD");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleDeleteLKPD = (id) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Hapus Riwayat',
+            message: 'Apakah Anda yakin ingin menghapus Riwayat LKPD ini?',
+            onConfirm: async () => {
+                try {
+                    await deleteDoc(doc(db, 'lkpd_history', id));
+                    toast.success("Riwayat LKPD dihapus");
+                } catch (error) {
+                    console.error("Error deleting LKPD:", error);
+                    toast.error("Gagal menghapus");
+                } finally {
+                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                }
+            }
+        });
+    };
+
+    const handleLoadLKPD = (lkpd) => {
+        setLkpdContent(lkpd.content);
+        setSelectedClass(lkpd.classId || lkpd.classRoom);
+        // We might not be able to set selectedRPP easily if it's not in the current rpp_history page 
+        // but for display purposes, setting content is enough.
+        // Optionally try to find the RPP object
+        const rpp = savedRPPs.find(r => r.id === lkpd.rppId);
+        if (rpp) setSelectedRPP(rpp);
+    };
+
+    return (
+        <div className="max-w-[1500px] mx-auto px-4 py-4 lg:py-8 min-h-screen">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 lg:mb-8 no-print">
+                <div>
+                    <h1 className="text-3xl font-extrabold text-purple-800 dark:text-purple-100 flex items-center gap-3">
+                        <ClipboardList className="text-purple-600 animate-pulse" />
+                        Generator LKPD
+                    </h1>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">
+                        Buat Lembar Kerja Peserta Didik (LKPD) otomatis dari RPP yang sudah ada.
+                    </p>
+                    <div className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-wider font-bold text-purple-600 bg-purple-50 dark:bg-purple-900/30 px-2 py-1 rounded border border-purple-100 dark:border-purple-800 w-fit">
+                        <Sparkles size={12} /> Powered by BSKAP 2025 Intel Engine
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                {/* Sidebar Controls */}
+                <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-8 h-fit">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4">
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                            <Search size={20} className="text-purple-500" />
+                            Konfigurasi
+                        </h3>
+
+                        {/* RPP Selection */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Pilih RPP Sumber</label>
+                            {loadingHistory ? (
+                                <div className="flex items-center gap-2 text-sm text-gray-500"><Loader2 className="animate-spin" size={14} /> Memuat RPP...</div>
+                            ) : (
+                                <div className="max-h-60 overflow-y-auto border dark:border-gray-600 rounded-xl divide-y dark:divide-gray-700">
+                                    {savedRPPs.length > 0 ? (
+                                        savedRPPs.map((rpp) => (
+                                            <button
+                                                key={rpp.id}
+                                                onClick={() => {
+                                                    setSelectedRPP(rpp);
+                                                    setSelectedClass('');
+                                                    if (rpp.assessmentModel) {
+                                                        setAssessmentModel(rpp.assessmentModel);
+                                                        toast.success(`Model KKTP terdeteksi: ${rpp.assessmentModel}`);
+                                                    }
+                                                }}
+                                                className={`w-full text-left p-3 text-sm transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/20 ${selectedRPP?.id === rpp.id ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-bold' : 'text-gray-600 dark:text-gray-400'}`}
+                                            >
+                                                <div className="font-bold">{rpp.gradeLevel} - {rpp.subject}</div>
+                                                <div className="text-xs font-normal truncate">{rpp.topic}</div>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="p-4 text-center text-xs text-gray-400">Belum ada RPP tersimpan. Silakan buat RPP dulu.</div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Grade Level Display (Read Only) */}
+                        {selectedRPP && (
+                            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 block mb-1">Terpilih:</span>
+                                <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">{selectedRPP.gradeLevel} - {selectedRPP.subject}</div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">{selectedRPP.topic}</div>
+                            </div>
+                        )}
+
+                        {/* Class Selection */}
+                        <StyledSelect
+                            label="Pilih Kelas (Target)"
+                            value={selectedClass}
+                            onChange={(e) => setSelectedClass(e.target.value)}
+                            disabled={!selectedRPP}
+                        >
+                            <option value="">-- Pilih Kelas --</option>
+                            {classes
+                                .filter(c => !selectedRPP || c.level == selectedRPP.gradeLevel) // Filter by RPP level
+                                .map(c => <option key={c.id} value={c.id}>{c.rombel}</option>)
+                            }
+                        </StyledSelect>
+
+                        <StyledSelect
+                            label="Pendekatan Asesmen (KKTP)"
+                            value={assessmentModel}
+                            onChange={(e) => setAssessmentModel(e.target.value)}
+                        >
+                            {BSKAP_DATA.kktp_standards.methods.map(m => (
+                                <option key={m.type} value={m.type}>{m.type}</option>
+                            ))}
+                        </StyledSelect>
+
+                        <button
+                            onClick={handleGenerateLKPD}
+                            disabled={isGenerating || !selectedRPP || !selectedClass}
+                            className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg shadow-purple-200 dark:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {isGenerating ? <Loader2 className="animate-spin" size={20} /> : <Sparkles size={20} />}
+                            {isGenerating ? 'Memproses...' : 'Buat LKPD'}
+                        </button>
+
+                    </div>
+
+                    {/* History Section */}
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4">
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                            <History size={20} className="text-purple-500" />
+                            Riwayat LKPD
+                        </h3>
+                        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                            {loadingHistory ? (
+                                <div className="flex justify-center p-4"><Loader2 className="animate-spin text-gray-300" /></div>
+                            ) : savedLKPDs.length > 0 ? (
+                                savedLKPDs.map((item) => (
+                                    <div key={item.id} className="group relative bg-gray-50 dark:bg-gray-900/40 p-3 rounded-xl border dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-800 transition-all">
+                                        <div className="flex justify-between items-start">
+                                            <div className="cursor-pointer flex-1" onClick={() => handleLoadLKPD(item)}>
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{item.gradeLevel} - {item.classRoom}</span>
+                                                    <span className="text-[10px] text-gray-400">{new Date(item.createdAt?.toDate()).toLocaleDateString('id-ID')}</span>
+                                                </div>
+                                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">{item.rppTopic || 'Topik tidak tersedia'}</p>
+                                            </div>
+                                            <button onClick={() => handleDeleteLKPD(item.id)} className="text-red-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-center text-xs text-gray-400 py-4">Belum ada riwayat tersimpan.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Preview Area */}
+                <div className="lg:col-span-3">
+                    {lkpdContent ? (
+                        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full min-h-[600px]">
+                            <div className="p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center sticky top-0 z-20">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-purple-600 rounded-lg">
+                                        <FileText className="text-white" size={20} />
+                                    </div>
+                                    <span className="font-bold text-gray-800 dark:text-gray-200">Pratinjau LKPD</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={handleSaveLKPD}
+                                        disabled={isSaving}
+
+                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-sm transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
+                                    >
+                                        {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                                        Simpan
+                                    </button>
+                                    <button
+                                        onClick={handleDownloadDocx}
+                                        className="px-4 py-2 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-lg font-bold text-sm transition-colors flex items-center gap-2"
+                                    >
+                                        <Download size={16} /> Word
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="lkpd-preview-content" className="p-8 lg:p-12 overflow-y-auto flex-1 rpp-prose max-w-none custom-scrollbar">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                                    {lkpdContent}
+                                </ReactMarkdown>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="h-[400px] flex flex-col items-center justify-center text-center space-y-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-3xl">
+                            <div className="p-6 bg-purple-50 dark:bg-purple-900/20 rounded-full">
+                                <ClipboardList className="text-purple-300 dark:text-purple-700" size={64} />
+                            </div>
+                            <div className="max-w-md">
+                                <h3 className="text-lg font-bold text-gray-400">Belum ada konten</h3>
+                                <p className="text-gray-400 text-sm">Pilih RPP dan Kelas di sebelah kiri, lalu klik "Buat LKPD" untuk memulai.</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+            {confirmModal.isOpen && (
+                <Modal onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
+                    <div className="text-center">
+                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                            <Trash2 className="h-8 w-8 text-red-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{confirmModal.title}</h3>
+                        <p className="text-gray-500 dark:text-gray-400 mb-6">{confirmModal.message}</p>
+                        <div className="flex gap-3 justify-center">
+                            <button
+                                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                                className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={confirmModal.onConfirm}
+                                className="px-6 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 dark:shadow-none transition"
+                            >
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+        </div>
+    );
+};
+
+export default LkpdGeneratorPage;

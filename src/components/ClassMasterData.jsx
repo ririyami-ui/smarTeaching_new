@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import toast from 'react-hot-toast';
 
@@ -9,7 +9,7 @@ import StyledInput from './StyledInput';
 import StyledButton from './StyledButton';
 import ClassCard from './ClassCard';
 import Modal from './Modal';
-import { Plus, Upload, Download } from 'lucide-react';
+import { Plus, Upload, Download, Trash2 } from 'lucide-react';
 
 export default function ClassMasterData() {
   const [classes, setClasses] = useState([]);
@@ -24,10 +24,11 @@ export default function ClassMasterData() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentClass, setCurrentClass] = useState(null);
   const [editData, setEditData] = useState({ code: '', level: '', rombel: '', description: '' });
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
   const classesCollectionRef = collection(db, 'classes');
 
-  const getClasses = async () => {
+  const getClasses = useCallback(async () => {
     if (auth.currentUser) {
       try {
         const q = query(classesCollectionRef, where('userId', '==', auth.currentUser.uid));
@@ -46,7 +47,7 @@ export default function ClassMasterData() {
         }
       }
     }
-  };
+  }, [classesCollectionRef]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -54,7 +55,7 @@ export default function ClassMasterData() {
       else setClasses([]);
     });
     return () => unsubscribe();
-  }, []);
+  }, [getClasses]);
 
   const addClass = async () => {
     if (!newCode || !newLevel || !newRombel) {
@@ -81,12 +82,12 @@ export default function ClassMasterData() {
     console.log("  description:", newDescription);
     console.log("  userId:", auth.currentUser.uid);
 
-    const promise = addDoc(classesCollectionRef, { 
+    const promise = addDoc(classesCollectionRef, {
       code: newCode,
       level: newLevel,
       rombel: newRombel,
       description: newDescription,
-      userId: auth.currentUser.uid 
+      userId: auth.currentUser.uid
     });
 
     toast.promise(promise, {
@@ -103,15 +104,23 @@ export default function ClassMasterData() {
     });
   };
 
-  const deleteClass = async (id) => {
-    const promise = deleteDoc(doc(db, 'classes', id));
-    toast.promise(promise, {
-      loading: 'Menghapus...',
-      success: () => {
-        getClasses();
-        return 'Kelas berhasil dihapus!';
-      },
-      error: 'Gagal menghapus kelas.',
+  const deleteClass = (id) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Kelas',
+      message: 'Apakah Anda yakin ingin menghapus data kelas ini? Semua data terkait (seperti daftar siswa) mungkin akan terpengaruh atau kehilangan referensi.',
+      onConfirm: async () => {
+        const promise = deleteDoc(doc(db, 'classes', id));
+        toast.promise(promise, {
+          loading: 'Menghapus...',
+          success: () => {
+            getClasses();
+            setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            return 'Kelas berhasil dihapus!';
+          },
+          error: 'Gagal menghapus kelas.',
+        });
+      }
     });
   };
 
@@ -190,19 +199,19 @@ export default function ClassMasterData() {
             }
             importedCount++;
             existingClassCodes.add(code); // Add to set to handle duplicates within the file itself
-            return addDoc(classesCollectionRef, { 
+            return addDoc(classesCollectionRef, {
               code: code,
               level: row['Tingkat'],
               rombel: row['Rombel'],
               description: row['Keterangan'] || '',
-              userId: auth.currentUser.uid 
+              userId: auth.currentUser.uid
             });
           }
           return null;
         }).filter(p => p !== null);
 
         await Promise.all(promises);
-        
+
         let message = `Impor selesai! ${importedCount} kelas berhasil ditambahkan.`;
         if (skippedCount > 0) {
           message += ` ${skippedCount} kelas dilewati karena kode sudah ada.`;
@@ -220,19 +229,16 @@ export default function ClassMasterData() {
   };
 
   const downloadTemplate = () => {
-    const ws = XLSX.utils.json_to_sheet([{ 
-      'Kode Kelas': '', 
-      'Tingkat': '', 
-      'Rombel': '', 
-      'Keterangan': '' 
-    }]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Data Kelas');
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'template_data_kelas.xlsx');
+    // Download static template file from public folder
+    const link = document.createElement('a');
+    link.href = '/template_data_kelas.xlsx';
+    link.download = 'template_data_kelas.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const tableHeaders = ['Kode Kelas', 'Tingkat', 'Rombel', 'Keterangan', 'Aksi'];
+
 
   return (
     <>
@@ -269,11 +275,11 @@ export default function ClassMasterData() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-[500px] overflow-y-auto p-2">
               {classes.map((classItem) => (
-                <ClassCard 
-                  key={classItem.id} 
-                  classItem={classItem} 
-                  onEdit={handleOpenEditModal} 
-                  onDelete={deleteClass} 
+                <ClassCard
+                  key={classItem.id}
+                  classItem={classItem}
+                  onEdit={handleOpenEditModal}
+                  onDelete={deleteClass}
                 />
               ))}
             </div>
@@ -286,28 +292,28 @@ export default function ClassMasterData() {
         <Modal onClose={() => setIsEditModalOpen(false)}>
           <h3 className="text-lg font-semibold mb-4">Edit Data Kelas</h3>
           <form onSubmit={handleUpdateClass} className="space-y-4">
-            <StyledInput 
-              type="text" 
-              placeholder="Kode Kelas" 
-              value={editData.code} 
+            <StyledInput
+              type="text"
+              placeholder="Kode Kelas"
+              value={editData.code}
               onChange={(e) => setEditData({ ...editData, code: e.target.value })}
             />
-            <StyledInput 
-              type="text" 
-              placeholder="Tingkat" 
-              value={editData.level} 
+            <StyledInput
+              type="text"
+              placeholder="Tingkat"
+              value={editData.level}
               onChange={(e) => setEditData({ ...editData, level: e.target.value })}
             />
-            <StyledInput 
-              type="text" 
-              placeholder="Rombel" 
-              value={editData.rombel} 
+            <StyledInput
+              type="text"
+              placeholder="Rombel"
+              value={editData.rombel}
               onChange={(e) => setEditData({ ...editData, rombel: e.target.value })}
             />
-            <StyledInput 
-              type="text" 
-              placeholder="Keterangan" 
-              value={editData.description} 
+            <StyledInput
+              type="text"
+              placeholder="Keterangan"
+              value={editData.description}
               onChange={(e) => setEditData({ ...editData, description: e.target.value })}
             />
             <div className="flex justify-end gap-2 mt-6">
@@ -315,6 +321,32 @@ export default function ClassMasterData() {
               <StyledButton type="submit">Simpan Perubahan</StyledButton>
             </div>
           </form>
+        </Modal>
+      )}
+      {/* Confirm Modal */}
+      {confirmModal.isOpen && (
+        <Modal onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+              <Trash2 className="h-8 w-8 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{confirmModal.title}</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">{confirmModal.message}</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+              >
+                Batal
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className="px-6 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 dark:shadow-none transition"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
         </Modal>
       )}
     </>

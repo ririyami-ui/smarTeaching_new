@@ -1,50 +1,51 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { db, auth } from '../firebase';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { auth } from '../firebase';
 
 const ChatContext = createContext();
 
 export const useChat = () => useContext(ChatContext);
 
-const CHAT_HISTORY_LIMIT = 50; // Define the chat history limit
-
 export const ChatProvider = ({ children }) => {
   const [chatHistory, setChatHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
-  const isInitialLoad = useRef(true);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // Effect to initialize chat on login and fetch history
+  // Load history on auth change
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async user => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      setCurrentUser(user);
       if (user) {
         setLoadingHistory(true);
-        isInitialLoad.current = true; // Set flag on user change
-        const chatDocRef = doc(db, "chats", user.uid);
-        try {
-          const docSnap = await getDoc(chatDocRef);
-          if (docSnap.exists() && docSnap.data().messages) {
-            setChatHistory(docSnap.data().messages);
-          } else {
-            const greetingMessage = {
-              role: 'model',
-              parts: [{ text: `Selamat datang di Asisten Guru! Ada yang bisa kami bantu terkait pembelajaran? 😊` }]
-            };
-            await setDoc(chatDocRef, { messages: [greetingMessage], userId: user.uid });
-            setChatHistory([greetingMessage]);
+        // Load from localStorage
+        const storedKey = `chat_history_${user.uid}`;
+        const storedHistory = localStorage.getItem(storedKey);
+
+        if (storedHistory) {
+          try {
+            const parsed = JSON.parse(storedHistory);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setChatHistory(parsed);
+            } else {
+              // Fallback valid init
+              const greetingMessage = {
+                role: 'model',
+                parts: [{ text: `Selamat datang kembali! Riwayat chat Anda tersimpan. Ada yang bisa dibantu? 😊` }]
+              };
+              setChatHistory([greetingMessage]);
+            }
+          } catch (e) {
+            console.error("Failed to parse chat history", e);
+            setChatHistory([]);
           }
-        } catch (error) {
-          console.error("Error fetching or initializing chat history: ", error);
-          setChatHistory([{
+        } else {
+          // Initialize new
+          const greetingMessage = {
             role: 'model',
             parts: [{ text: `Selamat datang di Asisten Guru! Ada yang bisa kami bantu terkait pembelajaran? 😊` }]
-          }]);
-        } finally {
-          setLoadingHistory(false);
-          // Use a timeout to prevent the initial load from triggering the save effect immediately
-          setTimeout(() => {
-            isInitialLoad.current = false;
-          }, 500);
+          };
+          setChatHistory([greetingMessage]);
         }
+        setLoadingHistory(false);
       } else {
         setChatHistory([]);
         setLoadingHistory(false);
@@ -53,28 +54,26 @@ export const ChatProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // Effect to save chat history to Firestore when it changes, skipping the initial load
+  // Persist to localStorage on change
   useEffect(() => {
-    if (isInitialLoad.current || loadingHistory) {
-      return; // Don't save on initial load
+    if (currentUser && chatHistory.length > 0) {
+      localStorage.setItem(`chat_history_${currentUser.uid}`, JSON.stringify(chatHistory));
     }
+  }, [chatHistory, currentUser]);
 
-    if (auth.currentUser && chatHistory.length > 0) {
-      const chatDocRef = doc(db, "chats", auth.currentUser.uid);
-      const limitedHistory = chatHistory.slice(Math.max(0, chatHistory.length - CHAT_HISTORY_LIMIT));
-
-      setDoc(chatDocRef, {
-        messages: limitedHistory,
-        userId: auth.currentUser.uid
-      }, { merge: true }).catch(error => {
-        console.error("Error saving chat history to Firestore: ", error);
-      });
-    }
-  }, [chatHistory, loadingHistory]);
-
-  // Function to add a message to the history (in-memory only)
   const addMessageToHistory = (message) => {
     setChatHistory(prev => [...prev, message]);
+  };
+
+  const clearChat = () => {
+    if (currentUser) {
+      localStorage.removeItem(`chat_history_${currentUser.uid}`);
+      const greetingMessage = {
+        role: 'model',
+        parts: [{ text: `Chat telah dibersihkan. Mulai percakapan baru! 🚀` }]
+      };
+      setChatHistory([greetingMessage]);
+    }
   };
 
   const value = {
@@ -82,6 +81,7 @@ export const ChatProvider = ({ children }) => {
     loadingHistory,
     addMessageToHistory,
     setChatHistory,
+    clearChat
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
