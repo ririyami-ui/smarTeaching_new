@@ -975,7 +975,7 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
                         <div>NIP. ${userProfile?.principalNip || '.....................................'}</div>
                     </td>
                     <td>
-                        ${signingLocation || 'Jakarta'}, ${moment().format('DD MMMM YYYY')}<br>
+                        ${signingLocation || userProfile?.school?.split(' ')[1] || 'Indonesia'}, ${moment().format('DD MMMM YYYY')}<br>
                         Guru Mata Pelajaran<br>
                         <div class="signature-name">${userProfile?.name || '( ..................................... )'}</div>
                         <div>NIP. ${userProfile?.nip || '.....................................'}</div>
@@ -1938,7 +1938,6 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                     <td class="text-center">${index + 1}</td>
                     <td>${row.elemen}</td>
                     <td>${row.materi}</td>
-                    <td>${row.kd}</td>
                     <td class="text-center">${row.jp}</td>
                     ${cells}
                 </tr>
@@ -1974,8 +1973,8 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                 <thead>
                     <tr>
                         <th rowspan="2" style="width: 30px;">No</th>
-                        <th rowspan="2" style="width: 200px;">Tujuan Pembelajaran</th>
-                        <th rowspan="2" style="width: 200px;">Lingkup Materi</th>
+                        <th rowspan="2" style="width: 150px;">Elemen</th>
+                        <th rowspan="2" style="width: 250px;">Lingkup Materi</th>
                         <th rowspan="2" style="width: 40px;">JP</th>
                         ${monthHeader}
                     </tr>
@@ -1988,6 +1987,20 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                 </tbody>
             </table>
 
+            <div style="margin-top: 20px; font-size: 9pt;">
+                <strong>KETERANGAN WARNA:</strong>
+                <table style="width: auto; border: none; margin-top: 5px;">
+                    <tr>
+                        <td style="width: 30px; background-color: #e8f5e9; border: 1px solid black;">&nbsp;</td>
+                        <td style="border: none; padding-left: 10px;">Belajar Efektif / Tatap Muka (Kode: #E8F5E9)</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 30px; background-color: #ffebee; border: 1px solid black;">&nbsp;</td>
+                        <td style="border: none; padding-left: 10px;">Libur Resmi / Agenda Sekolah (Kode: #FFEBEE)</td>
+                    </tr>
+                </table>
+            </div>
+
             <table class="signature-table">
                 <tr>
                     <td>
@@ -1997,7 +2010,7 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                         <div>NIP. ${userProfile?.principalNip || '.....................................'}</div>
                     </td>
                     <td>
-                        ${userProfile?.school?.split(' ')[1] || 'Indonesia'}, ${moment().format('DD MMMM YYYY')}<br>
+                        ${signingLocation || userProfile?.school?.split(' ')[1] || 'Indonesia'}, ${moment().format('DD MMMM YYYY')}<br>
                         Guru Mata Pelajaran<br>
                         <div class="signature-name">${userProfile?.name || '( ..................................... )'}</div>
                         <div>NIP. ${userProfile?.nip || '.....................................'}</div>
