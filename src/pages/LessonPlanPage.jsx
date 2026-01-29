@@ -53,7 +53,7 @@ const LessonPlanPage = () => {
     const [sourceType, setSourceType] = useState('promes'); // 'promes' or 'atp'
     const [atpMaterials, setAtpMaterials] = useState([]);
     const [teachingModel, setTeachingModel] = useState('Otomatis');
-    const [assessmentModel, setAssessmentModel] = useState('Rubrik'); // New State: Model KKTP
+    const [assessmentModel, setAssessmentModel] = useState('Otomatis'); // New State: Model KKTP
 
     // Prepopulate from URL if coming from Schedule
     useEffect(() => {

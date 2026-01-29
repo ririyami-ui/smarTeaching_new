@@ -1523,6 +1523,10 @@
     "kktp_standards": {
         "methods": [
             {
+                "type": "Otomatis",
+                "logic": "AI secara cerdas menentukan metode (Rubrik/Deskripsi/Interval) yang paling sesuai dengan karakteristik Tujuan Pembelajaran."
+            },
+            {
                 "type": "Deskripsi Kriteria",
                 "logic": "Mengidentifikasi muncul/tidaknya indikator tertentu dalam karya peserta didik."
             },
