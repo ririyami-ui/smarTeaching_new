@@ -1992,11 +1992,11 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                 <table style="width: auto; border: none; margin-top: 5px;">
                     <tr>
                         <td style="width: 30px; background-color: #e8f5e9; border: 1px solid black;">&nbsp;</td>
-                        <td style="border: none; padding-left: 10px;">Belajar Efektif / Tatap Muka (Kode: #E8F5E9)</td>
+                        <td style="border: none; padding-left: 10px;">Belajar Efektif / Tatap Muka</td>
                     </tr>
                     <tr>
                         <td style="width: 30px; background-color: #ffebee; border: 1px solid black;">&nbsp;</td>
-                        <td style="border: none; padding-left: 10px;">Libur Resmi / Agenda Sekolah (Kode: #FFEBEE)</td>
+                        <td style="border: none; padding-left: 10px;">Libur Resmi / Agenda Sekolah</td>
                     </tr>
                 </table>
             </div>
