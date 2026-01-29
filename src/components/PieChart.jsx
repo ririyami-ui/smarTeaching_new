@@ -21,12 +21,12 @@ const PieChart = ({ data }) => {
 
   return (
     <div className="flex flex-col justify-center gap-4 p-4 h-full">
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-800 mb-2">
-        <div className="flex justify-between items-center text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+      <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl border border-blue-200 dark:border-blue-800 mb-2">
+        <div className="flex justify-between items-center text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase tracking-widest">
           <span>Konteks Perhitungan</span>
           <span>{schoolDays || 0} Hari Sekolah</span>
         </div>
-        <div className="text-[9px] text-blue-500/70 dark:text-blue-400/50 mt-1">
+        <div className="text-[10px] font-bold text-blue-600/80 dark:text-blue-400 mt-1">
           *Total Akumulasi = {studentCount || 0} Siswa x {schoolDays || 0} Hari Efektif
         </div>
       </div>
@@ -41,16 +41,16 @@ const PieChart = ({ data }) => {
             <div key={cat.key} className="space-y-1">
               <div className="flex justify-between items-end">
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${cat.color}`}></div>
-                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{cat.label}</span>
+                  <div className={`w-2.5 h-2.5 rounded-full ${cat.color} shadow-sm`}></div>
+                  <span className="text-xs font-black text-gray-800 dark:text-gray-200">{cat.label}</span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[10px] font-medium text-gray-400 italic">Avg: {avgPerStudent} hr/siswa</span>
-                  <span className="text-xs font-black text-gray-900 dark:text-gray-100">{value}</span>
-                  <span className="text-xs font-black text-blue-600 dark:text-blue-400">{percentage}%</span>
+                  <span className="text-[10px] font-bold text-gray-500 italic">Avg: {avgPerStudent} hr/siswa</span>
+                  <span className="text-sm font-black text-gray-900 dark:text-gray-100">{value}</span>
+                  <span className="text-sm font-black text-blue-700 dark:text-blue-400">{percentage}%</span>
                 </div>
               </div>
-              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-3 overflow-hidden shadow-inner">
                 <div
                   className={`h-full ${cat.color} rounded-full transition-all duration-1000 ease-out`}
                   style={{ width: `${percentage}%` }}
@@ -61,9 +61,9 @@ const PieChart = ({ data }) => {
         })}
       </div>
 
-      <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
-        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Akumulasi</span>
-        <span className="text-lg font-black text-gray-800 dark:text-gray-200">{total} <span className="text-xs font-bold text-gray-400">HARI</span></span>
+      <div className="pt-4 border-t-2 border-gray-100 dark:border-gray-800 flex justify-between items-center">
+        <span className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Total Akumulasi</span>
+        <span className="text-xl font-black text-gray-900 dark:text-gray-100">{total} <span className="text-xs font-bold text-gray-500">HARI</span></span>
       </div>
     </div>
   );

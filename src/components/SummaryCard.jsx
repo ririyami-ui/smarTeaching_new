@@ -14,7 +14,7 @@ const SummaryCard = ({ title, value, icon, color = 'blue', trend, subtitle }) =>
         <div className={`${colorClasses[color]} rounded-xl border p-5 transition-all duration-300 hover:shadow-lg hover:scale-105`}>
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                    <p className="text-sm font-medium opacity-80 mb-1">{title}</p>
+                    <p className="text-sm font-bold opacity-100 mb-1">{title}</p>
                     <div className="flex items-baseline gap-2">
                         <p className="text-3xl font-bold">{value}</p>
                         {trend && (
@@ -24,7 +24,7 @@ const SummaryCard = ({ title, value, icon, color = 'blue', trend, subtitle }) =>
                         )}
                     </div>
                     {subtitle && (
-                        <p className="text-xs opacity-70 mt-1">{subtitle}</p>
+                        <p className="text-xs font-bold opacity-90 mt-1">{subtitle}</p>
                     )}
                 </div>
                 {icon && (
