@@ -157,6 +157,19 @@ const QuizGeneratorPage = () => {
                 if (q) {
                     const snap = await getDocs(q);
                     const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                    // Sort by gradeLevel then materi/subject
+                    data.sort((a, b) => {
+                        const gradeA = String(a.gradeLevel || a.grade || '');
+                        const gradeB = String(b.gradeLevel || b.grade || '');
+                        const gradeComp = gradeA.localeCompare(gradeB);
+                        if (gradeComp !== 0) return gradeComp;
+
+                        const labelA = String(a.materi || a.topic || a.subject || '');
+                        const labelB = String(b.materi || b.topic || b.subject || '');
+                        return labelA.localeCompare(labelB);
+                    });
+
                     setSourceData(data);
                 } else {
                     setSourceData([]);
@@ -1085,13 +1098,21 @@ const QuizGeneratorPage = () => {
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Pilih Dokumen</label>
                                         <StyledSelect value={selectedContextId} onChange={(e) => handleSourceChange(e.target.value)} disabled={sourceType === 'manual' || sourceType === 'image'}>
-                                            <option value="">-- Pilih --</option>
-                                            {sourceData.map(d => (
-                                                <option key={d.id} value={d.id}>
-                                                    {sourceType === 'rpp' ? `${d.gradeLevel} - ${d.materi || d.topic}` : `${d.gradeLevel} - ${d.subject}`}
-                                                </option>
-                                            ))}
+                                            <option value="">{loading ? 'Memuat...' : '-- Pilih --'}</option>
+                                            {sourceData
+                                                .filter(d => !subject || (d.subject && d.subject.toLowerCase() === subject.toLowerCase()))
+                                                .map(d => (
+                                                    <option key={d.id} value={d.id}>
+                                                        {sourceType === 'rpp'
+                                                            ? `${d.gradeLevel || 'Kelas'} - ${d.materi || d.topic} (${d.academicYear || ''})`
+                                                            : `${d.subject} - ${d.gradeLevel || d.grade} (${d.semester})`
+                                                        }
+                                                    </option>
+                                                ))}
                                         </StyledSelect>
+                                        {subject && sourceData.filter(d => d.subject && d.subject.toLowerCase() === subject.toLowerCase()).length === 0 && (
+                                            <p className="text-[10px] text-amber-600 mt-1">Tidak ada {sourceType.toUpperCase()} untuk mapel ini.</p>
+                                        )}
                                     </div>
                                 </div>
 
