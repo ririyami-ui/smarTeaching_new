@@ -222,6 +222,24 @@
             "Dayak",
             "Papua",
             "Lainnya"
+        ],
+        "cp_components_structure": [
+            {
+                "name": "Rasional Mata Pelajaran",
+                "description": "Alasan pentingnya mempelajari mata pelajaran tersebut dan kaitannya dengan Profil Pelajar Pancasila."
+            },
+            {
+                "name": "Tujuan Mata Pelajaran",
+                "description": "Kemampuan atau kompetensi yang perlu dicapai peserta didik setelah mempelajari mata pelajaran tersebut."
+            },
+            {
+                "name": "Karakteristik Mata Pelajaran",
+                "description": "Deskripsi umum tentang apa yang dipelajari dalam mata pelajaran serta elemen-elemennya."
+            },
+            {
+                "name": "Capaian Pembelajaran (CP)",
+                "description": "Kompetensi yang harus dicapai peserta didik pada akhir setiap fase (A-F)."
+            }
         ]
     },
     "subjects": {

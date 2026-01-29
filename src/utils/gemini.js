@@ -272,18 +272,18 @@ const createSystemInstruction = (userProfile) => {
         - Bisa atur bobot penilaian (Akademik vs Sikap).
 
         - **SUMBER DATA MUTLAK (SOURCE OF TRUTH):** Segala informasi kurikulum, standar, terminologi, dan filosofi pedagogis WAJIB bersumber dari **BSKAP_DATA** (intelejen JSON terlampir). DILARANG menggunakan pengetahuan umum atau menerka-nerka di luar data ini.
-        - Dasar Hukum Utama: **${BSKAP_DATA.standards.regulation}**.
-        - Filosofi Utama: **${BSKAP_DATA.standards.philosophy.name}**
-${BSKAP_DATA.standards.philosophy.pillars.map(p => `          *   **${p.name}**: ${p.description}`).join('\n')}
+        - Dasar Hukum Utama: **${BSKAP_DATA.standards?.regulation || 'Keputusan Kepala BSKAP'}**.
+        - Filosofi Utama: **${BSKAP_DATA.standards?.philosophy?.name || 'Deep Learning'}**
+${(BSKAP_DATA.standards?.philosophy?.pillars || []).map(p => `          *   **${p.name}**: ${p.description}`).join('\n')}
         - **PROFIL LULUSAN (8 DIMENSI 2025):**
-${BSKAP_DATA.standards.profile_lulusan_2025.map(d => `          *   **${d.dimensi}**: ${d.deskripsi}`).join('\n')}
+${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).map(d => `          *   **${d.dimensi}**: ${d.deskripsi}`).join('\n')}
         - **KOMPETENSI INDUSTRI (HARD & SOFT SKILLS):**
-${BSKAP_DATA.standards.industry_competencies_2025_2026.map(c => `          *   **${c.name}**: ${c.description}`).join('\n')}
+${(BSKAP_DATA.standards?.industry_competencies_2025_2026 || []).map(c => `          *   **${c.name}**: ${c.description}`).join('\n')}
         - **STANDAR INSTRUKSI:** 
-          * Asesmen: ${BSKAP_DATA.standards.teaching_instruction_standards.assessment}
-          * Perencanaan: ${BSKAP_DATA.standards.teaching_instruction_standards.planning}
+          * Asesmen: ${BSKAP_DATA.standards?.teaching_instruction_standards?.assessment || '-'}
+          * Perencanaan: ${BSKAP_DATA.standards?.teaching_instruction_standards?.planning || '-'}
         - **ANATOMI DOKUMEN CP (WAJIB):** Setiap penjelasan Capaian Pembelajaran harus memuat 4 komponen dari BSKAP_DATA:
-${BSKAP_DATA.standards.cp_components_structure.map(c => `          *   **${c.name}**: ${c.description}`).join('\n')}
+${(BSKAP_DATA.standards?.cp_components_structure || []).map(c => `          *   **${c.name}**: ${c.description}`).join('\n')}
         - Anda harus patuh pada standar ini secara kaku untuk semua jawaban terkait kurikulum dan administrasi guru.
 
         Aturan Respons:
