@@ -329,25 +329,58 @@ const AbsensiPage = () => {
     <div className="p-3 sm:p-6 bg-background-light dark:bg-background-dark min-h-screen">
       <h1 className="text-2xl sm:text-3xl font-bold text-primary-dark dark:text-primary-light mb-6">Absensi Siswa</h1>
 
-      <div className="p-4 sm:p-6 rounded-2xl shadow-xl mb-6 flex flex-col items-center border-2 border-slate-800 dark:border-slate-700" style={{ backgroundColor: '#5E716A' }}>
+      <div className="relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-md p-4 sm:p-6 rounded-3xl shadow-lg mb-6 border border-gray-200 dark:border-gray-700">
+        {/* Subtle Decorative Background */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
-        {activeSchedule && (
-          <h2 className="text-xl font-semibold text-white mb-2">
-            Kelas Aktif: {activeSchedule.class} ({activeSchedule.subject})
-          </h2>
-        )}
-        <div className={!activeSchedule ? 'w-full text-center' : ''}>
-          <ClockDisplay />
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+          {/* Class Information (Left) */}
+          <div className="flex-1 text-center md:text-left">
+            {activeSchedule ? (
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-primary dark:text-primary-light uppercase tracking-widest opacity-70">Sesi Belajar Aktif</span>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
+                  {activeSchedule.class} — {activeSchedule.subject}
+                </h2>
+                <div className="flex items-center justify-center md:justify-start gap-4 mt-2">
+                  <div className="px-3 py-1 bg-primary/10 dark:bg-primary/20 rounded-full text-xs font-bold text-primary dark:text-primary-light border border-primary/20">
+                    Smt {activeSemester}
+                  </div>
+                  <div className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                    {academicYear}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                  <span className="animate-pulse">⏳</span>
+                </div>
+                <p className="text-sm font-medium italic">Menunggu jadwal aktif berikutnya...</p>
+              </div>
+            )}
+          </div>
+
+          {/* Clock Display (Center/Right) */}
+          <div className="flex-shrink-0 bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-inner">
+            <ClockDisplay size="sm" variant="minimal" />
+          </div>
         </div>
-        {previousMaterial && (
-          <p className="text-sm text-white mt-2">
-            Materi Sebelumnya: {previousMaterial}
-          </p>
-        )}
-        {previousLearningActivities && (
-          <p className="text-sm text-white mt-2">
-            {previousLearningActivities}
-          </p>
+
+        {/* Previous Material Section (Footer of Header) */}
+        {(previousMaterial || previousLearningActivities) && (
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/50 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-shrink-0 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+              <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter">Review Sesi Terakhir:</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-[11px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 line-clamp-1 italic">
+                {previousMaterial === 'Tidak ada materi sebelumnya' ? 'Belum ada catatan materi dari jurnal pertemuan terakhir.' : previousMaterial}
+                {previousLearningActivities && previousLearningActivities !== 'Tidak ada aktivitas pembelajaran sebelumnya' && ` — ${previousLearningActivities}`}
+              </p>
+            </div>
+          </div>
         )}
       </div>
 

@@ -84,16 +84,27 @@ const QuizGeneratorPage = () => {
         fetchMasters();
     }, []);
 
-    const QUESTION_TYPES = BSKAP_DATA.standards.assessment_item_types.map(t => ({
-        id: t.id,
-        label: t.name,
-        icon: t.id === 'pg' ? <List size={16} /> :
-            t.id === 'pg_complex' ? <CheckSquare size={16} /> :
-                t.id === 'matching' ? <Grid size={16} /> :
-                    t.id === 'true_false' ? <ToggleLeft size={16} /> :
-                        t.id === 'essay' ? <Type size={16} /> :
-                            t.id === 'uraian' ? <AlignLeft size={16} /> : <FileText size={16} />
-    }));
+    const QUESTION_TYPES = BSKAP_DATA.standards.assessment_item_types.map(t => {
+        const simplifiedDescriptions = {
+            'pg': 'Pilihan ganda',
+            'pg_complex': 'Pilihan ganda lebih dari 1',
+            'matching': 'Menjodohkan',
+            'true_false': 'Benar salah',
+            'essay': 'Essay',
+            'uraian': 'Uraian'
+        };
+        return {
+            id: t.id,
+            label: t.name,
+            description: simplifiedDescriptions[t.id] || t.description,
+            icon: t.id === 'pg' ? <List size={16} /> :
+                t.id === 'pg_complex' ? <CheckSquare size={16} /> :
+                    t.id === 'matching' ? <Grid size={16} /> :
+                        t.id === 'true_false' ? <ToggleLeft size={16} /> :
+                            t.id === 'essay' ? <Type size={16} /> :
+                                t.id === 'uraian' ? <AlignLeft size={16} /> : <FileText size={16} />
+        };
+    });
 
     const formatAnswer = (q) => {
         if (!q) return '-';
@@ -1245,7 +1256,8 @@ const QuizGeneratorPage = () => {
                                         {QUESTION_TYPES.map(type => (
                                             <div
                                                 key={type.id}
-                                                className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 shadow-sm hover:shadow-md transition-shadow"
+                                                title={type.description}
+                                                className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 shadow-sm hover:shadow-md transition-shadow cursor-help"
                                             >
                                                 <div className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-300 flex-1 min-w-0 mr-3">
                                                     <div className="p-2 bg-white dark:bg-gray-600 rounded-md shadow-sm text-blue-500 shrink-0">

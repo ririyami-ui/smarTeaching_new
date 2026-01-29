@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Javanese:wght@400;700&display=swap');
 
 :root {
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -585,6 +586,13 @@ div.rpp-signature td {
 }
 
 /* --- End RPP Paper-Like Styling --- */
+
+/* Javanese Script Support */
+.font-carakan {
+  font-family: 'Noto Sans Javanese', serif !important;
+  line-height: 1.8 !important;
+  font-size: 1.1em;
+}
 
 /* Custom Animations for TeachingScheduleCard */
 .animate-pulse-subtle {

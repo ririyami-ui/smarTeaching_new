@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { runEarlyWarningAnalysis, getAllStudents } from '../utils/analysis';
 import StyledSelect from '../components/StyledSelect';
 import { useSettings } from '../utils/SettingsContext';
@@ -22,42 +23,52 @@ const EarlyWarningPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  const [selectedClass, setSelectedClass] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
   const { activeSemester, academicYear, geminiModel } = useSettings();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = auth.onAuthStateChanged(user => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribeAuth();
+  }, []);
 
   useEffect(() => {
     const performAnalysis = async () => {
-      if (auth.currentUser) {
-        const [flaggedResults, allStudentsData, classesData, subjectsData] = await Promise.all([
-          runEarlyWarningAnalysis(auth.currentUser.uid, activeSemester, academicYear, geminiModel),
-          getAllStudents(auth.currentUser.uid),
-          getDocs(query(collection(db, 'classes'), where('userId', '==', auth.currentUser.uid))),
-          getDocs(query(collection(db, 'subjects'), where('userId', '==', auth.currentUser.uid)))
-        ]);
-        setFlaggedStudents(flaggedResults);
-        setAllStudents(allStudentsData);
-        setClasses(classesData.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.rombel.localeCompare(b.rombel)));
-        setSubjects(subjectsData.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.name.localeCompare(b.name)));
+      if (currentUser) {
+        setIsLoading(true);
+        try {
+          const [flaggedResults, allStudentsData, classesData, subjectsData] = await Promise.all([
+            runEarlyWarningAnalysis(currentUser.uid, activeSemester, academicYear, geminiModel),
+            getAllStudents(currentUser.uid),
+            getDocs(query(collection(db, 'classes'), where('userId', '==', currentUser.uid))),
+            getDocs(query(collection(db, 'subjects'), where('userId', '==', currentUser.uid)))
+          ]);
+          setFlaggedStudents(flaggedResults);
+          setAllStudents(allStudentsData);
+          setClasses(classesData.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => (a.rombel || '').localeCompare(b.rombel || '')));
+          setSubjects(subjectsData.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => (a.name || '').localeCompare(b.name || '')));
+        } catch (err) {
+          console.error("Early Warning Analysis Error:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setFlaggedStudents([]);
+        setAllStudents([]);
         setIsLoading(false);
       }
     };
 
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      if (user) {
-        performAnalysis();
-      } else {
-        setIsLoading(false);
-        setFlaggedStudents([]);
-        setAllStudents([]);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [activeSemester, academicYear, geminiModel]);
+    performAnalysis();
+  }, [currentUser, activeSemester, academicYear, geminiModel]);
 
   // Filter Logic
   const filteredFlaggedStudents = useMemo(() => {
     return flaggedStudents.filter(student => {
-      const classMatch = selectedClass === '' || student.classId === selectedClass || student.rombel === selectedClass;
+      const classMatch = selectedClass === '' || student.rombel === selectedClass;
       const subjectMatch = selectedSubject === '' ||
         (student.subjectsWithWarnings && student.subjectsWithWarnings.some(s => s.id === selectedSubject || s.name === selectedSubject));
       return classMatch && subjectMatch;
@@ -166,7 +177,7 @@ const EarlyWarningPage = () => {
         >
           <option value="">Semua Kelas</option>
           {classes.map(cls => (
-            <option key={cls.id} value={cls.id}>
+            <option key={cls.id} value={cls.rombel}>
               {cls.rombel}
             </option>
           ))}
@@ -291,6 +302,7 @@ const EarlyWarningPage = () => {
         </h3>
         {filteredFlaggedStudents.length > 0 ? (
           <div className="overflow-x-auto">
+            {/* ... table content remains same ... */}
             <table className="w-full text-left">
               <thead className="bg-gray-100 dark:bg-gray-700">
                 <tr>
@@ -305,11 +317,11 @@ const EarlyWarningPage = () => {
                 {filteredFlaggedStudents
                   .sort((a, b) => {
                     // Sort by class first
-                    if (a.rombel !== b.rombel) {
-                      return a.rombel.localeCompare(b.rombel);
+                    if ((a.rombel || '') !== (b.rombel || '')) {
+                      return (a.rombel || '').localeCompare(b.rombel || '');
                     }
                     // Then by name
-                    return a.name.localeCompare(b.name);
+                    return (a.name || '').localeCompare(b.name || '');
                   })
                   .map(student => (
                     <tr key={student.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -354,13 +366,29 @@ const EarlyWarningPage = () => {
           </div>
         ) : (
           <div className="text-center py-10">
-            <TrendingUp size={64} className="mx-auto text-green-500 mb-4" />
-            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-              Tidak ada siswa yang teridentifikasi memerlukan perhatian khusus! 🎉
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Semua siswa dalam kondisi baik sesuai kriteria peringatan dini.
-            </p>
+            {selectedClass ? (
+              <>
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp size={48} className="text-green-500" />
+                </div>
+                <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  Semua siswa di kelas {selectedClass} dalam kondisi baik! 🎉
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Tidak ada siswa yang teridentifikasi memerlukan perhatian khusus saat ini.
+                </p>
+              </>
+            ) : (
+              <>
+                <TrendingUp size={64} className="mx-auto text-green-500 mb-4" />
+                <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  Tidak ada siswa yang teridentifikasi memerlukan perhatian khusus! 🎉
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Semua siswa dalam kondisi baik sesuai kriteria peringatan dini.
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>

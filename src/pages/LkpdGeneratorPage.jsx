@@ -98,6 +98,9 @@ const LkpdGeneratorPage = () => {
             const rpps = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setSavedRPPs(rpps);
             setLoadingHistory(false);
+        }, (error) => {
+            console.error("RPP snapshot error:", error);
+            setLoadingHistory(false);
         });
 
         // Fetch Saved LKPDs
@@ -110,6 +113,8 @@ const LkpdGeneratorPage = () => {
         const unsubLKPD = onSnapshot(lkpdQuery, (snapshot) => {
             const lkpds = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setSavedLKPDs(lkpds);
+        }, (error) => {
+            console.error("LKPD snapshot error:", error);
         });
 
         // Fetch Classes
@@ -121,6 +126,8 @@ const LkpdGeneratorPage = () => {
 
         const unsubClasses = onSnapshot(classesQuery, (snapshot) => {
             setClasses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        }, (error) => {
+            console.error("Classes snapshot error:", error);
         });
 
         return () => {

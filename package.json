@@ -20,6 +20,7 @@
     "@capacitor/core": "^7.4.3",
     "@capacitor/local-notifications": "^7.0.2",
     "@google/generative-ai": "^0.24.1",
+    "carakanjs": "^1.2.1",
     "file-saver": "^2.0.5",
     "firebase": "^11.6.1",
     "html-docx-js-typescript": "^0.1.5",

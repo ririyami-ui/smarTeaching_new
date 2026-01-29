@@ -10,6 +10,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { getRegionFromSubject } from '../utils/carakan';
 import { saveAs } from 'file-saver';
 import { asBlob } from 'html-docx-js-typescript';
 import Modal from '../components/Modal';
@@ -493,7 +494,7 @@ const HandoutGeneratorPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="prose dark:prose-invert max-w-none bg-white p-8 rounded-lg shadow-sm border border-gray-100 min-h-[500px]" id="handout-preview">
+                                <div className={`prose dark:prose-invert max-w-none bg-white p-8 rounded-lg shadow-sm border border-gray-100 min-h-[500px] ${getRegionFromSubject(selectedSubject) === 'Jawa' ? 'font-carakan' : ''}`} id="handout-preview">
                                     <ReactMarkdown
                                         remarkPlugins={[remarkGfm]}
                                         rehypePlugins={[rehypeRaw]}

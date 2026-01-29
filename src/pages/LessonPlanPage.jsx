@@ -13,6 +13,7 @@ import {
     deleteDoc,
     doc
 } from 'firebase/firestore';
+import { toHanacaraka, getRegionFromSubject } from '../utils/carakan';
 import {
     FileText,
     Sparkles,
@@ -756,7 +757,7 @@ const LessonPlanPage = () => {
                                     )}
                                 </div>
                             </div>
-                            <div className="p-8 lg:p-12 overflow-y-auto flex-1 rpp-prose max-w-none print:p-0 print:overflow-visible custom-scrollbar">
+                            <div className={`p-8 lg:p-12 overflow-y-auto flex-1 rpp-prose max-w-none print:p-0 print:overflow-visible custom-scrollbar ${getRegionFromSubject(viewingRPP?.subject || selectedMaterial?.subject) === 'Jawa' ? 'font-carakan' : ''}`}>
                                 <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                                     {generatedRPP || viewingRPP?.content}
                                 </ReactMarkdown>

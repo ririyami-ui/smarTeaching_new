@@ -12,6 +12,7 @@ import StyledTable from '../components/StyledTable';
 import { useSearchParams } from 'react-router-dom';
 import { useSettings } from '../utils/SettingsContext';
 import { getTopicForSchedule } from '../utils/topicUtils';
+import { toHanacaraka, getRegionFromSubject } from '../utils/carakan';
 
 export default function JurnalPage() {
   const [currentDate, setCurrentDate] = useState('');
@@ -35,7 +36,20 @@ export default function JurnalPage() {
   const [isAnalyzingAI, setIsAnalyzingAI] = useState(false); // New state for AI analysis loading
   const [programs, setPrograms] = useState([]);
   const [carryOverSuggestion, setCarryOverSuggestion] = useState(null); // New state for carry-over
+  const [similarJournalSuggestion, setSimilarJournalSuggestion] = useState(null); // New state for cloning
   const { activeSemester, academicYear, geminiModel } = useSettings();
+
+  const isJavanese = React.useMemo(() => {
+    const sub = subjects.find(s => s.id === selectedSubject);
+    return getRegionFromSubject(sub?.name) === 'Jawa';
+  }, [selectedSubject, subjects]);
+
+  const handleTransliterate = (text, setter) => {
+    if (!text) return;
+    const result = toHanacaraka(text);
+    setter(result);
+    toast.success('Berhasil dikonversi ke Aksara Jawa!');
+  };
 
   const classesCollectionRef = React.useMemo(() => collection(db, 'classes'), []);
   const subjectsCollectionRef = React.useMemo(() => collection(db, 'subjects'), []);
@@ -168,6 +182,21 @@ export default function JurnalPage() {
       setCarryOverSuggestion(null);
     }
   }, [selectedClass, selectedSubject, currentDate, journals]);
+
+  // Logic for Similar Material Cloning Suggestion
+  useEffect(() => {
+    if (material && material.length > 3 && journals.length > 0) {
+      const normMaterial = material.trim().toLowerCase();
+      // Find the most recent journal with the same material (that is not the one currently being edited)
+      const similar = journals
+        .filter(j => j.id !== editingJournalId && (j.material || '').trim().toLowerCase() === normMaterial)
+        .sort((a, b) => moment(b.date).diff(moment(a.date)))[0];
+
+      setSimilarJournalSuggestion(similar || null);
+    } else {
+      setSimilarJournalSuggestion(null);
+    }
+  }, [material, journals, editingJournalId]);
 
   const handleSaveJournal = async () => {
     if (!selectedClass || !selectedSubject || !material || !learningObjectives || !learningActivities) {
@@ -342,7 +371,17 @@ export default function JurnalPage() {
                 placeholder="Materi yang diajarkan"
                 value={material}
                 onChange={(e) => setMaterial(e.target.value)}
+                className={isJavanese ? 'font-carakan' : ''}
               />
+              {isJavanese && material && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); handleTransliterate(material, setMaterial); }}
+                  className="mt-1 text-[10px] bg-indigo-50 text-indigo-600 font-bold px-2 py-1 rounded border border-indigo-100 flex items-center gap-1 hover:bg-indigo-100 transition-colors"
+                >
+                  <Sparkles size={10} /> Konversi ke Aksara Jawa
+                </button>
+              )}
               {/* Carry-over Suggestion */}
               {carryOverSuggestion && (
                 <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-red-50/50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800 shadow-sm transition-all animate-bounce-short">
@@ -411,25 +450,75 @@ export default function JurnalPage() {
                 }
                 return null;
               })()}
+
+              {/* Similar Journal Suggestion (Cloning) */}
+              {similarJournalSuggestion && (
+                <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-blue-50/50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800 shadow-sm transition-all animate-in slide-in-from-top-1 duration-300">
+                  <BookOpen size={14} className="text-blue-600 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[9px] font-black text-blue-800 dark:text-blue-400 uppercase tracking-tighter leading-none mb-0.5">Materi Serupa Ditemukan:</p>
+                    <p className="text-[11px] font-bold text-blue-700 dark:text-blue-300 truncate italic">
+                      Copy dari {similarJournalSuggestion.className} ({moment(similarJournalSuggestion.date).format('DD/MM')})
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setLearningObjectives(similarJournalSuggestion.learningObjectives || '');
+                      setLearningActivities(similarJournalSuggestion.learningActivities || '');
+                      setReflection(similarJournalSuggestion.reflection || '');
+                      setFollowUp(similarJournalSuggestion.followUp || '');
+                      toast.success('Konten jurnal disalin!');
+                    }}
+                    className="shrink-0 text-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-2.5 py-1 rounded-md shadow-sm active:scale-95 transition-all"
+                  >
+                    Salin
+                  </button>
+                </div>
+              )}
             </div>
 
-            <StyledInput
-              type="textarea"
-              label="Tujuan Pembelajaran"
-              placeholder="Tujuan pembelajaran hari ini"
-              value={learningObjectives}
-              onChange={(e) => setLearningObjectives(e.target.value)}
-              voiceEnabled
-            />
+            <div className="relative">
+              <StyledInput
+                type="textarea"
+                label="Tujuan Pembelajaran"
+                placeholder="Tujuan pembelajaran hari ini"
+                value={learningObjectives}
+                onChange={(e) => setLearningObjectives(e.target.value)}
+                className={isJavanese ? 'font-carakan' : ''}
+                voiceEnabled
+              />
+              {isJavanese && learningObjectives && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); handleTransliterate(learningObjectives, setLearningObjectives); }}
+                  className="absolute right-0 top-0 mt-0 mr-1 text-[9px] bg-indigo-50 text-indigo-600 font-bold px-1.5 py-0.5 rounded border border-indigo-100 hover:bg-indigo-100 transition-colors z-10"
+                >
+                  Konversi Aksara
+                </button>
+              )}
+            </div>
 
-            <StyledInput
-              type="textarea"
-              label="Kegiatan Pembelajaran"
-              placeholder="Deskripsi kegiatan di kelas"
-              value={learningActivities}
-              onChange={(e) => setLearningActivities(e.target.value)}
-              voiceEnabled
-            />
+            <div className="relative">
+              <StyledInput
+                type="textarea"
+                label="Kegiatan Pembelajaran"
+                placeholder="Deskripsi kegiatan di kelas"
+                value={learningActivities}
+                onChange={(e) => setLearningActivities(e.target.value)}
+                className={isJavanese ? 'font-carakan' : ''}
+                voiceEnabled
+              />
+              {isJavanese && learningActivities && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); handleTransliterate(learningActivities, setLearningActivities); }}
+                  className="absolute right-0 top-0 mt-0 mr-1 text-[9px] bg-indigo-50 text-indigo-600 font-bold px-1.5 py-0.5 rounded border border-indigo-100 hover:bg-indigo-100 transition-colors z-10"
+                >
+                  Konversi Aksara
+                </button>
+              )}
+            </div>
 
             <StyledInput
               type="textarea"

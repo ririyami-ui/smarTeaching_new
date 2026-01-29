@@ -16,12 +16,20 @@ export const SettingsProvider = ({ children }) => {
     const [loadingSettings, setLoadingSettings] = useState(true);
 
     useEffect(() => {
+        let unsubscribeSnapshot = null;
+
         const unsubscribeAuth = auth.onAuthStateChanged(user => {
             if (user) {
                 const userDocRef = doc(db, 'users', user.uid);
 
+                // Clear previous snapshot if it exists (shouldn't happen with auth change but good practice)
+                if (unsubscribeSnapshot) {
+                    unsubscribeSnapshot();
+                    unsubscribeSnapshot = null;
+                }
+
                 // Use onSnapshot for real-time updates when user changes settings in Profile
-                const unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
+                unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         if (data.activeSemester) setActiveSemester(data.activeSemester);
@@ -32,15 +40,24 @@ export const SettingsProvider = ({ children }) => {
                         setUserProfile(data); // Store full profile
                     }
                     setLoadingSettings(false);
+                }, (error) => {
+                    console.error("Settings snapshot error:", error);
+                    setLoadingSettings(false);
                 });
-
-                return () => unsubscribeSnapshot();
             } else {
+                // IMPORTANT: Unsubscribe when user logs out to prevent permission-denied errors
+                if (unsubscribeSnapshot) {
+                    unsubscribeSnapshot();
+                    unsubscribeSnapshot = null;
+                }
                 setLoadingSettings(false);
             }
         });
 
-        return () => unsubscribeAuth();
+        return () => {
+            unsubscribeAuth();
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
+        };
     }, []);
 
     const value = {

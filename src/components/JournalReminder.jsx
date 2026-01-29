@@ -43,9 +43,13 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
 
                 const journalsSnap = await getDocs(journalsQuery);
                 // Map as "YYYY-MM-DD_ClassName_SubjectName" for easy lookup
+                // We use a normalized string (lowercase, trimmed) to avoid mismatch
                 const journalKeys = new Set(journalsSnap.docs.map(doc => {
                     const data = doc.data();
-                    return `${data.date}_${data.className}_${data.subjectName}`;
+                    const date = data.date || '';
+                    const className = (data.className || data.class || data.rombel || '').toString().trim().toLowerCase();
+                    const subjectName = (data.subjectName || data.subject || '').toString().trim().toLowerCase();
+                    return `${date}_${className}_${subjectName}`;
                 }));
 
                 const missing = [];
@@ -54,7 +58,7 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
                 for (let i = 0; i < 7; i++) {
                     const checkDate = moment().subtract(i, 'days');
 
-                    // Skip future dates if somehow we iterated forward (logic above is subtract, so safe)
+                    // Skip future dates
                     if (checkDate.isAfter(today)) continue;
 
                     const dayNameIndex = checkDate.day(); // 0-6
@@ -62,11 +66,18 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
                     const dayNameIndo = dayNames[dayNameIndex];
 
                     // Filter schedules for this day name
-                    const daySchedules = schedules.filter(s => s.day === dayNameIndo && s.type === 'teaching');
+                    // RELAXED: If type is missing, we assume it's "teaching" for backward compatibility
+                    const daySchedules = schedules.filter(s => s.day === dayNameIndo && (s.type === 'teaching' || !s.type));
 
                     for (const sched of daySchedules) {
-                        const className = typeof sched.class === 'object' ? sched.class.rombel : sched.class;
-                        const journalKey = `${checkDate.format('YYYY-MM-DD')}_${className}_${sched.subject}`;
+                        const originalClassName = typeof sched.class === 'object' ? sched.class.rombel : (sched.className || sched.class);
+                        const originalSubject = sched.subjectName || sched.subject;
+
+                        const normClassName = (originalClassName || '').toString().trim().toLowerCase();
+                        const normSubject = (originalSubject || '').toString().trim().toLowerCase();
+                        const dateStr = checkDate.format('YYYY-MM-DD');
+
+                        const journalKey = `${dateStr}_${normClassName}_${normSubject}`;
 
                         if (!journalKeys.has(journalKey)) {
                             // For TODAY ONLY: Check if we're within 10 minutes of class ending
@@ -76,11 +87,11 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
                                 // Parse end time and calculate threshold (10 minutes before end)
                                 const todayStr = moment().format('YYYY-MM-DD');
                                 const classEndTime = moment(`${todayStr} ${sched.endTime}`, 'YYYY-MM-DD HH:mm');
-                                const thresholdTime = classEndTime.clone().subtract(10, 'minutes');
+                                const thresholdTime = classEndTime.isValid() ? classEndTime.clone().subtract(10, 'minutes') : null;
                                 const now = moment();
 
                                 // Only add to missing if current time >= threshold (within 10 min of ending or already ended)
-                                if (now.isBefore(thresholdTime)) {
+                                if (thresholdTime && now.isBefore(thresholdTime)) {
                                     // Too early to remind, skip this schedule
                                     continue;
                                 }
@@ -88,18 +99,17 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
 
                             // Add to missing journals
                             missing.push({
-                                date: checkDate.format('YYYY-MM-DD'),
+                                date: dateStr,
                                 formattedDate: checkDate.format('dddd, DD MMM'),
-                                className: className,
-                                subject: sched.subject,
+                                className: originalClassName,
+                                subject: originalSubject,
                                 time: sched.startTime
                             });
                         }
                     }
                 }
 
-                // Sort: oldest missing first ? or newest? Newest (top) usually better visibility
-                // Actually for "Debt", oldest might be more urgent. Let's do latest first.
+                // Sort: Newest (top) usually better visibility
                 missing.sort((a, b) => moment(b.date).diff(moment(a.date)));
 
                 setMissingJournals(missing);

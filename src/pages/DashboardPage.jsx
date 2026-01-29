@@ -13,6 +13,7 @@ import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import JournalReminder from '../components/JournalReminder';
 import TaskReminder from '../components/TaskReminder';
+import ClockDisplay from '../components/ClockDisplay';
 
 // Helper function to get the next occurrence of a day of the week
 const getNextDayOccurrence = (dayOfWeek, timeString, startDate = moment()) => {
@@ -40,82 +41,7 @@ const getNextDayOccurrence = (dayOfWeek, timeString, startDate = moment()) => {
   return currentMoment.toDate();
 };
 
-// Digital Clock Component
-const DigitalClock = () => {
-  const [currentTime, setCurrentTime] = useState(moment());
-  const [showColon, setShowColon] = useState(true);
-
-  useEffect(() => {
-    const timerId = setInterval(() => {
-      const now = moment();
-      setCurrentTime(now);
-      setShowColon(now.milliseconds() < 500);
-    }, 500);
-    return () => clearInterval(timerId);
-  }, []);
-
-  const dayMap = {
-    'Sunday': 'Minggu', 'Monday': 'Senin', 'Tuesday': 'Selasa',
-    'Wednesday': 'Rabu', 'Thursday': 'Kamis', 'Friday': 'Jumat', 'Saturday': 'Sabtu',
-  };
-
-  const monthMap = {
-    'January': 'Januari', 'February': 'Februari', 'March': 'Maret', 'April': 'April',
-    'May': 'Mei', 'June': 'Juni', 'July': 'Juli', 'August': 'Agustus',
-    'September': 'September', 'October': 'Oktober', 'November': 'November', 'December': 'Desember',
-  };
-
-  let formattedDate = currentTime.format('dddd, DD MMMM YYYY');
-  Object.entries(dayMap).forEach(([en, id]) => formattedDate = formattedDate.replace(en, id));
-  Object.entries(monthMap).forEach(([en, id]) => formattedDate = formattedDate.replace(en, id));
-
-  return (
-    <div className="relative group w-full">
-      {/* Premium Glassmorphic Container - More aggressive padding reduction for medium-large screens */}
-      <div className="relative overflow-hidden bg-white/60 dark:bg-black/60 backdrop-blur-2xl border border-white/40 dark:border-gray-800/40 p-4 sm:p-5 md:p-8 lg:p-4 xl:p-8 rounded-[2.5rem] md:rounded-[3rem] shadow-2xl shadow-blue-500/10 dark:shadow-none transition-all duration-700 hover:shadow-blue-500/20">
-
-        {/* Pulsing Aura Background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 md:w-32 h-24 md:h-32 bg-blue-500/20 dark:bg-blue-400/10 blur-[60px] md:blur-[80px] rounded-full animate-pulse pointer-events-none" />
-
-        <div className="relative z-10 text-center">
-          {/* Time Display with Flex to prevent wrapping and ensure center alignment */}
-          {/* We scale down at 'lg' because the layout becomes 1/3 column, then up again at 'xl' */}
-          <div className="relative flex items-baseline justify-center whitespace-nowrap">
-            {/* LCD Layer: Shadow/Off Segments */}
-            <div className="relative font-dseg7classic opacity-[0.03] dark:opacity-[0.05] select-none tracking-tight leading-none">
-              <span className="text-4xl sm:text-5xl md:text-7xl lg:text-4xl xl:text-6xl 2xl:text-7xl">88<span className="opacity-0">:</span>88</span>
-              <span className="text-xl sm:text-2xl md:text-4xl lg:text-2xl xl:text-4xl 2xl:text-5xl ml-1 md:ml-2">88</span>
-            </div>
-
-            {/* Actual Time Layer */}
-            <div className="absolute inset-0 flex items-baseline justify-center font-dseg7classic text-blue-900 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(30,64,175,0.2)] md:drop-shadow-[0_0_15px_rgba(30,64,175,0.3)] dark:drop-shadow-[0_0_20px_rgba(96,165,250,0.5)] tracking-tight leading-none">
-              <span className="text-4xl sm:text-5xl md:text-7xl lg:text-4xl xl:text-6xl 2xl:text-7xl">
-                {currentTime.format('HH')}
-                <span className={`transition-opacity duration-300 ${showColon ? 'opacity-100' : 'opacity-0'}`}>:</span>
-                {currentTime.format('mm')}
-              </span>
-              <span className="text-xl sm:text-2xl md:text-4xl lg:text-2xl xl:text-4xl 2xl:text-5xl ml-1 md:ml-2 opacity-80 brightness-110">
-                {currentTime.format('ss')}
-              </span>
-            </div>
-          </div>
-
-          {/* Date Display */}
-          <div className="mt-4 md:mt-6 lg:mt-3 xl:mt-6 flex flex-col items-center">
-            <div className="h-px w-16 md:w-24 lg:w-16 xl:w-24 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent mb-3 md:mb-4 lg:mb-2 xl:mb-4" />
-            <p className="text-xs sm:text-sm md:text-2xl lg:text-sm xl:text-xl 2xl:text-2xl font-black bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-100 dark:to-indigo-200 bg-clip-text text-transparent tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.2em] lg:tracking-[0.1em] xl:tracking-[0.2em] uppercase">
-              {formattedDate}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Decorative corners - hidden on very small screens to save space */}
-      <div className="hidden sm:block absolute -top-1 -left-1 w-6 h-6 border-t-2 border-l-2 border-blue-500/20 rounded-tl-xl pointer-events-none" />
-      <div className="hidden sm:block absolute -bottom-1 -right-1 w-6 h-6 border-b-2 border-r-2 border-blue-500/20 rounded-br-xl pointer-events-none" />
-    </div>
-  );
-};
+// DigitalClock local removed in favor of imported ClockDisplay
 
 
 
@@ -578,9 +504,8 @@ export default function DashboardPage() {
     <div className="space-y-4">
       {/* Top Section: Clock and Reminder */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 p-4 sm:p-6 rounded-[2rem] sm:rounded-3xl text-black flex flex-col justify-center items-center text-center border-4 border-black shadow-cekung animated-background overflow-hidden">
-          <h1 className="text-sm sm:text-lg font-bold mb-3 md:mb-1">{schoolName}</h1>
-          <DigitalClock />
+        <div className="lg:col-span-1 flex flex-col justify-center items-center text-center">
+          <ClockDisplay />
         </div>
         <div className="lg:col-span-2">
           <TeachingScheduleCard

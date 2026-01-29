@@ -180,6 +180,17 @@ const getSemesterKey = (semester) => {
 };
 
 /**
+ * Detects regional language from subject name (e.g., "Bahasa Daerah (Jawa)" -> "Jawa").
+ * @param {string} subject - The subject name.
+ * @returns {string|null} The regional language name or null.
+ */
+function getRegionalLanguage(subject) {
+  if (!subject) return null;
+  const match = subject.match(/bahasa daerah\s*\(([^)]+)\)/i);
+  return match ? match[1] : null;
+}
+
+/**
  * Normalizes subject name to key used in BSKAP_DATA.
  * Handles "Bahasa Daerah (Region)" -> "Bahasa Daerah" mapping.
  */
@@ -870,6 +881,14 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
       - **DISTRIBUSI SOAL (STRICT)**: ${typeDetails}
       - TOTAL Soal: ${count} butir
 
+      ${getRegionalLanguage(subject) ? `
+      **INSTRUKSI BAHASA DAERAH (${getRegionalLanguage(subject)})**:
+      - Karena mata pelajaran ini adalah Bahasa Daerah, Anda **WAJIB** menggunakan **Bahasa ${getRegionalLanguage(subject)}** untuk seluruh isi soal, stimulus, dan pilihan jawaban.
+      - Gunakan tingkatan bahasa yang sesuai (misal: Ngoko/Kromo untuk Jawa sesuai konteks materi).
+      ${(getRegionalLanguage(subject).toLowerCase().includes('jawa') || getRegionalLanguage(subject).toLowerCase().includes('madura')) ? `- Sertakan penggunaan **Aksara Hanacaraka (Aksara Jawa/Madura)** pada bagian yang relevan (misal: dalam stimulus teks atau pertanyaan tentang penulisan aksara).` : ''}
+      - Tetap gunakan Bahasa Indonesia HANYA untuk instruksi struktural atau field JSON.
+      ` : ''}
+
       **ATURAN MAIN (WAJIB):**
       1. **SOURCE OF TRUTH**: DILARANG keras berimprovisasi di luar ruang lingkup materi di konteks/RPP. Seluruh isi soal, stimulus, dan penjelasan harus selaras dengan buku teks resmi dan standar CP resmi Kemendikdasmen.
       2. **PRINSIP DEEP LEARNING**:
@@ -1148,6 +1167,14 @@ export const generateLessonPlan = async (data) => {
       - **PROFIL LULUSAN (MANDATORY)**: Dimensi yang HARUS digunakan: **${data.profilLulusan}**. DILARANG KERAS berimprovisasi, menambah, atau mengurangi dimensi ini. Gunakan PERSIS seperti tertulis.` : ''}
       ${data.sourceType === 'atp' ? `- **SUMBER UTAMA (ATP)**: RPP ini HARUS diturunkan secara spesifik dari butir Tujuan Pembelajaran (TP) yang tercantum di Alur Tujuan Pembelajaran (ATP). Gunakan Elemen ${data.elemen} sebagai jangkar kompetensi.` : ''}
       
+      ${getRegionalLanguage(data.subject) ? `
+      **INSTRUKSI BAHASA DAERAH (${getRegionalLanguage(data.subject)})**:
+      - Karena mata pelajaran ini adalah Bahasa Daerah, Anda **WAJIB** menggunakan **Bahasa ${getRegionalLanguage(data.subject)}** untuk seluruh isi konten pembelajaran (Tujuan Pembelajaran, Langkah Kegiatan, Materi Ajar, dsb).
+      - Gunakan tingkatan bahasa yang sesuai (misal: Ngoko/Kromo untuk Jawa sesuai konteks materi).
+      ${(getRegionalLanguage(data.subject).toLowerCase().includes('jawa') || getRegionalLanguage(data.subject).toLowerCase().includes('madura')) ? `- Sertakan penggunaan **Aksara Hanacaraka (Aksara Jawa/Madura)** pada bagian yang relevan (terutama di bagian Materi Ajar Mendetail dan Latihan LKPD).` : ''}
+      - Tetap gunakan Bahasa Indonesia HANYA untuk instruksi struktural dan label header dokumen.
+      ` : ''}
+      
       **INTELIGENSI SEMESTER (WAJIB):**
       - Semester Aktif: **${getSemesterLabel(data.semester)}**
       - Fokus: **${BSKAP_DATA.standards.semester_logic[getSemesterKey(data.semester)].focus}**
@@ -1380,7 +1407,7 @@ ${(BSKAP_DATA.standards.profile_lulusan_2025 || []).map(d => `      ${d.id}. **$
       (Peringatan Sistem: Jangan mengubah atau menambah dimensi lain. Gunakan persis seperti yang telah ditentukan di atas).
       ` : `
       Sebutkan dimensi yang paling relevan dengan materi ini dari standar berikut (pilih minimal 1, maksimal 3):
-      - **Keimanan & Ketakwaan**: Beriman dan bertakwa kepada Tuhan YME serta berakhlak mulia.
+      - **Keimanan & Ketakwaan**: Beriman dan bertakwa kepada Tuhan YME serta berakhlak mulia. (Berikan prioritas jika TP melibatkan nilai moral, etika, atau sebagai landasan spiritual ritual kelas).
       - **Kewargaan**: Menjadi warga negara yang cinta tanah air, berkontribusi aktif, dan memahami nilai-nilai Pancasila.
       - **Penalaran Kritis**: Mampu menganalisis informasi, mengevaluasi argumen, dan membuat keputusan rasional.
       - **Kreativitas**: Mampu menghasilkan gagasan orisinal, inovatif, dan solusi baru.
@@ -1424,7 +1451,7 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       ### PERTEMUAN [X] (Topik Spesifik: ...)
       
       **1. Pendahuluan (Mindful Connection) - [10 menit]:**
-      *   **Ritual Pembuka (Mindful):** Salam, Doa, Absensi/Presensi, dan Menanyakan Kabar peserta didik untuk membangun koneksi awal yang hangat dan kesadaran penuh.
+      *   **Ritual Pembuka (Mindful):** Salam pembuka, **Berdoa bersama**, **Presensi/Mengabsen peserta didik**, dan Menanyakan Kabar untuk membangun koneksi awal yang hangat, rasa syukur, dan kesadaran penuh.
       *   **Apersepsi (Meaningful):** Hubungkan materi baru dengan pengalaman atau pengetahuan siswa yang relevan dengan kehidupan nyata mereka.
       *   **Motivasi & Tujuan (Mindful + Joyful):** Sampaikan tujuan pembelajaran dengan cara yang memotivasi dan membuat siswa antusias. Jelaskan MENGAPA materi ini penting untuk mereka.
       *   **Pemantik (Hook - Joyful):** Berikan pemicu rasa ingin tahu seperti video menarik, pertanyaan tantangan, cerita pendek, atau fenomena mengejutkan yang membuat siswa excited untuk belajar.
@@ -1465,9 +1492,10 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       *   **Preview:** Berikan gambaran menarik tentang materi pertemuan berikutnya.
       *   **Ritual Penutup (Mindful):** WAJIB diakhiri dengan **Doa Syukur** dan **Salam Penutup** sebagai tanda syukur atas kelancaran proses belajar.
 
-      **4. Integrasi 6C & Deep Learning (Serta KONSISTENSI TP):**
+      **4. Integrasi 6C & Deep Learning (PRINSIP HUTANG BAYAR):**
+      - **PRINSIP HUTANG BAYAR**: Setiap Dimensi Profil Lulusan yang Anda pilih di Bagian II **WAJIB** memiliki aktivitas nyata di langkah-langkah pembelajaran ini. DILARANG mencantumkan Dimensi yang tidak diajarkan.
       - Pastikan seluruh langkah di pertemuan ini secara eksplisit mengintegrasikan: Character, Citizenship, Collaboration, Communication, Creativity, Critical Thinking.
-      - **CEK KONSISTENSI:** Setiap Tujuan Pembelajaran (TP) yang Anda tulis di atas **HARUS** memiliki aktivitas nyata di langkah-langkah ini. Jangan ada TP yang "terlupakan" atau tidak diajarkan.
+      - **CEK KONSISTENSI TP**: Setiap Tujuan Pembelajaran (TP) yang Anda tulis di atas **HARUS** memiliki aktivitas nyata di langkah-langkah ini. Jangan ada TP yang "terlupakan" atau tidak diajarkan.
 
 
       **CATATAN PENTING TENTANG KEDALAMAN KONTEN (TARGET: OPTIMAL 8-12 HALAMAN TOTAL):**
@@ -1648,7 +1676,8 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       - **WAJIB** gunakan istilah **"Peserta Didik"** pengganti kata "Siswa" di seluruh dokumen.
       - **JANGAN** membuat bagian Tanda Tangan (Mengetahui Kepala Sekolah/Guru). Bagian ini akan ditambahkan otomatis oleh sistem.
       - **JANGAN** menggunakan placeholder seperti "NIP. ....................".
-      - Output harus **langsung dalam format Markdown** tanpa komentar pembuka.
+      - **PRINSIP HUTANG BAYAR (AUDIT KONSISTENSI)**: Periksa kembali hasil akhir Anda. Jika Anda mencantumkan "Penalaran Kritis" di Profil Lulusan, pastikan ada kegiatan diskusi atau analisis mendalam di langkah pembelajaran. Jika Anda mencantumkan "Kemampuan Komunikasi", pastikan ada kegiatan presentasi atau berbagi ide. RPP adalah janji yang harus "dibayar" dalam kegiatan nyata.
+      - Output harus **langsung dalam format Markdown** tanpa komentar pembuka atau penutup dari asisten.
     `;
 
     return await retryWithBackoff(async () => {
@@ -1684,6 +1713,14 @@ export const generateHandout = async (data) => {
     - Jenjang/Kelas: ${data.gradeLevel}
     - Materi Pokok: ${data.materi}
     - Guru: ${data.teacherTitle} ${data.teacherName}
+
+    ${getRegionalLanguage(data.subject) ? `
+    **INSTRUKSI BAHASA DAERAH (${getRegionalLanguage(data.subject)})**:
+    - Karena mata pelajaran ini adalah Bahasa Daerah, Anda **WAJIB** menggunakan **Bahasa ${getRegionalLanguage(data.subject)}** untuk seluruh isi materi edukasi, sapaan, dan tantangan dalam handout ini.
+    - Gunakan tingkatan bahasa yang sesuai.
+    ${(getRegionalLanguage(data.subject).toLowerCase().includes('jawa') || getRegionalLanguage(data.subject).toLowerCase().includes('madura')) ? `- Sertakan penggunaan **Aksara Hanacaraka (Aksara Jawa/Madura)** pada bagian yang relevan (misal: pengenalan aksara, kutipan, atau latihan membaca).` : ''}
+    - Tetap gunakan Bahasa Indonesia HANYA untuk instruksi struktural.
+    ` : ''}
 
     **PRINSIP DEEP LEARNING (WAJIB):**
     Bahan ajar ini harus dirancang agar peserta didik mengalami:
@@ -2043,8 +2080,25 @@ export async function generateATP(data) {
     - Peta Elemen Resmi: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.elemen || [])}
     - **LINGKUP MATERI RESMI (MANDATORY)**: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.materi_inti || [])}
     
+    **🚨 CRITICAL SEMESTER CONSTRAINT (ABSOLUTE RULE):**
+    ✅ **ANDA HANYA BOLEH** menggunakan elemen dari: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.elemen || [])}
+    ✅ **ANDA HANYA BOLEH** menggunakan materi yang MERUJUK pada: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.materi_inti || [])}
+    ❌ **DILARANG KERAS** menggunakan materi dari semester ${getSemesterLabel(semester) === 'Ganjil' ? 'Genap' : 'Ganjil'}
+    ❌ **DILARANG** menambah elemen atau materi di luar list resmi semester ${getSemesterLabel(semester)} di atas
+    🎯 **FOKUS WAJIB**: Semester **${getSemesterLabel(semester)}** dengan filosofi **${BSKAP_DATA.standards.semester_logic[getSemesterKey(semester)].focus}**
+    
+    **📚 CRITICAL GRADE-LEVEL TEXTBOOK CONSTRAINT (ABSOLUTE RULE):**
+    🎯 **REFERENSI WAJIB**: Anda HARUS menggunakan pengetahuan Anda tentang **Buku Teks Resmi Kemendikdasmen / Kemendikbudristek untuk Kelas ${data.gradeLevel}** sebagai panduan utama.
+    ✅ **MANDATORY**: Setiap materi yang Anda pilih dari "LINGKUP MATERI RESMI" di atas HARUS dipetakan ke **urutan bab/topik yang sesuai dengan Buku Pemerintah (Kemendikdasmen/Kemendikbudristek) Kelas ${data.gradeLevel}**.
+    ❌ **DILARANG KERAS**: Mengambil materi yang ada di Buku Teks Kelas ${parseInt(data.gradeLevel) - 1} (kelas di bawahnya) atau Kelas ${parseInt(data.gradeLevel) + 1} (kelas di atasnya).
+    🔍 **VERIFICATION MANDATORY**: Sebelum memilih suatu materi dari list, tanyakan pada diri sendiri: "Apakah topik ini ada di Buku ${data.subject} Kelas ${data.gradeLevel} Kemendikdasmen / Kemendikbudristek?"
+    
+    **CONTOH SPIRAL CURRICULUM (REFERENSI):**
+    - Matematika SMP: Kelas 7 (Bilangan Bulat, Pecahan, Himpunan) → Kelas 8 (Koordinat Kartesius, Teorema Pythagoras, SPLDV) → Kelas 9 (Perpangkatan, Barisan, Fungsi Kuadrat)
+    - Gunakan pengetahuan serupa untuk mata pelajaran ${data.subject} Kelas ${data.gradeLevel}
+    
     **INSTRUKSI PENYUSUNAN (STRICT):**
-    1. **SINKRONISASI SEMESTER**: Pastikan pembagian materi di ATP ini mencerminkan beban kerja semester ${getSemesterLabel(semester)}.
+    1. **MANDATORY SEMESTER LOCK**: Gunakan HANYA elemen dan materi dari "PETA ELEMEN RESMI" dan "LINGKUP MATERI RESMI" di atas. Jika ada elemen yang tidak tercakup di semester ini, SKIP dan jangan paksa.
     2. **DEEP LEARNING PHILOSOPHY (BSKAP 046/H/KR/2025)**:
        - **Mindful**: Pembelajaran yang membangun kesadaran penuh dan fokus (Sense of Awareness).
        - **Meaningful**: Fokus pada kedalaman pemahaman (Deep Learning) dan relevansi dunia nyata, bukan hanya keluasan materi.
@@ -2075,9 +2129,15 @@ export async function generateATP(data) {
     - Mata Pelajaran: ${data.subject}
     - RPP Existing: ${data.existingRPPs?.join(', ') || 'Belum ada'}
 
+    ${getRegionalLanguage(data.subject) ? `
+    **INSTRUKSI BAHASA DAERAH (${getRegionalLanguage(data.subject)})**:
+    - Karena mata pelajaran ini adalah Bahasa Daerah, susunlah narasi Tujuan Pembelajaran (TP) dalam **Bahasa ${getRegionalLanguage(data.subject)}**.
+    - Tetap gunakan Bahasa Indonesia untuk field JSON dan label elemen.
+    ` : ''}
+
     **PEMETAAN PROFIL LULUSAN (8 DIMENSI 2025):**
     Setiap TP HARUS dipetakan ke salah satu atau beberapa dimensi Profil Lulusan berikut:
-    ${BSKAP_DATA.standards.profile_lulusan_2025.map(p => `- ${p.dimensi}`).join('\n    ')}
+    ${BSKAP_DATA.standards.profile_lulusan_2025.map(p => `- ${p.dimensi}${p.dimensi === 'Keimanan & Ketakwaan' ? ' (Gunakan jika TP mengandung unsur karakter, integritas, atau tanggung jawab moral/sosial).' : ''}`).join('\n    ')}
     
     **KOMPETENSI INDUSTRI (STRATEGIS 2026):**
     Perkaya narasi TP (Tujuan Pembelajaran) jika relevan dengan nilai kompetensi industri berikut:
@@ -2086,13 +2146,20 @@ export async function generateATP(data) {
     Gunakan nama dimensi/kompetensi yang relevan dengan TP tersebut.
 
     **STRUKTUR OUTPUT (JSON ARRAY):**
+    ⚠️ PENTING: Field 'elemen' harus HANYA dari list: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.elemen || [])}
+    ⚠️ PENTING: Field 'materi' harus MERUJUK materi dalam list: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.materi_inti || [])}
     [
       { "no": 1, "elemen": "ELEMEN_TUNGGAL", "materi": "JUDUL_UNIK_SPESIFIK", "tp": "TP_DESKRIPTIF_PROYEK/TEORI", "jp": ${data.jpPerWeek}, "profilLulusan": "DIMENSI_8" }
     ]
 
-    **VERIFIKASI AKHIR AUDITOR:**
+    **VERIFIKASI AKHIR AUDITOR (WAJIB DICEK SEBELUM OUTPUT):**
     - "Apakah kedalaman materi sudah sesuai taksonomi Bloom untuk Kelas ${data.gradeLevel}?"
     - "Hitung ulang: Apakah total JP tepat ${data.totalJP} JP? (WAJIB SINKRON)."
+    - "🚨 CRITICAL: Apakah SEMUA elemen yang saya pilih ADA dalam list semester ${getSemesterLabel(semester)}: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.elemen || [])}?"
+    - "🚨 CRITICAL: Apakah SEMUA materi yang saya buat MERUJUK pada lingkup materi semester ${getSemesterLabel(semester)}: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.materi_inti || [])}?"
+    - "🚨 Apakah saya TIDAK menggunakan materi dari semester ${getSemesterLabel(semester) === 'Ganjil' ? 'Genap' : 'Ganjil'}?"
+    - "📚 CRITICAL: Apakah SETIAP materi yang saya pilih SESUAI dengan urutan topik/bab di Buku Teks ${data.subject} Kelas ${data.gradeLevel} Kemendikdasmen / Kemendikbudristek?"
+    - "📚 CRITICAL: Apakah saya TIDAK mengambil topik yang seharusnya ada di Buku Kelas ${parseInt(data.gradeLevel) - 1} atau Kelas ${parseInt(data.gradeLevel) + 1}?"
     `;
 
   try {

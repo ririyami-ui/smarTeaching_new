@@ -25,7 +25,7 @@ export default function AboutPage() {
 
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-semibold text-text-light dark:text-text-dark mb-2">Deskripsi Aplikasi</h2>
-        <p className="text-md">Aplikasi ini dibuat untuk memudahkan memanajemen kegiatan pembelajaran.</p>
+        <p className="text-md">Aplikasi didedikasikan untuk guru hebat Bondowoso, terima kasih untuk semua pihak yang telah memberi masukan dan saran untuk penyempurnaan aplikasi ini.</p>
       </div>
 
       <div className="text-center">
