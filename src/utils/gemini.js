@@ -853,11 +853,11 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
     // Default Example Options Array String
     let exampleOptionsJSON = '["A. Opsi 1", "B. Opsi 2", "C. Opsi 3", "D. Opsi 4", "E. Opsi 5"]';
 
-    if (lowerGrade.includes('sd') || lowerGrade.includes('mi') || lowerGrade.match(/kelas\s*[1-6]\b/)) {
+    if (lowerGrade.includes('sd') || lowerGrade.includes('mi') || lowerGrade.match(/\b(1|2|3|4|5|6|i|ii|iii|iv|v|vi)\b/i)) {
       optionCount = 3;
       optionLabel = "A-C";
       exampleOptionsJSON = '["A. Opsi 1", "B. Opsi 2", "C. Opsi 3"]';
-    } else if (lowerGrade.includes('smp') || lowerGrade.includes('mts') || lowerGrade.match(/kelas\s*(7|8|9)\b/)) {
+    } else if (lowerGrade.includes('smp') || lowerGrade.includes('mts') || lowerGrade.match(/\b(7|8|9|vii|viii|ix)\b/i)) {
       optionCount = 4;
       optionLabel = "A-D";
       exampleOptionsJSON = '["A. Opsi 1", "B. Opsi 2", "C. Opsi 3", "D. Opsi 4"]';
@@ -979,35 +979,33 @@ ${BSKAP_DATA.standards.cognitive_levels.map(l => `          - **${l.id} (${l.lev
           {
             "id": 1,
             "type": "pg", 
-            "competency": "Menganalisis data...", // Kompetensi yang diuji (CP/KD)
-            "pedagogical_materi": "Spreadsheet Basics", // Materi pokok
-            "indicator": "Disajikan narasi detektif...", // Indikator Soal
-            "cognitive_level": "Aplikasi", // Pengetahuan/Pemahaman, Aplikasi, atau Penalaran
-            "stimulus": "<b>KASUS DATA DETECTIVE:</b><br/>Seorang detektif data sedang menelusuri sel-sel di Excel. Ia berada di Kolom C dan Baris 10...",
-            "question": "Berdasarkan narasi detektif di atas, manakah alamat sel yang benar?",
+            "competency": "Menganalisis data...", 
+            "pedagogical_materi": "Materi Pokok", 
+            "indicator": "Indikator soal...", 
+            "cognitive_level": "Aplikasi",
+            "stimulus": "Konteks/Teks/Data...",
+            "question": "Pertanyaan...",
             "options": ${exampleOptionsJSON},
             "answer": "A. Opsi 1", 
             "explanation": "Penjelasan..."
           },
-            "options": ["A. Opsi 1", "B. Opsi 2", "C. Opsi 3", "D. Opsi 4", "E. Opsi 5"],
-            "answer": "A. Opsi 1", // Kunci Jawaban Lengkap
-            "explanation": "Penjelasan logika jawaban..."
-          },
           {
             "id": 2,
             "type": "pg_complex", 
-            "stimulus": "", // Kosong jika ikut soal sebelumnya
+            "stimulus": "", 
             "question": "Pilihlah DUA pernyataan yang benar...",
             "options": ["1. Pernyataan A", "2. Pernyataan B", "3. Pernyataan C", "4. Pernyataan D"],
             "answer": ["1. Pernyataan A", "3. Pernyataan C"],
             "explanation": "..."
           },
+          {
+            "id": 3,
             "type": "matching",
-            "stimulus": "Perhatikan data berikut...",
+            "stimulus": "Data...",
             "question": "Jodohkan...",
             "left_side": ["Premis A", "Premis B"],
-            "right_side": ["Respon 2 (Pasangan A)", "Respon 3 (Pengecoh)", "Respon 1 (Pasangan B)"], // HARUS DIACAK
-            "pairs": [{"left": "Premis A", "right": "Respon 2 (Pasangan A)"}]
+            "right_side": ["Respon 2 (Pasangan A)", "Respon 3 (Pengecoh)", "Respon 1 (Pasangan B)"],
+            "pairs": [{"left": "Premis A", "right": "Respon 2 (Pasangan A)"}, {"left": "Premis B", "right": "Respon 1 (Pasangan B)"}]
           },
           {
             "id": 4,
@@ -1022,17 +1020,17 @@ ${BSKAP_DATA.standards.cognitive_levels.map(l => `          - **${l.id} (${l.lev
           {
             "id": 5,
             "type": "essay",
-            "stimulus": "Kasus singkat...",
+            "stimulus": "Kasus...",
             "question": "Jelaskan...",
-            "answer": "...",
-            "grading_guide": "..."
+            "answer": "Kunci jawaban...",
+            "grading_guide": "Rubrik..."
           },
-           {
+          {
             "id": 6,
-            "type": "uraian", // Uraian Panjang
-            "question": "Uraikan analisis anda mengenai...",
-            "answer": "Jawaban model...",
-            "grading_guide": "Rubrik penilaian..."
+            "type": "uraian",
+            "question": "Uraikan...",
+            "answer": "Model jawaban...",
+            "grading_guide": "Kriteria..."
           }
         ]
       }
