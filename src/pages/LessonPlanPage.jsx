@@ -477,8 +477,17 @@ const LessonPlanPage = () => {
         `;
 
         try {
+            const subjectData = subjects.find(s => s.id === selectedSubject);
+            const subjectName = subjectData?.name || selectedSubject;
+            const topicName = (viewingRPP ? viewingRPP.topic : manualMateri || selectedMaterial?.materi || 'Materi').substring(0, 30);
+
+            // Clean filename from illegal characters
+            const safeSubject = subjectName.replace(/[/\\?%*:|"<>]/g, '-');
+            const safeTopic = topicName.replace(/[/\\?%*:|"<>]/g, '-');
+            const safeGrade = String(selectedGrade).replace(/[/\\?%*:|"<>]/g, '-');
+
             const converted = await asBlob(htmlString);
-            const fileName = `RPP-${selectedSubject}-${selectedGrade}.docx`;
+            const fileName = `RPP_${safeSubject}_${safeGrade}_${safeTopic}.docx`;
             saveAs(converted, fileName);
             toast.success("RPP sedang didownload (.docx)");
         } catch (error) {
