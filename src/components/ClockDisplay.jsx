@@ -62,10 +62,10 @@ const ClockDisplay = ({ size = 'lg', variant = 'card' }) => {
   const isSmall = size === 'sm';
   const isMinimal = variant === 'minimal';
 
-  const segmentSize = isSmall ? 'text-2xl sm:text-3xl' : 'text-5xl sm:text-6xl';
+  const segmentSize = isSmall ? 'text-2xl sm:text-3xl' : 'text-4xl sm:text-5xl';
   const labelSize = isSmall ? 'text-[8px]' : 'text-[10px]';
   const dotSize = isSmall ? 'w-1 h-1' : 'w-1.5 h-1.5 sm:w-2 sm:h-2';
-  const gapSize = isSmall ? 'gap-1' : 'gap-2 sm:gap-4';
+  const gapSize = isSmall ? 'gap-1' : 'gap-1.5 sm:gap-3';
 
   const SegmentDisplay = ({ value, label }) => (
     <div className="flex flex-col items-center">
