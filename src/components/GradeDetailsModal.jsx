@@ -57,6 +57,22 @@ const GradeDetailsModal = ({ date, assessmentType, material, selectedClass, sele
         );
         let gradesSnapshot = await getDocs(gradesQuery);
 
+        // Fallback for legacy grades (using names)
+        if (gradesSnapshot.empty && classObj && subjectObj) {
+          const fallbackGradesQuery = query(
+            collection(db, 'grades'),
+            where('userId', '==', auth.currentUser.uid),
+            where('date', '==', date),
+            where('className', '==', classObj.rombel),
+            where('subjectName', '==', subjectObj.name),
+            where('assessmentType', '==', assessmentType),
+            where('material', '==', material),
+            where('semester', '==', activeSemester),
+            where('academicYear', '==', academicYear)
+          );
+          gradesSnapshot = await getDocs(fallbackGradesQuery);
+        }
+
         const fetchedGrades = gradesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         const gradesMap = new Map();
@@ -211,7 +227,7 @@ const GradeDetailsModal = ({ date, assessmentType, material, selectedClass, sele
             <div className="min-w-full inline-block align-middle">
               <div>
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
-                    <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
+                  <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
                     <tr>
                       <th className="hidden sm:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         NIS
@@ -227,7 +243,7 @@ const GradeDetailsModal = ({ date, assessmentType, material, selectedClass, sele
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {studentGrades.map((row, index) => (
                       <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                         <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white w-24">
+                        <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white w-24">
                           {row.nis}
                         </td>
                         <td className="px-3 sm:px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
