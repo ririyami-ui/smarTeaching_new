@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSettings } from '../utils/SettingsContext';
 import { db, auth } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 import {
     collection,
     query,
@@ -44,6 +45,7 @@ import Modal from '../components/Modal';
 
 const LessonPlanPage = () => {
     const { activeSemester, academicYear, geminiModel } = useSettings();
+    const navigate = useNavigate();
     const [levels, setLevels] = useState([]);
     const [subjects, setSubjects] = useState([]);
     const [selectedGrade, setSelectedGrade] = useState('');
@@ -712,9 +714,21 @@ const LessonPlanPage = () => {
                                                 <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">{plan.topic}</p>
                                                 <p className="text-[10px] text-gray-500 mt-1">{new Date(plan.createdAt?.toDate()).toLocaleDateString('id-ID')}</p>
                                             </div>
-                                            <button onClick={() => handleDelete(plan.id)} className="text-red-400 hover:text-red-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Trash2 size={14} />
-                                            </button>
+                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate('/penilaian-kktp');
+                                                    }}
+                                                    className="text-blue-400 hover:text-blue-600 p-1"
+                                                    title="Lakukan Penilaian Digital"
+                                                >
+                                                    <ClipboardList size={14} />
+                                                </button>
+                                                <button onClick={() => handleDelete(plan.id)} className="text-red-400 hover:text-red-600 p-1">
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))

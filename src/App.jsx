@@ -25,6 +25,7 @@ import QuizGeneratorPage from './pages/QuizGeneratorPage.jsx';
 import PenugasanPage from './pages/PenugasanPage.jsx';
 import RekapIndividuPage from './pages/RekapIndividuPage.jsx';
 import HandoutGeneratorPage from './pages/HandoutGeneratorPage.jsx';
+import AssessmentKktpPage from './pages/PenilaianKktpPage.jsx';
 import DatabaseCleanupPage from './pages/DatabaseCleanupPage.jsx';
 import { ChatProvider } from './utils/ChatContext.jsx';
 import { SettingsProvider } from './utils/SettingsContext.jsx';
@@ -144,6 +145,7 @@ function App() {
                   <Route path="/handout-generator" element={<HandoutGeneratorPage />} />
                   <Route path="/quiz-generator" element={<QuizGeneratorPage />} />
                   <Route path="/penugasan" element={<PenugasanPage />} />
+                  <Route path="/penilaian-kktp" element={<AssessmentKktpPage />} />
                   <Route path="/database-cleanup" element={<DatabaseCleanupPage />} />
                 </Routes>
               </DashboardLayout>

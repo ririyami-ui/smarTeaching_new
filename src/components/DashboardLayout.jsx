@@ -88,6 +88,7 @@ export default function DashboardLayout({ children, user }) {
         { name: 'Absensi Siswa', icon: <ClipboardList size={20} />, path: '/absensi' },
         { name: 'Jurnal Mengajar', icon: <FileText size={20} />, path: '/jurnal' },
         { name: 'Input Nilai', icon: <GraduationCap size={20} />, path: '/nilai' },
+        { name: 'Penilaian KKTP', icon: <ClipboardCheck size={20} />, path: '/penilaian-kktp' },
         { name: 'Penugasan Siswa', icon: <ListTodo size={20} />, path: '/penugasan' },
       ]
     },

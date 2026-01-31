@@ -8,15 +8,17 @@ import { Plus, Trash2, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from './Modal';
 import bskapData from '../utils/bskap_2025_intel.json';
+import { useSettings } from '../utils/SettingsContext';
 
 export default function SubjectMasterData() {
+  const { userProfile } = useSettings();
   const [subjects, setSubjects] = useState([]);
   const [newSubjectCode, setNewSubjectCode] = useState('');
   const [newSubjectName, setNewSubjectName] = useState('');
   const [editingSubjectId, setEditingSubjectId] = useState(null); // State for editing
   const [editedSubjectCode, setEditedSubjectCode] = useState('');
   const [editedSubjectName, setEditedSubjectName] = useState('');
-  const [selectedSchoolLevel, setSelectedSchoolLevel] = useState('SD');
+  const [selectedSchoolLevel, setSelectedSchoolLevel] = useState(userProfile?.schoolLevel || 'SD');
   const [selectedRegion, setSelectedRegion] = useState('');
   const [editedRegion, setEditedRegion] = useState('');
 
@@ -38,6 +40,13 @@ export default function SubjectMasterData() {
     });
     return () => unsubscribe();
   }, []);
+
+  // Sync with profile level changes
+  useEffect(() => {
+    if (userProfile?.schoolLevel && !editingSubjectId) {
+      setSelectedSchoolLevel(userProfile.schoolLevel);
+    }
+  }, [userProfile?.schoolLevel, editingSubjectId]);
 
   const saveSubject = async () => {
     if (!auth.currentUser) {

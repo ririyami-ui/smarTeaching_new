@@ -8,6 +8,7 @@ export default function CreateProfilePage({ onProfileCreated }) {
   const [name, setName] = useState('');
   const [nip, setNip] = useState('');
   const [school, setSchool] = useState('');
+  const [schoolLevel, setSchoolLevel] = useState('SD');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -32,6 +33,7 @@ export default function CreateProfilePage({ onProfileCreated }) {
         name,
         nip,
         school,
+        schoolLevel,
         email: user.email, // Save email for reference
       };
       // Use user.uid as the document ID in the 'users' collection
@@ -76,6 +78,19 @@ export default function CreateProfilePage({ onProfileCreated }) {
             onChange={(e) => setSchool(e.target.value)}
             required
           />
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-gray-500 ml-1">Jenjang Sekolah (SD/SMP/SMA)</label>
+            <select
+              value={schoolLevel}
+              onChange={(e) => setSchoolLevel(e.target.value)}
+              className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all dark:text-white"
+            >
+              <option value="SD">SD (Sekolah Dasar)</option>
+              <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
+              <option value="SMA">SMA (Sekolah Menengah Atas)</option>
+              <option value="SMK">SMK (Sekolah Menengah Kejuruan)</option>
+            </select>
+          </div>
           {error && <p className="text-sm text-red-500 text-center">{error}</p>}
           <StyledButton type="submit" disabled={loading} className="w-full">
             {loading ? 'Menyimpan...' : 'Simpan Profil'}

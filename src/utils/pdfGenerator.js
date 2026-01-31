@@ -780,3 +780,123 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
 
   doc.save(`Rekap_Individu_${student.name.replace(/\s+/g, '_')}.pdf`);
 };
+
+export const generateKktpAssessmentPDF = ({
+  students,
+  kktpData,
+  assessmentScores,
+  teacherName,
+  userProfile,
+  selectedClass,
+  selectedSubject,
+  topic,
+  assessmentDate,
+  isManualMode,
+  manualCriteria
+}) => {
+  const doc = new jsPDF('landscape');
+  const pageWidth = doc.internal.pageSize.width;
+
+  // Header
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text("LAPORAN PENILAIAN DIGITAL KKTP", pageWidth / 2, 15, { align: "center" });
+
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(userProfile?.school || 'Smart Teaching Academy', pageWidth / 2, 22, { align: "center" });
+
+  // Info Block
+  doc.setFontSize(10);
+  doc.text(`Mata Pelajaran: ${selectedSubject || '-'}`, 14, 35);
+  doc.text(`Kelas: ${selectedClass || '-'}`, 14, 41);
+  doc.text(`Materi/Topik: ${topic || '-'}`, 14, 47);
+
+  doc.text(`Semester: ${userProfile?.activeSemester || '-'}`, pageWidth - 80, 35);
+  doc.text(`Tahun Pelajaran: ${userProfile?.academicYear || '-'}`, pageWidth - 80, 41);
+  doc.text(`Tanggal: ${fmtDate(assessmentDate)}`, pageWidth - 80, 47);
+
+  // Prepare Table
+  const activeCriteria = isManualMode ? manualCriteria : (kktpData?.criteria || []);
+  const kktpType = isManualMode ? 'Rubrik' : kktpData?.type;
+
+  const tableColumn = ["No", "Nama Siswa"];
+  activeCriteria.forEach((c, i) => {
+    tableColumn.push(isManualMode ? (c.name || `Aspek ${i + 1}`) : (c.aspect || c.indicator || `Kriteria ${i + 1}`));
+  });
+  tableColumn.push("Nilai Akhir");
+
+  const tableRows = students.map((student, idx) => {
+    const scores = assessmentScores[student.id] || {};
+    const row = [idx + 1, student.name];
+
+    activeCriteria.forEach((_, i) => {
+      const score = scores[i];
+      if (score === undefined || score === null) {
+        row.push("-");
+      } else if (kktpType === 'Deskripsi Kriteria') {
+        row.push(score === 1 ? "V" : "X");
+      } else {
+        row.push(score);
+      }
+    });
+
+    // Calculate Final Score using logic from PenilaianKktpPage
+    let finalScore = 0;
+    if (activeCriteria.length > 0) {
+      if (kktpType === 'Rubrik' || isManualMode) {
+        let sum = 0;
+        activeCriteria.forEach((_, i) => sum += (scores[i] || 0));
+        const max = activeCriteria.length * 4;
+        finalScore = max > 0 ? Math.round((sum / max) * 100) : 0;
+      } else if (kktpType === 'Deskripsi Kriteria') {
+        let checkedCount = 0;
+        activeCriteria.forEach((_, i) => { if (scores[i] === 1) checkedCount++; });
+        finalScore = Math.round((checkedCount / activeCriteria.length) * 100);
+      } else if (kktpType === 'Interval Nilai') {
+        let sum = 0, count = 0;
+        activeCriteria.forEach((_, i) => {
+          if (scores[i] !== undefined) { sum += scores[i]; count++; }
+        });
+        finalScore = count > 0 ? Math.round(sum / count) : 0;
+      }
+    }
+    row.push(finalScore);
+    return row;
+  });
+
+  // Add Table
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: 55,
+    theme: 'grid',
+    styles: { fontSize: 8, halign: 'center' },
+    columnStyles: { 1: { halign: 'left', fontStyle: 'bold' } },
+    headStyles: { fillColor: [59, 130, 246] }
+  });
+
+  // Footer
+  const finalY = doc.autoTable.previous.finalY + 15;
+  const signX = pageWidth - 70;
+  const dateStr = fmtDate(new Date());
+
+  doc.setFontSize(10);
+  doc.text(`${userProfile?.school?.split(' ').pop() || 'Jakarta'}, ${dateStr}`, signX, finalY);
+  doc.text("Guru Mata Pelajaran,", signX, finalY + 7);
+  doc.setFont('helvetica', 'bold');
+  doc.text(teacherName, signX, finalY + 25);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`NIP. ${userProfile?.nip || '....................'}`, signX, finalY + 31);
+
+  if (userProfile?.principalName) {
+    doc.text("Mengetahui,", 14, finalY);
+    doc.text("Kepala Sekolah,", 14, finalY + 7);
+    doc.setFont('helvetica', 'bold');
+    doc.text(userProfile.principalName, 14, finalY + 25);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`NIP. ${userProfile.principalNip || '....................'}`, 14, finalY + 31);
+  }
+
+  doc.save(`Penilaian_KKTP_${selectedClass}_${topic.substring(0, 20)}.pdf`);
+};

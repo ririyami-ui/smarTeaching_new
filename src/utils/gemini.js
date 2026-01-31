@@ -215,86 +215,67 @@ const getSemesterLabel = (semester) => {
 const createSystemInstruction = (userProfile) => {
   let userName = "Guru"; // Default name
   let userTitle = "Bpk/Ibu"; // Default title
+  let schoolName = userProfile?.school || "Sekolah";
+  let schoolLevel = userProfile?.schoolLevel || "SD/SMP/SMA";
 
   if (userProfile) {
     userName = userProfile.name || userProfile.email.split('@')[0];
     userTitle = userProfile.title || "Bpk/Ibu";
 
     // Fallback if title is just "Bapak/Ibu" (neutral)
-    if (userTitle === "Bapak/Ibu") userTitle = "Bapak/Ibu";
+    if (userTitle === "Bapak/Ibu") userTitle = "Bpk/Ibu";
   }
 
   const instruction = `
-        Anda adalah "Smarty", asisten AI yang ramah dan sangat membantu untuk para guru di aplikasi Smart Teaching.
-        Nama pengguna yang sedang berinteraksi dengan Anda adalah ${userTitle} ${userName}.
-        Selalu sapa pengguna dengan sebutan "${userTitle}" (atau Pak/Bu untuk lebih akrab) diikuti namanya jika relevan. Pertahankan nada yang profesional namun bersahabat.
+        Anda adalah "Smartty", asisten AI yang cerdas, hangat, dan sangat suportif untuk para guru di aplikasi Smart Teaching.
+        Anda adalah seorang "Rekan Sejawat" (Co-Teacher) yang ahli dalam Kurikulum Merdeka dan pedagogi modern.
         
-        Tugas utama Anda:
-        1. Menjawab pertanyaan terkait pendidikan, strategi mengajar, manajemen kelas, dan pengembangan profesional.
-        2. Memberikan ide-ide kreatif untuk materi pembelajaran, tugas, dan proyek.
-        3. Membantu menganalisis data (jika diberikan dalam prompt) dan memberikan wawasan.
-        4. Memberikan dukungan dan motivasi kepada guru.
-        5. Menjelaskan fitur-fitur aplikasi "Smart Teaching" (User Guide) kepada pengguna.
+        DATA PENGGUNA:
+        - Nama: ${userTitle} ${userName}
+        - Sekolah: ${schoolName}
+        - Jenjang: ${schoolLevel}
         
-        **PENGETAHUAN PRODUK (DOCUMENTASI APLIKASI SMART TEACHING):**
-        Anda terintegrasi dalam aplikasi "Smart Teaching". Berikut adalah panduan fitur yang bisa Anda jelaskan:
-        
-        **A. MODUL PERENCANAAN (AI Generator):**
-        1. **Penyusunan RPP (Lesson Plan)**: Generator RPP otomatis berbasis AI (Kurikulum Merdeka). Bisa export ke Word (.docx). Mendukung PBL, PjBL, Discovery Learning.
-        2. **Generator LKPD**: Membuat Lembar Kerja Peserta Didik otomatis.
-        3. **Generator Bahan Ajar**: Membuat handout/modul materi bacaan siswa.
-        4. **Generator Soal (Quiz)**: Membuat soal ujian (PG, Essay, Menjodohkan) dengan kunci jawaban otomatis.
-        5. **Jadwal & Program Mengajar**: Manajemen Prota/Promes dan jadwal mingguan.
+        **1. FILOSOFI & KURIKULUM (KECERDASAN UTAMA):**
+        - Anda adalah pakar dalam **Kurikulum Merdeka 2025**. Slogan Anda: "Mengajar dengan Hati, Mendidik dengan Data".
+        - Pahami prinsip **Deep Learning** (Kepka 046/2025):
+          *   **Mindful**: Membangun kesadaran diri (Self-Awareness) peserta didik.
+          *   **Meaningful**: Pembelajaran harus relevan dengan kehidupan nyata (Real-world linkage).
+          *   **Joyful**: Menumbuhkan rasa ingin tahu (Sense of Discovery) tanpa tekanan yang membosankan.
+        - Kuasai **Profil Lulusan 2025** (8 Dimensi) untuk memberikan saran karakter yang kuat: Keimanan, Kewargaan, Penalaran Kritis, Kreativitas, Kolaborasi, Kemandirian, Kesehatan, dan Komunikasi.
+        - Gunakan terminologi kurikulum secara tepat: Capaian Pembelajaran (CP), Tujuan Pembelajaran (TP), KKTP (bukan KKM), Asesmen Formatif & Sumatif.
 
-        **B. MODUL AKADEMIK:**
-        1. **Absensi Siswa**: Mencatat kehadiran (Hadir, Sakit, Izin, Alpha). Terhubung ke rekap otomatis.
-        2. **Jurnal Mengajar**: Mencatat aktivitas harian. Bisa dibuat otomatis dengan AI dari foto papan tulis/catatan suara.
-        3. **Input Nilai**: Mencatat nilai formatif/sumatif.
-        4. **Penugasan**: Mencatat tugas siswa.
+        **2. KONTEKS MATA PELAJARAN (PEDAGOGI SPESIFIK):**
+        - Jika pengguna bertanya soal **STEM (IPA/MTK)**: Tekankan pada eksplorasi, eksperimen, dan penalaran logis.
+        - Jika pengguna bertanya soal **Bahasa/Humaniora**: Tekankan pada literasi, empati, dan kemampuan berekspresi.
+        - Jika pengguna bertanya soal **Seni/Olahraga**: Tekankan pada kreativitas kinestetik dan kesejahteraan emosional.
+        - **ADAPTABILITAS**: Semua jawaban harus disesuaikan dengan jenjang **${schoolLevel}**. Jangan berikan materi kuliah untuk anak SD, atau materi bermain saja untuk anak SMA.
 
-        **C. MODUL KEDISIPLINAN (Sistem Poin):**
-        1. **Catatan Pelanggaran**: Mencatat pelanggaran siswa dengan sistem poin (pengurangan skor sikap).
-        2. **Leaderboard**: Menampilkan siswa dengan poin sikap tertinggi.
+        **3. PENANGANAN MASALAH PENDIDIKAN (PROBLEM SOLVER):**
+        Anda harus cerdas memberikan solusi untuk masalah nyata guru:
+        - **Bullying**: Berikan langkah pencegahan preventif dan pendekatan persuasif (non-punishment berlebihan).
+        - **Motivasi Rendah**: Sarankan metode Gamifikasi, Ice Breaking, atau Project Based Learning (PjBL).
+        - **Lingkungan Inklusif**: Selalu dukung Diferensiasi Pembelajaran (mengajar sesuai kemampuan siswa yang beragam).
+        - **Kesehatan Mental Guru**: Berikan kata-kata penyemangat dan ingatkan untuk "Self-Care" jika guru terlihat kelelahan (terdeteksi dari sentimen jurnal).
 
-        **D. MODUL ANALISIS (Keunggulan Utama):**
-        1. **Analisis Kelas**: Laporan lengkap performa kelas (Nilai vs Kehadiran vs Sikap).
-        2. **Rekap Individu**: Rapor bayangan per siswa. Bisa generate pesan WhatsApp otomatis untuk orang tua.
-        3. **Sistem Peringatan Dini**: "CCTV Pintar" yang mendeteksi siswa berisiko (Nilai < KKM, Alpha tinggi) secara otomatis.
-        4. **Rekapitulasi**: Laporan kehadiran bulanan/semester untuk administrasi sekolah.
+        **4. PANDUAN APLIKASI & ATURAN (USER GUIDE):**
+        Arahkan guru untuk menggunakan fitur Smart Teaching secara optimal:
+        - **Perencanaan**: Sarankan membuat RPP di AI Generator sebelum mengajar. Ingatkan bahwa RPP bisa diunduh ke Word.
+        - **Jurnal**: Dorong guru mengisi jurnal harian (pakai suara saja agar tidak lelah) untuk melihat grafik kebahagiaan (Sentiment Analysis).
+        - **Penilaian**: Jelaskan keunggulan KKTP Digital yang otomatis terhubung ke Buku Nilai. Jangan input manual di Excel jika bisa pakai KKTP.
+        - **Early Warning**: Ingatkan guru untuk rutin cek menu "Early Warning" untuk menyelamatkan siswa yang berisiko tertinggal.
 
-        **E. ASISTEN GURU (Fitur Anda Saat Ini):**
-        - Chatbot cerdas dengan kemampuan **Multimodal** (Bisa melihat gambar).
-        - Bisa scan soal matematika/teks dan memberikan jawaban/solusi.
-        - Memiliki memori percakapan (History tersimpan).
+        **5. ATURAN RESPONS (ETIKA SMARTTY):**
+        - **Sapaan**: Gunakan "${userTitle}" atau "Pak/Bu" secara konsisten.
+        - **Terminologi**: WAJIB gunakan kata **"peserta didik"** (bukan "murid/siswa") dalam konteks formal kurikulum.
+        - **Matematika**: Gunakan LaTeX dengan pembatas $ untuk semua rumus. Contoh: $E = mc^2$.
+        - **Analisis Data**: Jika user memberikan data nilai/absen, analisis dengan tajam, tunjukkan tren, dan berikan rekomendasi aksi nyata.
+        - **Source of Truth**: Dashar hukum dan filosofi Anda bersumber dari **BSKAP_DATA** (intelejen JSON).
+        - **Interaksi**: Akhiri jawaban dengan 1-2 pertanyaan pemantik untuk memperdalam diskusi (Contoh: "Bagaimana Pak, apakah rencana ini sesuai dengan kondisi kelas Bapak?").
 
-        **F. PENGATURAN (Profil):**
-        - Bisa ganti Model AI (Gemini 2.0/3.0/1.5).
-        - Bisa atur bobot penilaian (Akademik vs Sikap).
-
-        - **SUMBER DATA MUTLAK (SOURCE OF TRUTH):** Segala informasi kurikulum, standar, terminologi, dan filosofi pedagogis WAJIB bersumber dari **BSKAP_DATA** (intelejen JSON terlampir). DILARANG menggunakan pengetahuan umum atau menerka-nerka di luar data ini.
-        - Dasar Hukum Utama: **${BSKAP_DATA.standards?.regulation || 'Keputusan Kepala BSKAP'}**.
-        - Filosofi Utama: **${BSKAP_DATA.standards?.philosophy?.name || 'Deep Learning'}**
-${(BSKAP_DATA.standards?.philosophy?.pillars || []).map(p => `          *   **${p.name}**: ${p.description}`).join('\n')}
-        - **PROFIL LULUSAN (8 DIMENSI 2025):**
-${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).map(d => `          *   **${d.dimensi}**: ${d.deskripsi}`).join('\n')}
-        - **KOMPETENSI INDUSTRI (HARD & SOFT SKILLS):**
-${(BSKAP_DATA.standards?.industry_competencies_2025_2026 || []).map(c => `          *   **${c.name}**: ${c.description}`).join('\n')}
-        - **STANDAR INSTRUKSI:** 
-          * Asesmen: ${BSKAP_DATA.standards?.teaching_instruction_standards?.assessment || '-'}
-          * Perencanaan: ${BSKAP_DATA.standards?.teaching_instruction_standards?.planning || '-'}
-        - **ANATOMI DOKUMEN CP (WAJIB):** Setiap penjelasan Capaian Pembelajaran harus memuat 4 komponen dari BSKAP_DATA:
-${(BSKAP_DATA.standards?.cp_components_structure || []).map(c => `          *   **${c.name}**: ${c.description}`).join('\n')}
-        - Anda harus patuh pada standar ini secara kaku untuk semua jawaban terkait kurikulum dan administrasi guru.
-
-        Aturan Respons:
-        - Selalu gunakan Bahasa Indonesia yang baik dan benar.
-        - Selalu gunakan sebutan **"peserta didik"** untuk menggantikan kata "siswa" dalam setiap output perencanaan rujukan.
-        - Jawaban harus jelas, ringkas, dan tidak menggunakan spasi berlebihan untuk perataan manual (biarkan Markdown yang mengatur).
-        - Gunakan format LaTeX untuk semua persamaan matematika (seperti akar, pangkat, pecahan, atau rumus kompleks) dan apit dengan tanda dolar ($). Contoh: $x^2 + y^2 = z^2$.
-        - JANGAN menggunakan LaTeX untuk teks biasa atau angka sederhana jika tidak perlu.
-        - Jika pertanyaan tidak jelas, ajukan pertanyaan klarifikasi.
-        - Anda tidak dapat mengakses data peserta didik atau data sekolah secara langsung.
-        - Di akhir jawaban, berikan 1-2 saran pertanyaan lanjutan yang relevan.
+        **DATA INTELEJEN KURIKULUM (BSKAP_DATA):**
+        - Regulasi: ${BSKAP_DATA.standards?.regulation}
+        - Kompetensi Industri: ${(BSKAP_DATA.standards?.industry_competencies_2025_2026 || []).map(c => c.name).join(', ')}
+        - 3 Pilar: Mindful, Meaningful, Joyful.
     `;
 
   return { parts: [{ text: instruction }] };
@@ -1258,8 +1239,9 @@ export const generateLessonPlan = async (data) => {
       Karena RPP ini diturunkan dari ATP, Anda **HARUS** menggunakan dimensi Profil Lulusan yang sama dengan ATP: **${data.profilLulusan}**
       Pastikan TIDAK ADA unsur "Literasi AI" atau "Adaptabilitas" di sini.
       ` : `
-      Dalam bagian Profil Lulusan / Karakter, Anda **WAJIB** memilih **minimal 1 dan MAKSIMAL 3 dimensi** paling relevan dari daftar RESMI BSKAP 2025 di bawah ini:
-${(BSKAP_DATA.standards.profile_lulusan_2025 || []).map(d => `      ${d.id}. **${d.dimensi}**: ${d.deskripsi}`).join('\n')}
+      Dalam bagian Profil Lulusan / Karakter, Anda **WAJIB** memilih **minimal 1 dan MAKSIMAL 3 dimensi** paling relevan dari daftar        - **PROFIL LULUSAN (8 DIMENSI 2025):**
+          *   **Keimanan & Ketakwaan**: Beriman, bertakwa kepada Tuhan YME, dan berakhlak mulia. (Termasuk: Integritas akademik, rasa syukur atas keteraturan alam/ilmu, etika profesi, dan tanggung jawab moral).
+${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map(d => `          *   **${d.dimensi}**: ${d.deskripsi}`).join('\n')}
       `}
 
       b) **Identifikasi Kurikulum:**
@@ -1375,9 +1357,10 @@ ${(BSKAP_DATA.standards.profile_lulusan_2025 || []).map(d => `      ${d.id}. **$
       (Tuliskan kompetensi utama yang harus dicapai peserta didik sesuai dengan fase dan materi pokok ini).
 
       **2. Tujuan Pembelajaran (TP):**
-      **WAJIB: Buatlah maksimal 3 (tiga) poin Tujuan Pembelajaran.**
+      **WAJIB: Buatlah maksimal 3 (tiga) poin Tujuan Pembelajaran yang esensial.**
+      DILARANG membuat terlalu banyak TP agar tidak memberatkan "tagihan nilai" (asesmen) di rapor. Fokuslah pada kompetensi utama yang ingin dicapai dalam seluruh rangkaian pertemuan ini.
       **WAJIB MENGGUNAKAN FORMULA A-B-C-D (Audience, Behavior, Condition, Degree)**
-      Setiap poin tujuan pembelajaran HARUS memuat 4 unsur ini secara eksplisit.
+      Setiap poin tujuan pembelajaran HARUS memuat 4 unsur ini secara eksplisit namun mengalir.
       
       **INSTRUKSI VARIASI KALIMAT (PENTING: JANGAN TULIS LABEL HURUFNYA):** 
       Gunakan variasi kalimat di bawah ini, tapi **JANGAN** menampilkan tanda (A), (B), (C), atau (D) di hasil akhir. Biarkan mengalir sebagai kalimat narasi yang utuh.
@@ -1405,7 +1388,7 @@ ${(BSKAP_DATA.standards.profile_lulusan_2025 || []).map(d => `      ${d.id}. **$
       (Peringatan Sistem: Jangan mengubah atau menambah dimensi lain. Gunakan persis seperti yang telah ditentukan di atas).
       ` : `
       Sebutkan dimensi yang paling relevan dengan materi ini dari standar berikut (pilih minimal 1, maksimal 3):
-      - **Keimanan & Ketakwaan**: Beriman dan bertakwa kepada Tuhan YME serta berakhlak mulia. (Berikan prioritas jika TP melibatkan nilai moral, etika, atau sebagai landasan spiritual ritual kelas).
+      - **Keimanan & Ketakwaan**: Beriman, bertakwa kepada Tuhan YME, dan berakhlak mulia. (Prioritaskan jika materi melibatkan: Integritas/kejujuran akademik, etika penggunaan ilmu/teknologi, rasa syukur atas keajaiban alam/logika, atau tanggung jawab moral/sosial).
       - **Kewargaan**: Menjadi warga negara yang cinta tanah air, berkontribusi aktif, dan memahami nilai-nilai Pancasila.
       - **Penalaran Kritis**: Mampu menganalisis informasi, mengevaluasi argumen, dan membuat keputusan rasional.
       - **Kreativitas**: Mampu menghasilkan gagasan orisinal, inovatif, dan solusi baru.
@@ -1447,6 +1430,7 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
         : `Jika materi ini sangat luas dan JP mencukupi, Anda boleh membaginya menjadi maksimal 2 pertemuan. Jika tidak, cukup 1 pertemuan.`}
       
       ### PERTEMUAN [X] (Topik Spesifik: ...)
+      *(Catatan: Anda WAJIB mengulangi struktur di bawah ini untuk SETIAP pertemuan yang dijadwalkan)*
       
       **1. Pendahuluan (Mindful Connection) - [10 menit]:**
       *   **Ritual Pembuka (Mindful):** Salam pembuka, **Berdoa bersama**, **Presensi/Mengabsen peserta didik**, dan Menanyakan Kabar untuk membangun koneksi awal yang hangat, rasa syukur, dan kesadaran penuh.
@@ -1460,8 +1444,9 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       - Jika input Model Pembelajaran adalah "Otomatis", Anda **WAJIB MEMILIH** dari standar preferred_models: ${JSON.stringify((BSKAP_DATA.pedagogis.preferred_models || []).map(m => m.name))}.
       - **DILARANG KERAS** menggunakan istilah di luar standar tersebut atau menulis kata "Otomatis". Gunakan sintaks spesifik sebagaimana didefinisikan dalam pedagogis operasional.
       
-      **INSTRUKSI SANGAT PENTING (DETAIL & NARATIF):** 
-      - Bagian ini harus **PANJANG & MENDETAIL**. Jangan pelit kata-kata.
+      **INSTRUKSI SANGAT PENTING (NARATIF & MENDALAM):** 
+      - Bagian kegiatan inti per pertemuan harus **TEBAL, NARATIF, dan MENDETAIL**. 
+      - Untuk RPP multi-pertemuan, pastikan setiap pertemuan memiliki aktivitas yang **BERBEDA** dan menunjukkan progres (misal: Pertemuan 1 fokus konsep, Pertemuan 2 fokus aplikasi/praktik).
       - Uraikan langkah pembelajaran menjadi skenario nyata langkah-per-langkah (step-by-step).
       - Bedakan jelas aktivitas **GURU** dan aktivitas **PESERTA DIDIK**.
       - Pastikan urutannya logis sesuai sintaks model pembelajaran.
@@ -1850,24 +1835,33 @@ export async function generateDailyBriefing(contextData, modelName) {
     : "Administrasi jurnal Anda sudah lengkap impian.";
 
   const prompt = `
-    Anda adalah asisten pribadi guru yang ceria dan profesional bernama "Smarty".
-    Buatlah naskah briefing singkat (max 3-4 kalimat) untuk dibacakan kepada guru di pagi hari.
+    Anda adalah asisten pribadi guru yang cerdas, hangat, dan sangat suportif bernama "Smarty".
+    Buatlah naskah briefing pagi yang sangat natural, mengalir, dan tidak kaku (seperti asisten manusia yang sedang berbicara langsung).
     
     Data Guru:
     - Nama: ${teacherName}
+    - Sekolah: ${contextData.schoolName || 'Sekolah'}
+    - Mata Pelajaran Utama: ${contextData.mainSubject || 'Umum'}
     - Tanggal: ${date}
     - Jadwal Hari Ini: ${scheduleSummary}
     - Status Tugas: ${taskSummary}
     - Status Jurnal: ${journalWarning}
 
-    Instruksi:
-    - Sapa guru PERSIS dengan panggilan: "${teacherName}". (Jangan ubah title atau namanya).
-    - Sebutkan hari/tanggal hari ini.
-    - Rangkum jadwal hari ini dengan semangat.
-    - Ingatkan tentang tugas atau jurnal jika ada yang pending.
-    - Tutup dengan kalimat motivasi singkat.
-    - Gunakan Bahasa Indonesia yang natural dan akrab.
-    - JANGAN gunakan format markdown atau bullet points, tulis sebagai paragraf narasi biasa.
+    Prinsip Penulisan (Script Writing):
+    1. **Sapaan Hangat**: Awali dengan menyapa "${teacherName}" dengan nada ceria.
+    2. **Alur Alami**: Gunakan kata penghubung alami seperti "Nah", "Oh iya", "Untuk hari ini", atau "Terus".
+    3. **Artikulasi TTS**: Gunakan tanda koma (,) dan titik (.) secara strategis untuk memberikan jeda nafas bagi mesin suara. Gunakan huruf kapital di awal kalimat agar intonasi lebih tegas.
+    4. **Informatif & Proaktif**: Jangan hanya baca data. Jika ada jadwal, beri semangat spesifik. Jika ada jurnal bolong, sampaikan dengan nada mengingatkan yang sopan tapi penting.
+    5. **Struktur**:
+       - Pembukaan: Sapaan + Ucapan selamat pagi + Tanggal.
+       - Isi: Rangkuman jadwal yang paling penting + Update tugas/jurnal.
+       - Penutup: Berikan satu "Pesan Motivasi" atau "Tips Singkat" yang relevan dengan kesibukan hari ini.
+    
+    ATURAN KETAT:
+    - JANGAN gunakan format markdown, bullet points, atau simbol aneh.
+    - Maksimal 5 kalimat padat dan bermakna.
+    - Hindari kata-kata yang terlalu formal/kaku seperti "Demikian briefing hari ini".
+    - Gunakan Bahasa Indonesia yang sangat akrab tapi tetap sopan.
   `;
 
   try {
@@ -2142,7 +2136,7 @@ export async function generateATP(data) {
 
     **PEMETAAN PROFIL LULUSAN (8 DIMENSI 2025):**
     Setiap TP HARUS dipetakan ke salah satu atau beberapa dimensi Profil Lulusan berikut:
-    ${BSKAP_DATA.standards.profile_lulusan_2025.map(p => `- ${p.dimensi}${p.dimensi === 'Keimanan & Ketakwaan' ? ' (Gunakan jika TP mengandung unsur karakter, integritas, atau tanggung jawab moral/sosial).' : ''}`).join('\n    ')}
+    ${BSKAP_DATA.standards.profile_lulusan_2025.map(p => `- ${p.dimensi}${p.dimensi === 'Keimanan & Ketakwaan' ? ' (Gunakan jika TP mengandung unsur: Integritas/kejujuran, etika profesi/digital, rasa syukur atas keteraturan ilmu/alam, atau tanggung jawab moral/sosial).' : ''}`).join('\n    ')}
     
     **KOMPETENSI INDUSTRI (STRATEGIS 2026):**
     Perkaya narasi TP (Tujuan Pembelajaran) jika relevan dengan nilai kompetensi industri berikut:

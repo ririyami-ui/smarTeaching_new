@@ -11,6 +11,7 @@ export default function ProfileEditor() {
   const [title, setTitle] = useState('Bapak/Ibu'); // New State: Sapaan
   const [nip, setNip] = useState('');
   const [school, setSchool] = useState('');
+  const [schoolLevel, setSchoolLevel] = useState('SD'); // New State: Jenjang
   const [principalName, setPrincipalName] = useState('');
   const [principalNip, setPrincipalNip] = useState('');
   const [loading, setLoading] = useState(true);
@@ -43,6 +44,7 @@ export default function ProfileEditor() {
             setTitle(profileData.title || 'Bapak/Ibu');
             setNip(profileData.nip || '');
             setSchool(profileData.school || '');
+            setSchoolLevel(profileData.schoolLevel || 'SD');
             setPrincipalName(profileData.principalName || '');
             setPrincipalNip(profileData.principalNip || '');
             setAcademicYear(profileData.academicYear || '');
@@ -85,6 +87,7 @@ export default function ProfileEditor() {
         title,
         nip,
         school,
+        schoolLevel,
         principalName,
         principalNip,
         academicYear,
@@ -192,6 +195,22 @@ export default function ProfileEditor() {
             onChange={(e) => setSchool(e.target.value)}
             required
           />
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-gray-500 ml-1">Jenjang Sekolah Utama (Konteks AI)</label>
+            <StyledSelect
+              value={schoolLevel}
+              onChange={(e) => setSchoolLevel(e.target.value)}
+              required
+            >
+              <option value="SD">SD (Sekolah Dasar)</option>
+              <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
+              <option value="SMA">SMA (Sekolah Menengah Atas)</option>
+              <option value="SMK">SMK (Sekolah Menengah Kejuruan)</option>
+            </StyledSelect>
+            <p className="text-[10px] text-gray-400 mt-1 italic">
+              *Membantu Smartty memberikan saran materi dan kurikulum yang sesuai jenjang Anda.
+            </p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <StyledInput
               type="text"

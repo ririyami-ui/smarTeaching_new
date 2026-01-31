@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, writeBatch } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import moment from 'moment';
+import { Trash2, AlertTriangle, X } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 import StyledInput from './StyledInput';
 import StyledSelect from './StyledSelect';
@@ -23,6 +25,12 @@ const RiwayatNilai = ({ classes, subjects }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedAssessmentType, setSelectedAssessmentType] = useState('');
   const [selectedMaterial, setSelectedMaterial] = useState('');
+
+  // Delete Modal State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const { activeSemester, academicYear } = useSettings();
 
   const handleShowHistory = async () => {
@@ -63,11 +71,12 @@ const RiwayatNilai = ({ classes, subjects }) => {
         where('semester', '==', activeSemester),
         where('academicYear', '==', academicYear)
       );
-      let querySnapshot = await getDocs(gradesQuery);
+      const modernSnapshot = await getDocs(gradesQuery);
+      let allDocs = [...modernSnapshot.docs];
 
-      // Fallback for legacy grades
-      if (querySnapshot.empty && classObj && subjectObj) {
-        gradesQuery = query(
+      // Always check for legacy grades (using names) to ensure mixed history appears
+      if (classObj && subjectObj) {
+        const legacyQuery = query(
           collection(db, 'grades'),
           where('userId', '==', auth.currentUser.uid),
           where('className', '==', classObj.rombel),
@@ -77,10 +86,18 @@ const RiwayatNilai = ({ classes, subjects }) => {
           where('semester', '==', activeSemester),
           where('academicYear', '==', academicYear)
         );
-        querySnapshot = await getDocs(gradesQuery);
+        const legacySnapshot = await getDocs(legacyQuery);
+
+        // Merge legacy docs, avoiding duplicates if any ID matches (unlikely but safe)
+        const existingIds = new Set(allDocs.map(d => d.id));
+        legacySnapshot.docs.forEach(doc => {
+          if (!existingIds.has(doc.id)) {
+            allDocs.push(doc);
+          }
+        });
       }
 
-      const submittedGrades = querySnapshot.docs.map(doc => doc.data());
+      const submittedGrades = allDocs.map(doc => doc.data());
 
       const gradesBySession = submittedGrades.reduce((acc, grade) => {
         const key = `${grade.date}-${grade.assessmentType}-${grade.material}`;
@@ -130,6 +147,55 @@ const RiwayatNilai = ({ classes, subjects }) => {
     setSelectedAssessmentType(item.assessmentType);
     setSelectedMaterial(item.material);
     setShowDetailsModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      setIsDeleting(true);
+      // We need to query specific grades to delete
+      const q = query(
+        collection(db, 'grades'),
+        where('userId', '==', auth.currentUser.uid),
+        where('classId', '==', selectedClass),
+        where('subjectId', '==', selectedSubject),
+        where('date', '==', itemToDelete.date),
+        where('assessmentType', '==', itemToDelete.assessmentType),
+        where('material', '==', itemToDelete.material),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear)
+      );
+
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) {
+        toast.error("Data tidak ditemukan atau sudah terhapus.");
+        handleShowHistory();
+        setShowDeleteModal(false);
+        return;
+      }
+
+      const batch = writeBatch(db);
+      snapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+      toast.success("Data nilai berhasil dihapus.");
+      handleShowHistory(); // Refresh list
+    } catch (error) {
+      console.error("Error deleting assessment:", error);
+      toast.error("Gagal menghapus data.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const handleDeleteClick = (item) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
   };
 
   const riwayatNilaiColumns = [
@@ -215,7 +281,12 @@ const RiwayatNilai = ({ classes, subjects }) => {
                     </td>
                     <td className="px-6 py-4 whitespace-normal text-sm text-gray-800 dark:text-gray-200">{row.details}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
-                      <StyledButton onClick={() => handleShowDetails(row)}>Detail & Edit</StyledButton>
+                      <div className="flex items-center gap-2">
+                        <StyledButton onClick={() => handleShowDetails(row)} size="sm">Detail</StyledButton>
+                        <StyledButton onClick={() => handleDeleteClick(row)} variant="danger" size="sm" className="bg-red-100 text-red-600 hover:bg-red-200 border-red-200">
+                          <Trash2 size={16} />
+                        </StyledButton>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -236,6 +307,46 @@ const RiwayatNilai = ({ classes, subjects }) => {
           classes={classes}
           subjects={subjects}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-scale-up">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full">
+                <AlertTriangle size={32} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Hapus Data Nilai?</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  Anda akan menghapus nilai untuk materi <br />
+                  <span className="font-bold text-gray-700 dark:text-gray-300">"{itemToDelete?.material}"</span>.
+                </p>
+                <p className="text-xs text-red-500 mt-2 font-medium">
+                  Tindakan ini tidak dapat dibatalkan.
+                </p>
+              </div>
+
+              <div className="flex gap-3 w-full mt-2">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition shadow-lg shadow-red-200 dark:shadow-none flex justify-center items-center gap-2"
+                >
+                  {isDeleting ? 'Menghapus...' : 'Ya, Hapus'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

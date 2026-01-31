@@ -3,7 +3,8 @@ import { BookOpen, Calendar, List, Clock, Save, ChevronDown, Check, Trash, Uploa
 import { collection, getDocs, query, where, writeBatch, doc, serverTimestamp, orderBy, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import moment from 'moment';
-import { analyzeTeachingJournals } from '../utils/gemini'; // Add this line
+import { analyzeTeachingJournals } from '../utils/gemini';
+import { generateDataHash } from '../utils/cacheUtils'; // Caching logic
 import toast from 'react-hot-toast';
 import StyledInput from '../components/StyledInput';
 import StyledSelect from '../components/StyledSelect';
@@ -142,12 +143,65 @@ export default function JurnalPage() {
       const fetchedJournals = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setJournals(fetchedJournals);
 
-      // --- Start AI Analysis ---
+      // --- Start AI Analysis with Caching ---
       setIsAnalyzingAI(true);
-      const aiResults = await analyzeTeachingJournals(fetchedJournals, geminiModel);
-      setAiSummary(aiResults.summary);
-      setAiSentimentPercentage(aiResults.sentiment.percentage);
-      setAiSentimentExplanation(aiResults.sentiment.explanation);
+
+      // 1. Generate hash for current content
+      // Only hash fields that Affect the AI analysis to ensure stability
+      const dataToHash = fetchedJournals.map(j => ({
+        d: j.date,
+        m: j.material,
+        o: j.learningObjectives,
+        r: j.reflection,
+        c: j.challenges
+      }));
+      const currentHash = generateDataHash(dataToHash);
+      const cacheKey = `journal_analysis_${auth.currentUser.uid}_${activeSemester}_${academicYear}`;
+      const cachedData = localStorage.getItem(cacheKey);
+
+      let shouldUseCache = false;
+      if (cachedData) {
+        const parsedCache = JSON.parse(cachedData);
+        if (parsedCache.hash === currentHash) {
+          // Cache HIT - Use saved analysis
+          console.log("Using cached AI Journal Analysis (Token Saver)");
+          setAiSummary(parsedCache.summary);
+          setAiSentimentPercentage(parsedCache.sentiment.percentage);
+          setAiSentimentExplanation(parsedCache.sentiment.explanation);
+          shouldUseCache = true;
+        }
+      }
+
+      if (!shouldUseCache) {
+        // Cache MISS - Call AI API
+        console.log("Fetching fresh AI Journal Analysis...");
+        if (fetchedJournals.length > 0) {
+          try {
+            const aiResults = await analyzeTeachingJournals(fetchedJournals, geminiModel);
+
+            // Save result to state
+            setAiSummary(aiResults.summary);
+            setAiSentimentPercentage(aiResults.sentiment.percentage);
+            setAiSentimentExplanation(aiResults.sentiment.explanation);
+
+            // Update Cache
+            localStorage.setItem(cacheKey, JSON.stringify({
+              hash: currentHash,
+              summary: aiResults.summary,
+              sentiment: aiResults.sentiment,
+              timestamp: Date.now()
+            }));
+          } catch (err) {
+            console.error("AI Analysis failed:", err);
+            // Don't nuke old data on error, maybe keep old state or show error
+          }
+        } else {
+          // Clear if no journals
+          setAiSummary('');
+          setAiSentimentPercentage(0);
+          setAiSentimentExplanation('');
+        }
+      }
       setIsAnalyzingAI(false);
       // --- End AI Analysis ---
 

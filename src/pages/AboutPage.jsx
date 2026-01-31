@@ -11,7 +11,7 @@ export default function AboutPage() {
           alt="Smart Teaching Logo"
           className="w-32 h-32 mb-4"
         />
-        <p className="text-lg font-semibold">Aplikasi Versi. 2.0.1</p>
+        <p className="text-lg font-semibold">Aplikasi Versi. 2.0.2</p>
       </div>
 
       <div className="mb-8 text-center">

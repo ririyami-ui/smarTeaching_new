@@ -51,7 +51,7 @@ const WelcomeScreen = () => {
             {/* Footer Info */}
             <div className="absolute bottom-10 text-center animate-fade-in-up" style={{ animationDelay: '1s' }}>
                 <p className="text-purple-900/40 dark:text-purple-100/30 text-[10px] font-bold uppercase tracking-widest">
-                    Build 2.0.1 • Deepmind AI Powered
+                    Build 2.0.2 • Deepmind AI Powered
                 </p>
             </div>
         </div>

@@ -34,8 +34,10 @@ const AIBriefing = ({ user, schedules, tasks, missingJournalsCount }) => {
 
             const contextData = {
                 teacherName: teacherName,
+                schoolName: user.schoolName || '',
+                mainSubject: user.subject || '',
                 date: moment().format('dddd, DD MMMM YYYY'),
-                schedules: schedules.slice(0, 3), // Only top 3 for brevity
+                schedules: schedules.slice(0, 3),
                 tasks: tasks || [],
                 missingJournalsCount: missingJournalsCount || 0,
                 model: geminiModel
@@ -117,19 +119,40 @@ const AIBriefing = ({ user, schedules, tasks, missingJournalsCount }) => {
 
                     const utterance = new SpeechSynthesisUtterance(briefingText);
                     utterance.lang = 'id-ID';
-                    utterance.rate = 1.0;
-                    utterance.pitch = 1.0;
 
-                    // Prioritize specific high-quality voices if available
-                    const indoVoice = availableVoices.find(v =>
-                        v.lang.includes('id-ID') || v.lang === 'id_ID'
-                    ) || availableVoices.find(v => v.lang.includes('id'));
+                    // FINE TUNING: 1.1 rate feels more natural for Indonesian than 1.0
+                    utterance.rate = 1.08;
+                    utterance.pitch = 1.02;
+                    utterance.volume = 1;
 
-                    if (indoVoice) {
-                        utterance.voice = indoVoice;
-                        console.log("Using voice:", indoVoice.name);
+                    // Prioritize specific high-quality/Natural voices if available
+                    const preferredVoices = [
+                        'Google Bahasa Indonesia',
+                        'Natural',
+                        'Microsoft Ardi',
+                        'Microsoft Gadis',
+                        'id-ID'
+                    ];
+
+                    let selectedVoice = null;
+                    for (const pref of preferredVoices) {
+                        selectedVoice = availableVoices.find(v =>
+                            v.name.includes(pref) || v.lang.includes(pref)
+                        );
+                        if (selectedVoice) break;
+                    }
+
+                    if (!selectedVoice) {
+                        selectedVoice = availableVoices.find(v =>
+                            v.lang.includes('id-ID') || v.lang === 'id_ID'
+                        ) || availableVoices.find(v => v.lang.includes('id'));
+                    }
+
+                    if (selectedVoice) {
+                        utterance.voice = selectedVoice;
+                        console.log("Using prioritized voice:", selectedVoice.name);
                     } else {
-                        console.log("No Indonesian voice found, using default.");
+                        console.log("No Indonesian voice found, using system default.");
                     }
 
                     utterance.onend = () => {
@@ -178,8 +201,10 @@ const AIBriefing = ({ user, schedules, tasks, missingJournalsCount }) => {
 
             const contextData = {
                 teacherName: teacherName,
+                schoolName: user.schoolName || '',
+                mainSubject: user.subject || '',
                 date: moment().format('dddd, DD MMMM YYYY'),
-                schedules: schedules.slice(0, 3), // Only top 3 for brevity
+                schedules: schedules.slice(0, 3),
                 tasks: tasks || [],
                 missingJournalsCount: missingJournalsCount || 0,
                 model: geminiModel
@@ -226,10 +251,13 @@ const AIBriefing = ({ user, schedules, tasks, missingJournalsCount }) => {
                         <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-mono uppercase tracking-widest text-white/80">AI Assistant</span>
                     </h3>
                     {isLoading ? (
-                        <div className="h-4 w-3/4 bg-white/20 rounded animate-pulse"></div>
+                        <div className="space-y-2 py-1">
+                            <div className="h-4 w-full bg-white/20 rounded animate-pulse"></div>
+                            <div className="h-4 w-2/3 bg-white/20 rounded animate-pulse"></div>
+                        </div>
                     ) : (
-                        <p className="text-sm md:text-base font-medium leading-relaxed opacity-95">
-                            "{briefingText}"
+                        <p className="text-sm md:text-base font-medium leading-relaxed opacity-95 italic text-blue-50">
+                            {briefingText ? `"${briefingText}"` : "Menyiapkan catatan briefing pagi Anda..."}
                         </p>
                     )}
                 </div>
