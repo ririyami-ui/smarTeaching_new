@@ -425,6 +425,21 @@ const RekapitulasiPage = () => {
           }
         }
       });
+      // Catch Class Agreement (Bobot & Kesepakatan)
+      let knowledgeW = 0.4;
+      let practiceW = 0.6;
+      try {
+        const agreementRef = doc(db, 'class_agreements', `${auth.currentUser.uid}_${selectedNilaiClass}`);
+        const agreementSnap = await getDoc(agreementRef);
+        if (agreementSnap.exists()) {
+          const agreementData = agreementSnap.data();
+          knowledgeW = (agreementData.knowledgeWeight ?? 40) / 100;
+          practiceW = (agreementData.practiceWeight ?? 60) / 100;
+        }
+      } catch (err) {
+        console.warn("Failed to fetch class agreement, using defaults:", err);
+      }
+
       const finalNilaiData = Object.values(recapitulation).map(studentData => {
         // Calculate Pengetahuan (Knowledge) average from all types except Praktik
         const pengetahuanScores = [
@@ -443,10 +458,10 @@ const RekapitulasiPage = () => {
 
         const Pengetahuan_avg = pengetahuanScores.length > 0 ? pengetahuanScores.reduce((a, b) => a + b, 0) / pengetahuanScores.length : 0;
 
-        // Weighted NA calculation: 40% Knowledge (Pengetahuan) and 60% Practice (Praktik)
+        // Weighted NA calculation: Dynamic Knowledge vs Practice weights
         let NA = 0;
         if (Pengetahuan_avg > 0 && Praktik_avg > 0) {
-          NA = (Pengetahuan_avg * 0.4) + (Praktik_avg * 0.6);
+          NA = (Pengetahuan_avg * knowledgeW) + (Praktik_avg * practiceW);
         } else if (Pengetahuan_avg > 0) {
           NA = Pengetahuan_avg;
         } else if (Praktik_avg > 0) {
@@ -462,6 +477,8 @@ const RekapitulasiPage = () => {
           Sumatif_avg: Sumatif_avg.toFixed(2),
           Praktik_avg: Praktik_avg.toFixed(2),
           NA: NA.toFixed(2),
+          knowledgeW: (knowledgeW * 100).toFixed(0),
+          practiceW: (practiceW * 100).toFixed(0)
         };
       }).sort((a, b) => a.absen - b.absen);
       setNilaiData(finalNilaiData);
@@ -702,7 +719,14 @@ const RekapitulasiPage = () => {
     { header: { label: 'Rata-rata NH' }, accessor: 'NH_avg' },
     { header: { label: 'Formatif' }, accessor: 'Formatif_avg' },
     { header: { label: 'Sumatif' }, accessor: 'Sumatif_avg' },
-    { header: { label: 'Praktik (60%)' }, accessor: 'Praktik_avg' },
+    {
+      header: {
+        label: nilaiData.length > 0 && nilaiData[0].practiceW
+          ? `Praktik (${nilaiData[0].practiceW}%)`
+          : 'Praktik'
+      },
+      accessor: 'Praktik_avg'
+    },
     { header: { label: 'Nilai Akhir (NA)' }, accessor: 'NA' },
   ];
 

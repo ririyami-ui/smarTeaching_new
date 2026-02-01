@@ -283,6 +283,199 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
   doc.save(`Rekap_Nilai_${selectedClass}_${selectedSubject}_${startDate}_${endDate}.pdf`);
 };
 
+export const generateClassAgreementPDF = ({ classData, agreementData, userProfile, teacherName, students = [] }) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
+  const mL = 30; // Margin Left for binding (3cm)
+  const mR = 14; // Margin Right
+  const contentWidth = pageWidth - mL - mR;
+
+  // Header - Professional Look
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text("KESEPAKATAN KELAS & KONTRAK BELAJAR", pageWidth / 2, 20, { align: "center" });
+
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.text((userProfile?.school || 'Smart Teaching Academy').toUpperCase(), pageWidth / 2, 28, { align: "center" });
+
+  doc.setLineWidth(0.5);
+  doc.line(mL, 35, pageWidth - mR, 35);
+  doc.setLineWidth(0.1);
+  doc.line(mL, 36, pageWidth - mR, 36);
+
+  // Info Section
+  let yPos = 48;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text("Tahun Pelajaran :", mL, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${userProfile?.academicYear || '-'}`, mL + 31, yPos);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text("Semester :", pageWidth - mR - 71, yPos); // Adjusted from 85 to 71 (85-14)
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${userProfile?.activeSemester || '-'}`, pageWidth - mR - 40, yPos); // Adjusted from 60 to 40 (60-14)
+
+  yPos += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.text("Kelas / Rombel :", mL, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${classData.level} / ${classData.rombel}`, mL + 31, yPos);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text("Wali / Guru :", pageWidth - mR - 71, yPos); // Adjusted from 85 to 71 (85-14)
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${teacherName}`, pageWidth - mR - 40, yPos); // Adjusted from 60 to 40 (60-14)
+
+  // 1. Aturan & Kesepakatan
+  yPos += 15;
+  doc.setFont('helvetica', 'bold');
+  doc.setFillColor(245, 245, 245);
+  doc.rect(mL, yPos, contentWidth, 8, 'F');
+  doc.text("I. ATURAN & KESEPAKATAN KELAS", mL + 4, yPos + 5.5);
+
+  yPos += 13;
+  doc.setFont('helvetica', 'normal');
+  const agreementText = agreementData.agreements || "Belum ada poin kesepakatan tertulis.";
+  yPos = addWrappedText(doc, agreementText, mL + 4, yPos, contentWidth - 8, 6);
+
+  // 2. Kontrak Penilaian
+  yPos += 12;
+  if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
+  doc.setFont('helvetica', 'bold');
+  doc.setFillColor(245, 245, 245);
+  doc.rect(mL, yPos, contentWidth, 8, 'F');
+  doc.text("II. KONTRAK PENILAIAN (BOBOT NILAI)", mL + 4, yPos + 5.5);
+
+  yPos += 12;
+  doc.setFont('helvetica', 'normal');
+  doc.text("Berdasarkan kesepakatan bersama, komposisi penilaian ditetapkan sebagai berikut:", mL + 4, yPos);
+
+  yPos += 8;
+  const weightTable = [
+    ["Komponen Penilaian", "Bobot (%)", "Keterangan"],
+    ["Pengetahuan", `${agreementData.knowledgeWeight}%`, "Tugas, Ulangan, PTS, PAS"],
+    ["Praktik / Unjuk Kerja", `${agreementData.practiceWeight}%`, "Proyek, Produk, Portofolio"],
+    ["", "", ""],
+    ["Nilai Akademik", `${agreementData.academicWeight}%`, "Gabungan Pengetahuan & Praktik"],
+    ["Nilai Sikap", `${agreementData.attitudeWeight}%`, "Perilaku & Kedisiplinan"]
+  ];
+
+  doc.autoTable({
+    head: [weightTable[0]],
+    body: weightTable.slice(1),
+    startY: yPos,
+    margin: { left: mL, right: mR },
+    theme: 'grid',
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [75, 75, 75] },
+    columnStyles: { 1: { halign: 'center' } }
+  });
+
+  yPos = doc.autoTable.previous.finalY + 15;
+  if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
+
+  // 3. Pernyataan & Komitmen
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(9);
+  const commitmentText = "Kesepakatan ini dibuat secara sadar dan sukarela sebagai pedoman bersama dalam menciptakan suasana belajar yang kondusif, disiplin, dan berintegritas selama tahun pelajaran berlangsung.";
+  yPos = addWrappedText(doc, commitmentText, mL + 4, yPos, contentWidth - 8, 5);
+
+  // 4. Footer TTD Utama
+  yPos += 15;
+  if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
+
+  const dateStr = fmtDate(new Date());
+  let city = userProfile?.school?.split(' ').pop() || 'Jakarta';
+  const signX = pageWidth - mR - 60; // Adjusted from 75 to 60 (75-14)
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(`${city}, ${dateStr}`, signX, yPos);
+  doc.text("Guru Mata Pelajaran,", signX, yPos + 7);
+  doc.setFont('helvetica', 'bold');
+  doc.text(teacherName, signX, yPos + 28); // Adjusted from 30 to 28 (30-2)
+  doc.setFont('helvetica', 'normal');
+  doc.text(`NIP. ${userProfile?.nip || '....................'}`, signX, yPos + 34); // Adjusted from 36 to 34 (36-2)
+
+  doc.text("Mengetahui,", mL, yPos);
+  doc.text("Perwakilan Siswa (Ketua Kelas),", mL, yPos + 7);
+  doc.text("( ................................... )", mL, yPos + 28); // Adjusted from 30 to 28 (30-2)
+  doc.text("NIS.", mL, yPos + 34); // Adjusted from 36 to 34 (36-2)
+
+  // --- HALAMAN LAMPIRAN (Tanda Tangan Siswa) ---
+  if (students && students.length > 0) {
+    doc.addPage();
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text("LAMPIRAN: DAFTAR Tanda Tangan SISWA", pageWidth / 2, 20, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Kelas : ${classData.level} / ${classData.rombel}`, mL, 30);
+    doc.text(`Tentang : Kesepakatan Kelas & Kontrak Belajar`, mL, 36);
+
+    const studentTableHead = [["No", "NIS", "Nama Siswa", "Tanda Tangan"]];
+    const studentTableBody = students.map((s, idx) => {
+      const num = s.absen || idx + 1;
+      return [
+        num,
+        s.nis || '-',
+        s.name,
+        idx % 2 === 0 ? `${num}. .................` : `                ${num}. .................`
+      ];
+    });
+
+    doc.autoTable({
+      head: studentTableHead,
+      body: studentTableBody,
+      startY: 45,
+      margin: { left: mL, right: mR },
+      theme: 'grid',
+      styles: { fontSize: 8, cellPadding: 1.5 },
+      headStyles: { fillColor: [50, 50, 50] },
+      columnStyles: {
+        0: { cellWidth: 10 }, // No
+        1: { cellWidth: 25 }, // NIS
+        2: { cellWidth: contentWidth - 10 - 25 - 50 }, // Flex Nama Siswa (contentWidth - No - NIS - TTD)
+        3: { cellWidth: 50 }, // Tanda Tangan
+      }
+    });
+
+    // Signatures at the bottom of Appendix
+    yPos = doc.autoTable.previous.finalY + 10;
+    const signatureRequiredHeight = 40;
+
+    if (yPos + signatureRequiredHeight > pageHeight - 10) {
+      doc.addPage();
+      yPos = 25;
+    }
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Mengesahkan,', mL, yPos);
+    doc.text('Kepala Sekolah', mL, yPos + 6);
+    doc.setFont('helvetica', 'bold');
+    doc.text(userProfile?.principalName || '...................................', mL, yPos + 28);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`NIP. ${userProfile?.principalNip || '....................'}`, mL, yPos + 34);
+
+    doc.text(`${city}, ${dateStr}`, signX, yPos);
+    doc.text('Guru Pengajar,', signX, yPos + 6);
+    doc.setFont('helvetica', 'bold');
+    doc.text(teacherName, signX, yPos + 28);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`NIP. ${userProfile?.nip || '....................'}`, signX, yPos + 34);
+  } else {
+    console.warn("No students found for appendix, skipping page 2.");
+  }
+
+  // Filename
+  const fileName = `Kesepakatan_Kelas_${classData.rombel.replace(/\s+/g, '_')}.pdf`;
+  doc.save(fileName);
+};
+
 export const generateViolationRecapPDF = (data, schoolName, startDate, endDate, teacherName, selectedClass, userProfile) => {
   const doc = new jsPDF();
 

@@ -59,6 +59,7 @@ const RekapIndividuPage = () => {
     const [isGeneratingMessage, setIsGeneratingMessage] = useState(false); // New state for parent message generation
     const [isCopied, setIsCopied] = useState(false); // New state for copy button
     const [flaggedClassFilter, setFlaggedClassFilter] = useState(''); // New state for flagged students filter
+    const [classAgreement, setClassAgreement] = useState(null); // New state for dynamic weights
 
     const { activeSemester, academicYear, userProfile, geminiModel, academicWeight, attitudeWeight } = useSettings();
 
@@ -132,6 +133,32 @@ const RekapIndividuPage = () => {
         };
         fetchStudents();
     }, [selectedClass, currentUser]);
+
+    // Fetch class agreement when class changes
+    useEffect(() => {
+        const fetchClassAgreement = async () => {
+            if (!selectedClass || !currentUser) {
+                setClassAgreement(null);
+                return;
+            }
+            try {
+                // Find class ID first
+                const targetClass = classes.find(c => c.rombel === selectedClass);
+                if (targetClass) {
+                    const docRef = doc(db, 'class_agreements', `${currentUser.uid}_${targetClass.id}`);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        setClassAgreement(docSnap.data());
+                    } else {
+                        setClassAgreement(null);
+                    }
+                }
+            } catch (err) {
+                console.warn("Failed to fetch class agreement:", err);
+            }
+        };
+        fetchClassAgreement();
+    }, [selectedClass, classes, currentUser]);
 
     // Fetch all data for selected student
     useEffect(() => {
@@ -259,9 +286,12 @@ const RekapIndividuPage = () => {
             ? practiceGrades.reduce((sum, g) => sum + parseFloat(g.score), 0) / practiceGrades.length
             : 0;
 
+        const knowledgeW = (classAgreement?.knowledgeWeight ?? 40) / 100;
+        const practiceW = (classAgreement?.practiceWeight ?? 60) / 100;
+
         let academicAvgResult = 0;
         if (knowledgeAvg > 0 && practiceAvg > 0) {
-            academicAvgResult = (knowledgeAvg * 0.4) + (practiceAvg * 0.6);
+            academicAvgResult = (knowledgeAvg * knowledgeW) + (practiceAvg * practiceW);
         } else if (knowledgeAvg > 0) {
             academicAvgResult = knowledgeAvg;
         } else if (practiceAvg > 0) {
@@ -310,7 +340,11 @@ const RekapIndividuPage = () => {
             attitudePredicate: getAttitudePredicate(attitudeScore),
             totalInfractionPoints,
             attendance: attendanceCounts,
-            finalScore: ((parseFloat(academicAvg) * (academicWeight / 100)) + (attitudeScore * (attitudeWeight / 100))).toFixed(2),
+            finalScore: ((parseFloat(academicAvg) * ((classAgreement?.academicWeight ?? academicWeight) / 100)) + (attitudeScore * ((classAgreement?.attitudeWeight ?? attitudeWeight) / 100))).toFixed(2),
+            academicWeight: classAgreement?.academicWeight ?? academicWeight,
+            attitudeWeight: classAgreement?.attitudeWeight ?? attitudeWeight,
+            knowledgeWeight: (knowledgeW * 100).toFixed(0),
+            practiceWeight: (practiceW * 100).toFixed(0),
             studentName: selectedStudent?.name || '',
             subjectFilter: selectedSubject,
             warnings: warnings,
@@ -613,6 +647,21 @@ const RekapIndividuPage = () => {
                             </StyledSelect>
                         </div>
                     </div>
+
+                    {/* Class Agreement Display */}
+                    {classAgreement?.agreements && (
+                        <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800/20 p-5 rounded-3xl flex items-start gap-4 animate-in fade-in duration-700">
+                            <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-xl text-purple-600">
+                                <Scale size={20} />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-1">Kesepakatan Kelas {selectedClass}</p>
+                                <div className="text-xs text-purple-800 dark:text-purple-300 whitespace-pre-line leading-relaxed font-medium">
+                                    {classAgreement.agreements}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Summary Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

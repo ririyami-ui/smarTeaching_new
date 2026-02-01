@@ -20,8 +20,8 @@ const PieChart = ({ data }) => {
   }
 
   return (
-    <div className="flex flex-col justify-center gap-4 p-4 h-full">
-      <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl border border-blue-200 dark:border-blue-800 mb-2">
+    <div className="flex flex-col justify-start gap-4 p-2 h-full overflow-hidden">
+      <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl border border-blue-200 dark:border-blue-800 mt-2 mb-2">
         <div className="flex justify-between items-center text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase tracking-widest">
           <span>Konteks Perhitungan</span>
           <span>{schoolDays || 0} Hari Sekolah</span>

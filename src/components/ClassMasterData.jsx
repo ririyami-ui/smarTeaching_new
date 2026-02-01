@@ -9,7 +9,8 @@ import StyledInput from './StyledInput';
 import StyledButton from './StyledButton';
 import ClassCard from './ClassCard';
 import Modal from './Modal';
-import { Plus, Upload, Download, Trash2 } from 'lucide-react';
+import { Plus, Upload, Download, Trash2, Scale } from 'lucide-react';
+import ClassAgreementModal from './ClassAgreementModal';
 
 export default function ClassMasterData() {
   const [classes, setClasses] = useState([]);
@@ -22,6 +23,7 @@ export default function ClassMasterData() {
   const [file, setFile] = useState(null);
   // State for edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAgreementModalOpen, setIsAgreementModalOpen] = useState(false);
   const [currentClass, setCurrentClass] = useState(null);
   const [editData, setEditData] = useState({ code: '', level: '', rombel: '', description: '' });
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
@@ -128,6 +130,11 @@ export default function ClassMasterData() {
     setCurrentClass(classItem);
     setEditData(classItem);
     setIsEditModalOpen(true);
+  };
+
+  const handleOpenAgreementModal = (classItem) => {
+    setCurrentClass(classItem);
+    setIsAgreementModalOpen(true);
   };
 
   const handleUpdateClass = async (e) => {
@@ -277,7 +284,7 @@ export default function ClassMasterData() {
               {classes.map((classItem) => (
                 <ClassCard
                   key={classItem.id}
-                  classItem={classItem}
+                  classItem={{ ...classItem, onAgreement: handleOpenAgreementModal }}
                   onEdit={handleOpenEditModal}
                   onDelete={deleteClass}
                 />
@@ -349,6 +356,15 @@ export default function ClassMasterData() {
           </div>
         </Modal>
       )}
+
+      {/* Class Agreement Modal */}
+      <ClassAgreementModal
+        isOpen={isAgreementModalOpen}
+        onClose={() => setIsAgreementModalOpen(false)}
+        classId={currentClass?.id}
+        rombel={currentClass?.rombel}
+        level={currentClass?.level}
+      />
     </>
   );
 }

@@ -447,7 +447,7 @@ const AnalisisKelasPage = () => {
 
               <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
                 <h3 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wider">Komposisi Kehadiran</h3>
-                <div className="h-[250px]"><PieChart data={analysisData.stats?.attendance || {}} /></div>
+                <div className="h-[320px]"><PieChart data={analysisData.stats?.attendance || {}} /></div>
               </div>
             </div>
 
