@@ -30,7 +30,7 @@ const AsistenGuruPage = () => {
   const recognitionRef = useRef(null); // Ref for SpeechRecognition instance
   const fileInputRef = useRef(null); // Ref for file input
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [autoSpeak, setAutoSpeak] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
 
   // --- TTS Logic ---
   const speakText = (text) => {

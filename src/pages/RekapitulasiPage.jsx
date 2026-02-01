@@ -415,13 +415,13 @@ const RekapitulasiPage = () => {
           const score = parseFloat(grade.score);
           if (!isNaN(score)) {
             const type = grade.assessmentType;
-            if (type === 'Harian') recapitulation[grade.studentId].NH.push(score);
+            if (['Harian', 'Tugas', 'Kuis', 'Pengetahuan', 'Homework'].includes(type)) recapitulation[grade.studentId].NH.push(score);
             else if (type === 'Formatif') recapitulation[grade.studentId].Formatif.push(score);
             else if (type === 'Sumatif') recapitulation[grade.studentId].Sumatif.push(score);
             else if (type === 'Ulangan') recapitulation[grade.studentId].Ulangan.push(score);
             else if (type === 'Tengah Semester' || type === 'PTS') recapitulation[grade.studentId].PTS.push(score);
             else if (type === 'Akhir Semester' || type === 'PAS') recapitulation[grade.studentId].PAS.push(score);
-            else if (type === 'Praktik') recapitulation[grade.studentId].Praktik.push(score);
+            else if (['Praktik', 'Proyek', 'Produk', 'Portofolio', 'Keterampilan', 'Unjuk Kerja', 'Praktikum', 'Project', 'Skill'].includes(type)) recapitulation[grade.studentId].Praktik.push(score);
           }
         }
       });

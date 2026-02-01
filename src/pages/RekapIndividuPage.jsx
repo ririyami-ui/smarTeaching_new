@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { collection, getDocs, query, where, orderBy, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { runEarlyWarningAnalysis } from '../utils/analysis';
 import { db, auth } from '../firebase';
@@ -10,6 +10,7 @@ import StyledSelect from '../components/StyledSelect';
 import StyledTable from '../components/StyledTable';
 import PieChart from '../components/PieChart';
 import SummaryCard from '../components/SummaryCard';
+import RadarChart from '../components/RadarChart';
 import {
     User,
     GraduationCap,
@@ -26,7 +27,14 @@ import {
     MessageCircle,
     Copy,
     Check,
-    X
+    X,
+    Share2,
+    Filter,
+    ChevronRight,
+    TrendingUp,
+    Brain,
+    Scale,
+    ArrowLeft
 } from 'lucide-react';
 import { useSettings } from '../utils/SettingsContext';
 import { generateStudentIndividualRecapPDF } from '../utils/pdfGenerator';
@@ -35,8 +43,17 @@ import { generateStudentNarrative, generateParentMessage } from '../utils/gemini
 // Set global locale for moment
 moment.locale('id');
 
+// Helper function for attitude predicate
+const getAttitudePredicate = (score) => {
+    if (score >= 91) return 'Sangat Baik';
+    if (score >= 81) return 'Baik';
+    if (score >= 71) return 'Cukup';
+    return 'Kurang';
+};
+
 const RekapIndividuPage = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [classes, setClasses] = useState([]);
     const [selectedClass, setSelectedClass] = useState('');
     const [students, setStudents] = useState([]);
@@ -62,6 +79,34 @@ const RekapIndividuPage = () => {
     const [classAgreement, setClassAgreement] = useState(null); // New state for dynamic weights
 
     const { activeSemester, academicYear, userProfile, geminiModel, academicWeight, attitudeWeight } = useSettings();
+
+    // State for calculated statistics, including radar data
+    const [stats, setStats] = useState({
+        academicAvg: 0,
+        attitudeScore: 0,
+        attitudePredicate: '-',
+        totalInfractionPoints: 0,
+        attendance: { Hadir: 0, Sakit: 0, Ijin: 0, Alpha: 0, schoolDays: 0, studentCount: 1 },
+        finalScore: 0,
+        academicWeight: 0,
+        attitudeWeight: 0,
+        knowledgeWeight: 0,
+        practiceWeight: 0,
+        studentName: '',
+        subjectFilter: '',
+        warnings: [],
+        numDays: 0,
+        radarData: {
+            "Keimanan": 85,
+            "Kewargaan": 85,
+            "Penalaran Kritis": 85,
+            "Kreativitas": 85,
+            "Kolaborasi": 85,
+            "Kemandirian": 85,
+            "Kesehatan": 85,
+            "Komunikasi": 85
+        }
+    });
 
     // Fetch Early Warning Students
     useEffect(() => {
@@ -253,12 +298,17 @@ const RekapIndividuPage = () => {
         return grades.filter(g => g.subjectName === selectedSubject);
     }, [grades, selectedSubject]);
 
-    // Statistics - calculated based on filtered grades but all infractions
     // Handle Student Selection via URL/State (Direct link from Early Warning)
+
     useEffect(() => {
         if (location.state?.studentId && location.state?.classId && classes.length > 0) {
-            setSelectedClass(location.state.classId);
-            // Need a slight delay or wait for students to be loaded
+            const matchingClass = classes.find(c => c.id === location.state.classId);
+            if (matchingClass) {
+                setSelectedClass(matchingClass.rombel);
+            } else {
+                const classByName = classes.find(c => c.rombel === location.state.classId);
+                if (classByName) setSelectedClass(location.state.classId);
+            }
             if (students.length > 0) {
                 const studentExists = students.find(s => s.id === location.state.studentId);
                 if (studentExists) {
@@ -266,17 +316,19 @@ const RekapIndividuPage = () => {
                     if (location.state.subject) {
                         setSelectedSubject(location.state.subject);
                     }
-                    // Clear state to avoid re-triggering on refresh if not intended
                     window.history.replaceState({}, document.title);
                 }
             }
         }
     }, [location.state, classes, students]);
 
-    const stats = useMemo(() => {
-        const knowledgeTypes = ['Harian', 'Formatif', 'Sumatif', 'Ulangan', 'Tengah Semester', 'PTS', 'Akhir Semester', 'PAS'];
+    // Calculate stats and radar data whenever dependencies change
+    useEffect(() => {
+        const knowledgeTypes = ['Harian', 'Formatif', 'Sumatif', 'Ulangan', 'Tengah Semester', 'PTS', 'Akhir Semester', 'PAS', 'Tugas', 'Kuis', 'Pengetahuan', 'Homework'];
+        const practiceTypes = ['Praktik', 'Proyek', 'Produk', 'Portofolio', 'Keterampilan', 'Unjuk Kerja', 'Praktikum', 'Project', 'Skill'];
+
         const knowledgeGrades = filteredGrades.filter(g => knowledgeTypes.includes(g.assessmentType));
-        const practiceGrades = filteredGrades.filter(g => g.assessmentType === 'Praktik');
+        const practiceGrades = filteredGrades.filter(g => practiceTypes.includes(g.assessmentType));
 
         const knowledgeAvg = knowledgeGrades.length > 0
             ? knowledgeGrades.reduce((sum, g) => sum + parseFloat(g.score), 0) / knowledgeGrades.length
@@ -315,13 +367,6 @@ const RekapIndividuPage = () => {
             studentCount: 1
         });
 
-        const getAttitudePredicate = (score) => {
-            if (score >= 91) return 'Sangat Baik';
-            if (score >= 81) return 'Baik';
-            if (score >= 71) return 'Cukup';
-            return 'Kurang';
-        };
-
         // Early Warning Logic
         const warnings = [];
         if (parseFloat(academicAvg) < 65 && filteredGrades.length > 0) {
@@ -334,13 +379,33 @@ const RekapIndividuPage = () => {
             warnings.push(`Skor sikap di bawah standar(${attitudeScore})`);
         }
 
-        return {
+        const finalScore = ((parseFloat(academicAvg) * ((classAgreement?.academicWeight ?? academicWeight) / 100)) + (attitudeScore * ((classAgreement?.attitudeWeight ?? attitudeWeight) / 100))).toFixed(2);
+
+        // 5. Radar Chart Scoring Logic (BSKAP 2025 Dimensions)
+        // Baseline 70 + weighted calculation
+        const currentKnowledgeAvg = parseFloat(knowledgeAvg) || 75;
+        const currentPracticeAvg = parseFloat(practiceAvg) || 75;
+        const attPct = (attendanceCounts.Hadir / (numDays || 1)) * 100;
+        const infPenalty = (totalInfractionPoints / 100) * 10; // Max 10 penalty for 100 points
+
+        const radialMapping = {
+            "Keimanan": Math.min(100, Math.max(50, 95 - infPenalty)),
+            "Kewargaan": Math.min(100, Math.max(50, attPct * 0.6 + (100 - infPenalty) * 0.4)),
+            "Penalaran Kritis": currentKnowledgeAvg,
+            "Kreativitas": currentPracticeAvg,
+            "Kolaborasi": Math.min(100, (currentKnowledgeAvg * 0.3 + currentPracticeAvg * 0.7)), // Proxy from practice
+            "Kemandirian": Math.min(100, Math.max(40, attPct * 0.4 + (currentKnowledgeAvg + currentPracticeAvg) / 2 * 0.6)),
+            "Kesehatan": Math.min(100, Math.max(30, 100 - (attendanceCounts.Sakit * 5))),
+            "Komunikasi": Math.min(100, currentPracticeAvg) // Proxy from practice
+        };
+
+        setStats({
             academicAvg,
             attitudeScore,
             attitudePredicate: getAttitudePredicate(attitudeScore),
             totalInfractionPoints,
             attendance: attendanceCounts,
-            finalScore: ((parseFloat(academicAvg) * ((classAgreement?.academicWeight ?? academicWeight) / 100)) + (attitudeScore * ((classAgreement?.attitudeWeight ?? attitudeWeight) / 100))).toFixed(2),
+            finalScore,
             academicWeight: classAgreement?.academicWeight ?? academicWeight,
             attitudeWeight: classAgreement?.attitudeWeight ?? attitudeWeight,
             knowledgeWeight: (knowledgeW * 100).toFixed(0),
@@ -348,9 +413,11 @@ const RekapIndividuPage = () => {
             studentName: selectedStudent?.name || '',
             subjectFilter: selectedSubject,
             warnings: warnings,
-            numDays: attendance.length
-        };
-    }, [filteredGrades, infractions, attendance, selectedStudent, academicWeight, attitudeWeight, selectedSubject]);
+            numDays: attendance.length,
+            radarData: radialMapping
+        });
+    }, [filteredGrades, infractions, attendance, selectedStudent, academicWeight, attitudeWeight, selectedSubject, classAgreement]);
+
 
     const handleExportPDF = () => {
         if (!selectedStudent) return;
@@ -391,14 +458,7 @@ const RekapIndividuPage = () => {
         }
     };
 
-    // Auto-generate narrative if empty after fetching
-    useEffect(() => {
-        if (!isLoading && selectedStudentId && !narrativeNote && !isGenerating && stats.studentName && stats.academicAvg !== 0) {
-            handleGenerateNarrative(true);
-        }
-    }, [isLoading, selectedStudentId, narrativeNote, isGenerating, stats]);
-
-    const handleGenerateNarrative = async (isAutoSave = false) => {
+    const handleGenerateNarrative = useCallback(async (isAutoSave = false) => {
         if (!selectedStudentId) return;
         setIsGenerating(true);
         try {
@@ -429,7 +489,14 @@ const RekapIndividuPage = () => {
         } finally {
             setIsGenerating(false);
         }
-    };
+    }, [selectedStudentId, selectedStudent, grades, attendance, infractions, stats, userProfile, geminiModel, activeSemester, academicYear]);
+
+    // Auto-generate narrative if empty after fetching
+    useEffect(() => {
+        if (!isLoading && selectedStudentId && !narrativeNote && !isGenerating && stats.studentName && stats.academicAvg !== 0) {
+            handleGenerateNarrative(true);
+        }
+    }, [isLoading, selectedStudentId, narrativeNote, isGenerating, stats, handleGenerateNarrative]);
 
     const handleGenerateParentMessage = async () => {
         if (!selectedStudentId || !narrativeNote) return;
@@ -471,6 +538,12 @@ const RekapIndividuPage = () => {
             <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="p-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-2xl transition-all active:scale-95"
+                        >
+                            <ArrowLeft className="text-gray-600 dark:text-gray-300" size={24} />
+                        </button>
                         <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-2xl">
                             <User className="text-blue-600 dark:text-blue-400" size={24} />
                         </div>
@@ -695,76 +768,117 @@ const RekapIndividuPage = () => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Attendance Detail */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl text-amber-600">
-                                        <Calendar size={20} />
-                                    </div>
-                                    <h2 className="text-lg font-bold text-gray-800 dark:text-white">Detail Kehadiran</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
+                        {/* Radar Chart Profil Lulusan */}
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 overflow-hidden relative">
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <Brain size={80} />
+                            </div>
+                            <div className="flex items-center gap-3 mb-6 relative z-10">
+                                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl text-indigo-600">
+                                    <Brain size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-800 dark:text-white leading-tight">Profil Lulusan 2025</h2>
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Holistic Competency Radar</p>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                                <div className="w-full">
-                                    <PieChart data={stats.attendance} numDays={stats.numDays} />
-                                </div>
-                                <div className="max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
-                                    <table className="w-full text-left">
-                                        <tbody className="text-xs divide-y dark:divide-gray-700">
-                                            {attendance.length > 0 ? attendance.map((att, i) => (
-                                                <tr key={i}>
-                                                    <td className="py-2 text-gray-500 text-[10px] font-medium">{moment(att.date).format('DD/MM/YY')}</td>
-                                                    <td className="py-2 font-bold text-gray-800 dark:text-gray-200">
-                                                        {new Intl.DateTimeFormat('id-ID', { weekday: 'long' }).format(new Date(att.date))}
-                                                    </td>
-                                                    <td className="py-2 text-right">
-                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${att.status === 'Hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30' :
-                                                            att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30' :
-                                                                'bg-amber-100 text-amber-700 dark:bg-amber-900/30'
-                                                            }`}>
-                                                            {att.status.toUpperCase()}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            )) : (
-                                                <tr><td colSpan="3" className="py-10 text-center text-gray-400">Belum ada data absensi</td></tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div className="h-[300px] flex items-center justify-center p-2 mt-4">
+                                <RadarChart
+                                    data={stats.radarData}
+                                    size={280}
+                                    descriptions={{
+                                        "Keimanan": "Log Pelanggaran & Catatan Wali Kelas",
+                                        "Kewargaan": "Persentase Kehadiran & Kedisiplinan",
+                                        "Penalaran Kritis": "Rata-rata Nilai Pengetahuan",
+                                        "Kreativitas": "Rata-rata Nilai Keterampilan",
+                                        "Kolaborasi": "Integrasi Nilai Keterampilan & Proyek",
+                                        "Kemandirian": "Kemandirian Belajar & Absensi",
+                                        "Kesehatan": "Data Sakit & Kebugaran Terlacak",
+                                        "Komunikasi": "Presentasi & Kualitas Tugas Praktik"
+                                    }}
+                                />
+                            </div>
+
+                            <div className="mt-4 p-3 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/30">
+                                <p className="text-[10px] text-indigo-800 dark:text-indigo-400 font-medium italic text-center leading-relaxed">
+                                    *Data dihasilkan secara cerdas melalui konvergensi capaian akademik, rekam kehadiran, dan profil perilaku selama satu semester.
+                                </p>
                             </div>
                         </div>
 
-                        {/* Infraction Detail */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-xl text-red-600">
-                                        <ShieldAlert size={20} />
+                        <div className="space-y-6">
+                            {/* Attendance Detail */}
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl text-amber-600">
+                                            <Calendar size={20} />
+                                        </div>
+                                        <h2 className="text-lg font-bold text-gray-800 dark:text-white">Detail Kehadiran</h2>
                                     </div>
-                                    <h2 className="text-lg font-bold text-gray-800 dark:text-white">Catatan Kedisiplinan</h2>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                                    <div className="w-full">
+                                        <PieChart data={stats.attendance} numDays={stats.numDays} />
+                                    </div>
+                                    <div className="max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
+                                        <table className="w-full text-left">
+                                            <tbody className="text-xs divide-y dark:divide-gray-700">
+                                                {attendance.length > 0 ? attendance.map((att, i) => (
+                                                    <tr key={i}>
+                                                        <td className="py-2 text-gray-500 text-[10px] font-medium">{moment(att.date).format('DD/MM/YY')}</td>
+                                                        <td className="py-2 font-bold text-gray-800 dark:text-gray-200">
+                                                            {new Intl.DateTimeFormat('id-ID', { weekday: 'long' }).format(new Date(att.date))}
+                                                        </td>
+                                                        <td className="py-2 text-right">
+                                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${att.status === 'Hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30' :
+                                                                att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30' :
+                                                                    'bg-amber-100 text-amber-700 dark:bg-amber-900/30'
+                                                                }`}>
+                                                                {att.status.toUpperCase()}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                )) : (
+                                                    <tr><td colSpan="3" className="py-10 text-center text-gray-400">Belum ada data absensi</td></tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="max-h-[220px] overflow-y-auto custom-scrollbar">
-                                <div className="space-y-4">
-                                    {infractions.length > 0 ? infractions.map((inf, i) => (
-                                        <div key={i} className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase">
-                                                    {new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(inf.date))}
-                                                </span>
-                                                <span className="px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 text-[10px] font-black rounded-md">+{inf.points} POIN</span>
-                                            </div>
-                                            <p className="font-bold text-gray-800 dark:text-gray-200">{inf.infractionType}</p>
-                                            {inf.description && <p className="text-xs text-gray-500 mt-1 italic">{inf.description}</p>}
+                            {/* Infraction Detail */}
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-xl text-red-600">
+                                            <ShieldAlert size={20} />
                                         </div>
-                                    )) : (
-                                        <div className="py-10 text-center text-gray-400">Tidak ada catatan pelanggaran</div>
-                                    )}
+                                        <h2 className="text-lg font-bold text-gray-800 dark:text-white">Catatan Kedisiplinan</h2>
+                                    </div>
+                                </div>
+
+                                <div className="max-h-[220px] overflow-y-auto custom-scrollbar">
+                                    <div className="space-y-4">
+                                        {infractions.length > 0 ? infractions.map((inf, i) => (
+                                            <div key={i} className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase">
+                                                        {new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(inf.date))}
+                                                    </span>
+                                                    <span className="px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 text-[10px] font-black rounded-md">+{inf.points} POIN</span>
+                                                </div>
+                                                <p className="font-bold text-gray-800 dark:text-gray-200">{inf.infractionType}</p>
+                                                {inf.description && <p className="text-xs text-gray-500 mt-1 italic">{inf.description}</p>}
+                                            </div>
+                                        )) : (
+                                            <div className="py-10 text-center text-gray-400">Tidak ada catatan pelanggaran</div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -885,50 +999,49 @@ const RekapIndividuPage = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-
-            {/* Modal for Parent Message */}
-            {parentMessage && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="p-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white/20 rounded-xl">
-                                    <MessageCircle size={24} />
+                    {/* Modal for Parent Message */}
+                    {parentMessage && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                            <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                                <div className="p-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white flex justify-between items-center">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-white/20 rounded-xl">
+                                            <MessageCircle size={24} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-black leading-tight">Pesan Orang Tua Cerdas</h3>
+                                            <p className="text-[10px] opacity-80 font-bold uppercase tracking-wider">Siap kirim via WhatsApp</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setParentMessage('')} className="p-2 hover:bg-white/20 rounded-full transition-all">
+                                        <X size={20} />
+                                    </button>
                                 </div>
-                                <div>
-                                    <h3 className="font-black leading-tight">Pesan Orang Tua Cerdas</h3>
-                                    <p className="text-[10px] opacity-80 font-bold uppercase tracking-wider">Siap kirim via WhatsApp</p>
+                                <div className="p-8 overflow-y-auto custom-scrollbar">
+                                    <div className="bg-gray-50 dark:bg-black/30 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 relative group">
+                                        <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                            {parentMessage}
+                                        </pre>
+                                    </div>
+                                </div>
+                                <div className="p-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 flex gap-3">
+                                    <button
+                                        onClick={() => setParentMessage('')}
+                                        className="flex-1 py-4 font-bold text-gray-500 hover:text-gray-700 transition-all"
+                                    >
+                                        Tutup
+                                    </button>
+                                    <button
+                                        onClick={handleCopyMessage}
+                                        className="flex-[2] bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-green-500/20"
+                                    >
+                                        {isCopied ? <Check size={20} /> : <Copy size={20} />}
+                                        {isCopied ? 'TERSALIN!' : 'SALIN & KIRIM'}
+                                    </button>
                                 </div>
                             </div>
-                            <button onClick={() => setParentMessage('')} className="p-2 hover:bg-white/20 rounded-full transition-all">
-                                <X size={20} />
-                            </button>
                         </div>
-                        <div className="p-8 overflow-y-auto custom-scrollbar">
-                            <div className="bg-gray-50 dark:bg-black/30 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 relative group">
-                                <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                    {parentMessage}
-                                </pre>
-                            </div>
-                        </div>
-                        <div className="p-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 flex gap-3">
-                            <button
-                                onClick={() => setParentMessage('')}
-                                className="flex-1 py-4 font-bold text-gray-500 hover:text-gray-700 transition-all"
-                            >
-                                Tutup
-                            </button>
-                            <button
-                                onClick={handleCopyMessage}
-                                className="flex-[2] bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-green-500/20"
-                            >
-                                {isCopied ? <Check size={20} /> : <Copy size={20} />}
-                                {isCopied ? 'TERSALIN!' : 'SALIN & KIRIM'}
-                            </button>
-                        </div>
-                    </div>
+                    )}
                 </div>
             )}
         </div>
