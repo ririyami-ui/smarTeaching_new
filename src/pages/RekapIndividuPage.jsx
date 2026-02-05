@@ -34,7 +34,10 @@ import {
     TrendingUp,
     Brain,
     Scale,
-    ArrowLeft
+    ArrowLeft,
+    MapPin,
+    RefreshCw,
+    Loader2
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -85,6 +88,9 @@ const RekapIndividuPage = () => {
     const [flaggedClassFilter, setFlaggedClassFilter] = useState(''); // New state for flagged students filter
     const [classAgreement, setClassAgreement] = useState(null); // New state for dynamic weights
 
+    const [signingLocation, setSigningLocation] = useState('Jakarta');
+    const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
     const { activeSemester, academicYear, userProfile, geminiModel, academicWeight, attitudeWeight } = useSettings();
 
     // State for calculated statistics, including radar data
@@ -130,7 +136,45 @@ const RekapIndividuPage = () => {
             }
         };
         fetchFlagged();
+
+        // Load signing location
+        const savedLoc = localStorage.getItem('QUIZ_SIGNING_LOCATION');
+        if (savedLoc) setSigningLocation(savedLoc);
     }, [activeSemester, academicYear, geminiModel]);
+
+    const handleDetectLocation = async () => {
+        if (!navigator.geolocation) {
+            toast.error("Browser tidak mendukung geolokasi.");
+            return;
+        }
+
+        setIsDetectingLocation(true);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const data = await response.json();
+
+                    const city = data.address.city || data.address.town || data.address.regency || data.address.county || 'Jakarta';
+                    const cleanCity = city.replace(/^(Kabupaten|Kota|Kab\.|Kota\s)\s+/i, '');
+                    setSigningLocation(cleanCity);
+                    localStorage.setItem('QUIZ_SIGNING_LOCATION', cleanCity);
+                    toast.success(`Lokasi terdeteksi: ${cleanCity}`);
+                } catch (error) {
+                    console.error("Error detecting location:", error);
+                    toast.error("Gagal mendeteksi nama kota.");
+                } finally {
+                    setIsDetectingLocation(false);
+                }
+            },
+            (error) => {
+                console.error("Geolocation error:", error);
+                toast.error("Gagal mendapatkan lokasi.");
+                setIsDetectingLocation(false);
+            }
+        );
+    };
 
     // Unified effective auth state
     const [currentUser, setCurrentUser] = useState(null);
@@ -594,7 +638,27 @@ const RekapIndividuPage = () => {
                         </div>
                         <div>
                             <h1 className="text-2xl font-black text-gray-800 dark:text-white">Rekap Individu Siswa</h1>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Rekam jejak komprehensif perjalanan belajar siswa</p>
+                            <div className="flex items-center gap-2 mt-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded-lg w-fit">
+                                <MapPin size={12} className="text-blue-500" />
+                                <span>Lokasi TTD:</span>
+                                <input
+                                    type="text"
+                                    className="bg-transparent focus:outline-none min-w-[80px] normal-case"
+                                    value={signingLocation}
+                                    onChange={(e) => {
+                                        setSigningLocation(e.target.value);
+                                        localStorage.setItem('QUIZ_SIGNING_LOCATION', e.target.value);
+                                    }}
+                                    placeholder="Kota..."
+                                />
+                                <button
+                                    onClick={handleDetectLocation}
+                                    disabled={isDetectingLocation}
+                                    className="hover:text-blue-500 transition-colors"
+                                >
+                                    {isDetectingLocation ? <Loader2 size={10} className="animate-spin" /> : <RefreshCw size={10} />}
+                                </button>
+                            </div>
                         </div>
                     </div>
 

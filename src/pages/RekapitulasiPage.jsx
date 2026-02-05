@@ -3,7 +3,8 @@ import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firesto
 import { db, auth } from '../firebase';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { Calendar, BookOpen, Award, AlertTriangle, Users, TrendingUp, FileDown, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, BookOpen, Award, AlertTriangle, Users, TrendingUp, FileDown, CheckCircle, XCircle, MapPin, RefreshCw, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 import StyledInput from '../components/StyledInput';
 import StyledSelect from '../components/StyledSelect';
@@ -66,6 +67,10 @@ const RekapitulasiPage = () => {
   const [selectedViolationClass, setSelectedViolationClass] = useState('');
   const [violationData, setViolationData] = useState([]);
 
+  // Signing Location State
+  const [signingLocation, setSigningLocation] = useState('Jakarta');
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
 
 
   useEffect(() => {
@@ -78,6 +83,20 @@ const RekapitulasiPage = () => {
           setUserProfile(profileData);
           setSchoolName(profileData.schoolName || '');
           setTeacherName(profileData.name || auth.currentUser.email);
+
+          // Try to set signing location from profile heuristic if not in localStorage
+          const savedLoc = localStorage.getItem('QUIZ_SIGNING_LOCATION');
+          if (savedLoc) {
+            setSigningLocation(savedLoc);
+          } else if (profileData.schoolName || profileData.school) {
+            const school = profileData.schoolName || profileData.school;
+            const parts = school.trim().split(' ');
+            const last = parts[parts.length - 1];
+            if (last.length > 2 && isNaN(last)) {
+              setSigningLocation(last);
+              localStorage.setItem('QUIZ_SIGNING_LOCATION', last);
+            }
+          }
         }
 
         const classesQuery = query(collection(db, 'classes'), where('userId', '==', auth.currentUser.uid));
@@ -94,6 +113,40 @@ const RekapitulasiPage = () => {
     };
     fetchInitialData();
   }, []);
+
+  const handleDetectLocation = async () => {
+    if (!navigator.geolocation) {
+      toast.error("Browser tidak mendukung geolokasi.");
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await response.json();
+
+          const city = data.address.city || data.address.town || data.address.regency || data.address.county || 'Jakarta';
+          const cleanCity = city.replace(/^(Kabupaten|Kota|Kab\.|Kota\s)\s+/i, '');
+          setSigningLocation(cleanCity);
+          localStorage.setItem('QUIZ_SIGNING_LOCATION', cleanCity);
+          toast.success(`Lokasi terdeteksi: ${cleanCity}`);
+        } catch (error) {
+          console.error("Error detecting location:", error);
+          toast.error("Gagal mendeteksi nama kota.");
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        toast.error("Gagal mendapatkan lokasi.");
+        setIsDetectingLocation(false);
+      }
+    );
+  };
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -258,7 +311,7 @@ const RekapitulasiPage = () => {
       alpa: item.Alpha || 0,
     }));
     const classObj = classes.find(c => c.id === selectedClass);
-    generateAttendanceRecapPDF(pdfData, schoolName, startDate, endDate, teacherName, classObj?.rombel || selectedClass);
+    generateAttendanceRecapPDF(pdfData, schoolName, startDate, endDate, teacherName, classObj?.rombel || selectedClass, userProfile);
   };
 
   const handleKehadiranExcelExport = () => {
@@ -743,18 +796,37 @@ const RekapitulasiPage = () => {
   return (
     <div className="p-4 sm:p-6 min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
+        <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
+          <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
               <TrendingUp className="w-8 h-8 text-primary" />
               Rekapitulasi
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Data rekapitulasi pengajaran dan kedisiplinan siswa
-            </p>
+            <div className="flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-gray-400 bg-white dark:bg-surface-dark px-3 py-2 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 w-fit">
+              <MapPin size={14} className="text-primary" />
+              <span className="opacity-60 uppercase tracking-tighter">Lokasi TTD:</span>
+              <input
+                type="text"
+                className="bg-transparent focus:outline-none min-w-[100px] text-gray-900 dark:text-gray-100"
+                value={signingLocation}
+                onChange={(e) => {
+                  setSigningLocation(e.target.value);
+                  localStorage.setItem('QUIZ_SIGNING_LOCATION', e.target.value);
+                }}
+                placeholder="Pilih Kota..."
+              />
+              <button
+                onClick={handleDetectLocation}
+                disabled={isDetectingLocation}
+                className="hover:text-primary transition-colors disabled:opacity-50"
+                title="Deteksi Lokasi GPS"
+              >
+                {isDetectingLocation ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+              </button>
+            </div>
           </div>
 
-          <div className="flex bg-white dark:bg-surface-dark p-1 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto no-scrollbar">
+          <div className="flex bg-white dark:bg-surface-dark p-1.5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-x-auto no-scrollbar">
             {renderTabButton('kehadiran', 'Kehadiran', <Users className="w-4 h-4" />)}
             {renderTabButton('jurnal', 'Jurnal', <BookOpen className="w-4 h-4" />)}
             {renderTabButton('nilai', 'Nilai', <Award className="w-4 h-4" />)}

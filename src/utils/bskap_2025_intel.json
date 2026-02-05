@@ -243,18 +243,22 @@
                 "Pendidikan Pancasila": {
                     "ganjil": {
                         "elemen": [
-                            "Pancasila"
+                            "Pancasila",
+                            "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945"
                         ],
                         "materi_inti": [
-                            "Simbol Negara"
+                            "Simbol & Sila Pancasila",
+                            "Aturan di Keluarga"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "NKRI"
+                            "Bhinneka Tunggal Ika",
+                            "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
-                            "Identitas Diri"
+                            "Identitas Diri & Keberagaman",
+                            "Karakteristik Lingkungan & Kerja Sama"
                         ]
                     }
                 },
@@ -493,18 +497,24 @@
                 "Matematika": {
                     "ganjil": {
                         "elemen": [
-                            "Bilangan"
+                            "Bilangan",
+                            "Aljabar"
                         ],
                         "materi_inti": [
-                            "Cacah s.d 100"
+                            "Bilangan Cacah s.d 100",
+                            "Simbol Penjumlahan & Pengurangan"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "Pengukuran"
+                            "Pengukuran",
+                            "Geometri",
+                            "Analisis Data dan Peluang"
                         ],
                         "materi_inti": [
-                            "Jam & Panjang"
+                            "Panjang, Berat & Durasi",
+                            "Bangun Datar & Bangun Ruang",
+                            "Piktogram Dasar"
                         ]
                     }
                 },
@@ -561,36 +571,44 @@
                 "Bahasa Indonesia": {
                     "ganjil": {
                         "elemen": [
-                            "Membaca"
+                            "Menyimak",
+                            "Membaca dan Memirsa"
                         ],
                         "materi_inti": [
-                            "Teks Pendek"
+                            "Informasi Teks nonsastra",
+                            "Membaca Kata Sederhana"
                         ]
                     },
                     "genap": {
                         "elemen": [
+                            "Berbicara dan Mempresentasikan",
                             "Menulis"
                         ],
                         "materi_inti": [
-                            "Kalimat Tanya"
+                            "Merespons Percakapan",
+                            "Menulis Permulaan"
                         ]
                     }
                 },
                 "Pendidikan Pancasila": {
                     "ganjil": {
                         "elemen": [
-                            "UUD 1945"
+                            "Pancasila",
+                            "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945"
                         ],
                         "materi_inti": [
-                            "Aturan Sekolah"
+                            "Penerapan Nilai Pancasila",
+                            "Aturan di Sekolah"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "Bhinneka"
+                            "Bhinneka Tunggal Ika",
+                            "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
-                            "Keberagaman Teman"
+                            "Menghargai Perbedaan",
+                            "Menjaga Lingkungan (Bela Negara)"
                         ]
                     }
                 },
@@ -1029,72 +1047,90 @@
                 "Matematika": {
                     "ganjil": {
                         "elemen": [
-                            "Bilangan"
+                            "Bilangan",
+                            "Aljabar"
                         ],
                         "materi_inti": [
-                            "Pecahan"
+                            "Bilangan Cacah s.d 10.000, Pecahan",
+                            "Pola Gambar & Bilangan"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "Data"
+                            "Pengukuran",
+                            "Geometri",
+                            "Analisis Data dan Peluang"
                         ],
                         "materi_inti": [
-                            "Pictogram"
+                            "Satuan Baku Panjang & Berat",
+                            "Ciri Bangun Datar",
+                            "Tabel & Diagram Batang"
                         ]
                     }
                 },
                 "IPAS": {
                     "ganjil": {
                         "elemen": [
-                            "Sains"
+                            "Pemahaman IPAS (Sains)",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Fotosintesis"
+                            "Pancaindra, Siklus Hidup, Pelestarian SDA",
+                            "Mengamati & Mempertanyakan"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "Sosial"
+                            "Pemahaman IPAS (Sosial)",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Peta & Wilayah"
+                            "Interaksi Sosial, Peta Kabupaten/Kota",
+                            "Merencanakan & Menyelidiki"
                         ]
                     }
                 },
                 "Bahasa Indonesia": {
                     "ganjil": {
                         "elemen": [
-                            "Membaca"
+                            "Menyimak",
+                            "Membaca dan Memirsa"
                         ],
                         "materi_inti": [
-                            "Teks Eksplanasi"
+                            "Ide Pokok Teks Sastra/Nonsastra",
+                            "Kosakata Baru & Informasi Teks"
                         ]
                     },
                     "genap": {
                         "elemen": [
+                            "Berbicara dan Mempresentasikan",
                             "Menulis"
                         ],
                         "materi_inti": [
-                            "Puisi Anak"
+                            "Berdiskusi & Menceritakan Kembali",
+                            "Menulis Teks Narasi Sederhana"
                         ]
                     }
                 },
                 "Pendidikan Pancasila": {
                     "ganjil": {
                         "elemen": [
-                            "Pancasila"
+                            "Pancasila",
+                            "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945"
                         ],
                         "materi_inti": [
-                            "Gotong Royong"
+                            "Makna Sila & Perumus Pancasila",
+                            "Aturan di Sekolah & Rumah"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "UUD 1945"
+                            "Bhinneka Tunggal Ika",
+                            "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
-                            "Musyawarah"
+                            "Menghargai Budaya & Agama",
+                            "Wilayah NKRI (RT s.d Kecamatan)"
                         ]
                     }
                 },
@@ -1727,18 +1763,18 @@
                 "Pendidikan Agama Buddha": {
                     "ganjil": {
                         "elemen": [
-                            "Materi"
+                            "Sejarah"
                         ],
                         "materi_inti": [
-                            "Konsep Nirvana Dasar"
+                            "Riwayat Hidup Buddha Gautama: Kelahiran hingga Pencerahan"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "Ritual"
+                            "Dhamma"
                         ],
                         "materi_inti": [
-                            "Meditasi Dasar"
+                            "Hukum Tilakkhana (Tiga Corak Umum)"
                         ]
                     }
                 },
@@ -1858,11 +1894,10 @@
                             "Aljabar"
                         ],
                         "materi_inti": [
-                            "Bilangan Bulat",
-                            "Bilangan Rasional",
-                            "Bentuk Aljabar"
+                            "Operasi Bilangan Bulat dan Rasional dalam Masalah Finansial Sederhana",
+                            "Pemodelan Masalah Nyata dengan Bentuk Aljabar"
                         ],
-                        "cp_snippet": "Membaca, menulis, dan membandingkan bilangan bulat, bilangan rasional. Mengenali, memprediksi dan menggeneralisasi pola dalam bentuk susunan benda dan bilangan."
+                        "cp_snippet": "Membaca, menulis, dan membandingkan bilangan bulat, rasional. Mengenali, memprediksi dan menggeneralisasi pola dalam bentuk susunan benda dan bilangan."
                     },
                     "genap": {
                         "elemen": [
@@ -1872,9 +1907,9 @@
                         ],
                         "materi_inti": [
                             "Persamaan dan Pertidaksamaan Linear Satu Variabel",
-                            "Perbandingan Senilai dan Berbalik Nilai",
-                            "Garis dan Sudut",
-                            "Pengolahan Data"
+                            "Penerapan Rasio dan Perbandingan pada Skala dan Laju",
+                            "Garis dan Sudut dalam Konstruksi Sederhana",
+                            "Pengolahan dan Penyajian Data Kontekstual"
                         ],
                         "cp_snippet": "Menyelesaikan persamaan dan pertidaksamaan linear satu variabel. Menggunakan hubungan antar-sudut; menganalisis data berdasarkan tampilan data."
                     }
@@ -1912,9 +1947,9 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Hakikat Sains dan Metode Ilmiah",
-                            "Zat dan Perubahannya",
-                            "Suhu, Kalor, dan Pemuaian"
+                            "Hakikat Sains, Metode Ilmiah, dan Keselamatan Kerja di Laboratorium",
+                            "Klasifikasi Zat dan Perubahannya dalam Kehidupan Sehari-hari",
+                            "Suhu, Kalor, dan Pemuaian pada Benda di Sekitar"
                         ],
                         "cp_snippet": "Menerapkan pengukuran fisis; menganalisis klasifikasi, sifat, dan perubahan materi; memahami konsep suhu dan kalor."
                     },
@@ -1924,10 +1959,10 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Gerak dan Gaya",
+                            "Gerak dan Gaya dalam Aktivitas Keseharian",
                             "Klasifikasi Makhluk Hidup",
-                            "Ekologi dan Keanekaragaman Hayati",
-                            "Bumi dan Tata Surya"
+                            "Ekologi dan Pelestarian Keanekaragaman Hayati Indonesia",
+                            "Bumi dan Tata Surya dalam Fenomena Alam"
                         ],
                         "cp_snippet": "Menelaah identifikasi makhluk hidup; menganalisis ragam gerak dan gaya; memahami interaksi makhluk hidup dan lingkungan."
                     }
@@ -1939,8 +1974,8 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Keluarga Awal Kehidupan",
-                            "Keberagaman Lingkungan Sekitar"
+                            "Keluarga dan Sejarah Lokal dalam Konteks Pembentukan Jati Diri",
+                            "Karakteristik Wilayah dan Keberagaman Lingkungan Sekitar"
                         ],
                         "cp_snippet": "Menjelaskan keberagaman kondisi geografis Indonesia; memahami sejarah asal usul keluarga dan masyarakat."
                     },
@@ -1950,8 +1985,8 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Potensi Ekonomi Lingkungan",
-                            "Pemberdayaan Masyarakat"
+                            "Potensi Ekonomi Lingkungan dan Aktivitas Pemenuhan Kebutuhan",
+                            "Pemberdayaan Masyarakat untuk Kelestarian Alam dan Mitigasi Kebencanaan"
                         ],
                         "cp_snippet": "Mengidentifikasi upaya masyarakat dalam memenuhi kebutuhannya melalui kegiatan ekonomi dan pemberdayaan."
                     }
@@ -1960,7 +1995,7 @@
                     "ganjil": {
                         "elemen": [
                             "Pancasila",
-                            "UUD NRI Tahun 1945"
+                            "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945"
                         ],
                         "materi_inti": [
                             "Sejarah Kelahiran Pancasila",
@@ -1972,7 +2007,7 @@
                     "genap": {
                         "elemen": [
                             "Bhinneka Tunggal Ika",
-                            "NKRI"
+                            "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
                             "Keberagaman Bangsa Indonesia",
@@ -1991,9 +2026,9 @@
                         ],
                         "materi_inti": [
                             "Informatika dan Keterampilan Generik",
-                            "BK (Himpunan, Logika)",
-                            "TIK (Folder, Perangkat Lunak)",
-                            "SK (Perangkat Keras, OS)"
+                            "Berpikir Komputasional: Himpunan, Logika, dan Algoritma Dasar",
+                            "TIK: Manajemen File, Aplikasi Perkantoran, dan Content Management System (CMS)",
+                            "Sistem Komputer: Komponen, Fungsi, dan Kodifikasi Data"
                         ],
                         "cp_snippet": "Menerapkan berpikir komputasional; memanfaatkan aplikasi perkantoran; memahami komponen sistem komputer."
                     },
@@ -2005,9 +2040,9 @@
                             "Praktik Lintas Bidang"
                         ],
                         "materi_inti": [
-                            "Analisis Data (Perkakas, Pengolahan)",
+                            "Analisis Data: Alat, Pengolahan, dan Interpretasi",
                             "Algoritma dan Pemrograman (Visual Scratch)",
-                            "Dampak Sosial Informatika (Informasi Palsu)",
+                            "Dampak Sosial Informatika: Etika Digital dan Keamanan Informasi",
                             "Praktika Lintas Bidang (Proyek)"
                         ],
                         "cp_snippet": "Mengolah dan menganalisis data; membuat program visual; memahami dampak sosial informatika."
@@ -2066,31 +2101,31 @@
                 "Pendidikan Agama Islam": {
                     "ganjil": {
                         "elemen": [
-                            "Al-Qur'an",
+                            "Al-Qur'an Hadis",
                             "Akidah",
                             "Akhlak"
                         ],
                         "materi_inti": [
-                            "Pedoman Hidup Al-Qur'an dan Sunnah",
-                            "Sifat Allah",
-                            "Shalat & Zikir"
+                            "Al-Qur'an dan Sunnah Pedoman Hidup",
+                            "Asmaul Husna: Al-Alim, Al-Khabir, As-Sami', Al-Bashir",
+                            "Adab Shalat dan Zikir"
                         ]
                     },
                     "genap": {
                         "elemen": [
                             "Fikih",
-                            "Sejarah"
+                            "Sejarah Peradaban Islam"
                         ],
                         "materi_inti": [
-                            "Zakat, Haji, Umrah",
-                            "Bani Umayyah"
+                            "Zakat, Haji, dan Umrah",
+                            "Sejarah Bani Umayyah di Damaskus"
                         ]
                     }
                 },
                 "Pendidikan Agama Kristen": {
                     "ganjil": {
                         "elemen": [
-                            "Penyelamatan"
+                            "Allah Berkarya"
                         ],
                         "materi_inti": [
                             "Allah Penyelamat dalam Yesus Kristus"
@@ -2098,7 +2133,7 @@
                     },
                     "genap": {
                         "elemen": [
-                            "Alkitab"
+                            "Manusia dan Nilai-Nilai Kristiani"
                         ],
                         "materi_inti": [
                             "Alkitab sebagai Penuntun Hidup"
@@ -2108,10 +2143,10 @@
                 "Pendidikan Agama Katolik": {
                     "ganjil": {
                         "elemen": [
-                            "Kitab Suci"
+                            "Pribadi Peserta Didik"
                         ],
                         "materi_inti": [
-                            "Struktur Perjanjian Lama & Baru"
+                            "Manusia sebagai Citra Allah yang Unik"
                         ]
                     },
                     "genap": {
@@ -2119,25 +2154,25 @@
                             "Yesus Kristus"
                         ],
                         "materi_inti": [
-                            "Yesus Mewartakan Kerajaan Allah"
+                            "Yesus Christ as the Fulfillment of God's Promise"
                         ]
                     }
                 },
                 "Pendidikan Agama Hindu": {
                     "ganjil": {
                         "elemen": [
-                            "Upaveda"
+                            "Sraddha dan Bhakti"
                         ],
                         "materi_inti": [
-                            "Mengenal Bagian-bagian Upaveda Dasar"
+                            "Konsep Avatara, Deva, dan Rsi dalam Weda"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "Sraddha"
+                            "Susila"
                         ],
                         "materi_inti": [
-                            "Konsep Tat Twam Asi dalam Kehidupan"
+                            "Etika Hindu: Tat Twam Asi dalam Kehidupan"
                         ]
                     }
                 },
@@ -2199,7 +2234,8 @@
                     "ganjil": {
                         "elemen": [
                             "Mengalami",
-                            "Menciptakan"
+                            "Menciptakan",
+                            "Berpikir dan Bekerja Artistik"
                         ],
                         "materi_inti": [
                             "Rupa Dasar (Titik, Garis, Bidang)",
@@ -2211,7 +2247,8 @@
                     "genap": {
                         "elemen": [
                             "Merefleksikan",
-                            "Berapresiasi"
+                            "Berapresiasi",
+                            "Berdampak"
                         ],
                         "materi_inti": [
                             "Desain Poster dan Tipografi",
@@ -2284,23 +2321,27 @@
                             "Aljabar"
                         ],
                         "materi_inti": [
-                            "Bilangan Berpangkat",
-                            "Teorema Pythagoras",
-                            "Persamaan Linear dan Pertidaksamaan Linear Satu Variabel"
+                            "Bilangan Berpangkat dan Bentuk Akar",
+                            "Teorema Pythagoras dalam Pemecahan Masalah",
+                            "Relasi dan Fungsi dalam Masalah Kehidupan Nyata"
                         ],
-                        "cp_snippet": "Mengenali bilangan berpangkat bulat dan akar; membuktikan teorema Pythagoras; menyelesaikan persamaan linear."
+                        "cp_snippet": "Mengenali bilangan berpangkat bulat dan akar; membuktikan teorema Pythagoras; menyajikan relasi dan fungsi."
                     },
                     "genap": {
                         "elemen": [
                             "Aljabar",
+                            "Pengukuran",
+                            "Geometri",
                             "Analisis Data dan Peluang"
                         ],
                         "materi_inti": [
-                            "Relasi dan Fungsi",
                             "Persamaan Garis Lurus",
-                            "Statistika"
+                            "Pemodelan dengan Sistem Persamaan Linear Dua Variabel (SPLDV)",
+                            "Lingkaran (Busur, Juring, dan Sudut)",
+                            "Luas Permukaan dan Volume Bangun Ruang Sisi Datar (Prisma dan Limas)",
+                            "Statistika dan Peluang Dasar"
                         ],
-                        "cp_snippet": "Menyajikan relasi dan fungsi; menggambar grafik persamaan garis lurus; menganalisis data statistik."
+                        "cp_snippet": "Menyelesaikan SPLDV; memahami konsep busur dan juring lingkaran; menganalisis data statistik."
                     }
                 },
                 "Bahasa Indonesia": {
@@ -2336,9 +2377,9 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Pengenalan Sel",
-                            "Struktur dan Fungsi Tubuh Makhluk Hidup",
-                            "Usaha, Energi, dan Pesawat Sederhana"
+                            "Pengenalan Sel sebagai Unit Terkecil Kehidupan",
+                            "Struktur dan Fungsi Tubuh Makhluk Hidup (Sistem Organ)",
+                            "Usaha, Energi, dan Pesawat Sederhana dalam Aktivitas Manusia"
                         ],
                         "cp_snippet": "Menganalisis struktur sel; memahami sistem organ tubuh manusia; menerapkan konsep usaha dan pesawat sederhana."
                     },
@@ -2348,9 +2389,9 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Getaran, Gelombang, dan Cahaya",
+                            "Gejala Alam: Getaran, Gelombang, dan Cahaya",
                             "Unsur, Senyawa, dan Campuran",
-                            "Struktur Bumi dan Perkembangannya"
+                            "Struktur Bumi, Lempeng Tektonik, dan Mitigasi Bencana"
                         ],
                         "cp_snippet": "Menganalisis fenomena gelombang dan cahaya; membedakan unsur, senyawa, campuran; memahami struktur bumi."
                     }
@@ -2362,8 +2403,8 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Kondisi Geografis dan Pelestarian SDA",
-                            "Kemajemukan Masyarakat Indonesia"
+                            "Keragaman Alam dan Pemanfaatan SDA yang Berkelanjutan",
+                            "Kemajemukan Masyarakat Indonesia dalam Bingkai Nasional"
                         ],
                         "cp_snippet": "Menganalisis pengaruh kondisi geografis terhadap pelestarian SDA; memahami keberagaman budaya masyarakat."
                     },
@@ -2373,8 +2414,8 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Nasionalisme dan Jati Diri Bangsa",
-                            "Pembangunan Perekonomian Indonesia"
+                            "Proses Pembentukan Nasionalisme dan Jati Diri Bangsa Indonesia",
+                            "Pembangunan Ekonomi untuk Kesejahteraan Masyarakat di Era Global"
                         ],
                         "cp_snippet": "Menjelaskan perkembangan nasionalisme Indonesia; menganalisis dinamika pembangunan ekonomi."
                     }
@@ -2383,7 +2424,7 @@
                     "ganjil": {
                         "elemen": [
                             "Pancasila",
-                            "UUD NRI Tahun 1945"
+                            "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945"
                         ],
                         "materi_inti": [
                             "Kedudukan dan Fungsi Pancasila",
@@ -2395,7 +2436,7 @@
                     "genap": {
                         "elemen": [
                             "Bhinneka Tunggal Ika",
-                            "NKRI"
+                            "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
                             "Kebangkitan Nasional dan Sumpah Pemuda",
@@ -2414,10 +2455,10 @@
                             "Jaringan Komputer dan Internet"
                         ],
                         "materi_inti": [
-                            "BK (Dekomposisi, Abstraksi)",
-                            "TIK (Informasi Digital, Berbagi Konten)",
-                            "SK (Komponen Sistem Terintegrasi)",
-                            "JKI (Keamanan Data Cloud)"
+                            "Berpikir Komputasional: Dekomposisi, Abstraksi, Analisis Data",
+                            "TIK: Informasi Digital, Berbagi Konten, dan Literasi Digital",
+                            "Sistem Komputer: Perangkat Keras dan Perangkat Lunak Terintegrasi",
+                            "Jaringan Komputer dan Internet: Keamanan Data Cloud"
                         ],
                         "cp_snippet": "Menerapkan metode berpikir komputasional; mengelola informasi digital; memahami keamanan data cloud."
                     },
@@ -2491,43 +2532,45 @@
                 "Pendidikan Agama Islam": {
                     "ganjil": {
                         "elemen": [
-                            "Al-Qur'an",
+                            "Al-Qur'an Hadis",
                             "Akidah",
                             "Akhlak"
                         ],
                         "materi_inti": [
-                            "Melestarikan Alam",
-                            "Kitab Allah",
-                            "Jujur & Amanah"
+                            "Melestarikan Alam (Q.S. Ar-Rum)",
+                            "Iman kepada Kitab-Kitab Allah",
+                            "Sikap Jujur, Amanah, dan Istiqamah"
                         ]
                     },
                     "genap": {
                         "elemen": [
                             "Fikih",
-                            "Sejarah"
+                            "Sejarah Peradaban Islam"
                         ],
                         "materi_inti": [
-                            "Shalat Jenazah & Muamalah",
-                            "Bani Abbasiyah"
+                            "Shalat Jenazah dan Tata Cara Muamalah",
+                            "Sejarah Bani Abbasiyah di Baghdad"
                         ]
                     }
                 },
                 "Pendidikan Agama Kristen": {
                     "ganjil": {
                         "elemen": [
-                            "Iman"
+                            "Allah Berkarya"
                         ],
                         "materi_inti": [
-                            "Iman dan Pengharapan di Tengah Tantangan"
-                        ]
+                            "Iman dan Pengharapan di Tengah Tantangan Hidup"
+                        ],
+                        "cp_snippet": "Memahami tanggung jawab kristiani terhadap lingkungan; menerapkan iman dalam menghadapi tantangan hidup."
                     },
                     "genap": {
                         "elemen": [
-                            "Masyarakat"
+                            "Gereja dan Masyarakat Majemuk"
                         ],
                         "materi_inti": [
-                            "Tanggung Jawab Kristiani di Lingkungan"
-                        ]
+                            "Tanggung Jawab Kristiani terhadap Sesama dan Lingkungan"
+                        ],
+                        "cp_snippet": "Memahami peran gereja di tengah masyarakat majemuk sebagai saksi Kristus."
                     }
                 },
                 "Pendidikan Agama Katolik": {
@@ -2536,70 +2579,79 @@
                             "Gereja"
                         ],
                         "materi_inti": [
-                            "Panggilan Murid-Murid Yesus"
-                        ]
+                            "Panggilan dan Tugas Murid-Murid Yesus"
+                        ],
+                        "cp_snippet": "Memahami peran sakramen dan panggilan hidup sebagai murid Yesus di tengah masyarakat."
                     },
                     "genap": {
                         "elemen": [
-                            "Sakramen"
+                            "Masyarakat"
                         ],
                         "materi_inti": [
-                            "Sakramen sebagai Tanda Kehadiran Allah"
-                        ]
+                            "Sakramen sebagai Tanda Kehadiran Allah dalam Dunia"
+                        ],
+                        "cp_snippet": "Menyadari kehadiran Allah melalui sakramen-sakramen Gereja dalam kehidupan sehari-hari."
                     }
                 },
                 "Pendidikan Agama Hindu": {
                     "ganjil": {
                         "elemen": [
-                            "Tattwa"
+                            "Sraddha dan Bhakti"
                         ],
                         "materi_inti": [
-                            "Konsep Panca Mahabhuta dalam Alam"
-                        ]
+                            "Konsep Panca Mahabhuta dalam Alam Semesta"
+                        ],
+                        "cp_snippet": "Memahami konsep Panca Mahabhuta sebagai unsur pembentuk alam semesta."
                     },
                     "genap": {
                         "elemen": [
-                            "Sraddha"
+                            "Sraddha dan Bhakti"
                         ],
                         "materi_inti": [
-                            "Punarbhava dalam Siklus Kehidupan"
-                        ]
+                            "Konsep Punarbhava dalam Siklus Kehidupan"
+                        ],
+                        "cp_snippet": "Memahami konsep Punarbhava dalam siklus kehidupan alam semesta dan hukum karma."
                     }
                 },
                 "Pendidikan Agama Buddha": {
                     "ganjil": {
                         "elemen": [
-                            "Materi"
+                            "Sejarah"
                         ],
                         "materi_inti": [
-                            "Pemahaman Empat Kebenaran Mulia Lanjut"
-                        ]
+                            "Pemahaman Empat Kebenaran Mulia (Cattari Ariya Saccani)"
+                        ],
+                        "cp_snippet": "Menganalisis Empat Kebenaran Mulia dalam kehidupan sehari-hari untuk membebaskan penderitaan."
                     },
                     "genap": {
                         "elemen": [
                             "Dhamma"
                         ],
                         "materi_inti": [
-                            "Hukum Kausalitas (Paticcasamuppada) Dasar"
-                        ]
+                            "Hukum Kausalitas (Paticcasamuppada) Lanjut"
+                        ],
+                        "cp_snippet": "Memahami Hukum Kausalitas (Sebab Akibat) yang saling bergantungan dalam kehidupan."
                     }
                 },
                 "Pendidikan Agama Khonghucu": {
                     "ganjil": {
                         "elemen": [
-                            "Etika"
+                            "Keimanan",
+                            "Perilaku Junzi"
                         ],
                         "materi_inti": [
-                            "Implementasi Wu Lun dalam Keluarga"
-                        ]
+                            "Implementasi Lima Hubungan Sosial (Wu Lun) dalam Keluarga"
+                        ],
+                        "cp_snippet": "Mengimplementasikan hubungan sosial (Wu Lun) dan karakter Junzi dalam lingkungan keluarga."
                     },
                     "genap": {
                         "elemen": [
-                            "Ritual"
+                            "Tata Ibadah"
                         ],
                         "materi_inti": [
-                            "Makna Ibadah Hari Raya Tengah Tahun"
-                        ]
+                            "Makna Ibadah dan Perayaan Hari Raya Keagamaan"
+                        ],
+                        "cp_snippet": "Memahami makna spiritual dari ibadah dan perayaan hari raya Khonghucu."
                     }
                 },
                 "Pendidikan Kepercayaan": {
@@ -2609,7 +2661,8 @@
                         ],
                         "materi_inti": [
                             "Keluhuran Budaya Lokal Spiritual"
-                        ]
+                        ],
+                        "cp_snippet": "Menghayati keluhuran budaya spiritual dan kearifan lokal dalam perilaku keseharian."
                     },
                     "genap": {
                         "elemen": [
@@ -2617,14 +2670,16 @@
                         ],
                         "materi_inti": [
                             "Penghayatan Ketuhanan dalam Keseharian"
-                        ]
+                        ],
+                        "cp_snippet": "Menyadari hubungan harmonis antara manusia, sesama, dan Tuhan YME."
                     }
                 },
                 "Seni Rupa": {
                     "ganjil": {
                         "elemen": [
                             "Mengalami",
-                            "Menciptakan"
+                            "Menciptakan",
+                            "Berpikir dan Bekerja Artistik"
                         ],
                         "materi_inti": [
                             "Menggambar Perspektif Satu Titik Hilang",
@@ -2636,7 +2691,8 @@
                     "genap": {
                         "elemen": [
                             "Merefleksikan",
-                            "Berapresiasi"
+                            "Berapresiasi",
+                            "Berdampak"
                         ],
                         "materi_inti": [
                             "Desain Grafis dan Tipografi Dasar",
@@ -2704,43 +2760,47 @@
                 "Pendidikan Agama Islam": {
                     "ganjil": {
                         "elemen": [
-                            "Al-Qur'an",
+                            "Al-Qur'an Hadis",
                             "Akidah",
                             "Akhlak"
                         ],
                         "materi_inti": [
-                            "Etika Pergaulan Q.S. Al-Hujurat",
-                            "Iman kepada Qada & Qadar",
-                            "Sikap Optimis & Ikhtiar"
-                        ]
+                            "Etika Pergaulan dan Berbakti kepada Orang Tua (Q.S. Al-Hujurat)",
+                            "Iman kepada Qada dan Qadar",
+                            "Sikap Optimis, Ikhtiar, dan Tawakal"
+                        ],
+                        "cp_snippet": "Menerapkan etika pergaulan Islami; memahami Qada dan Qadar serta sejarah Islam di Nusantara."
                     },
                     "genap": {
                         "elemen": [
                             "Fikih",
-                            "Sejarah"
+                            "Sejarah Peradaban Islam"
                         ],
                         "materi_inti": [
-                            "Penyembelihan, Qurban & Aqiqah",
-                            "Sejarah Perkembangan Islam di Indonesia"
-                        ]
+                            "Penyembelihan Hewan, Qurban, dan Aqiqah",
+                            "Sejarah Perkembangan Islam di Nusantara"
+                        ],
+                        "cp_snippet": "Memahami tata cara penyembelihan hewan; menganalisis sejarah masuk dan berkembangnya Islam di Nusantara."
                     }
                 },
                 "Pendidikan Agama Kristen": {
                     "ganjil": {
                         "elemen": [
-                            "Gereja"
+                            "Gereja dan Masyarakat Majemuk"
                         ],
                         "materi_inti": [
-                            "Peran Gereja di Tengah Masyarakat Modern"
-                        ]
+                            "Peran Gereja di Tengah Masyarakat Modern dan Digital"
+                        ],
+                        "cp_snippet": "Menganalisis peran gereja di era digital; mengupayakan perdamaian dan kelestarian alam global."
                     },
                     "genap": {
                         "elemen": [
-                            "Dunia"
+                            "Alam Semesta dan Lingkungan Hidup"
                         ],
                         "materi_inti": [
-                            "Mengupayakan Perdamaian dan Keadilan Global"
-                        ]
+                            "Mengupayakan Perdamaian, Keadilan, dan Kelestarian Alam Global"
+                        ],
+                        "cp_snippet": "Menyadari panggilan kristiani untuk menjaga keutuhan ciptaan dan keadilan sosial global."
                     }
                 },
                 "Pendidikan Agama Katolik": {
@@ -2750,7 +2810,8 @@
                         ],
                         "materi_inti": [
                             "Gereja dan Dunia: Terbuka & Berdialog"
-                        ]
+                        ],
+                        "cp_snippet": "Memahami hubungan Gereja dengan dunia serta pentingnya dialog antarumat beragama."
                     },
                     "genap": {
                         "elemen": [
@@ -2758,25 +2819,28 @@
                         ],
                         "materi_inti": [
                             "Memahami Berbagai Panggilan Hidup Kristiani"
-                        ]
+                        ],
+                        "cp_snippet": "Menganalisis berbagai panggilan hidup Kristiani (awam, klerus, hidup bakti) dalam Gereja."
                     }
                 },
                 "Pendidikan Agama Hindu": {
                     "ganjil": {
                         "elemen": [
-                            "Sraddha"
+                            "Sraddha dan Bhakti"
                         ],
                         "materi_inti": [
-                            "Pendalaman Panca Sradha dalam Kehidupan"
-                        ]
+                            "Pendalaman Panca Sradha dalam Kehidupan Sehari-hari"
+                        ],
+                        "cp_snippet": "Mendalami Panca Sradha sebagai dasar keimanan Hindu dalam kehidupan sehari-hari."
                     },
                     "genap": {
                         "elemen": [
-                            "Budaya"
+                            "Sejarah"
                         ],
                         "materi_inti": [
-                            "Sastra Suci Hindu: Dharma Gita Dasar"
-                        ]
+                            "Sastra Suci Hindu: Mengenal Dharma Gita"
+                        ],
+                        "cp_snippet": "Mengenal dan mengapresiasi sastra suci Hindu melalui nyanyian keagamaan Dharma Gita."
                     }
                 },
                 "Pendidikan Agama Buddha": {
@@ -2785,16 +2849,18 @@
                             "Dhamma"
                         ],
                         "materi_inti": [
-                            "Karakteristik Umum Dhamma (Ehipassiko)"
-                        ]
+                            "Karakteristik Umum Dhamma (Ehipassiko, Opanayiko)"
+                        ],
+                        "cp_snippet": "Memahami karakteristik umum Dhamma yang mengundang untuk dibuktikan sendiri (Ehipassiko)."
                     },
                     "genap": {
                         "elemen": [
                             "Ritual"
                         ],
                         "materi_inti": [
-                            "Praktik Meditasi Vipassana Dasar"
-                        ]
+                            "Praktik Meditasi Samatha dan Vipassana"
+                        ],
+                        "cp_snippet": "Mempraktikkan meditasi Samatha dan Vipassana untuk mencapai ketenangan dan pandangan terang."
                     }
                 },
                 "Pendidikan Agama Khonghucu": {
@@ -2804,7 +2870,8 @@
                         ],
                         "materi_inti": [
                             "Prinsip Tengah Harmonis (Zhong He)"
-                        ]
+                        ],
+                        "cp_snippet": "Menerapkan prinsip Tengah Harmonis dalam menjaga keseimbangan diri dan masyarakat."
                     },
                     "genap": {
                         "elemen": [
@@ -2812,7 +2879,8 @@
                         ],
                         "materi_inti": [
                             "Implementasi Kebajikan dalam Ruang Publik"
-                        ]
+                        ],
+                        "cp_snippet": "Menerapkan kebajikan dan etika Khonghucu dalam berinteraksi di ruang publik."
                     }
                 },
                 "Pendidikan Kepercayaan": {
@@ -2822,7 +2890,8 @@
                         ],
                         "materi_inti": [
                             "Pengamalan Budi Luhur dalam Kebangsaan"
-                        ]
+                        ],
+                        "cp_snippet": "Mengamalkan budi luhur dan nilai-nilai spiritual dalam kehidupan berbangsa dan bernegara."
                     },
                     "genap": {
                         "elemen": [
@@ -2830,33 +2899,34 @@
                         ],
                         "materi_inti": [
                             "Keselarasan Manusia dengan Alam Semesta"
-                        ]
+                        ],
+                        "cp_snippet": "Menyadari keselarasan antara mikrokosmos (manusia) dan makrokosmos (alam semesta)."
                     }
                 },
                 "Matematika": {
                     "ganjil": {
                         "elemen": [
-                            "Bilangan",
-                            "Aljabar"
+                            "Aljabar",
+                            "Geometri"
                         ],
                         "materi_inti": [
-                            "Perpangkatan dan Bentuk Akar",
-                            "Persamaan Kuadrat",
-                            "Fungsi Kuadrat"
+                            "Persamaan dan Fungsi Kuadrat dalam Kehidupan Sehari-hari",
+                            "Penerapan Transformasi Geometri pada Karya Seni dan Arsitektur"
                         ],
-                        "cp_snippet": "Menerapkan operasi bilangan berpangkat; menyelesaikan persamaan kuadrat; menganalisis fungsi kuadrat."
+                        "cp_snippet": "Menyelesaikan persamaan kuadrat; menganalisis fungsi kuadrat; melakukan transformasi geometri pada bidang koordinat."
                     },
                     "genap": {
                         "elemen": [
                             "Geometri",
-                            "Pengukuran"
+                            "Pengukuran",
+                            "Analisis Data dan Peluang"
                         ],
                         "materi_inti": [
-                            "Transformasi Geometri (Refleksi, Translasi)",
-                            "Kesebangunan dan Kekongruenan",
-                            "Bangun Ruang Sisi Lengkung (Tabung, Kerucut, Bola)"
+                            "Kesebangunan dan Kekongruenan dalam Pemecahan Masalah",
+                            "Luas Permukaan dan Volume Bangun Ruang Sisi Lengkung (Tabung, Kerucut, Bola)",
+                            "Statistika dan Peluang Lanjut (Analisis Data)"
                         ],
-                        "cp_snippet": "Melakukan transformasi geometri; memahami konsep kesebangunan; menghitung volume bangun ruang sisi lengkung."
+                        "cp_snippet": "Memahami konsep kesebangunan; menghitung volume bangun ruang sisi lengkung; menggunakan peluang dalam percobaan sederhana."
                     }
                 },
                 "Bahasa Indonesia": {
@@ -2892,9 +2962,9 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Pertumbuhan dan Perkembangan",
-                            "Sistem Koordinasi dan Reproduksi",
-                            "Tekanan Zat (Padat, Cair, Gas)"
+                            "Tahapan Pertumbuhan dan Perkembangan Manusia serta Makhluk Hidup Lain",
+                            "Sistem Koordinasi dan Kesehatan Reproduksi",
+                            "Konsep Tekanan Zat (Padat, Cair, Gas) dalam Teknologi"
                         ],
                         "cp_snippet": "Memahami fase pertumbuhan makhluk hidup; menganalisis sistem koordinasi; menerapkan hukum tekanan."
                     },
@@ -2904,9 +2974,9 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Listrik Magnet dan Sumber Energi",
-                            "Reaksi Kimia Dasar",
-                            "Pewarisan Sifat dan Bioteknologi"
+                            "Listrik, Magnet, dan Sumber Energi Terbarukan",
+                            "Reaksi Kimia Dasar dalam Kehidupan",
+                            "Pewarisan Sifat dan Pemanfaatan Bioteknologi Modern/Konvensional"
                         ],
                         "cp_snippet": "Menerapkan prinsip elektromagnetik; memahami reaksi kimia; menganalisis genetika dan bioteknologi."
                     }
@@ -2918,8 +2988,8 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Manusia dan Perubahan",
-                            "Perkembangan Ekonomi Digital"
+                            "Dinamika Perubahan Sosial Budaya dalam Masyarakat Majemuk",
+                            "Pengembangan Ekonomi Kreatif dan Literasi Finansial di Era Digital"
                         ],
                         "cp_snippet": "Menganalisis perubahan sosial masyarakat; memahami dinamika ekonomi di era digital."
                     },
@@ -2929,8 +2999,8 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Tantangan Pembangunan Indonesia",
-                            "Kerja Sama Dunia"
+                            "Analisis Tantangan Pembangunan Indonesia Menuju Indonesia Emas",
+                            "Kerja Sama Dunia dan Peran Strategis Indonesia"
                         ],
                         "cp_snippet": "Mengidentifikasi tantangan pembangunan nasional; menganalisis peran Indonesia dalam kerja sama internasional."
                     }
@@ -2939,7 +3009,7 @@
                     "ganjil": {
                         "elemen": [
                             "Pancasila",
-                            "UUD NRI Tahun 1945"
+                            "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945"
                         ],
                         "materi_inti": [
                             "Dinamika Perwujudan Pancasila",
@@ -2951,12 +3021,12 @@
                     "genap": {
                         "elemen": [
                             "Bhinneka Tunggal Ika",
-                            "NKRI"
+                            "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
                             "Menjaga dan Melestarikan Pancasila",
                             "Kemerdekaan Berpendapat Warga Negara",
-                            "Bela Negara dan Keutuhan Wilayah"
+                            "Bela Negara and Keutuhan Wilayah"
                         ],
                         "cp_snippet": "Mengidentifikasi upaya pelestarian nilai Pancasila; memahami hak kebebasan berpendapat."
                     }
@@ -2970,10 +3040,10 @@
                             "Jaringan Komputer dan Internet"
                         ],
                         "materi_inti": [
-                            "BK (Struktur Data, Logika Lanjut)",
-                            "TIK (Integrasi Aplikasi Kantor, Blog/Vlog)",
-                            "SK (Keamanan Komputer)",
-                            "JKI (Konfigurasi Jaringan)"
+                            "Berpikir Komputasional: Struktur Data dan Logika Lanjut",
+                            "TIK: Integrasi Aplikasi Kantor, Vlog/Blog, dan Media Digital",
+                            "Sistem Komputer dan Keamanan Data",
+                            "Jaringan Komputer dan Internet: Konfigurasi Jaringan Sederhana"
                         ],
                         "cp_snippet": "Menerapkan ekspresi logika; mengintegrasikan konten aplikasi; memahami keamanan sistem."
                     },
@@ -2985,9 +3055,9 @@
                             "Praktik Lintas Bidang"
                         ],
                         "materi_inti": [
-                            "Analisis Data (Prediksi, Pemodelan)",
-                            "Algoritma dan Pemrograman (Modularisasi, Blocky)",
-                            "Dampak Sosial Informatika (Isu Keamanan Siber)",
+                            "Analisis Data: Prediksi, Pemodelan, dan Visualisasi Tren",
+                            "Algoritma dan Pemrograman: Modularisasi dan Pemrograman Tekstual Sederhana",
+                            "Dampak Sosial Informatika: Isu Keamanan Siber Global",
                             "Praktika Lintas Bidang (Proyek Inovasi Digital)"
                         ],
                         "cp_snippet": "Menganalisis tren data; merancang program modular; memahami isu keamanan siber global."
@@ -3043,7 +3113,8 @@
                     "ganjil": {
                         "elemen": [
                             "Mengalami",
-                            "Menciptakan"
+                            "Menciptakan",
+                            "Berpikir dan Bekerja Artistik"
                         ],
                         "materi_inti": [
                             "Seni Lukis (Gaya, Aliran, Tema)",
@@ -3055,7 +3126,8 @@
                     "genap": {
                         "elemen": [
                             "Merefleksikan",
-                            "Berapresiasi"
+                            "Berapresiasi",
+                            "Berdampak"
                         ],
                         "materi_inti": [
                             "Seni Grafis (Cetak Tinggi, Cetak Dalam)",
@@ -3125,7 +3197,7 @@
                 "Pendidikan Agama Islam": {
                     "ganjil": {
                         "elemen": [
-                            "Al-Qur'an",
+                            "Al-Qur'an Hadis",
                             "Akidah",
                             "Akhlak"
                         ],
@@ -3138,7 +3210,7 @@
                     "genap": {
                         "elemen": [
                             "Fikih",
-                            "Sejarah"
+                            "Sejarah Peradaban Islam"
                         ],
                         "materi_inti": [
                             "Kurban & Haji",
@@ -3365,72 +3437,88 @@
                 "Ekonomi": {
                     "ganjil": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Kelangkaan"
+                            "Hakikat Ilmu Ekonomi",
+                            "Kebutuhan & Kelangkaan"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Sistem Pembayaran"
+                            "Produk Keuangan Bank & Non-Bank",
+                            "Risiko Keuangan & Laporan Keuangan Pribadi"
                         ]
                     }
                 },
                 "Geografi": {
                     "ganjil": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Pengantar Geografi"
+                            "Konsep Dasar Geografi",
+                            "Fenomena Litosfer & Atmosfer"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Peta & Pengindraan Jauh"
+                            "Hidrosfer sebagai Ruang Hidup",
+                            "Teknologi Geospasial (Peta, Pengindraan Jauh, SIG)"
                         ]
                     }
                 },
                 "Sosiologi": {
                     "ganjil": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Paradigma Sosiologi"
+                            "Fungsi Sosiologi sebagai Ilmu",
+                            "Status & Peran Individu dalam Kelompok Sosial"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Interaksi & Identitas"
+                            "Ragam Gejala Sosial dalam Masyarakat",
+                            "Keragaman Manusia & Budaya Multikultural"
                         ]
                     }
                 },
                 "Sejarah": {
                     "ganjil": {
                         "elemen": [
-                            "Pemahaman"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Pengantar Ilmu Sejarah"
+                            "Konsep Dasar Ilmu Sejarah",
+                            "Penelitian Sejarah (Heuristik, Kritik, Interpretasi)"
                         ]
                     },
                     "genap": {
                         "elemen": [
-                            "Analisis"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Asal Usul Nenek Moyang"
+                            "Masa Kerajaan Hindu-Buddha",
+                            "Masa Kerajaan Islam"
                         ]
                     }
                 },
@@ -3527,7 +3615,7 @@
                 "Pendidikan Agama Islam": {
                     "ganjil": {
                         "elemen": [
-                            "Al-Qur'an",
+                            "Al-Qur'an Hadis",
                             "Akidah",
                             "Fikih"
                         ],
@@ -3540,7 +3628,7 @@
                     "genap": {
                         "elemen": [
                             "Akhlak",
-                            "Sejarah"
+                            "Sejarah Peradaban Islam"
                         ],
                         "materi_inti": [
                             "Adab Berpakaian & Perjalanan",
@@ -3677,55 +3765,78 @@
                 "Ekonomi": {
                     "ganjil": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Pendapatan Nasional"
-                        ]
+                            "Pendapatan Nasional & Kesenjangan Ekonomi",
+                            "Pertumbuhan & Pembangunan Ekonomi"
+                        ],
+                        "cp_snippet": "Menganalisis pendapatan nasional; memahami indikator pertumbuhan dan pembangunan ekonomi."
                     },
                     "genap": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "APBN & APBD"
-                        ]
+                            "Ketenagakerjaan & Integritas Literasi Keuangan",
+                            "Teori Uang, Inflasi & Kebijakan Moneter",
+                            "Kebijakan Fiskal & APBN"
+                        ],
+                        "cp_snippet": "Menganalisis permasalahan ketenagakerjaan; memahami mekanisme inflasi dan kebijakan ekonomi pemerintah."
                     }
                 },
                 "Fisika": {
                     "ganjil": {
                         "elemen": [
-                            "Fisika"
+                            "Pemahaman Fisika",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Kinematika"
-                        ]
+                            "Vektor & Penerapannya",
+                            "Kinematika & Dinamika Gerak",
+                            "Hukum Gravitasi Newton"
+                        ],
+                        "cp_snippet": "Menerapkan prinsip vektor; menganalisis gerak benda dan gaya gravitasi planet."
                     },
                     "genap": {
                         "elemen": [
-                            "Fisika"
+                            "Pemahaman Fisika",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Termodinamika"
-                        ]
+                            "Fluida Statis & Dinamis",
+                            "Termodinamika & Kalor",
+                            "Gelombang Bunyi & Gelombang Cahaya"
+                        ],
+                        "cp_snippet": "Memahami prinsip fluida dan termodinamika; menganalisis gejala gelombang dalam kehidupan sehari-hari."
                     }
                 },
                 "Biologi": {
                     "ganjil": {
                         "elemen": [
-                            "Sains"
+                            "Pemahaman Biologi",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Sel Lanjut"
-                        ]
+                            "Struktur Sel & Bioproses (Transpor Membran)",
+                            "Jaringan Tumbuhan & Hewan",
+                            "Sistem Gerak Manusia"
+                        ],
+                        "cp_snippet": "Menganalisis struktur sel dan jaringan; memahami mekanisme gerak tubuh manusia."
                     },
                     "genap": {
                         "elemen": [
-                            "Sains"
+                            "Pemahaman Biologi",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Sistem Organ"
-                        ]
+                            "Sistem Sirkulasi & Pencernaan",
+                            "Sistem Pernapasan & Ekskresi",
+                            "Sistem Koordinasi & Reproduksi"
+                        ],
+                        "cp_snippet": "Menjelaskan fungsi sistem organ tubuh manusia dan gangguan yang mungkin terjadi."
                     }
                 },
                 "Bahasa Daerah": {
@@ -3779,6 +3890,80 @@
                             "Rencana Pengembangan Usaha (Scaling)"
                         ],
                         "cp_snippet": "Mengembangkan strategi promosi yang efektif; menganalisis profitabilitas dan melakukan ekspansi bisnis."
+                    }
+                },
+                "Kimia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman Kimia",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Stoikiometri Lanjut",
+                            "Struktur Atom & Ikatan Kimia",
+                            "Termokimia & Energi Reaksi"
+                        ],
+                        "cp_snippet": "Menghitung kuantitas zat dalam reaksi; menganalisis bentuk molekul dan perubahan entalpi."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman Kimia",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Laju Reaksi & Kesetimbangan",
+                            "Larutan Asam-Basa & Penyangga",
+                            "Kelarutan & Hasil Kali Kelarutan"
+                        ],
+                        "cp_snippet": "Menganalisis faktor laju reaksi; menghitung pH larutan dan memahami konsep penyangga."
+                    }
+                },
+                "Geografi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Posisi Strategis Indonesia & SDA",
+                            "Keanekaragaman Hayati (Flora & Fauna)"
+                        ],
+                        "cp_snippet": "Menganalisis letak astronomis dan geografis Indonesia; memahami sebaran flora fauna dunia."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Lingkungan Hidup & Pembangunan Berkelanjutan",
+                            "Kependudukan & Dinamika Penduduk"
+                        ],
+                        "cp_snippet": "Memahami konsep pelestarian lingkungan; menganalisis data kependudukan Indonesia."
+                    }
+                },
+                "Sosiologi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Kelompok Sosial & Hubungan Antar Kelompok",
+                            "Permasalahan Sosial Akibat Globalisasi"
+                        ],
+                        "cp_snippet": "Menjelaskan konsep kelompok sosial; mengidentifikasi dampak globalisasi terhadap masyarakat."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Konflik Sosial & Resolusi Konflik",
+                            "Integrasi Sosial dalam Masyarakat Majemuk"
+                        ],
+                        "cp_snippet": "Menganalisis akar penyebab konflik; mengusulkan solusi integratif untuk kedamaian sosial."
                     }
                 }
             },
@@ -3921,52 +4106,69 @@
                             "Kalkulus"
                         ],
                         "materi_inti": [
-                            "Limit & Turunan"
-                        ]
+                            "Limit Fungsi",
+                            "Turunan Fungsi Aljabar & Trigonometri",
+                            "Integral Tak Tentu & Tentu"
+                        ],
+                        "cp_snippet": "Memahami konsep limit; menerapkan aturan turunan dan integral fungsi dalam pemecahan masalah."
                     },
                     "genap": {
                         "elemen": [
-                            "Peluang"
+                            "Analisis Data dan Peluang"
                         ],
                         "materi_inti": [
-                            "Distribusi Normal"
-                        ]
+                            "Distribusi Peluang Binomial",
+                            "Distribusi Normal & Uji Hipotesis"
+                        ],
+                        "cp_snippet": "Menyelesaikan masalah terkait distribusi peluang; menganalisis data menggunakan distribusi normal."
                     }
                 },
                 "Geografi": {
                     "ganjil": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Pembangunan Wilayah"
-                        ]
+                            "Pembangunan Wilayah & Tata Ruang",
+                            "Interaksi Keruangan Desa & Kota"
+                        ],
+                        "cp_snippet": "Menganalisis konsep wilayah dan tata ruang; memahami pola interaksi desa-kota."
                     },
                     "genap": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Mitigasi Bencana"
-                        ]
+                            "Mitigasi Bencana Alam & Lingkungan Hidup",
+                            "Kerja Sama Negara Maju & Berkembang"
+                        ],
+                        "cp_snippet": "Merancang strategi mitigasi bencana; menganalisis dinamika hubungan internasional antarnegara."
                     }
                 },
                 "Sosiologi": {
                     "ganjil": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Perubahan Sosial"
-                        ]
+                            "Perubahan Sosial & Globalisasi Lanjut",
+                            "Dinamika Masyarakat Digital"
+                        ],
+                        "cp_snippet": "Menganalisis arah perubahan sosial di era digital dan dampaknya terhadap struktur masyarakat."
                     },
                     "genap": {
                         "elemen": [
-                            "Konsep"
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Kearifan Lokal"
-                        ]
+                            "Kearifan Lokal dalam Masyarakat Modern",
+                            "Pemberdayaan Komunitas Berbasis Kearifan Lokal"
+                        ],
+                        "cp_snippet": "Merancang aksi pemberdayaan komunitas dengan mengintegrasikan nilai-nilai kearifan lokal."
                     }
                 },
                 "Bahasa Daerah": {
@@ -4020,6 +4222,110 @@
                             "Pembuatan Proposal Pengembangan Usaha Baru"
                         ],
                         "cp_snippet": "Menyusun laporan wirausaha secara profesional; melakukan refleksi atas kegagalan/keberhasilan bisnis."
+                    }
+                },
+                "Fisika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman Fisika",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Listrik Statis & Dinamis",
+                            "Medan Magnet & Induksi Elektromagnetik",
+                            "Arus Bolak-balik (AC)"
+                        ],
+                        "cp_snippet": "Menerapkan prinsip kelistrikan dan kemagnetan dalam teknologi digital."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman Fisika",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Fisika Modern (Relativitas & Kuantum)",
+                            "Fisika Inti & Radioaktivitas",
+                            "Teknologi Digital & Penyimpanan Data"
+                        ],
+                        "cp_snippet": "Menganalisis teori relativitas; memahami penerapan radioaktivitas dan teknologi digital."
+                    }
+                },
+                "Kimia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman Kimia",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Sifat Koligatif Larutan",
+                            "Reaksi Redoks & Elektrokimia",
+                            "Sel Volta & Sel Elektrolisis"
+                        ],
+                        "cp_snippet": "Menerapkan hukum koligatif; menganalisis proses elektrokimia pada baterai dan korosi."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman Kimia",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Kimia Unsur (Golongan Utama & Transisi)",
+                            "Senyawa Karbon (Gugus Fungsi)",
+                            "Makromolekul (Polimer, Karbohidrat, Protein, Lemak)"
+                        ],
+                        "cp_snippet": "Mengidentifikasi sifat unsur-unsur kimia; memahami struktur dan manfaat senyawa karbon."
+                    }
+                },
+                "Biologi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman Biologi",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Pertumbuhan & Perkembangan",
+                            "Metabolisme Sel (Enzim & Catabolisme)",
+                            "Genetika (Hukum Mendel & DNA/RNA)"
+                        ],
+                        "cp_snippet": "Memahami proses pertumbuhan; menganalisis metabolisme sel dan pola penurunan sifat."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman Biologi",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Pembelahan Sel (Mitosis & Meiosis)",
+                            "Evolusi (Adaptasi & Seleksi Alam)",
+                            "Bioteknologi Modern & Bioetika"
+                        ],
+                        "cp_snippet": "Mengevaluasi gagasan evolusi; memahami inovasi bioteknologi dalam kehidupan."
+                    }
+                },
+                "Ekonomi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Akuntansi Produk Jasa sebagai Sistem Informasi",
+                            "Persamaan Dasar Akuntansi",
+                            "Siklus Akuntansi Perusahaan Jasa"
+                        ],
+                        "cp_snippet": "Memahami konsep dasar akuntansi; menyusun laporan keuangan perusahaan jasa sederhana."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Siklus Akuntansi Perusahaan Dagang",
+                            "Penutupan Siklus Akuntansi",
+                            "Analisis Laporan Keuangan Audit Sederhana"
+                        ],
+                        "cp_snippet": "Mengolah data keuangan perusahaan dagang; memahami pentingnya pemeriksaan laporan keuangan."
                     }
                 }
             }

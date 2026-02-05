@@ -9,7 +9,24 @@ const fmtDate = (date) => {
   return moment(date).locale('id').format('DD MMMM YYYY');
 };
 
-export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate, teacherName, selectedClass) => {
+// Helper to get city/location for signature
+const getCity = (userProfile) => {
+  // 1. Try localStorage (shared with other pages)
+  const saved = localStorage.getItem('QUIZ_SIGNING_LOCATION');
+  if (saved && saved !== 'Jakarta') return saved;
+
+  // 2. Heuristic from school name
+  if (userProfile?.school) {
+    const parts = userProfile.school.trim().split(' ');
+    const last = parts[parts.length - 1];
+    if (isNaN(last) && last.length > 2) return last;
+  }
+
+  // 3. Fallback to saved even if it is Jakarta or default
+  return saved || 'Jakarta';
+};
+
+export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate, teacherName, selectedClass, userProfile) => {
   const doc = new jsPDF();
 
   // Set font and size for headers
@@ -64,7 +81,8 @@ export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate,
 
   // doc.text(`${fmtDate(startDate)} - ${fmtDate(endDate)}`, rightColX, finalY + 20); // Date Range as proxy for date? No, use current date.
   const dateStr = fmtDate(new Date());
-  doc.text(`Jakarta, ${dateStr}`, rightColX, finalY + 20);
+  const city = getCity(userProfile);
+  doc.text(`${city}, ${dateStr}`, rightColX, finalY + 20);
   doc.text("Guru Kelas", rightColX, finalY + 30);
   doc.setFont('helvetica', 'bold');
   doc.text(teacherName, rightColX, finalY + 50);
@@ -157,14 +175,7 @@ export const generateJurnalRecapPDF = (jurnalData, startDate, endDate, teacherNa
 
   // Right Column (Teacher)
   const dateStr = fmtDate(new Date());
-  // Attempt to extract city from school name if possible
-  let city = 'Jakarta';
-  if (userProfile?.school) {
-    const parts = userProfile.school.split(' ');
-    // Basic heuristic: last word if not numbers
-    const last = parts[parts.length - 1];
-    if (isNaN(last) && last.length > 2) city = last;
-  }
+  const city = getCity(userProfile);
 
   doc.text(`${city}, ${dateStr}`, rightColX, finalY + 20);
   // Determine subject for "Guru Mapel"
@@ -264,12 +275,7 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
 
   // Right Column (Teacher)
   const dateStr = fmtDate(new Date());
-  let city = 'Jakarta';
-  if (userProfile?.school) {
-    const parts = userProfile.school.split(' ');
-    const last = parts[parts.length - 1];
-    if (isNaN(last) && last.length > 2) city = last;
-  }
+  const city = getCity(userProfile);
 
   doc.text(`${city}, ${dateStr}`, rightColX, finalY + 20);
   doc.text(`Guru Mata Pelajaran`, rightColX, finalY + 30);
@@ -388,7 +394,7 @@ export const generateClassAgreementPDF = ({ classData, agreementData, userProfil
   if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
 
   const dateStr = fmtDate(new Date());
-  let city = userProfile?.school?.split(' ').pop() || 'Jakarta';
+  const city = getCity(userProfile);
   const signX = pageWidth - mR - 60; // Adjusted from 75 to 60 (75-14)
 
   doc.setFont('helvetica', 'normal');
@@ -544,12 +550,7 @@ export const generateViolationRecapPDF = (data, schoolName, startDate, endDate, 
 
   // Right Column (Teacher)
   const dateStr = fmtDate(new Date());
-  let city = 'Jakarta';
-  if (userProfile?.school) {
-    const parts = userProfile.school.split(' ');
-    const last = parts[parts.length - 1];
-    if (isNaN(last) && last.length > 2) city = last;
-  }
+  const city = getCity(userProfile);
 
   doc.text(`${city}, ${dateStr}`, rightColX, finalY + 20);
   doc.text(`Guru Mata Pelajaran`, rightColX, finalY + 30);
@@ -687,12 +688,7 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
   doc.line(14, yPos - 5, pageWidth - 14, yPos - 5);
 
   const dateStr = fmtDate(new Date());
-  let city = 'Jakarta';
-  if (userProfile?.school) {
-    const parts = userProfile.school.split(' ');
-    const last = parts[parts.length - 1];
-    if (isNaN(last) && last.length > 2) city = last;
-  }
+  const city = getCity(userProfile);
 
   const signX = pageWidth - 70;
   doc.setFontSize(9);
@@ -1054,10 +1050,11 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
 
   const signX = pageWidth - 70;
   const dateStr = fmtDate(new Date());
+  const city = getCity(userProfile);
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${userProfile?.school?.split(' ').pop() || 'Jakarta'}, ${dateStr}`, signX, yPos);
+  doc.text(`${city}, ${dateStr}`, signX, yPos);
   doc.text("Guru Mata Pelajaran,", signX, yPos + 7);
 
   doc.setFont('helvetica', 'bold');
@@ -1193,9 +1190,10 @@ export const generateKktpAssessmentPDF = ({
   const finalY = doc.autoTable.previous.finalY + 15;
   const signX = pageWidth - 70;
   const dateStr = fmtDate(new Date());
+  const city = getCity(userProfile);
 
   doc.setFontSize(10);
-  doc.text(`${userProfile?.school?.split(' ').pop() || 'Jakarta'}, ${dateStr}`, signX, finalY);
+  doc.text(`${city}, ${dateStr}`, signX, finalY);
   doc.text("Guru Mata Pelajaran,", signX, finalY + 7);
   doc.setFont('helvetica', 'bold');
   doc.text(teacherName, signX, finalY + 25);

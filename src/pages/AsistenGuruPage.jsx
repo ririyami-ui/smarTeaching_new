@@ -32,40 +32,186 @@ const AsistenGuruPage = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
 
-  // --- TTS Logic ---
+  // Enhanced text-to-speech pre-processing for mathematical notation
+  const preprocessMathText = (text) => {
+    let processed = text;
+
+    // Step 1: Remove LaTeX delimiters FIRST (before any other processing)
+    processed = processed.replace(/\$\$/g, ' '); // Display math $$...$$
+    processed = processed.replace(/\$/g, ' '); // Inline math $...$
+    processed = processed.replace(/\\\[/g, ' '); // Display math \[...\]
+    processed = processed.replace(/\\\]/g, ' ');
+    processed = processed.replace(/\\\(/g, ' '); // Inline math \(...\)
+    processed = processed.replace(/\\\)/g, ' ');
+
+    // Step 2: Remove markdown formatting
+    processed = processed.replace(/\*\*/g, ''); // Bold
+    processed = processed.replace(/\*/g, ''); // Italic
+    processed = processed.replace(/`/g, ''); // Code
+    processed = processed.replace(/#{1,6}\s/g, ''); // Headers
+    processed = processed.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'); // Links
+    processed = processed.replace(/^[-*+]\s/gm, ''); // List bullets
+    processed = processed.replace(/_{2,}/g, ''); // Underscores (horizontal rule)
+
+    // Step 3: Handle LaTeX square root \sqrt{...} before other processing
+    // \sqrt{16} → akar 16
+    processed = processed.replace(/\\sqrt\{([^}]+)\}/g, 'akar dari $1');
+    // \sqrt[3]{27} → akar pangkat 3 dari 27
+    processed = processed.replace(/\\sqrt\[(\d)\]\{([^}]+)\}/g, 'akar pangkat $1 dari $2');
+
+    // Step 4: Handle LaTeX superscript with braces ^{...}
+    // x^{2} → x kuadrat, x^{3} → x kubik, x^{n} → x pangkat n
+    processed = processed.replace(/([a-zA-Z0-9]+)\^\{2\}/g, '$1 kuadrat');
+    processed = processed.replace(/([a-zA-Z0-9]+)\^\{3\}/g, '$1 kubik');
+    processed = processed.replace(/([a-zA-Z0-9]+)\^\{([^}]+)\}/g, '$1 pangkat $2');
+
+    // Step 5: Handle LaTeX subscript with braces _{...}
+    // x_{1} → x indeks 1
+    processed = processed.replace(/([a-zA-Z])_\{([^}]+)\}/g, '$1 indeks $2');
+
+    // Step 6: Convert Unicode superscripts (pangkat)
+    const superscriptMap = {
+      '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+      '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+      'ⁿ': 'n', '⁺': 'plus', '⁻': 'minus'
+    };
+
+    Object.entries(superscriptMap).forEach(([sup, base]) => {
+      const regex = new RegExp(sup, 'g');
+      processed = processed.replace(regex, ` pangkat ${base} `);
+    });
+
+    // Step 7: Convert common mathematical patterns (caret notation without braces)
+    // x^2 → x kuadrat
+    processed = processed.replace(/([a-zA-Z0-9]+)\^2\b/g, '$1 kuadrat');
+    // x^3 → x kubik  
+    processed = processed.replace(/([a-zA-Z0-9]+)\^3\b/g, '$1 kubik');
+    // x^n → x pangkat n (general case)
+    processed = processed.replace(/([a-zA-Z0-9]+)\^(\d+|[a-zA-Z])/g, '$1 pangkat $2');
+    // x^(n+1) → x pangkat (n+1)
+    processed = processed.replace(/([a-zA-Z0-9]+)\^\(([^)]+)\)/g, '$1 pangkat $2');
+
+    // Step 5: Subscripts (indeks bawah)
+    const subscriptMap = {
+      '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4',
+      '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9'
+    };
+
+    Object.entries(subscriptMap).forEach(([sub, base]) => {
+      const regex = new RegExp(sub, 'g');
+      processed = processed.replace(regex, ` indeks ${base} `);
+    });
+
+    // Subscript notation x_1 → x indeks 1
+    processed = processed.replace(/([a-zA-Z])_(\d+)/g, '$1 indeks $2');
+
+    // Step 6: Square root √ → akar
+    processed = processed.replace(/√(\d+)/g, 'akar $1');
+    processed = processed.replace(/√\(([^)]+)\)/g, 'akar dari $1');
+    processed = processed.replace(/\\?sqrt\(([^)]+)\)/g, 'akar dari $1');
+
+    // Step 7: Fractions
+    // LaTeX \frac{a}{b} → a per b (do this before division operator)
+    processed = processed.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1 per $2');
+    // a/b → a per b (only for numbers to avoid breaking words)
+    processed = processed.replace(/(\d+)\s*\/\s*(\d+)/g, '$1 per $2');
+
+    // Step 8: Mathematical operators (CAREFUL - use word boundaries to avoid breaking words)
+    // Replace only when operators are surrounded by spaces or numbers
+    processed = processed.replace(/(\s|^)\+(\s|$)/g, '$1tambah$2');
+    processed = processed.replace(/(\d)\s*\+\s*(\d)/g, '$1 tambah $2');
+
+    // Minus/dash is tricky - only replace when clearly an operator
+    processed = processed.replace(/(\d)\s*-\s*(\d)/g, '$1 kurang $2');
+
+    // Multiplication
+    processed = processed.replace(/(\s|^)×(\s|$)/g, '$1kali$2');
+    processed = processed.replace(/(\s|^)·(\s|$)/g, '$1kali$2');
+    processed = processed.replace(/(\d)\s*×\s*(\d)/g, '$1 kali $2');
+    processed = processed.replace(/(\d)\s*·\s*(\d)/g, '$1 kali $2');
+
+    // Division
+    processed = processed.replace(/(\s|^)÷(\s|$)/g, '$1bagi$2');
+    processed = processed.replace(/(\d)\s*÷\s*(\d)/g, '$1 bagi $2');
+
+    // Equals and comparisons
+    processed = processed.replace(/\s*=\s*/g, ' sama dengan ');
+    processed = processed.replace(/\s*≈\s*/g, ' kira-kira sama dengan ');
+    processed = processed.replace(/\s*≠\s*/g, ' tidak sama dengan ');
+    processed = processed.replace(/\s*≤\s*/g, ' lebih kecil atau sama dengan ');
+    processed = processed.replace(/\s*≥\s*/g, ' lebih besar atau sama dengan ');
+    processed = processed.replace(/(\d)\s*<\s*(\d)/g, '$1 lebih kecil dari $2');
+    processed = processed.replace(/(\d)\s*>\s*(\d)/g, '$1 lebih besar dari $2');
+
+    // Step 9: Greek letters (common in math/science)
+    const greekMap = {
+      'α': 'alpha', 'β': 'beta', 'γ': 'gamma', 'δ': 'delta',
+      'ε': 'epsilon', 'θ': 'theta', 'λ': 'lambda', 'μ': 'mu',
+      'π': 'pi', 'σ': 'sigma', 'τ': 'tau', 'ω': 'omega'
+    };
+
+    Object.entries(greekMap).forEach(([symbol, name]) => {
+      const regex = new RegExp(symbol, 'g');
+      processed = processed.replace(regex, name);
+    });
+
+    // Step 10: Scientific notation: 1.5×10³ → 1 koma 5 kali 10 pangkat 3
+    processed = processed.replace(/(\d+\.?\d*)\s*[x×]\s*10\^(\d+)/g, '$1 kali 10 pangkat $2');
+    processed = processed.replace(/(\d+\.?\d*)\s*[x×]\s*10([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (match, coef, exp) => {
+      const expNum = exp.split('').map(char => superscriptMap[char] || char).join('');
+      return `${coef} kali 10 pangkat ${expNum}`;
+    });
+
+    // Step 11: Decimal point: use "koma" for Indonesian
+    processed = processed.replace(/(\d+)\.(\d+)/g, '$1 koma $2');
+
+    // Step 12: Percentage
+    processed = processed.replace(/(\d+)\s*%/g, '$1 persen');
+
+    // Step 13: Degree symbol
+    processed = processed.replace(/(\d+)\s*°/g, '$1 derajat');
+
+    // Step 14: Chemistry formulas: H₂O → H 2 O
+    processed = processed.replace(/([A-Z][a-z]?)₂/g, '$1 dua ');
+    processed = processed.replace(/([A-Z][a-z]?)₃/g, '$1 tiga ');
+    processed = processed.replace(/([A-Z][a-z]?)₄/g, '$1 empat ');
+
+    // Step 15: Clean up extra spaces
+    processed = processed.replace(/\s+/g, ' ').trim();
+
+    return processed;
+  };
+
   const speakText = (text) => {
     if (!window.speechSynthesis) {
-      toast.error("Browser tidak mendukung fitur suara");
+      toast.error('Browser tidak mendukung text-to-speech');
       return;
     }
 
     // Stop listening if speaking to avoid feedback loop
-    if (isListening) setIsListening(false);
     window.speechSynthesis.cancel();
 
-    // Clean Markdown for speech (remove **, *, #, `, etc.)
-    const cleanText = text
-      .replace(/\*\*/g, '')      // Remove bold **
-      .replace(/\*/g, '')        // Remove italic *
-      .replace(/#/g, '')         // Remove headers #
-      .replace(/`/g, '')         // Remove code ticks `
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links, keep text
-      .replace(/[-_]{3,}/g, '')  // Remove horizontal lines
-      .replace(/\$/g, '')        // Remove dollar signs (LaTeX)
-      .trim();
+    // Pre-process text for natural mathematical reading
+    const cleanText = preprocessMathText(text);
+
+    // Skip if empty after cleaning
+    if (!cleanText || cleanText.trim().length === 0) {
+      return;
+    }
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
+
+    // Voice settings for natural Indonesian
     utterance.lang = 'id-ID';
-    utterance.rate = 1.0; // Normal speed for better flow
-    utterance.pitch = 1;
+    utterance.rate = 1.0; // Natural speed - balanced and clear
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
 
-    // Try to find a specific "Google Bahasa Indonesia" voice if available as it sounds more natural
+    // Try to use Indonesian voice if available
     const voices = window.speechSynthesis.getVoices();
-    const indonesianVoice = voices.find(v => v.name.includes('Google Bahasa Indonesia')) ||
-      voices.find(v => v.lang.includes('id-ID') || v.lang.includes('ind'));
-
-    if (indonesianVoice) {
-      utterance.voice = indonesianVoice;
+    const idVoice = voices.find(voice => voice.lang === 'id-ID' || voice.lang.startsWith('id'));
+    if (idVoice) {
+      utterance.voice = idVoice;
     }
 
     utterance.onstart = () => setIsSpeaking(true);

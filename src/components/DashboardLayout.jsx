@@ -45,7 +45,14 @@ import useTaskNotifications from '../hooks/useTaskNotifications';
 import { useSettings } from '../utils/SettingsContext';
 
 export default function DashboardLayout({ children, user }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebarOpen');
+      if (saved !== null) return saved === 'true';
+      return window.innerWidth >= 768;
+    }
+    return false;
+  });
   const [colorTheme, setTheme] = useDarkMode();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
@@ -135,6 +142,10 @@ export default function DashboardLayout({ children, user }) {
       [title]: !prev[title]
     }));
   };
+
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', isSidebarOpen);
+  }, [isSidebarOpen]);
 
   const handleLogout = async () => {
     try {
@@ -232,13 +243,21 @@ export default function DashboardLayout({ children, user }) {
   return (
     <div className="h-screen flex flex-col bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans overflow-hidden">
       {/* Desktop Sidebar - Premium Glassmorphic Refresh */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-white/80 dark:bg-black/80 backdrop-blur-2xl border-r border-gray-100 dark:border-gray-800/50 p-4 shadow-2xl md:flex">
-        <div className="mb-6 flex items-center gap-3 px-4 py-2 h-20 border-b border-gray-100 dark:border-gray-800/50">
-          <img src="/Logo Smart Teaching Baru_.png" alt="Logo" className="h-10 w-auto" />
-          <div className="flex flex-col">
-            <h1 className="font-sans text-lg font-extrabold text-blue-600 dark:text-blue-500 tracking-tight leading-tight">Smart</h1>
-            <h1 className="font-sans text-lg font-extrabold text-gray-800 dark:text-white tracking-tight leading-tight -mt-1">Teaching</h1>
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 flex-col bg-white/80 dark:bg-black/80 backdrop-blur-2xl border-r border-gray-100 dark:border-gray-800/50 p-4 shadow-2xl transition-transform duration-300 ease-in-out hidden md:flex ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="mb-6 flex items-center justify-between gap-3 px-4 py-2 h-20 border-b border-gray-100 dark:border-gray-800/50">
+          <div className="flex items-center gap-3">
+            <img src="/Logo Smart Teaching Baru_.png" alt="Logo" className="h-10 w-auto" />
+            <div className="flex flex-col">
+              <h1 className="font-sans text-lg font-extrabold text-blue-600 dark:text-blue-500 tracking-tight leading-tight">Smart</h1>
+              <h1 className="font-sans text-lg font-extrabold text-gray-800 dark:text-white tracking-tight leading-tight -mt-1">Teaching</h1>
+            </div>
           </div>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400"
+          >
+            <ChevronRight className="rotate-180" size={18} />
+          </button>
         </div>
         <nav className="flex-1 h-full overflow-y-auto pr-2 custom-scrollbar">
           {navCategories.map((category, idx) => {
@@ -299,9 +318,9 @@ export default function DashboardLayout({ children, user }) {
       </aside>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-lg p-4 shadow-sm md:left-64">
+      <header className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-lg p-4 shadow-sm transition-all duration-300 ${isSidebarOpen ? 'md:left-64' : 'md:left-0'}`}>
         <div className="flex items-center gap-4">
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2 md:hidden">
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2">
             <Menu size={24} />
           </button>
           <div className="flex flex-col md:flex-row md:items-baseline md:gap-2">
@@ -403,7 +422,7 @@ export default function DashboardLayout({ children, user }) {
       </header>
 
       {/* Main Content with Entry Animation */}
-      <main className={`md:ml-64 pt-20 pb-24 md:pb-6 flex-1 ${location.pathname === '/asisten-guru' ? '' : 'overflow-y-auto'}`}>
+      <main className={`pt-20 pb-24 md:pb-6 flex-1 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-0'} ${location.pathname === '/asisten-guru' ? '' : 'overflow-y-auto'}`}>
         <div key={location.pathname} className={`w-full animate-fade-in-up ${location.pathname === '/asisten-guru' ? '' : 'p-3 sm:p-6'}`}>
           {children}
         </div>
