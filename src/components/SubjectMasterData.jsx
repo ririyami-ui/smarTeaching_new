@@ -212,7 +212,10 @@ export default function SubjectMasterData() {
                 <option value="">Pilih Mata Pelajaran</option>
                 {(() => {
                   const level = selectedSchoolLevel === 'SMK' ? 'SMA' : selectedSchoolLevel; // Fallback SMA subjects for SMK
-                  const subjectsList = bskapData.subjects[level] ? Object.keys(bskapData.subjects[level]) : [];
+                  const levelData = bskapData.subjects[level];
+                  const subjectsList = levelData
+                    ? [...new Set(Object.values(levelData).flatMap(grade => Object.keys(grade)))].sort()
+                    : [];
                   return subjectsList.map((subject) => (
                     <option key={subject} value={subject}>
                       {subject}
@@ -222,7 +225,8 @@ export default function SubjectMasterData() {
                 {/* Allow keeping current value if not in list during edit */}
                 {editingSubjectId && editedSubjectName &&
                   (!bskapData.subjects[selectedSchoolLevel === 'SMK' ? 'SMA' : selectedSchoolLevel] ||
-                    !Object.keys(bskapData.subjects[selectedSchoolLevel === 'SMK' ? 'SMA' : selectedSchoolLevel]).includes(editedSubjectName)) && (
+                    !Object.values(bskapData.subjects[selectedSchoolLevel === 'SMK' ? 'SMA' : selectedSchoolLevel])
+                      .some(grade => Object.keys(grade).includes(editedSubjectName))) && (
                     <option value={editedSubjectName}>{editedSubjectName}</option>
                   )}
               </select>

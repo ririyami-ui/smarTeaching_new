@@ -1273,7 +1273,11 @@ export const generateLessonPlan = async (data) => {
       1. **SUMBER KEBENARAN TUNGGAL**: Data berikut adalah EKSTRAKSI RESMI dari **${BSKAP_DATA.standards.regulation}** untuk **${getSemesterLabel(data.semester)}**. Anda **WAJIB** menggunakan HANYA Elemen dan Materi Inti yang tercantum di bawah ini.
       2. **DILARANG HALUSINASI**: Jangan gunakan CP dari peraturan lama (033/2022 or 008/2022) jika bertentangan dengan data ini. DILARANG menggunakan materi dari semester lain.
       3. **STRUKTUR DATA RESMI (SEMESTER ${getSemesterLabel(data.semester).toUpperCase()}):**
-      ${JSON.stringify(BSKAP_DATA.subjects[getLevel(data.gradeLevel)]?.[getSubjectKey(data.subject)]?.[getSemesterKey(data.semester)] || BSKAP_DATA.subjects["SMA"]["Informatika"]["ganjil"])}
+      ${JSON.stringify(
+      (BSKAP_DATA.subjects[getLevel(data.gradeLevel)]?.[data.gradeLevel]?.[getSubjectKey(data.subject)] ||
+        BSKAP_DATA.subjects[getLevel(data.gradeLevel)]?.[getSubjectKey(data.subject)])?.[getSemesterKey(data.semester)] ||
+      BSKAP_DATA.subjects["SMA"]?.["10"]?.["Informatika"]?.["ganjil"] || {}
+    )}
       4. **TUGAS ANDA**: Susun narasi Capaian Pembelajaran (CP) satu paragraf utuh dengan pola kalimat wajib:
          **"Pada akhir fase [Fase], peserta didik mampu [Kata Kerja Operasional dari Elemen] [Materi Inti] untuk [Tujuan/Manfaat]."**
          *Contoh Output:* "Pada akhir fase D, peserta didik mampu menggunakan aplikasi pengolah angka untuk mengolah data, mengidentifikasi antarmuka perkakas, serta membedakan dan mengelola berbagai jenis data (angka, teks, tanggal) guna menunjang analisis data yang akurat."
@@ -2135,7 +2139,10 @@ export async function generateATP(data) {
   const subject = data.subject;
 
   const level = getLevel(data.gradeLevel);
-  const subjectData = BSKAP_DATA.subjects[level]?.[getSubjectKey(subject)];
+  const levelData = BSKAP_DATA.subjects[level];
+  const gradeData = levelData?.[data.gradeLevel];
+  const subjectData = (gradeData && gradeData[getSubjectKey(subject)])
+    || levelData?.[getSubjectKey(subject)];
 
   const prompt = `
     Anda adalah **Sistem Pakar Kurikulum Nasional & Auditor Administrasi Guru** dari Kemendikdasmen RI yang sangat canggih.

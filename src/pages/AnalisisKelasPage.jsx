@@ -5,6 +5,10 @@ import { auth, db } from '../firebase';
 import { Loader, FileText, Zap } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeRaw from 'rehype-raw';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { generateClassAnalysisReport, generateConciseClassAnalysisReport } from '../utils/gemini';
 import { useSettings } from '../utils/SettingsContext';
 import { generateDataHash } from '../utils/cacheUtils';
@@ -396,13 +400,21 @@ const AnalisisKelasPage = () => {
             <button
               onClick={async () => {
                 const infographicElement = document.getElementById('class-analysis-infographic');
+                const analysisElement = document.getElementById('ai-analysis-report');
                 if (!infographicElement) return;
-                const canvas = await html2canvas(infographicElement, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-                const imgData = canvas.toDataURL('image/png');
+
+                const [infoCanvas, analysisCanvas] = await Promise.all([
+                  html2canvas(infographicElement, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }),
+                  analysisElement ? html2canvas(analysisElement, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }) : Promise.resolve(null)
+                ]);
+
+                const imgData = infoCanvas.toDataURL('image/png');
+                const analysisImgData = analysisCanvas ? analysisCanvas.toDataURL('image/png') : null;
+
                 import('../utils/pdfGenerator').then(({ generateClassAnalysisPDF }) => {
                   const teacherName = auth.currentUser.displayName || 'Guru';
                   const profileData = userProfile || { school: 'Nama Sekolah Belum Diatur' };
-                  generateClassAnalysisPDF(analysisData, report, teacherName, profileData, imgData);
+                  generateClassAnalysisPDF(analysisData, report, teacherName, profileData, imgData, analysisImgData);
                 });
               }}
               className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-2xl shadow-lg transition-all active:scale-95 text-sm sm:text-base flex items-center gap-2 justify-center"
@@ -514,8 +526,13 @@ const AnalisisKelasPage = () => {
               </div>
             </div>
             <div className="p-4 sm:p-8">
-              <div className="prose dark:prose-invert max-w-none prose-sm prose-p:leading-relaxed">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{report}</ReactMarkdown>
+              <div id="ai-analysis-report" className="prose dark:prose-invert max-w-none prose-sm prose-p:leading-relaxed">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeRaw, rehypeKatex]}
+                >
+                  {report}
+                </ReactMarkdown>
               </div>
             </div>
           </div>

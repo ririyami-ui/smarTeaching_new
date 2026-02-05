@@ -588,7 +588,7 @@ const addWrappedText = (doc, text, x, y, maxWidth, lineHeight) => {
   return currentY;
 };
 
-export const generateClassAnalysisPDF = (classData, reportText, teacherName, userProfile, infographicImage) => {
+export const generateClassAnalysisPDF = (classData, reportText, teacherName, userProfile, infographicImage, analysisImage) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
@@ -654,12 +654,26 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
   doc.text("WAWASAN DIGITAL & REKOMENDASI AI", 14 + 5, yPos + 7);
   yPos += 15;
 
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(55, 65, 81); // Gray-700
+  if (analysisImage) {
+    try {
+      const imgWidth = pageWidth - 28;
+      // We need to estimate height or pass it. 
+      // For now, let's assume the caller provides a good aspect ratio image or we scale it.
+      // A safe way is to just put it and let it flow.
+      doc.addImage(analysisImage, 'PNG', 14, yPos, imgWidth, 0); // 0 means auto height
+      yPos += doc.getImageProperties(analysisImage).height * (imgWidth / doc.getImageProperties(analysisImage).width) + 15;
+    } catch (e) {
+      console.error("Error adding analysis image to PDF:", e);
+      yPos = addWrappedText(doc, reportText, 14, yPos, pageWidth - 28, 6);
+    }
+  } else {
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(55, 65, 81); // Gray-700
 
-  // Use helper for text body (Markdown to Text conversion)
-  yPos = addWrappedText(doc, reportText, 14, yPos, pageWidth - 28, 6);
+    // Use helper for text body (Markdown to Text conversion)
+    yPos = addWrappedText(doc, reportText, 14, yPos, pageWidth - 28, 6);
+  }
 
   // 3. Footer - Professional Signature Line
   if (yPos + 50 > pageHeight - 20) {
@@ -784,7 +798,7 @@ export const generateStudentAnalysisPDF = (studentName, className, reportText, s
   doc.save(`Laporan_Siswa_${studentName}_${new Date().toISOString().slice(0, 10)}.pdf`);
 };
 
-export const generateStudentIndividualRecapPDF = ({ student, stats, grades, attendance, infractions, narrative, userProfile, teacherName, selectedSubject }) => {
+export const generateStudentIndividualRecapPDF = ({ student, stats, grades, attendance, infractions, narrative, userProfile, teacherName, selectedSubject, radarChartImage, narrativeImage }) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
@@ -845,7 +859,13 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
 
   yPos = doc.autoTable.previous.finalY + 15;
 
-  // Academic Table
+  // Radar Chart & Data Source Section
+
+
+  yPos = doc.autoTable.previous.finalY + 15;
+  if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
+
+  // Academic Table (Moved here to fill Page 1)
   doc.setFont('helvetica', 'bold');
   doc.text("DETAIL PENILAIAN AKADEMIK", 14, yPos);
 
@@ -919,17 +939,100 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
+  doc.setFontSize(9);
   doc.text("CATATAN PERKEMBANGAN (NARASI)", narrativeX, yPos + 3);
 
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(8);
-  doc.setTextColor(50, 50, 50);
-  const splitNarrative = doc.splitTextToSize(narrative || "Belum ada catatan narasi untuk periode ini.", narrativeWidth);
-  doc.text(splitNarrative, narrativeX, yPos + 9);
+  if (narrativeImage) {
+    try {
+      doc.addImage(narrativeImage, 'PNG', narrativeX, yPos + 7, narrativeWidth, 0);
+      const props = doc.getImageProperties(narrativeImage);
+      const imgHeight = props.height * (narrativeWidth / props.width);
+      yPos += imgHeight + 15;
+    } catch (e) {
+      console.error("Error adding narrative image:", e);
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      doc.setTextColor(50, 50, 50);
+      const splitNarrative = doc.splitTextToSize(narrative || "Belum ada catatan narasi untuk periode ini.", narrativeWidth);
+      doc.text(splitNarrative, narrativeX, yPos + 9);
+      yPos += (splitNarrative.length * 4) + 15;
+    }
+  } else {
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(8);
+    doc.setTextColor(50, 50, 50);
+    const splitNarrative = doc.splitTextToSize(narrative || "Belum ada catatan narasi untuk periode ini.", narrativeWidth);
+    doc.text(splitNarrative, narrativeX, yPos + 9);
+    yPos += (splitNarrative.length * 4) + 15;
+  }
   doc.setTextColor(0, 0, 0);
 
   // Scoring Note for Parents
-  yPos = Math.max(doc.autoTable.previous.finalY, yPos + (splitNarrative.length * 4) + 5) + 12;
+  // Update yPos to clear Narrative and Attendance
+  // Since we already updated yPos inside the if/else for narrative, 
+  // we just need to make sure it's also below doc.autoTable.previous.finalY
+  yPos = Math.max(doc.autoTable.previous.finalY + 10, yPos);
+
+  // Radar Chart & Data Source Section
+  if (radarChartImage) {
+    // Reduced threshold to allow fitting on same page if possible
+    if (yPos + 180 > pageHeight - 20) { doc.addPage(); yPos = 20; }
+
+    doc.setFont('helvetica', 'bold');
+    doc.text("8 DIMENSI PROFIL LULUSAN", 14, yPos);
+    yPos += 8;
+
+    try {
+      // 1. Embed Radar Chart Image (Left Column)
+      const chartWidth = 90;
+      const chartHeight = 75;
+      const chartX = 14; // Align left
+      const chartY = yPos;
+
+      doc.addImage(radarChartImage, 'PNG', chartX, chartY, chartWidth, chartHeight);
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.text(`Grafik Kekuatan dan Kelemahan ${student.name}`, chartX + (chartWidth / 2), chartY + chartHeight + 5, { align: 'center', maxWidth: chartWidth });
+
+      // 2. Data Source Table (Right Column)
+      const sourceTable = [
+        ["Dimensi", "Sumber Data / Dasar Penilaian"],
+        ["Keimanan", "Log Pelanggaran, Jurnal Wali Kelas, & Poin Sikap"],
+        ["Kewargaan", "Tingkat Kehadiran & Catatan Kedisiplinan"],
+        ["Penalaran Kritis", "Rata-rata Nilai Pengetahuan (Formatif & Sumatif)"],
+        ["Kreativitas", "Rata-rata Nilai Keterampilan/Praktik"],
+        ["Kolaborasi", "Proyek Kelompok & Penilaian Antar Teman"],
+        ["Kemandirian", "Ketepatan Waktu Tugas & Kehadiran (Tanpa Alpha)"],
+        ["Kesehatan", "Riwayat Sakit & Data Fisik"],
+        ["Komunikasi", "Penilaian Lisan, Presentasi, & Narasi Guru"]
+      ];
+
+      doc.autoTable({
+        head: [sourceTable[0]],
+        body: sourceTable.slice(1),
+        startY: yPos,
+        theme: 'striped',
+        headStyles: { fillColor: [79, 70, 229] },
+        styles: { fontSize: 7, cellPadding: 2 }, // Slightly smaller font
+        columnStyles: { 0: { cellWidth: 25, fontStyle: 'bold' } }, // Reduced width for first column
+        margin: { left: 110, right: 14 } // Position on the right side
+      });
+
+      // 3. Update yPos to be below the tallest element
+      const chartBottom = chartY + chartHeight;
+      const tableBottom = doc.autoTable.previous.finalY;
+
+      yPos = Math.max(chartBottom, tableBottom) + 15;
+
+    } catch (e) {
+      console.error("Error adding radar chart to PDF:", e);
+    }
+  }
+
+
+
+  // Scoring Note for Parents
   if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
 
   doc.setDrawColor(200, 200, 200);
@@ -969,6 +1072,23 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
     doc.text(userProfile.principalName, 14, yPos + 25);
     doc.setFont('helvetica', 'normal');
     doc.text(`NIP. ${userProfile.principalNip || '....................'}`, 14, yPos + 31);
+  }
+
+  // Add Footer & Page Numbers
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(150, 150, 150);
+
+    const footerText = `${userProfile?.school || 'Smart Teaching Academy'} - Rekapitulasi Individu`;
+    const pageText = `Halaman ${i} dari ${totalPages}`;
+
+    // Left Footer
+    doc.text(footerText, 14, pageHeight - 10);
+    // Right Footer (Page Number)
+    doc.text(pageText, pageWidth - 14 - doc.getTextWidth(pageText), pageHeight - 10);
   }
 
   doc.save(`Rekap_Individu_${student.name.replace(/\s+/g, '_')}.pdf`);

@@ -16,6 +16,13 @@ import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeRaw from 'rehype-raw';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
+import html2canvas from 'html2canvas';
 import Modal from '../components/Modal';
 
 const QuizGeneratorPage = () => {
@@ -498,11 +505,12 @@ const QuizGeneratorPage = () => {
         }
     };
 
-    const exportPDF = () => {
+    const exportPDF = async () => {
         if (!quizResult) return;
 
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
         let yPos = 20;
 
         doc.setFontSize(18);
@@ -515,80 +523,36 @@ const QuizGeneratorPage = () => {
         doc.text(`Mapel: ${subject || userProfile.school || '-'} | Kelas: ${gradeLevel || '-'} | Topik: ${topic || '-'}`, pageWidth / 2, yPos, { align: 'center' });
         yPos += 6;
         doc.line(20, yPos, pageWidth - 20, yPos);
-        yPos += 15;
+        yPos += 10;
 
-        quizResult.questions.forEach((q, idx) => {
-            if (yPos > 270) {
-                doc.addPage();
-                yPos = 20;
-            }
+        for (let idx = 0; idx < quizResult.questions.length; idx++) {
+            const el = document.getElementById(`quiz-question-${idx}`);
+            if (el) {
+                try {
+                    const canvas = await html2canvas(el, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff'
+                    });
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = pageWidth - 40;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'bold');
+                    if (yPos + imgHeight > pageHeight - 20) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
 
-            if (q.stimulus) {
-                const cleanStimulus = q.stimulus.replace(/<[^>]*>?/gm, ' ').trim();
-                const stimulusText = doc.splitTextToSize(cleanStimulus, pageWidth - 40);
-                doc.setFillColor(252, 251, 235);
-                doc.rect(18, yPos - 5, pageWidth - 36, (stimulusText.length * 5) + 5, 'F');
-                doc.setDrawColor(245, 158, 11);
-                doc.line(18, yPos - 5, 18, yPos + (stimulusText.length * 5));
-                doc.setFont('helvetica', 'italic');
-                doc.text(stimulusText, 22, yPos);
-                yPos += (stimulusText.length * 5) + 10;
-            }
-
-            doc.setFont('helvetica', 'bold');
-            const cleanQuestion = q.question.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
-            const questionText = doc.splitTextToSize(`${idx + 1}. ${cleanQuestion}`, pageWidth - 40);
-            doc.text(questionText, 20, yPos);
-            yPos += (questionText.length * 5) + 5;
-
-            doc.setFont('helvetica', 'normal');
-            if (q.type === 'pg' || q.type === 'pg_complex') {
-                q.options.forEach((opt, oIdx) => {
-                    let cleanOpt = opt.replace(/<[^>]*>?/gm, ' ').trim();
-                    const labelRegex = new RegExp(`^${String.fromCharCode(65 + oIdx)}[.\\)]\\s*`, 'i');
-                    cleanOpt = cleanOpt.replace(labelRegex, '');
-                    const optText = doc.splitTextToSize(`${String.fromCharCode(65 + oIdx)}. ${cleanOpt}`, pageWidth - 50);
-                    doc.text(optText, 30, yPos);
-                    yPos += (optText.length * 5) + 2;
-                });
-                yPos += 5;
-            } else if (q.type === 'matching') {
-                const rows = [];
-                const maxLength = Math.max((q.left_side || []).length, (q.right_side || []).length);
-                for (let i = 0; i < maxLength; i++) {
-                    rows.push([
-                        q.left_side[i] ? `${i + 1}. ${q.left_side[i]}` : '',
-                        q.right_side[i] ? `${String.fromCharCode(65 + i)}. ${q.right_side[i]}` : ''
-                    ]);
+                    doc.addImage(imgData, 'PNG', 20, yPos, imgWidth, imgHeight);
+                    yPos += imgHeight + 10;
+                } catch (e) {
+                    console.error("Failed to capture question", idx, e);
+                    // Fallback to text if capture fails (not ideal for math but better than nothing)
+                    doc.text(`${idx + 1}. [Gagal memuat visual soal]`, 20, yPos);
+                    yPos += 10;
                 }
-                autoTable(doc, {
-                    startY: yPos,
-                    head: [['Pernyataan', 'Pasangan']],
-                    body: rows,
-                    theme: 'grid',
-                    styles: { fontSize: 9 },
-                    headStyles: { fillStyle: [59, 130, 246] },
-                    margin: { left: 25, right: 25 }
-                });
-                yPos = doc.lastAutoTable.finalY + 10;
-            } else if (q.type === 'true_false') {
-                const rows = q.statements.map(s => [s.text, '', '']);
-                autoTable(doc, {
-                    startY: yPos,
-                    head: [['Pernyataan', 'Benar', 'Salah']],
-                    body: rows,
-                    theme: 'grid',
-                    styles: { fontSize: 9 },
-                    headStyles: { fillStyle: [59, 130, 246] },
-                    columnStyles: { 1: { cellWidth: 20 }, 2: { cellWidth: 20 } },
-                    margin: { left: 25, right: 25 }
-                });
-                yPos = doc.lastAutoTable.finalY + 10;
             }
-        });
+        }
 
         doc.addPage();
         yPos = 20;
@@ -1363,7 +1327,7 @@ const QuizGeneratorPage = () => {
                             <div className="grid grid-cols-1 gap-6">
                                 {quizResult.questions && quizResult.questions.length > 0 ? (
                                     quizResult.questions.map((q, idx) => (
-                                        <div key={idx} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 relative">
+                                        <div key={idx} id={`quiz-question-${idx}`} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 relative">
                                             <span className="absolute top-4 right-4 text-xs font-bold text-gray-400 uppercase border px-2 py-1 rounded">{q.type.replace('_', ' ')}</span>
                                             <div className="flex gap-4">
                                                 <div className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
@@ -1372,17 +1336,25 @@ const QuizGeneratorPage = () => {
                                                 <div className="flex-grow space-y-3">
                                                     {/* EMBEDDED STIMULUS (HTML SUPPORT) */}
                                                     {q.stimulus && (
-                                                        <div
-                                                            className="mb-3 p-4 bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-500 rounded-r text-sm text-gray-800 dark:text-gray-200 prose dark:prose-invert max-w-none"
-                                                            dangerouslySetInnerHTML={{ __html: q.stimulus }}
-                                                        />
+                                                        <div className="mb-3 p-4 bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-500 rounded-r text-sm text-gray-800 dark:text-gray-200 prose dark:prose-invert max-w-none">
+                                                            <ReactMarkdown
+                                                                remarkPlugins={[remarkGfm, remarkMath]}
+                                                                rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                                            >
+                                                                {q.stimulus}
+                                                            </ReactMarkdown>
+                                                        </div>
                                                     )}
 
                                                     {/* QUESTION TEXT (HTML SUPPORT) */}
-                                                    <div
-                                                        className="font-medium text-lg text-gray-800 dark:text-white prose dark:prose-invert max-w-none"
-                                                        dangerouslySetInnerHTML={{ __html: q.question }}
-                                                    />
+                                                    <div className="font-medium text-lg text-gray-800 dark:text-white prose dark:prose-invert max-w-none">
+                                                        <ReactMarkdown
+                                                            remarkPlugins={[remarkGfm, remarkMath]}
+                                                            rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                                        >
+                                                            {q.question}
+                                                        </ReactMarkdown>
+                                                    </div>
 
                                                     {/* PEDAGOGICAL METADATA (NEW) */}
                                                     {(q.indicator || q.cognitive_level) && (
@@ -1406,7 +1378,11 @@ const QuizGeneratorPage = () => {
                                                             {q.options.map((opt, oIdx) => (
                                                                 <div key={oIdx} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                     <div className={`w-4 h-4 border rounded-full flex items-center justify-center ${q.type === 'pg_complex' ? 'rounded-md' : 'rounded-full'} border-gray-400`}></div>
-                                                                    <span className="text-gray-600 dark:text-gray-300">{opt}</span>
+                                                                    <span className="text-gray-600 dark:text-gray-300">
+                                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                            {opt}
+                                                                        </ReactMarkdown>
+                                                                    </span>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -1415,10 +1391,22 @@ const QuizGeneratorPage = () => {
                                                     {q.type === 'matching' && (
                                                         <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg">
                                                             <div className="space-y-2">
-                                                                {q.left_side.map((l, i) => <div key={i} className="p-2 border bg-white dark:bg-gray-800 rounded text-sm">{l}</div>)}
+                                                                {q.left_side.map((l, i) => (
+                                                                    <div key={i} className="p-2 border bg-white dark:bg-gray-800 rounded text-sm">
+                                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                            {l}
+                                                                        </ReactMarkdown>
+                                                                    </div>
+                                                                ))}
                                                             </div>
                                                             <div className="space-y-2">
-                                                                {q.right_side.map((r, i) => <div key={i} className="p-2 border bg-white dark:bg-gray-800 rounded text-sm">{r}</div>)}
+                                                                {q.right_side.map((r, i) => (
+                                                                    <div key={i} className="p-2 border bg-white dark:bg-gray-800 rounded text-sm">
+                                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                            {r}
+                                                                        </ReactMarkdown>
+                                                                    </div>
+                                                                ))}
                                                             </div>
                                                         </div>
                                                     )}
@@ -1427,7 +1415,11 @@ const QuizGeneratorPage = () => {
                                                         <div className="space-y-1">
                                                             {q.statements.map((s, i) => (
                                                                 <div key={i} className="flex justify-between items-center p-2 border-b last:border-0 border-dashed">
-                                                                    <span className="text-sm">{s.text}</span>
+                                                                    <span className="text-sm">
+                                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                            {s.text}
+                                                                        </ReactMarkdown>
+                                                                    </span>
                                                                     <div className="flex gap-2 text-xs font-bold text-gray-400">
                                                                         <span className="border px-2 py-1 rounded">B</span>
                                                                         <span className="border px-2 py-1 rounded">S</span>
@@ -1444,8 +1436,20 @@ const QuizGeneratorPage = () => {
                                                                 <span>Lihat Kunci & Pembahasan</span>
                                                             </summary>
                                                             <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 bg-green-50 dark:bg-green-900/10 p-3 rounded">
-                                                                <p><strong>Jawaban:</strong> {formatAnswer(q)}</p>
-                                                                {q.explanation && <p className="mt-1"><strong>Pembahasan:</strong> {q.explanation}</p>}
+                                                                <div className="flex gap-1">
+                                                                    <strong>Jawaban:</strong>
+                                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                        {formatAnswer(q)}
+                                                                    </ReactMarkdown>
+                                                                </div>
+                                                                {q.explanation && (
+                                                                    <div className="mt-2">
+                                                                        <strong>Pembahasan:</strong>
+                                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                            {q.explanation}
+                                                                        </ReactMarkdown>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </details>
                                                     </div>

@@ -33,7 +33,10 @@ import {
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import rehypeRaw from 'rehype-raw';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { asBlob } from 'html-docx-js-typescript';
 import { saveAs } from 'file-saver';
 import { generateLessonPlan } from '../utils/gemini';
@@ -92,6 +95,21 @@ const LessonPlanPage = () => {
         const saved = localStorage.getItem('QUIZ_SIGNING_LOCATION');
         if (saved) setSigningLocation(saved);
     }, []);
+
+    const [filterSubject, setFilterSubject] = useState('all');
+
+    const filteredRPPs = savedRPPs.filter(plan => {
+        if (filterSubject === 'all') return true;
+
+        // Find the selected subject name to support backward compatibility
+        const selectedSubjectDat = subjects.find(s => s.id === filterSubject);
+        const selectedSubjectName = selectedSubjectDat ? selectedSubjectDat.name : '';
+
+        // Match by ID OR by Name (for loose matching with older data)
+        return plan.subjectId === filterSubject ||
+            plan.subject === filterSubject ||
+            (selectedSubjectName && plan.subject === selectedSubjectName);
+    });
 
     const handleDetectLocation = () => {
         if (!navigator.geolocation) {
@@ -692,23 +710,36 @@ const LessonPlanPage = () => {
                             {isGenerating ? 'Menyusun RPP...' : 'Generate RPP AI'}
                         </StyledButton>
                     </div>
-
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4 no-print">
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                             <History size={20} className="text-purple-500" />
                             Riwayat RPP
                         </h3>
+
+                        {/* Filter Dropdown */}
+                        <div className="mb-2">
+                            <select
+                                value={filterSubject}
+                                onChange={(e) => setFilterSubject(e.target.value)}
+                                className="w-full p-2 text-xs border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-1 focus:ring-purple-500"
+                            >
+                                <option value="all">Semua Mata Pelajaran</option>
+                                {subjects.map(s => (
+                                    <option key={s.id} value={s.id}>{s.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
                         <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
                             {loadingHistory ? (
                                 <div className="flex justify-center p-4"><Loader2 className="animate-spin text-gray-300" /></div>
-                            ) : savedRPPs.length > 0 ? (
-                                savedRPPs.map((plan) => (
+                            ) : filteredRPPs.length > 0 ? (
+                                filteredRPPs.map((plan) => (
                                     <div key={plan.id} className="group relative bg-gray-50 dark:bg-gray-900/40 p-3 rounded-xl border dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-800 transition-all">
                                         <div className="flex justify-between items-start">
                                             <div className="cursor-pointer flex-1" onClick={() => {
                                                 setViewingRPP(plan);
                                                 setGeneratedRPP('');
-
                                             }}>
                                                 <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{plan.gradeLevel} - {plan.subject}</p>
                                                 <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">{plan.topic}</p>
@@ -733,10 +764,13 @@ const LessonPlanPage = () => {
                                     </div>
                                 ))
                             ) : (
-                                <p className="text-center text-xs text-gray-400 py-10">Belum ada RPP tersimpan.</p>
+                                <p className="text-center text-xs text-gray-400 py-10">
+                                    {filterSubject === 'all' ? 'Belum ada RPP tersimpan.' : 'Tidak ada RPP untuk mapel ini.'}
+                                </p>
                             )}
                         </div>
                     </div>
+
                 </div>
 
                 {/* Display Area */}
@@ -781,7 +815,10 @@ const LessonPlanPage = () => {
                                 </div>
                             </div>
                             <div className={`p-8 lg:p-12 overflow-y-auto flex-1 rpp-prose max-w-none print:p-0 print:overflow-visible custom-scrollbar ${getRegionFromSubject(viewingRPP?.subject || selectedMaterial?.subject) === 'Jawa' ? 'font-carakan' : ''}`}>
-                                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm, remarkMath]}
+                                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                >
                                     {generatedRPP || viewingRPP?.content}
                                 </ReactMarkdown>
 

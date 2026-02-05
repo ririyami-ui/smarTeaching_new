@@ -7,7 +7,10 @@ import BSKAP_DATA from '../utils/bskap_2025_intel.json';
 import { BookOpen, Save, Download, Printer, Wand2, ArrowLeft, Search, History, Trash2, Clock, X, Eye, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import rehypeRaw from 'rehype-raw';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { getRegionFromSubject } from '../utils/carakan';
@@ -496,8 +499,8 @@ const HandoutGeneratorPage = () => {
 
                                 <div className={`prose dark:prose-invert max-w-none bg-white p-8 rounded-lg shadow-sm border border-gray-100 min-h-[500px] ${getRegionFromSubject(selectedSubject) === 'Jawa' ? 'font-carakan' : ''}`} id="handout-preview">
                                     <ReactMarkdown
-                                        remarkPlugins={[remarkGfm]}
-                                        rehypePlugins={[rehypeRaw]}
+                                        remarkPlugins={[remarkGfm, remarkMath]}
+                                        rehypePlugins={[rehypeRaw, rehypeKatex]}
                                     >
                                         {generatedContent}
                                     </ReactMarkdown>

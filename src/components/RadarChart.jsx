@@ -8,7 +8,7 @@ const RadarChart = ({ data, size = 300, descriptions = {} }) => {
     if (numDimensions < 3) return <div className="text-xs text-gray-400">Minimal 3 dimensi diperlukan</div>;
 
     const center = size / 2;
-    const radius = (size / 2) * 0.7; // Factor for padding labels
+    const radius = (size / 2) * 0.6; // Factor for padding labels
     const angleStep = (Math.PI * 2) / numDimensions;
 
     // Helper to get coordinates

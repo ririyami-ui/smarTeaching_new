@@ -36,6 +36,13 @@ import {
     Scale,
     ArrowLeft
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeRaw from 'rehype-raw';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
+import html2canvas from 'html2canvas';
 import { useSettings } from '../utils/SettingsContext';
 import { generateStudentIndividualRecapPDF } from '../utils/pdfGenerator';
 import { generateStudentNarrative, generateParentMessage } from '../utils/gemini';
@@ -418,9 +425,34 @@ const RekapIndividuPage = () => {
         });
     }, [filteredGrades, infractions, attendance, selectedStudent, academicWeight, attitudeWeight, selectedSubject, classAgreement]);
 
-
-    const handleExportPDF = () => {
+    const handleExportPDF = async () => {
         if (!selectedStudent) return;
+
+        let radarChartImage = null;
+        try {
+            const chartElement = document.getElementById('radar-chart-container');
+            if (chartElement) {
+                const canvas = await html2canvas(chartElement, {
+                    scale: 4, // Higher resolution for crisp PDF
+                    backgroundColor: null, // Transparent background to blend
+                    useCORS: true, // Handle any remote images if present
+                    logging: false,
+                    imageTimeout: 0,
+                    onclone: (clonedDoc) => {
+                        // Ensure cloned chart is visible and correctly sized
+                        const clonedEl = clonedDoc.getElementById('radar-chart-container');
+                        if (clonedEl) {
+                            clonedEl.style.transform = 'none';
+                            clonedEl.style.margin = '0';
+                            // Force explicit width/height if needed, but scale handle resolution
+                        }
+                    }
+                });
+                radarChartImage = canvas.toDataURL('image/png');
+            }
+        } catch (error) {
+            console.error("Failed to capture radar chart:", error);
+        }
 
         generateStudentIndividualRecapPDF({
             student: selectedStudent,
@@ -431,7 +463,20 @@ const RekapIndividuPage = () => {
             narrative: narrativeNote,
             userProfile: userProfile,
             teacherName: userProfile?.name || auth.currentUser.displayName || 'Guru',
-            selectedSubject: selectedSubject // Pass context to PDF
+            selectedSubject: selectedSubject, // Pass context to PDF
+            radarChartImage: radarChartImage,
+            narrativeImage: await (async () => {
+                const navElement = document.getElementById('narrative-preview-content');
+                if (navElement) {
+                    const canvas = await html2canvas(navElement, {
+                        scale: 2,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    });
+                    return canvas.toDataURL('image/png');
+                }
+                return null;
+            })()
         });
     };
 
@@ -784,10 +829,10 @@ const RekapIndividuPage = () => {
                                 </div>
                             </div>
 
-                            <div className="h-[300px] flex items-center justify-center p-2 mt-4">
+                            <div id="radar-chart-container" className="h-[400px] flex items-center justify-center p-8 mt-4">
                                 <RadarChart
                                     data={stats.radarData}
-                                    size={280}
+                                    size={340}
                                     descriptions={{
                                         "Keimanan": "Log Pelanggaran & Catatan Wali Kelas",
                                         "Kewargaan": "Persentase Kehadiran & Kedisiplinan",
@@ -952,6 +997,24 @@ const RekapIndividuPage = () => {
                                 placeholder="Tuliskan catatan kemajuan belajar, saran, dan motivasi untuk siswa..."
                                 className="w-full h-48 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm text-gray-700 dark:text-gray-300 custom-scrollbar resize-none mb-4"
                             />
+
+                            {/* Narrative Preview Area */}
+                            {narrativeNote && (
+                                <div className="mb-6 animate-fade-in">
+                                    <div className="flex items-center gap-2 mb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        <Zap size={10} className="text-purple-500" />
+                                        Pratinjau Tampilan (Rendered)
+                                    </div>
+                                    <div id="narrative-preview-content" className="p-6 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100/50 dark:border-blue-800/20 prose dark:prose-invert max-w-none text-sm">
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm, remarkMath]}
+                                            rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                        >
+                                            {narrativeNote}
+                                        </ReactMarkdown>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="flex justify-end">
                                 <button

@@ -7,7 +7,10 @@ import BSKAP_DATA from '../utils/bskap_2025_intel.json';
 import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import rehypeRaw from 'rehype-raw';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { saveAs } from 'file-saver';
 import { asBlob } from 'html-docx-js-typescript';
 import { useSettings } from '../utils/SettingsContext';
@@ -451,7 +454,10 @@ const LkpdGeneratorPage = () => {
                                 </div>
                             </div>
                             <div id="lkpd-preview-content" className="p-8 lg:p-12 overflow-y-auto flex-1 rpp-prose max-w-none custom-scrollbar">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm, remarkMath]}
+                                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                >
                                     {lkpdContent}
                                 </ReactMarkdown>
                             </div>

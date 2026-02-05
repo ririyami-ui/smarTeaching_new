@@ -248,7 +248,22 @@ const DatabaseManager = () => {
 
               chunk.forEach(docData => {
                 const { id, ...data } = docData;
-                const docRef = doc(db, collectionId, id);
+
+                // CRITICAL FIX: Ensure the restored data is owned by the current user
+                // This satisfies Firestore security rules (userId == auth.uid)
+                data.userId = auth.currentUser.uid;
+
+                let targetId = id;
+                // Special case for teachingPrograms collection which enforces UID in docId
+                // (rules require docId.matches(request.auth.uid + '_.*'))
+                if (collectionId === 'teachingPrograms' && !id.startsWith(auth.currentUser.uid)) {
+                  // If the ID from backup doesn't match current UID, remap it
+                  const subjectPart = id.includes('_') ? id.split('_').slice(1).join('_') : id;
+                  targetId = `${auth.currentUser.uid}_${subjectPart}`;
+                  console.log(`Remapping teachingProgram ID: ${id} -> ${targetId}`);
+                }
+
+                const docRef = doc(db, collectionId, targetId);
                 batch.set(docRef, data, { merge: true });
               });
 
