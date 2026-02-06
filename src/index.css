@@ -425,15 +425,33 @@ body {
 
 /* Sub-sections (A, B, C) - Numbers handled by AI in prompt */
 .rpp-prose h3 {
-  margin-top: 1.5rem !important;
-  margin-bottom: 0.75rem !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
   display: flex !important;
   align-items: flex-start !important;
   gap: 0.5rem;
   color: #000 !important;
   font-weight: 700 !important;
-  border-bottom: 1px solid #ccc !important;
-  padding-bottom: 0.1rem;
+  border-bottom: 2px solid #eee !important;
+  padding-bottom: 0.25rem;
+}
+
+/* Page Break Marker */
+.page-break {
+  display: block;
+  page-break-before: always !important;
+  break-before: page !important;
+  height: 0;
+  margin: 0;
+  border: none;
+}
+
+@media print {
+
+  /* Global print optimizations */
+  .rpp-prose h3 {
+    page-break-before: auto !important;
+  }
 }
 
 /* List Item Formatting (1., a., i., and bullets) */

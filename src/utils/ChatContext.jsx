@@ -29,7 +29,7 @@ export const ChatProvider = ({ children }) => {
               // Fallback valid init
               const greetingMessage = {
                 role: 'model',
-                parts: [{ text: `Selamat datang kembali! Riwayat chat Anda tersimpan. Ada yang bisa dibantu? 😊` }]
+                parts: [{ text: `Halo! Senang melihat Anda kembali. Apa nih yang mau kita bahas atau kerjakan bareng hari ini? 😊` }]
               };
               setChatHistory([greetingMessage]);
             }
@@ -41,7 +41,7 @@ export const ChatProvider = ({ children }) => {
           // Initialize new
           const greetingMessage = {
             role: 'model',
-            parts: [{ text: `Selamat datang di Asisten Guru! Ada yang bisa kami bantu terkait pembelajaran? 😊` }]
+            parts: [{ text: `Halo! Saya Smartty, asisten Anda. Santai saja, saya siap bantu beresin administrasi atau diskusi ide mengajar. Ada yang seru hari ini? 🚀` }]
           };
           setChatHistory([greetingMessage]);
         }
@@ -70,7 +70,7 @@ export const ChatProvider = ({ children }) => {
       localStorage.removeItem(`chat_history_${currentUser.uid}`);
       const greetingMessage = {
         role: 'model',
-        parts: [{ text: `Chat telah dibersihkan. Mulai percakapan baru! 🚀` }]
+        parts: [{ text: `Siap! Chat sudah bersih. Ayo, kita mulai obrolan baru yang fresh! ✨` }]
       };
       setChatHistory([greetingMessage]);
     }

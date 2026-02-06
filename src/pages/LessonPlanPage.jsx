@@ -667,6 +667,7 @@ const LessonPlanPage = () => {
                             value={assessmentModel}
                             onChange={(e) => setAssessmentModel(e.target.value)}
                         >
+                            <option value="Otomatis">Otomatis (Pilihan Terbaik AI)</option>
                             {BSKAP_DATA.kktp_standards.methods.map(m => (
                                 <option key={m.type} value={m.type}>{m.type}</option>
                             ))}

@@ -293,7 +293,7 @@ const AsistenGuruPage = () => {
   }, [input]);
 
   useEffect(() => {
-    if (userProfile && chatHistory.length === 1 && chatHistory[0].parts[0].text.includes("Selamat datang")) {
+    if (userProfile && chatHistory.length === 1 && (chatHistory[0].parts[0].text.includes("Selamat datang") || chatHistory[0].parts[0].text.includes("Halo! Saya Smartty"))) {
       const hour = new Date().getHours();
       let greetingTime;
       if (hour < 11) greetingTime = "pagi";
@@ -302,10 +302,11 @@ const AsistenGuruPage = () => {
       else greetingTime = "malam";
 
       const userName = userProfile.name || userProfile.email.split('@')[0];
+      const userTitle = userProfile.title || "Bpk/Ibu";
       const greetingMessage = {
         role: 'model',
         parts: [{
-          text: `Selamat ${greetingTime}, Bpk/Ibu ${userName}. Ada yang bisa kami bantu terkait pembelajaran? 😊`
+          text: `Halo, selamat ${greetingTime} ${userTitle} ${userName}! 👋 Senang bisa ngobrol lagi. Hari ini ada yang bisa Smartty bantu buat bikin ngajar jadi lebih ringan?`
         }]
       };
       setChatHistory([greetingMessage]);
@@ -576,7 +577,26 @@ const AsistenGuruPage = () => {
                       <img src={message.image} alt="User Upload" className="max-w-full rounded-lg max-h-60 border border-white/20" />
                     </div>
                   )}
-                  {message.parts[0].text && <div className="markdown-content text-sm sm:text-base"><ReactMarkdown remarkPlugins={[remarkMath, remarkGfm]} rehypePlugins={[rehypeKatex]}>{message.parts[0].text}</ReactMarkdown></div>}
+                  {message.parts[0].text && (
+                    <div className="markdown-content text-sm sm:text-base">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath, remarkGfm]}
+                        rehypePlugins={[rehypeKatex]}
+                      >
+                        {(() => {
+                          let text = message.parts[0].text;
+                          // Robust detection: if text contains \begin{...} but isn't wrapped in $$ or ```
+                          // and it's not already within a code block or math block
+                          if (text.includes('\\begin{') && !text.includes('$$')) {
+                            // Simple auto-wrap for raw LaTeX blocks that AI failed to delimit
+                            // Find blocks starting with \begin and ending with \end
+                            text = text.replace(/(\\begin\{[a-z\*]+\}[\s\S]*?\\end\{[a-z\*]+\})/g, '$$\n$1\n$$');
+                          }
+                          return text;
+                        })()}
+                      </ReactMarkdown>
+                    </div>
+                  )}
                 </div>
                 {message.role === 'user' && <User className="w-6 h-6 sm:w-8 sm:h-8 text-gray-500 flex-shrink-0" />}
               </div>

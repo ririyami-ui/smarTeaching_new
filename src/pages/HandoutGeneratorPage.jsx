@@ -36,6 +36,8 @@ const HandoutGeneratorPage = () => {
     const [selectedRPPId, setSelectedRPPId] = useState(''); // To track selected RPP
 
     // Generation States
+    const [sourceType, setSourceType] = useState('rpp'); // 'rpp', 'atp', or 'manual'
+    const [selectedAtpItem, setSelectedAtpItem] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedContent, setGeneratedContent] = useState('');
 
@@ -164,8 +166,13 @@ const HandoutGeneratorPage = () => {
     };
 
     const handleGenerate = async () => {
-        if (!topic) {
+        if (!topic && sourceType !== 'atp') {
             toast.error("Mohon isi atau pilih topik materi terlebih dahulu");
+            return;
+        }
+
+        if (sourceType === 'atp' && !selectedAtpItem) {
+            toast.error("Mohon pilih butir ATP terlebih dahulu");
             return;
         }
 
@@ -174,10 +181,16 @@ const HandoutGeneratorPage = () => {
             const subjectObj = subjects.find(s => s.id === selectedSubject);
             const subjectName = subjectObj?.name || selectedSubject;
 
+            // Find selected RPP for context
+            const selectedRPP = savedRPPs.find(rpp => rpp.id === selectedRPPId);
+
             const result = await generateHandout({
                 subject: subjectName,
                 gradeLevel: selectedGrade,
-                materi: topic,
+                materi: sourceType === 'atp' ? selectedAtpItem.materi : topic,
+                kd: sourceType === 'atp' ? (selectedAtpItem.tp || selectedAtpItem.kd) : selectedRPP?.kd,
+                elemen: sourceType === 'atp' ? selectedAtpItem.elemen : selectedRPP?.elemen,
+                rppContent: sourceType === 'rpp' ? selectedRPP?.content : null,
                 teacherName: userProfile?.name || 'Guru Smart Teaching',
                 teacherTitle: userProfile?.title || 'Bapak/Ibu',
                 modelName: userProfile?.geminiModel // Pass user's preferred model if set
@@ -389,65 +402,138 @@ const HandoutGeneratorPage = () => {
                                     </div>
                                 </div>
 
-                                {/* Middle Row: RPP Selection (Filtered) */}
-                                <div>
-                                    <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">
-                                        Pilih Topik dari RPP (Sesuai Kelas & Mapel)
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            value={selectedRPPId}
-                                            onChange={(e) => handleRPPSelect(e.target.value)}
-                                            className="w-full px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark text-text-primary-light dark:text-text-primary-dark focus:ring-2 focus:ring-primary-light appearance-none"
-                                        >
-                                            <option value="">-- Pilih Topik dari RPP Tersimpan --</option>
-                                            {savedRPPs
-                                                .filter(rpp => {
-                                                    // Filter by Grade (Field is primarily gradeLevel in LessonPlanPage)
-                                                    const rppGrade = String(rpp.gradeLevel || rpp.class || rpp.grade || '').trim();
-                                                    const selectedGradeStr = String(selectedGrade).trim();
-
-                                                    // Loose equality to handle "7" vs "Kelas 7"
-                                                    const gradeMatch = rppGrade === selectedGradeStr || rppGrade.includes(selectedGradeStr) || selectedGradeStr.includes(rppGrade);
-
-                                                    // Filter by Subject (Case insensitive safe match)
-                                                    const rppSubjectId = rpp.subjectId;
-                                                    const rppSubjectName = (rpp.subject || '').toLowerCase().trim();
-                                                    const selectedSubjectObj = subjects.find(s => s.id === selectedSubject);
-                                                    const subjectMatch = rppSubjectId === selectedSubject || rppSubjectName === selectedSubjectObj?.name?.toLowerCase().trim();
-
-                                                    return gradeMatch && subjectMatch;
-                                                })
-                                                .map((rpp) => (
-                                                    <option key={rpp.id} value={rpp.id}>
-                                                        {rpp.topic || rpp.materi}
-                                                    </option>
-                                                ))}
-                                            <option value="manual">Manual Input (Topik Baru)</option>
-                                        </select>
-                                        <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 pointer-events-none" />
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        *Hanya menampilkan RPP yang cocok dengan Kelas & Mapel yang dipilih di atas.
-                                    </p>
+                                {/* Source Type Toggle */}
+                                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit">
+                                    <button
+                                        onClick={() => { setSourceType('rpp'); setTopic(''); setSelectedRPPId(''); }}
+                                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${sourceType === 'rpp' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        Pilih dari RPP
+                                    </button>
+                                    <button
+                                        onClick={() => { setSourceType('atp'); setTopic(''); setSelectedAtpItem(null); }}
+                                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${sourceType === 'atp' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        Pilih dari Database BSKAP
+                                    </button>
+                                    <button
+                                        onClick={() => { setSourceType('manual'); setTopic(''); setSelectedRPPId(''); }}
+                                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${sourceType === 'manual' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        Manual Input
+                                    </button>
                                 </div>
+
+                                {/* Dynamic Selection based on Source Type */}
+                                {sourceType === 'rpp' && (
+                                    <div className="animate-fade-in-down">
+                                        <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">
+                                            Pilih Topik dari RPP (Sesuai Kelas & Mapel)
+                                        </label>
+                                        <div className="relative">
+                                            <select
+                                                value={selectedRPPId}
+                                                onChange={(e) => handleRPPSelect(e.target.value)}
+                                                className="w-full px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark text-text-primary-light dark:text-text-primary-dark focus:ring-2 focus:ring-primary-light appearance-none"
+                                            >
+                                                <option value="">-- Pilih Topik dari RPP Tersimpan --</option>
+                                                {savedRPPs
+                                                    .filter(rpp => {
+                                                        const rppGrade = String(rpp.gradeLevel || rpp.class || rpp.grade || '').trim();
+                                                        const selectedGradeStr = String(selectedGrade).trim();
+                                                        const gradeMatch = rppGrade === selectedGradeStr || rppGrade.includes(selectedGradeStr) || selectedGradeStr.includes(rppGrade);
+
+                                                        const rppSubjectId = rpp.subjectId;
+                                                        const rppSubjectName = (rpp.subject || '').toLowerCase().trim();
+                                                        const selectedSubjectObj = subjects.find(s => s.id === selectedSubject);
+                                                        const subjectMatch = rppSubjectId === selectedSubject || rppSubjectName === selectedSubjectObj?.name?.toLowerCase().trim();
+
+                                                        return gradeMatch && subjectMatch;
+                                                    })
+                                                    .map((rpp) => (
+                                                        <option key={rpp.id} value={rpp.id}>
+                                                            {rpp.topic || rpp.materi}
+                                                        </option>
+                                                    ))}
+                                            </select>
+                                            <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 pointer-events-none" />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            *Handout akan disesuaikan dengan isi RPP yang Anda pilih.
+                                        </p>
+                                    </div>
+                                )}
+
+                                {sourceType === 'atp' && (
+                                    <div className="animate-fade-in-down">
+                                        <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">
+                                            Pilih Butir ATP / Materi Resmi BSKAP
+                                        </label>
+                                        <div className="relative">
+                                            <select
+                                                onChange={(e) => {
+                                                    const val = JSON.parse(e.target.value);
+                                                    setSelectedAtpItem(val);
+                                                    setTopic(val.materi);
+                                                }}
+                                                className="w-full px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark text-text-primary-light dark:text-text-primary-dark focus:ring-2 focus:ring-primary-light appearance-none"
+                                            >
+                                                <option value="">-- Pilih Materi dari Database --</option>
+                                                {(() => {
+                                                    const subjectObj = subjects.find(s => s.id === selectedSubject);
+                                                    const subjectName = subjectObj?.name || '';
+                                                    const gradeNum = parseInt(selectedGrade);
+                                                    const level = gradeNum <= 6 ? 'SD' : (gradeNum <= 9 ? 'SMP' : 'SMA');
+                                                    const gradeStr = String(gradeNum);
+
+                                                    const subjectData = BSKAP_DATA.subjects?.[level]?.[gradeStr]?.[subjectName];
+                                                    if (!subjectData) return <option disabled>Tidak ada data kurikulum</option>;
+
+                                                    const ganjilMateri = subjectData.ganjil?.materi_inti?.map(m => ({
+                                                        materi: m,
+                                                        elemen: subjectData.ganjil.elemen?.join(', ') || 'Umum',
+                                                        tp: subjectData.ganjil.cp_snippet
+                                                    })) || [];
+
+                                                    const genapMateri = subjectData.genap?.materi_inti?.map(m => ({
+                                                        materi: m,
+                                                        elemen: subjectData.genap.elemen?.join(', ') || 'Umum',
+                                                        tp: subjectData.genap.cp_snippet
+                                                    })) || [];
+
+                                                    const allMateri = [...ganjilMateri, ...genapMateri];
+
+                                                    if (allMateri.length === 0) return <option disabled>Materi belum tersedia</option>;
+
+                                                    return allMateri.map((item, idx) => (
+                                                        <option key={idx} value={JSON.stringify(item)}>
+                                                            [{item.elemen}] {item.materi}
+                                                        </option>
+                                                    ));
+                                                })()}
+                                            </select>
+                                            <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 pointer-events-none" />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {sourceType === 'manual' && (
+                                    <div className="animate-fade-in-down">
+                                        <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">
+                                            Topik / Materi Manual
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={topic}
+                                            onChange={(e) => setTopic(e.target.value)}
+                                            className="w-full px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark text-text-primary-light dark:text-text-primary-dark focus:ring-2 focus:ring-primary-light"
+                                            placeholder="Ketik topik materi secara detail..."
+                                        />
+                                    </div>
+                                )}
 
                                 {/* Bottom Row: Trigger Button */}
                                 <div>
-                                    {selectedRPPId === 'manual' && (
-                                        <div className="mb-4 animate-fade-in-down">
-                                            <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">
-                                                Topik / Materi Manual
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={topic}
-                                                onChange={(e) => setTopic(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark text-text-primary-light dark:text-text-primary-dark focus:ring-2 focus:ring-primary-light"
-                                                placeholder="Ketik topik materi..."
-                                            />
-                                        </div>
-                                    )}
 
                                     <button
                                         onClick={handleGenerate}

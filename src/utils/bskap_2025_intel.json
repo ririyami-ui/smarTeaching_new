@@ -210,34 +210,45 @@
                             "Bilangan"
                         ],
                         "materi_inti": [
-                            "Bilangan 0-20"
-                        ]
+                            "Eksplorasi Bilangan 0-20 (Melalui Media Konkrit/Benda di Sekitar)",
+                            "Membandingkan & Mengurutkan Jumlah Benda secara Menyenangkan"
+                        ],
+                        "cp_snippet": "Membaca, menulis, membandingkan, dan mengurutkan bilangan cacah sampai dengan 20; menentukan nilai tempat (satuan dan puluhan) dengan cara yang bermakna."
                     },
                     "genap": {
                         "elemen": [
-                            "Geometri"
+                            "Geometri",
+                            "Pengukuran"
                         ],
                         "materi_inti": [
-                            "Bangun Datar"
-                        ]
+                            "Mengenal Bangun Datar di Lingkungan Sekolah (Mindful Observation)",
+                            "Pengukuran Waktu & Panjang dengan Satuan Tidak Baku yang Menyenangkan"
+                        ],
+                        "cp_snippet": "Mengenal bangun datar (segitiga, segiempat, lingkaran) dan bangun ruang; mengenal serta menentukan panjang dan berat benda dengan satuan tidak baku."
                     }
                 },
                 "Bahasa Indonesia": {
                     "ganjil": {
                         "elemen": [
-                            "Menyimak"
+                            "Menyimak",
+                            "Membaca dan Memirsa"
                         ],
                         "materi_inti": [
-                            "Abjad & Suku Kata"
-                        ]
+                            "Bunyi Huruf, Suku Kata, & Kata Bermakna",
+                            "Membaca Suku Kata 'ba-ca-ku' dengan Menyenangkan"
+                        ],
+                        "cp_snippet": "Bersikap menjadi penyimak yang baik; memaknai kosakata baru dari teks yang dibacakan dan tayangan yang dipirsa dengan bantuan gambar."
                     },
                     "genap": {
                         "elemen": [
+                            "Berbicara dan Mempresentasikan",
                             "Menulis"
                         ],
                         "materi_inti": [
-                            "Kata Benda & Kerja"
-                        ]
+                            "Bercerita Pengalaman Diri secara Joyful",
+                            "Menulis Kata Kunci & Kalimat Sederhana (Subjek + Predikat)"
+                        ],
+                        "cp_snippet": "Berbicara dengan santun tentang diri sendiri dan lingkungan sekitar; menuliskan kata dan kalimat sederhana dengan huruf tegak bersambung atau lepas."
                     }
                 },
                 "Pendidikan Pancasila": {
@@ -247,9 +258,10 @@
                             "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945"
                         ],
                         "materi_inti": [
-                            "Simbol & Sila Pancasila",
-                            "Aturan di Keluarga"
-                        ]
+                            "Simbol & Sila Pancasila (Eksplorasi Makna dalam Keseharian)",
+                            "Aturan dan Norma di Rumah & Lingkungan Bermain (Mindful Actions)"
+                        ],
+                        "cp_snippet": "Mengenal bendera negara, bahasa Indonesia, lambang negara Garuda Pancasila, dan lagu kebangsaan; menceritakan simbol dan sila Pancasila."
                     },
                     "genap": {
                         "elemen": [
@@ -257,81 +269,102 @@
                             "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
-                            "Identitas Diri & Keberagaman",
-                            "Karakteristik Lingkungan & Kerja Sama"
-                        ]
+                            "Identitas Diri & Menghargai Keberagaman Teman (Joyful Inclusion)",
+                            "Kerja Sama di Lingkungan Rumah & Sekolah secara Bermakna"
+                        ],
+                        "cp_snippet": "Menceritakan identitas diri dan karakteristik fisik orang-orang di sekitarnya; menceritakan bentuk kerja sama dalam keberagaman di lingkungan keluarga dan sekolah."
                     }
                 },
                 "Pendidikan Agama Islam": {
                     "ganjil": {
                         "elemen": [
-                            "Al-Qur'an"
+                            "Al-Qur'an dan Hadis"
                         ],
                         "materi_inti": [
-                            "Huruf Hijaiyah"
-                        ]
+                            "Eksplorasi Huruf Hijaiyah & Harakat dengan Menyenangkan",
+                            "Hafalan Surah Al-Fatihah secara Khusyuk (Mindful)"
+                        ],
+                        "cp_snippet": "Mengenal huruf hijaiyah dan harakatnya, huruf hijaiyah bersambung, dan Surah al-Fatihah dengan benar."
                     },
                     "genap": {
                         "elemen": [
-                            "Fikih"
+                            "Fikih",
+                            "Akhlak"
                         ],
                         "materi_inti": [
-                            "Rukun Islam"
-                        ]
+                            "Rukun Islam Sebagai Fondasi Diri Bermakna",
+                            "Adab Makan & Minum Sesuai Sunnah (Joyful Habits)"
+                        ],
+                        "cp_snippet": "Mengenal rukun Islam dan syahadatain; menerapkan tata cara bersuci, berwudu, tayamum, dan salat dengan tertib."
                     }
                 },
                 "Pendidikan Agama Kristen": {
                     "ganjil": {
                         "elemen": [
-                            "Alkitab"
+                            "Allah Berkarya"
                         ],
                         "materi_inti": [
-                            "Allah Menciptakan Aku"
-                        ]
+                            "Allah Menciptakan Aku & Lingkunganku (Eksplorasi Keajaiban Ciptaan)",
+                            "Syukur Atas Tubuh & Talenta yang Diberikan Tuhan (Mindful Gratitude)"
+                        ],
+                        "cp_snippet": "Memahami bahwa Allah adalah Pencipta yang memelihara kehidupan; mensyukuri keberadaan dirinya sebagai ciptaan Allah."
                     },
                     "genap": {
                         "elemen": [
-                            "Allah Bapa"
+                            "Janji Allah",
+                            "Keluarga"
                         ],
                         "materi_inti": [
-                            "Kasih Allah dalam Keluarga"
-                        ]
+                            "Kasih Allah dalam Keluarga secara Bermakna",
+                            "Belajar Ketaatan dari Tokoh Alkitab Anak secara Menyenangkan"
+                        ],
+                        "cp_snippet": "Memahami kasih Allah melalui keluarga dan orang tua; menunjukkan perilaku kasih terhadap sesama."
                     }
                 },
                 "Pendidikan Agama Katolik": {
                     "ganjil": {
                         "elemen": [
-                            "Kitab Suci"
+                            "Pribadi Peserta Didik"
                         ],
                         "materi_inti": [
-                            "Allah Bapa Maha Baik"
-                        ]
+                            "Allah Bapa Maha Baik Menciptakan Diriku yang Unik",
+                            "Tanda Salib & Doa Harian secara Mindful"
+                        ],
+                        "cp_snippet": "Mengenal dirinya sebagai ciptaan Allah yang bermartabat; mengenal Allah Bapa yang Maha Baik sebagai Pencipta."
                     },
                     "genap": {
                         "elemen": [
-                            "Yesus Kristus"
+                            "Yesus Kristus",
+                            "Gereja"
                         ],
                         "materi_inti": [
-                            "Doa Bapa Kami Dasar"
-                        ]
+                            "Kisah Kelahiran Yesus & Doa Bapa Kami Bermakna",
+                            "Mengenal Rumah Ibadah & Tokoh Gereja secara Joyful"
+                        ],
+                        "cp_snippet": "Mengenal tokoh Yesus Kristus dalam Injil; mengenal rumah ibadah dan pimpinan Gereja secara sederhana."
                     }
                 },
                 "Pendidikan Agama Hindu": {
                     "ganjil": {
                         "elemen": [
-                            "Sraddha"
+                            "Sraddha dan Bhakti"
                         ],
                         "materi_inti": [
-                            "Catur Paramitha Dasar"
-                        ]
+                            "Catur Paramitha Dasar dalam Keseharian (Bermakna)",
+                            "Mengenal Hyang Widhi melalui Ciptaan-Nya (Eksplorasi)"
+                        ],
+                        "cp_snippet": "Mengenal ciptaan Hyang Widhi Wasa; memahami perilaku Catur Paramitha (Maitri, Karuna, Mudita, Upeksa)."
                     },
                     "genap": {
                         "elemen": [
-                            "Susila"
+                            "Susila",
+                            "Acara"
                         ],
                         "materi_inti": [
-                            "Tri Kaya Parisudha Dasar"
-                        ]
+                            "Eksplorasi Tri Kaya Parisudha dalam Berteman (Mindful)",
+                            "Doa-doa Harian & Sikap Kramaning Sembah Joyful"
+                        ],
+                        "cp_snippet": "Menerapkan perilaku Tri Kaya Parisudha; mengenal hari-hari suci agama Hindu secara sederhana."
                     }
                 },
                 "Pendidikan Agama Buddha": {
@@ -340,34 +373,44 @@
                             "Sejarah"
                         ],
                         "materi_inti": [
-                            "Pangeran Siddharta Kecil"
-                        ]
+                            "Teladan Kasih Sayang Pangeran Siddharta Kecil (Berkisah)",
+                            "Mengenal Tempat Ibadah & Simbol Buddhis (Eksplorasi Nyata)"
+                        ],
+                        "cp_snippet": "Mengenal riwayat Pangeran Siddharta pada masa kanak-kanak; mengenal tempat ibadah dan lambang Buddhis."
                     },
                     "genap": {
                         "elemen": [
-                            "Etika"
+                            "Etika",
+                            "Ritual"
                         ],
                         "materi_inti": [
-                            "Pancasila Buddhis Dasar"
-                        ]
+                            "Pancasila Buddhis dalam Kehidupan Sehari-hari secara Mindful",
+                            "Sikap Anjali & Penghormatan yang Menyenangkan (Joyful)"
+                        ],
+                        "cp_snippet": "Memahami nilai-nilai moral dalam Pancasila Buddhis; mengenal tradisi dan ritual penghormatan sederhana."
                     }
                 },
                 "Pendidikan Agama Khonghucu": {
                     "ganjil": {
                         "elemen": [
-                            "Sejarah"
+                            "Sejarah Suci"
                         ],
                         "materi_inti": [
-                            "Nabi Kongzi Maha Guru"
-                        ]
+                            "Nabi Kongzi sebagai Maha Guru yang Bijaksana (Meneladani)",
+                            "Mengenal Kelenteng & Simbol Suci secara Eksploratif"
+                        ],
+                        "cp_snippet": "Mengenal riwayat Nabi Kongzi secara sederhana; mengetahui tempat ibadah umat Khonghucu."
                     },
                     "genap": {
                         "elemen": [
-                            "Etika"
+                            "Etika",
+                            "Perilaku"
                         ],
                         "materi_inti": [
-                            "Lima Sifat Mulia Dasar"
-                        ]
+                            "Implementasi Lima Sifat Mulia (Wu Chang) secara Bermakna",
+                            "Hormat kepada Orang Tua & Guru (Mindful Respect)"
+                        ],
+                        "cp_snippet": "Memahami nilai-nilai etika dalam ajaran Khonghucu; menerapkan sikap hormat kepada orang-orang di sekitar."
                     }
                 },
                 "Pendidikan Kepercayaan": {
@@ -376,16 +419,21 @@
                             "Sejarah"
                         ],
                         "materi_inti": [
-                            "Mengenal Tuhan Yang Maha Esa"
-                        ]
+                            "Mengenal Tuhan Yang Maha Esa melalui Alam Semesta (Eksplorasi)",
+                            "Mensyukuri Anugerah Hidup secara Mindful & Joyful"
+                        ],
+                        "cp_snippet": "Memahami keberadaan Tuhan Yang Maha Esa; mensyukuri karunia Tuhan melalui alam ciptaan-Nya."
                     },
                     "genap": {
                         "elemen": [
-                            "Etika"
+                            "Etika",
+                            "Budi Pekerti"
                         ],
                         "materi_inti": [
-                            "Budi Pekerti Luhur Dasar"
-                        ]
+                            "Budi Pekerti Luhur dalam Pergaulan Teman (Bermakna)",
+                            "Sikap Sopan Santun & Gotong Royong secara Joyful"
+                        ],
+                        "cp_snippet": "Menerapkan sikap santun dan ramah dalam interaksi sosial; mengenal nilai-nilai luhur budaya bangsa."
                     }
                 },
                 "PJOK": {
@@ -501,21 +549,22 @@
                             "Aljabar"
                         ],
                         "materi_inti": [
-                            "Bilangan Cacah s.d 100",
-                            "Simbol Penjumlahan & Pengurangan"
-                        ]
+                            "Eksplorasi Bilangan Cacah s.d 100 (Benda Konkrit)",
+                            "Operasi Penjumlahan & Pengurangan yang Bermakna (Mindful)"
+                        ],
+                        "cp_snippet": "Membaca, menulis, membandingkan, dan mengurutkan bilangan cacah sampai dengan 100; memahami konsep nilai tempat; menyelesaikan masalah penjumlahan dan pengurangan."
                     },
                     "genap": {
                         "elemen": [
                             "Pengukuran",
                             "Geometri",
-                            "Analisis Data dan Peluang"
+                            "Analisis Data"
                         ],
                         "materi_inti": [
-                            "Panjang, Berat & Durasi",
-                            "Bangun Datar & Bangun Ruang",
-                            "Piktogram Dasar"
-                        ]
+                            "Investigasi Panjang, Berat & Durasi di Sekitar Kelas",
+                            "Eksplorasi Bangun Datar & Bangun Ruang secara Joyful"
+                        ],
+                        "cp_snippet": "Melakukan pengukuran panjang dan berat dengan satuan baku; mengenal serta mengklasifikasi berbagai bangun datar dan bangun ruang."
                     }
                 },
                 "Bahasa Daerah": {
@@ -575,9 +624,10 @@
                             "Membaca dan Memirsa"
                         ],
                         "materi_inti": [
-                            "Informasi Teks nonsastra",
-                            "Membaca Kata Sederhana"
-                        ]
+                            "Analisis Teks Cerita & Informasi Sederhana (Bermakna)",
+                            "Membaca Kata-kata dengan Pola Suku Kata Kompleks secara Joyful"
+                        ],
+                        "cp_snippet": "Menjelaskan ide pokok dan informasi detail dari teks audio; memaknai teks narasi dan informatif dengan bantuan unsur visual."
                     },
                     "genap": {
                         "elemen": [
@@ -585,9 +635,10 @@
                             "Menulis"
                         ],
                         "materi_inti": [
-                            "Merespons Percakapan",
-                            "Menulis Permulaan"
-                        ]
+                            "Diskusi Kelompok & Wawancara Sederhana secara Bermakna",
+                            "Menulis Paragraf Narasi Pendek tentang Keseharian (Mindful Writing)"
+                        ],
+                        "cp_snippet": "Berbicara santun dan menanggapi pembicaraan orang lain; menuliskan ide dalam kalimat dan paragraf sederhana menggunakan kosakata baru."
                     }
                 },
                 "Pendidikan Pancasila": {
@@ -597,9 +648,10 @@
                             "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945"
                         ],
                         "materi_inti": [
-                            "Penerapan Nilai Pancasila",
-                            "Aturan di Sekolah"
-                        ]
+                            "Internalisasi Nilai Pancasila dalam Sekolah (Mindful Habit)",
+                            "Aturan dan Hak di Lingkungan Sekolah secara Bermakna"
+                        ],
+                        "cp_snippet": "Mengidentifikasi dan menceritakan aturan di rumah dan di sekolah; menceritakan contoh perilaku sesuai dengan nilai-sila Pancasila."
                     },
                     "genap": {
                         "elemen": [
@@ -607,9 +659,10 @@
                             "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
-                            "Menghargai Perbedaan",
-                            "Menjaga Lingkungan (Bela Negara)"
-                        ]
+                            "Eksplorasi Keanekaragaman Suku & Budaya (Joyful Learning)",
+                            "Menjaga Kelestarian Lingkungan & Sikap Bela Negara sejak Dini"
+                        ],
+                        "cp_snippet": "Menyebutkan identitas diri dan ciri fisik teman; menceritakan contoh hidup rukun dalam keberagaman di rumah dan sekolah."
                     }
                 },
                 "Pendidikan Agama Islam": {
@@ -618,16 +671,21 @@
                             "Aqidah"
                         ],
                         "materi_inti": [
-                            "Asmaul Husna"
-                        ]
+                            "Mengagumi Kebesaran Allah melalui Asmaul Husna (Mindful)",
+                            "Meneladani Sifat-Sifat Allah dalam Keseharian Bermakna"
+                        ],
+                        "cp_snippet": "Mengenal rukun iman; mengenal beberapa asmaul husna (ar-Rahman, ar-Rahim, al-Malik, al-Quddus, as-Salam)."
                     },
                     "genap": {
                         "elemen": [
-                            "Akhlak"
+                            "Akhlak",
+                            "Sejarah"
                         ],
                         "materi_inti": [
-                            "Hormat Orang Tua"
-                        ]
+                            "Etika Berbicara & Hormat kepada Orang Tua (Bermakna)",
+                            "Kisah Keteladanan Nabi & Rasul secara Menyenangkan"
+                        ],
+                        "cp_snippet": "Menerapkan sikap santun, menghargai, dan hormat kepada sesama; mengenal kisah singkat Nabi Muhammad SAW."
                     }
                 },
                 "Pendidikan Agama Kristen": {
@@ -782,88 +840,115 @@
                             "Bilangan"
                         ],
                         "materi_inti": [
-                            "Cacah s.d 1000"
-                        ]
+                            "Eksplorasi Bilangan Cacah s.d 1.000 (Benda Konkrit & Gambar)",
+                            "Operasi Penjumlahan & Pengurangan Bilangan Ribuan secara Bermakna"
+                        ],
+                        "cp_snippet": "Membaca, menulis, membandingkan, dan mengurutkan bilangan cacah sampai dengan 1.000; menyelesaikan masalah yang berkaitan dengan penjumlahan dan pengurangan."
                     },
                     "genap": {
                         "elemen": [
-                            "Geometri"
+                            "Geometri",
+                            "Pengukuran"
                         ],
                         "materi_inti": [
-                            "Ciri Bangun Datar"
-                        ]
+                            "Investigasi Ciri-Ciri Bangun Datar di Lingkungan Sekolah (Mindful)",
+                            "Eksplorasi Luas & Keliling secara Menyenangkan & Eksploratif"
+                        ],
+                        "cp_snippet": "Mengenal dan mendeskripsikan ciri-ciri berbagai bangun datar; mengukur panjang, berat, dan luas menggunakan satuan tidak baku dan baku."
                     }
                 },
                 "Bahasa Indonesia": {
                     "ganjil": {
                         "elemen": [
-                            "Membaca"
+                            "Membaca dan Memirsa",
+                            "Menyimak"
                         ],
                         "materi_inti": [
-                            "Ide Pokok"
-                        ]
+                            "Eksplorasi Ide Pokok & Ide Pendukung Teks (Bermakna)",
+                            "Menganalisis Unsur Intrinsik Cerita secara Joyful"
+                        ],
+                        "cp_snippet": "Memahami pesan dan informasi tentang kehidupan sehari-hari; menunjukkan antusiasme dalam membaca teks narasi dan informatif."
                     },
                     "genap": {
                         "elemen": [
-                            "Menulis"
+                            "Menulis",
+                            "Berbicara dan Mempresentasikan"
                         ],
                         "materi_inti": [
-                            "Ringkasan Berita"
-                        ]
+                            "Menulis Ringkasan Berita Sekolah secara Mindful",
+                            "Menceritakan Kembali Informasi dengan Percaya Diri (Joyful)"
+                        ],
+                        "cp_snippet": "Menyampaikan pendapat dan tanggapan dengan santun; menuliskan ide dalam bentuk laporan hasil pengamatan atau narasi kreatif."
                     }
                 },
                 "Pendidikan Pancasila": {
                     "ganjil": {
                         "elemen": [
-                            "Pancasila"
+                            "Pancasila",
+                            "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945"
                         ],
                         "materi_inti": [
-                            "Pengamalan Sila"
-                        ]
+                            "Pengamalan Sila Pancasila dalam Kehidupan Berteman (Bermakna)",
+                            "Tanggung Jawab sebagai Warga Sekolah secara Mindful"
+                        ],
+                        "cp_snippet": "Memahami dan mempraktikkan nilai-nilai Pancasila dalam kehidupan sehari-hari; mengidentifikasi hak dan kewajiban sebagai anggota keluarga dan warga sekolah."
                     },
                     "genap": {
                         "elemen": [
-                            "NKRI"
+                            "Bhinneka Tunggal Ika",
+                            "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
-                            "Cintai Produk Lokal"
-                        ]
+                            "Cintai Produk Lokal & Budaya Daerah secara Joyful",
+                            "Membangun Kebanggaan terhadap NKRI melalui Eksplorasi Budaya"
+                        ],
+                        "cp_snippet": "Mengenal dan menghargai keberagaman budaya, suku bangsa, dan agama; menceritakan keunikan lingkungan kabupaten/kota tempat tinggalnya."
                     }
                 },
                 "Pendidikan Agama Islam": {
                     "ganjil": {
                         "elemen": [
-                            "Al-Qur'an"
+                            "Al-Qur'an dan Hadis"
                         ],
                         "materi_inti": [
-                            "Surah Pendek"
-                        ]
+                            "Hafalan & Makna Surah Pendek Pilihan secara Mindful",
+                            "Eksplorasi Etika Bergaul Teman Sebaya secara Bermakna"
+                        ],
+                        "cp_snippet": "Membaca dan menghafal beberapa surah pendek al-Qur'an dengan tartil; memahami pesan pokok dari surah-surah tersebut."
                     },
                     "genap": {
                         "elemen": [
+                            "Aqidah",
                             "Sejarah"
                         ],
                         "materi_inti": [
-                            "Kisah Nabi Muhammad"
-                        ]
+                            "Makna Iman kepada Malaikat & Percaya Takdir secara Bermakna",
+                            "Joyful Learning: Kisah Dakwah Nabi Muhammad di Madinah"
+                        ],
+                        "cp_snippet": "Mengenal para malaikat Allah dan tugas-tugasnya; mengetahui peristiwa-peristiwa penting dalam sejarah dakwah Nabi Muhammad SAW."
                     }
                 },
                 "Pendidikan Agama Kristen": {
                     "ganjil": {
                         "elemen": [
-                            "Kasih"
+                            "Allah Memulihkan"
                         ],
                         "materi_inti": [
-                            "Mengasihi Sesama Berbeda Agama"
-                        ]
+                            "Mengasihi Sesama yang Berbeda Latar Belakang (Bermakna)",
+                            "Praktik Toleransi Joyful dalam Lingkungan Sekolah"
+                        ],
+                        "cp_snippet": "Memahami makna mengasihi sesama manusia tanpa membeda-bedakan latar belakang; menunjukkan sikap inklusif."
                     },
                     "genap": {
                         "elemen": [
-                            "Gereja"
+                            "Gereja",
+                            "Masyarakat"
                         ],
                         "materi_inti": [
-                            "Komunitas Iman Dasar"
-                        ]
+                            "Komunitas Iman & Pelayanan Sosial secara Bermakna",
+                            "Eksplorasi Peran Anak dalam Komunitas Gereja Joyful"
+                        ],
+                        "cp_snippet": "Mengenal tugas dan peran Gereja di tengah masyarakat; aktif berpartisipasi dalam kegiatan komunitas iman."
                     }
                 },
                 "Pendidikan Agama Katolik": {
@@ -872,34 +957,43 @@
                             "Gereja"
                         ],
                         "materi_inti": [
-                            "Gereja sebagai Keluarga Allah"
-                        ]
+                            "Gereja sebagai Umat Allah & Keluarga yang Joyful",
+                            "Eksplorasi Pelayanan dalam Gereja secara Bermakna"
+                        ],
+                        "cp_snippet": "Memahami Gereja sebagai persekutuan umat Allah; mengenal tugas-tugas pokok Gereja secara sederhana."
                     },
                     "genap": {
                         "elemen": [
-                            "Sakramen"
+                            "Sakramen",
+                            "Doa"
                         ],
                         "materi_inti": [
-                            "Sakramen Baptis Dasar"
-                        ]
+                            "Makna Sakramen Baptis sebagai Pintu Gerbang Iman Bermakna",
+                            "Doa Rosario & Ibadat Sabda Anak secara Mindful"
+                        ],
+                        "cp_snippet": "Mengenal sakramen-sakramen dalam Gereja Katolik; membiasakan diri dalam kegiatan doa dan ibadat."
                     }
                 },
                 "Pendidikan Agama Hindu": {
                     "ganjil": {
                         "elemen": [
-                            "Sejarah"
+                            "Sejarah Suci Hindu"
                         ],
                         "materi_inti": [
-                            "Awal Hindu di Indonesia"
-                        ]
+                            "Awal Mula Agama Hindu di Indonesia secara Eksploratif",
+                            "Tokoh-tokoh Hindu yang Menginspirasi di Nusantara Joyful"
+                        ],
+                        "cp_snippet": "Mengenal sejarah perkembangan agama Hindu di Indonesia; meneladani perjuangan tokoh-tokoh Hindu."
                     },
                     "genap": {
                         "elemen": [
-                            "Sraddha"
+                            "Sraddha dan Bhakti"
                         ],
                         "materi_inti": [
-                            "Konsep Punarbhava Dasar"
-                        ]
+                            "Pendalaman Konsep Punarbhava secara Bermakna",
+                            "Hubungan Harmonis antara Manusia & Hyang Widhi Mindful"
+                        ],
+                        "cp_snippet": "Memahami ajaran Punarbhava sebagai bagian dari Panca Sradha; menunjukkan rasa bakti kepada Hyang Widhi."
                     }
                 },
                 "Pendidikan Agama Buddha": {
@@ -908,52 +1002,66 @@
                             "Sejarah"
                         ],
                         "materi_inti": [
-                            "Awal Buddha di Indonesia"
-                        ]
+                            "Masuknya Buddha di Indonesia dan Peninggalannya (Eksplorasi)",
+                            "Kisah-kisah Jataka yang Joyful & Sarat Makna"
+                        ],
+                        "cp_snippet": "Mengenal sejarah masuk dan berkembangnya agama Buddha di Indonesia; mengapresiasi peninggalan budaya Buddha."
                     },
                     "genap": {
                         "elemen": [
-                            "Etika"
+                            "Etika",
+                            "Dhamma"
                         ],
                         "materi_inti": [
-                            "Hukum Karma Dasar"
-                        ]
+                            "Hukum Karma & Reaksi Akibat dalam Keseharian Bermakna",
+                            "Membangun Kebahagiaan batin (Mindfulness) anak Joyful"
+                        ],
+                        "cp_snippet": "Memahami cara kerja hukum kamma secara sederhana; menerapkan nilai kesabaran dan kasih sayang."
                     }
                 },
                 "Pendidikan Agama Khonghucu": {
                     "ganjil": {
                         "elemen": [
-                            "Sejarah"
+                            "Sejarah Suci"
                         ],
                         "materi_inti": [
-                            "Khonghucu di Indonesia Dasar"
-                        ]
+                            "Perkembangan Khonghucu di Indonesia secara Bermakna",
+                            "Tokoh-tokoh Teladan umat Khonghucu Joyful"
+                        ],
+                        "cp_snippet": "Mengetahui sejarah kehadiran umat Khonghucu di Nusantara; mengenali para pejuang agama Khonghucu."
                     },
                     "genap": {
                         "elemen": [
-                            "Etika"
+                            "Etika",
+                            "Hubungan"
                         ],
                         "materi_inti": [
-                            "Delapan Kebajikan Dasar"
-                        ]
+                            "Implementasi Delapan Kebajikan dalam Berteman Bermakna",
+                            "Hormat & Tanggung Jawab sebagai Saudara Joyful"
+                        ],
+                        "cp_snippet": "Memahami dan mempraktikkan ajaran Delapan Kebajikan (Ba De); menjaga keharmonisan hubungan dalam keluarga."
                     }
                 },
                 "Pendidikan Kepercayaan": {
                     "ganjil": {
                         "elemen": [
-                            "Tuhan"
+                            "Eksistensi Tuhan"
                         ],
                         "materi_inti": [
-                            "Kekuasaan Tuhan YME"
-                        ]
+                            "Kekuasaan Tuhan YME dalam Peristiwa Alam (Mindful Observation)",
+                            "Mensyukuri Keragaman Ciptaan Tuhan Bermakna"
+                        ],
+                        "cp_snippet": "Menjelaskan bukti-bukti eksistensi Tuhan Yang Maha Esa di alam semesta; menunjukkan rasa kagum pada ciptaan Tuhan."
                     },
                     "genap": {
                         "elemen": [
-                            "Masyarakat"
+                            "Hubungan Sosial"
                         ],
                         "materi_inti": [
-                            "Toleransi Beragama Dasar"
-                        ]
+                            "Toleransi & Kerukunan Beragama secara Joyful",
+                            "Eksplorasi Budaya Lokal sebagai Identitas Diri Bermakna"
+                        ],
+                        "cp_snippet": "Mempraktikkan sikap toleransi dan kerja sama antar-umat beragama; melestarikan kearifan lokal bangsa Indonesia."
                     }
                 },
                 "PJOK": {
@@ -1051,21 +1159,22 @@
                             "Aljabar"
                         ],
                         "materi_inti": [
-                            "Bilangan Cacah s.d 10.000, Pecahan",
-                            "Pola Gambar & Bilangan"
-                        ]
+                            "Eksplorasi Bilangan Cacah s.d 10.000 & Pecahan Senilai (Bermakna)",
+                            "Operasi Pecahan dalam Keseharian secara Joyful"
+                        ],
+                        "cp_snippet": "Membaca, menulis, membandingkan, dan mengurutkan bilangan cacah s.d 10.000; mengenal, mengidentifikasi, dan menggunakan pecahan senilai."
                     },
                     "genap": {
                         "elemen": [
                             "Pengukuran",
                             "Geometri",
-                            "Analisis Data dan Peluang"
+                            "Analisis Data"
                         ],
                         "materi_inti": [
-                            "Satuan Baku Panjang & Berat",
-                            "Ciri Bangun Datar",
-                            "Tabel & Diagram Batang"
-                        ]
+                            "Investigasi Luas Bangun Datar & Sudut secara Mindful",
+                            "Analisis Data Diagram Batang Kontekstual Joyful"
+                        ],
+                        "cp_snippet": "Mengukur sudut menggunakan busur derajat; menghitung luas dan keliling bangun datar; menyajikan data dalam bentuk tabel dan diagram batang."
                     }
                 },
                 "IPAS": {
@@ -1075,9 +1184,10 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Pancaindra, Siklus Hidup, Pelestarian SDA",
-                            "Mengamati & Mempertanyakan"
-                        ]
+                            "Eksplorasi Fungsi Tubuh & Siklus Hidup Makhluk Hidup (Bermakna)",
+                            "Energi & Perubahannya di Sekitar Kita secara Mindful"
+                        ],
+                        "cp_snippet": "Memahami bagian tubuh tumbuhan dan fungsinya; menganalisis siklus hidup makhluk hidup; mengidentifikasi ragam gaya dan pengaruhnya."
                     },
                     "genap": {
                         "elemen": [
@@ -1085,9 +1195,10 @@
                             "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Interaksi Sosial, Peta Kabupaten/Kota",
-                            "Merencanakan & Menyelidiki"
-                        ]
+                            "Eksplorasi Peta & Kekayaan Alam Kabupaten/Kota (Joyful)",
+                            "Sejarah Lokal & Interaksi Sosial Bermakna di Masyarakat"
+                        ],
+                        "cp_snippet": "Mengenal ragam bentang alam dan keterkaitannya dengan profesi masyarakat; menceritakan peristiwa sejarah lokal daerah masing-masing."
                     }
                 },
                 "Bahasa Indonesia": {
@@ -1097,9 +1208,10 @@
                             "Membaca dan Memirsa"
                         ],
                         "materi_inti": [
-                            "Ide Pokok Teks Sastra/Nonsastra",
-                            "Kosakata Baru & Informasi Teks"
-                        ]
+                            "Eksplorasi Ide Pokok Teks Sastra & Nonsastra Bermakna",
+                            "Investigasi Kosakata Baru dalam Teks Petualangan Joyful"
+                        ],
+                        "cp_snippet": "Memahami ide pokok dan ide pendukung; mengidentifikasi informasi dari teks visual dan audio-visual secara kritis."
                     },
                     "genap": {
                         "elemen": [
@@ -1107,9 +1219,10 @@
                             "Menulis"
                         ],
                         "materi_inti": [
-                            "Berdiskusi & Menceritakan Kembali",
-                            "Menulis Teks Narasi Sederhana"
-                        ]
+                            "Diskusi Kreatif & Debat Sederhana secara Mindful",
+                            "Menulis Teks Prosedur & Narasi Berdasarkan Pengalaman Joyful"
+                        ],
+                        "cp_snippet": "Berbicara santun dalam diskusi; menulis teks narasi, deskripsi, dan prosedur dengan struktur yang benar."
                     }
                 },
                 "Pendidikan Pancasila": {
@@ -1119,9 +1232,10 @@
                             "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945"
                         ],
                         "materi_inti": [
-                            "Makna Sila & Perumus Pancasila",
-                            "Aturan di Sekolah & Rumah"
-                        ]
+                            "Makna Sila-Sila & Jasa Perumus Pancasila secara Bermakna",
+                            "Eksplorasi Hak & Kewajiban di Lingkungan Sekitar Secara Mindful"
+                        ],
+                        "cp_snippet": "Memahami sejarah perumusan Pancasila; mengidentifikasi bentuk pelaksanaan hak dan kewajiban dalam kehidupan sehari-hari."
                     },
                     "genap": {
                         "elemen": [
@@ -1129,99 +1243,126 @@
                             "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
-                            "Menghargai Budaya & Agama",
-                            "Wilayah NKRI (RT s.d Kecamatan)"
-                        ]
+                            "Eksplorasi Keragaman Budaya & Seni di Indonesia Secara Joyful",
+                            "Mengenal Wilayah NKRI (RT s.d Kecamatan) secara Bermakna"
+                        ],
+                        "cp_snippet": "Menjelaskan identitas diri (suku, budaya, agama); mengidentifikasi perangkat desa, kelurahan, dan kecamatan di sekitarnya."
                     }
                 },
                 "Pendidikan Agama Islam": {
                     "ganjil": {
                         "elemen": [
-                            "Al-Qur'an"
+                            "Al-Qur'an dan Hadis"
                         ],
                         "materi_inti": [
-                            "Surat At-Tin"
-                        ]
+                            "Hafalan & Tadabur Surah At-Tin secara Mindful",
+                            "Eksplorasi Adab terhadap Sesama & Lingkungan Bermakna"
+                        ],
+                        "cp_snippet": "Membaca dan menghafal surah-surah pendek dengan tartil; menerapkan perilaku terpuji terhadap Allah dan sesama."
                     },
                     "genap": {
                         "elemen": [
-                            "Fikih"
+                            "Fikih",
+                            "Sejarah"
                         ],
                         "materi_inti": [
-                            "Tayamum & Salat"
-                        ]
+                            "Tata Cara Tayamum & Salat dalam Kondisi Tertentu Bermakna",
+                            "Joyful Story: Peristiwa Hijrah Nabi Muhammad ke Madinah"
+                        ],
+                        "cp_snippet": "Memahami tata cara beribadah sesuai ketentuan fikih; meneladani perjuangan Nabi Muhammad SAW dalam peristiwa Hijrah."
                     }
                 },
                 "Pendidikan Agama Kristen": {
                     "ganjil": {
                         "elemen": [
-                            "Hukum"
+                            "Allah Memulihkan"
                         ],
                         "materi_inti": [
-                            "Sepuluh Perintah Allah Dasar"
-                        ]
+                            "Mengenal Sepuluh Perintah Allah secara Bermakna",
+                            "Implementasi Kasih Kristus dalam Sekolah Joyful"
+                        ],
+                        "cp_snippet": "Memahami Sepuluh Perintah Allah sebagai pedoman hidup; menerapkan perilaku hidup benar sesuai ajaran Alkitab."
                     },
                     "genap": {
                         "elemen": [
-                            "Tokoh"
+                            "Tokoh Alkitab",
+                            "Lingkungan"
                         ],
                         "materi_inti": [
-                            "Yusuf & Musa Dasar"
-                        ]
+                            "Belajar Integritas dari Tokoh Yusuf & Musa Bermakna",
+                            "Eksplorasi Tanggung Jawab Menjaga Ciptaan Tuhan Joyful"
+                        ],
+                        "cp_snippet": "Meneladani sikap ketaatan para tokoh Alkitab; menunjukkan kepedulian terhadap kelestarian alam."
                     }
                 },
                 "Pendidikan Agama Katolik": {
                     "ganjil": {
                         "elemen": [
-                            "Hukum"
+                            "Hukum Kasih"
                         ],
                         "materi_inti": [
-                            "Sepuluh Perintah Allah Dasar"
-                        ]
+                            "Sepuluh Perintah Allah & Hukum Kasih Dasar Bermakna",
+                            "Eksplorasi Keutamaan Doa dalam Hidup Kristiani Mindful"
+                        ],
+                        "cp_snippet": "Memahami Sepuluh Perintah Allah dan Hukum Kasih; mengamalkan perintah Allah dalam kehidupan sehari-hari."
                     },
                     "genap": {
                         "elemen": [
-                            "Tokoh"
+                            "Tokoh Suci",
+                            "Masyarakat"
                         ],
                         "materi_inti": [
-                            "Bunda Maria & Yosef Dasar"
-                        ]
+                            "Keteladanan Bunda Maria & Yosef yang Joyful",
+                            "Tanggung Jawab Anak dalam Keluarga & Masyarakat Bermakna"
+                        ],
+                        "cp_snippet": "Mengenal keteladanan para tokoh suci Gereja; aktif terlibat dalam kegiatan kemasyarakatan sesuai usia."
                     }
                 },
                 "Pendidikan Agama Hindu": {
                     "ganjil": {
                         "elemen": [
-                            "Sraddha"
+                            "Sraddha dan Bhakti"
                         ],
                         "materi_inti": [
-                            "Punarbhava Lanjut"
-                        ]
+                            "Pendalaman Konsep Punarbhava (Kelahiran Berulang) Bermakna",
+                            "Hukum Sebab Akibat dalam Perbuatan Manusia Mindful"
+                        ],
+                        "cp_snippet": "Memahami ajaran Punarbhava sebagai proses pembersihan diri; menerapkan perilaku baik dalam kehidupan."
                     },
                     "genap": {
                         "elemen": [
-                            "Susila"
+                            "Susila",
+                            "Sejarah Hindu"
                         ],
                         "materi_inti": [
-                            "Catur Paramitha Lanjut"
-                        ]
+                            "Implementasi Catur Paramitha dalam Keluarga Joyful",
+                            "Eksplorasi Tokoh Pahlawan Majapahit yang Hindu Bermakna"
+                        ],
+                        "cp_snippet": "Mempraktikkan ajaran Catur Paramitha; meneladani semangat kepahlawanan tokoh-tokoh Hindu."
                     }
                 },
                 "Pendidikan Agama Buddha": {
                     "ganjil": {
                         "elemen": [
+                            "Dhamma",
                             "Etika"
                         ],
                         "materi_inti": [
-                            "Hukum Karma Lanjut"
-                        ]
+                            "Hukum Karma Lanjut & Reaksi Akibat Bermakna",
+                            "Praktik Kesabaran (Khanti) dalam Lingkungan Joyful"
+                        ],
+                        "cp_snippet": "Memahami konsep hukum kamma secara mendalam; mengembangkan sikap sabar dan berlapang dada."
                     },
                     "genap": {
                         "elemen": [
-                            "Materi"
+                            "Materi Dhamma",
+                            "Ritual"
                         ],
                         "materi_inti": [
-                            "Empat Kebenaran Mulia Dasar"
-                        ]
+                            "Empat Kebenaran Mulia sebagai Panduan Hidup Mindful",
+                            "Eksplorasi Upacara Keagamaan Buddha di Indonesia Joyful"
+                        ],
+                        "cp_snippet": "Mengetahui inti dari Empat Kebenaran Mulia; berpartisipasi dalam perayaan hari besar Buddhis."
                     }
                 },
                 "Pendidikan Agama Khonghucu": {
@@ -1230,34 +1371,42 @@
                             "Etika"
                         ],
                         "materi_inti": [
-                            "Delapan Kebajikan Lanjut"
-                        ]
+                            "Implementasi Delapan Kebajikan secara Menyeluruh Bermakna",
+                            "Tanggung Jawab Diri dalam Lingkungan Sosial Joyful"
+                        ],
+                        "cp_snippet": "Memahami secara mendalam ajaran Delapan Kebajikan (Ba De); menunjukkan perilaku yang selaras dengan nilai etika."
                     },
                     "genap": {
                         "elemen": [
-                            "Materi"
+                            "Kitab Suci"
                         ],
                         "materi_inti": [
-                            "Zhong Yong Dasar"
-                        ]
+                            "Mengenal Inti Ajaran dalam Kitab Zhong Yong Bermakna",
+                            "Praktik Kebajikan dalam Kehidupan Kampus/Sekolah Joyful"
+                        ],
+                        "cp_snippet": "Mengetahui nilai-nilai dasar dalam kitab Zhong Yong; membiasakan diri berbuat bajak."
                     }
                 },
                 "Pendidikan Kepercayaan": {
                     "ganjil": {
                         "elemen": [
-                            "Etika"
+                            "Sejarah Luhur"
                         ],
                         "materi_inti": [
-                            "Keluhuran Budi Lanjut"
-                        ]
+                            "Pendalaman Keluhuran Budi Leluhur Bangsa Bermakna",
+                            "Eksplorasi Peninggalan Sejarah Kepercayaan Joyful"
+                        ],
+                        "cp_snippet": "Mengetahui sejarah dan asal-usul Kepercayaan terhadap Tuhan YME di Indonesia; menghargai jasa para sesepuh."
                     },
                     "genap": {
                         "elemen": [
-                            "Masyarakat"
+                            "Etika Sosial"
                         ],
                         "materi_inti": [
-                            "Kewajiban Hidup Dasar"
-                        ]
+                            "Kewajiban Hidup sebagai Warga Negara secara Bermakna",
+                            "Praktik Gotong Royong Tanpa Pamrih secara Joyful"
+                        ],
+                        "cp_snippet": "Memahami kewajiban hidup terhadap Tuhan, diri sendiri, dan sesama; aktif dalam kegiatan sosial budaya."
                     }
                 },
                 "PJOK": {
@@ -1351,199 +1500,261 @@
                 "Matematika": {
                     "ganjil": {
                         "elemen": [
-                            "Bilangan"
+                            "Bilangan",
+                            "Aljabar"
                         ],
                         "materi_inti": [
-                            "KPK & FPB"
-                        ]
+                            "Eksplorasi KPK & FPB dalam Masalah Kontekstual (Bermakna)",
+                            "Operasi Perkalian & Pembagian Pecahan secara Menyenangkan"
+                        ],
+                        "cp_snippet": "Memahami dan menggunakan KPK dan FPB; menyelesaikan masalah yang berkaitan dengan operasi hitung pecahan; memahami konsep rasio dan proporsi."
                     },
                     "genap": {
                         "elemen": [
-                            "Geometri"
+                            "Pengukuran",
+                            "Geometri",
+                            "Analisis Data"
                         ],
                         "materi_inti": [
-                            "Volume Bangun Ruang"
-                        ]
+                            "Investigasi Volume Kubus & Balok (Melalui Eksperimen Wadah)",
+                            "Eksplorasi Data Statistika Sederhana di Lingkungan Sekolah Joyful"
+                        ],
+                        "cp_snippet": "Menentukan volume bangun ruang (kubus dan balok); menyelesaikan masalah yang berkaitan dengan luas permukaan; menyajikan dan menganalisis data pada diagram gambar dan batang."
                     }
                 },
                 "IPAS": {
                     "ganjil": {
                         "elemen": [
-                            "Sains"
+                            "Pemahaman IPAS (Sains)",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Rantai Makanan"
-                        ]
+                            "Investigasi Ekosistem & Rantai Makanan (Eksplorasi Bermakna)",
+                            "Cahaya & Bunyi: Rahasia Sensorik Makhluk Hidup Mindful"
+                        ],
+                        "cp_snippet": "Menganalisis hubungan antar makhluk hidup pada suatu ekosistem dalam bentuk jaring-jaring makanan; memahami sifat-sifat bunyi dan cahaya melalui percobaan."
                     },
                     "genap": {
                         "elemen": [
-                            "Sosial"
+                            "Pemahaman IPAS (Sosial)",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Kerajaan Indonesia"
-                        ]
+                            "Eksplorasi Kejayaan Kerajaan Nusantara sebagai Warisan Bermakna",
+                            "Geografi Dunia & Persiapan Menghadapi Globalisasi secara Joyful"
+                        ],
+                        "cp_snippet": "Mengenal keragaman budaya, kearifan lokal, dan sejarah kerajaan-kerajaan di Indonesia; mengidentifikasi letak geografis Indonesia di peta dunia."
                     }
                 },
                 "Bahasa Indonesia": {
                     "ganjil": {
                         "elemen": [
-                            "Membaca"
+                            "Membaca dan Memirsa",
+                            "Menyimak"
                         ],
                         "materi_inti": [
-                            "Karya Sastra"
-                        ]
+                            "Apresiasi Karya Sastra: Cerpen & Puisi (Mindful Reading)",
+                            "Menganalisis Informasi dari Berbagai Media secara Bermakna"
+                        ],
+                        "cp_snippet": "Memahami ide pokok dan pesan dalam karya sastra; mengevaluasi informasi dari teks informatif dan sastra secara kritis."
                     },
                     "genap": {
                         "elemen": [
-                            "Berbicara"
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
                         ],
                         "materi_inti": [
-                            "Pidato Sederhana"
-                        ]
+                            "Seni Berpidato & Persuasi yang Menginspirasi (Joyful)",
+                            "Menulis Teks Eksposisi & Laporan Hasil Investigasi Bermakna"
+                        ],
+                        "cp_snippet": "Menyampaikan pidato dengan intonasi dan artikulasi yang tepat; menulis teks prosedur, eksposisi, dan deskripsi dengan struktur yang runtut."
                     }
                 },
                 "Pendidikan Pancasila": {
                     "ganjil": {
                         "elemen": [
-                            "Bhinneka"
+                            "Bhinneka Tunggal Ika",
+                            "Pancasila"
                         ],
                         "materi_inti": [
-                            "Budaya Daerah"
-                        ]
+                            "Eksplorasi Budaya Daerah & Pelestarian Bahasa Ibu Bermakna",
+                            "Toleransi Beragama dalam Bingkai Pancasila secara Joyful"
+                        ],
+                        "cp_snippet": "Menampilkan sikap menghargai keberagaman budaya, adat istiadat, dan bahasa daerah; mempraktikkan pengamalan sila-sila Pancasila dalam masyarakat."
                     },
                     "genap": {
                         "elemen": [
-                            "NKRI"
+                            "Negara Kesatuan Republik Indonesia",
+                            "Undang-Undang Dasar NRI 1945"
                         ],
                         "materi_inti": [
-                            "Bela Negara"
-                        ]
+                            "Sikap Bela Negara & Cinta Tanah Air Sejak Dini (Mindful)",
+                            "Organisasi di Lingkungan Masyarakat & Demokrasi Bermakna"
+                        ],
+                        "cp_snippet": "Menjelaskan hak dan kewajiban warga negara berdasarkan UUD 1945; menceritakan pentingnya menjaga keutuhan NKRI di lingkungan sekitarnya."
                     }
                 },
                 "Pendidikan Agama Islam": {
                     "ganjil": {
                         "elemen": [
-                            "Aqidah"
+                            "Aqidah",
+                            "Al-Qur'an dan Hadis"
                         ],
                         "materi_inti": [
-                            "Iman Kitab Allah"
-                        ]
+                            "Meyakini Kitab-Kitab Allah Sebagai Panduan Hidup Bermakna",
+                            "Hafalan Surah Al-Ma'un secara Mindful & Khusyuk"
+                        ],
+                        "cp_snippet": "Meyakini adanya kitab-kitab Allah sebagai wahyu; menghafal dan memahami kandungan surah al-Ma’un secara mendalam."
                     },
                     "genap": {
                         "elemen": [
-                            "Akhlak"
+                            "Akhlak",
+                            "Sejarah"
                         ],
                         "materi_inti": [
-                            "Saling Menghargai"
-                        ]
+                            "Internalisasi Sikap Saling Menghargai dalam Perbedaan Bermakna",
+                            "Joyful History: Perjuangan dan Keteladanan Sahabat Nabi"
+                        ],
+                        "cp_snippet": "Menerapkan sikap toleransi, moderasi beragama, dan saling menghormati; mengenal sejarah perjuangan sahabat Nabi (Khulafaur Rasyidin)."
                     }
                 },
                 "Pendidikan Agama Kristen": {
                     "ganjil": {
                         "elemen": [
-                            "Janji"
+                            "Allah Memulihkan"
                         ],
                         "materi_inti": [
-                            "Janji Allah kepada Nuh & Abraham"
-                        ]
+                            "Eksplorasi Janji Allah kepada Nuh & Abraham (Bermakna)",
+                            "Investigasi Iman & Kesetiaan dalam Ujian Joyful"
+                        ],
+                        "cp_snippet": "Memahami kesetiaan Allah dalam memenuhi janji-Nya kepada tokoh-tokoh Alkitab; menunjukkan ketabahan dalam menghadapi tantangan."
                     },
                     "genap": {
                         "elemen": [
-                            "Hidup"
+                            "Masyarakat",
+                            "Lingkungan"
                         ],
                         "materi_inti": [
-                            "Hidup Baru dalam Kristus Dasar"
-                        ]
+                            "Hidup Baru dalam Kristus sebagai Terang Dunia Bermakna",
+                            "Andil Anak dalam Melestarikan Alam Ciptaan secara Joyful"
+                        ],
+                        "cp_snippet": "Memahami makna hidup baru di dalam Kristus; menunjukkan perilaku positif dalam interaksi dengan sesama dan alam."
                     }
                 },
                 "Pendidikan Agama Katolik": {
                     "ganjil": {
                         "elemen": [
-                            "Janji"
+                            "Karya Keselamatan"
                         ],
                         "materi_inti": [
-                            "Janji Keselamatan Allah Dasar"
-                        ]
+                            "Investigasi Janji Keselamatan Allah dalam Sejarah Bermakna",
+                            "Mengenal Peran Para Nabi sebagai Penyambung Lidah Allah Mindful"
+                        ],
+                        "cp_snippet": "Memahami sejarah karya keselamatan Allah; meneladani perjuangan para tokoh nabi dalam mewartakan kerajaan Allah."
                     },
                     "genap": {
                         "elemen": [
-                            "Sakramen"
+                            "Sakramen",
+                            "Gereja"
                         ],
                         "materi_inti": [
-                            "Sakramen Inisiasi Lanjut"
-                        ]
+                            "Pendalaman Sakramen Ekaristi & Krisma yang Bermakna",
+                            "Melayani Sesama sebagai Anggota Tubuh Kristus Joyful"
+                        ],
+                        "cp_snippet": "Mengenal sakramen inisiasi lanjutan dalam Gereja Katolik; membiasakan diri dalam kegiatan pelayanan dan sosial."
                     }
                 },
                 "Pendidikan Agama Hindu": {
                     "ganjil": {
                         "elemen": [
-                            "Sraddha"
+                            "Sraddha dan Bhakti"
                         ],
                         "materi_inti": [
-                            "Panca Sradha Dasar"
-                        ]
+                            "Internalisasi Nilai Panca Sradha dalam Kehidupan Bermakna",
+                            "Keyakinan terhadap Brahman sebagai Sumber Hidup Mindful"
+                        ],
+                        "cp_snippet": "Memahami ajaran Panca Sradha sebagai fondasi keyakinan; menunjukkan sikap bakti melalui praktik keagamaan."
                     },
                     "genap": {
                         "elemen": [
-                            "Tuhan"
+                            "Sejarah Hindu Nusantara",
+                            "Susila"
                         ],
                         "materi_inti": [
-                            "Brahmavidya Dasar"
-                        ]
+                            "Eksplorasi Kerajaan-kerajaan Hindu di Nusantara Bermakna",
+                            "Implementasi Tri Hita Karana dalam Sekolah Joyful"
+                        ],
+                        "cp_snippet": "Mengenal peninggalan sejarah kerajaan Hindu; mempraktikkan ajaran Tri Hita Karana (hubungan dengan Tuhan, sesama, alam)."
                     }
                 },
                 "Pendidikan Agama Buddha": {
                     "ganjil": {
                         "elemen": [
-                            "Etika"
+                            "Etika",
+                            "Dhamma"
                         ],
                         "materi_inti": [
-                            "Pancasila Buddhis Lanjut"
-                        ]
+                            "Implementasi Pancasila Buddhis Lanjutan Bermakna",
+                            "Eksplorasi Delapan Jalan Utama sebagai Panduan Joyful"
+                        ],
+                        "cp_snippet": "Memahami pentingnya moralitas dalam ajaran Buddha; mempraktikkan sila dan etika dalam pergaulan."
                     },
                     "genap": {
                         "elemen": [
-                            "Kitab"
+                            "Kitab Suci",
+                            "Sejarah"
                         ],
                         "materi_inti": [
-                            "Sutta Pendek Dasar"
-                        ]
+                            "Eksplorasi Kandungan Sutta-Sutta Pendek secara Mindful",
+                            "Warisan Kebudayaan Buddha yang Mendunia (Candi Borobudur) Joyful"
+                        ],
+                        "cp_snippet": "Mengenal struktur Kitab Suci Tripitaka secara sederhana; mengagumi dan melestarikan warisan budaya Buddhis."
                     }
                 },
                 "Pendidikan Agama Khonghucu": {
                     "ganjil": {
                         "elemen": [
-                            "Etika"
+                            "Etika",
+                            "Hubungan Sosial"
                         ],
                         "materi_inti": [
-                            "Lima Hubungan Sosial (Wu Lun)"
-                        ]
+                            "Investigasi Lima Hubungan Sosial (Wu Lun) Bermakna",
+                            "Harmonisasi dalam Perbedaan secara Mindful & Joyful"
+                        ],
+                        "cp_snippet": "Memahami dan mempraktikkan konsep Wu Lun dalam interaksi sosial; menjaga keharmonisan beragama."
                     },
                     "genap": {
                         "elemen": [
-                            "Jalan"
+                            "Jalan Suci",
+                            "Perilaku"
                         ],
                         "materi_inti": [
-                            "Jalan Suci (Dao) Dasar"
-                        ]
+                            "Eksplorasi Jalan Suci (Dao) dalam Keseharian Bermakna",
+                            "Internalisasi Karakter Junzi (Insan Kamil) secara Joyful"
+                        ],
+                        "cp_snippet": "Mengetahui prinsip-prinsip Jalan Suci (Dao); berusaha mengembangkan karakter luhur sesuai ajaran Khonghucu."
                     }
                 },
                 "Pendidikan Kepercayaan": {
                     "ganjil": {
                         "elemen": [
-                            "Tuhan"
+                            "Spriritualitas"
                         ],
                         "materi_inti": [
-                            "Hubungan Manusia & Tuhan YME"
-                        ]
+                            "Pendalaman Hubungan Manusia dengan Tuhan YME Bermakna",
+                            "Praktik Menyukuri Kehidupan melalui Doa & Hening Mindful"
+                        ],
+                        "cp_snippet": "Menganalisis tanda-tanda kebesaran Tuhan YME dalam diri dan alam semesta; menunjukkan ketenangan batin."
                     },
                     "genap": {
                         "elemen": [
-                            "Alam"
+                            "Budaya Nusantara"
                         ],
                         "materi_inti": [
-                            "Kearifan Lokal Nusantara Dasar"
-                        ]
+                            "Investigasi Kearifan Lokal Nusantara sebagai Jati Diri Bermakna",
+                            "Pelestarian Tradisi & Budaya Bangsa secara Joyful"
+                        ],
+                        "cp_snippet": "Mengevaluasi nilai-nilai luhur kearifan lokal dalam menjaga persatuan; berpartisipasi dalam melestarikan budaya."
                     }
                 },
                 "Bahasa Inggris": {
@@ -1622,178 +1833,230 @@
                             "Bilangan"
                         ],
                         "materi_inti": [
-                            "Pecahan Desimal"
-                        ]
+                            "Eksplorasi Pecahan Desimal & Persen dalam Belanja (Bermakna)",
+                            "Investigasi Rasio & Kecepatan secara Joyful & Kontekstual"
+                        ],
+                        "cp_snippet": "Melakukan operasi hitung bilangan cacah, desimal, dan persen; menyelesaikan masalah yang berkaitan dengan rasio dan proporsi dalam keseharian."
                     },
                     "genap": {
                         "elemen": [
-                            "Data"
+                            "Analisis Data",
+                            "Geometri"
                         ],
                         "materi_inti": [
-                            "Rerata & Modus"
-                        ]
+                            "Analisis Rerata & Modus Data Statistik Sekolah (Mindful)",
+                            "Eksplorasi Gabungan Bangun Ruang secara Eksploratif Joyful"
+                        ],
+                        "cp_snippet": "Menyelesaikan masalah yang berkaitan dengan rata-rata, median, dan modus pada data tunggal; menghitung luas permukaan dan volume gabungan bangun ruang."
                     }
                 },
                 "IPAS": {
                     "ganjil": {
                         "elemen": [
-                            "Sains"
+                            "Pemahaman IPAS (Sains)",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Tata Surya"
-                        ]
+                            "Investigasi Tata Surya: Bumi, Bulan, & Planet Lain (Bermakna)",
+                            "Eksplorasi Listrik & Magnet sebagai Inovasi Masa Depan Joyful"
+                        ],
+                        "cp_snippet": "Menganalisis sistem tata surya dan dampaknya terhadap fenomena di bumi; mengidentifikasi jenis-jenis rangkaian listrik dan kegunaannya."
                     },
                     "genap": {
                         "elemen": [
-                            "Sosial"
+                            "Pemahaman IPAS (Sosial)",
+                            "Keterampilan Proses"
                         ],
                         "materi_inti": [
-                            "Modernisasi Dunia"
-                        ]
+                            "Eksplorasi Modernisasi Dunia & Dampaknya terhadap Budaya (Bermakna)",
+                            "Investigasi Globalisasi & Peran Indonesia di Kancah Dunia Joyful"
+                        ],
+                        "cp_snippet": "Menganalisis pengaruh globalisasi terhadap identitas bangsa; menjelaskan peran aktif Indonesia dalam organisasi internasional (ASEAN, G20)."
                     }
                 },
                 "Bahasa Indonesia": {
                     "ganjil": {
                         "elemen": [
-                            "Membaca"
+                            "Menyimak",
+                            "Membaca dan Memirsa"
                         ],
                         "materi_inti": [
-                            "Laporan Perjalanan"
-                        ]
+                            "Analisis Laporan Perjalanan & Observasi secara Bermakna",
+                            "Menganalisis Opini & Fakta dalam Teks Berita secara Mindful"
+                        ],
+                        "cp_snippet": "Mengidentifikasi informasi penting dan akurasi data dalam teks laporan; membedakan opini dan fakta dengan kritis."
                     },
                     "genap": {
                         "elemen": [
-                            "Menulis"
+                            "Menulis",
+                            "Berbicara dan Mempresentasikan"
                         ],
                         "materi_inti": [
-                            "Karya Ilmiah Anak"
-                        ]
+                            "Menulis Karya Ilmiah Anak: Proyek Mini Riset Joyful",
+                            "Presentasi Hasil Karya & Gagasan Kreatif secara Percaya Diri"
+                        ],
+                        "cp_snippet": "Menulis teks deskripsi, eksposisi, dan narasi bertema lingkungan dan teknologi; mempresentasikan ide secara logis dan persuasif."
                     }
                 },
                 "Pendidikan Pancasila": {
                     "ganjil": {
                         "elemen": [
-                            "NKRI"
+                            "Bhinneka Tunggal Ika",
+                            "Negara Kesatuan Republik Indonesia"
                         ],
                         "materi_inti": [
-                            "Otonomi Daerah"
-                        ]
+                            "Eksplorasi Otonomi Daerah & Kemajuan Lokal secara Bermakna",
+                            "Internalisasi Toleransi Beragama Tingkat Lanjut secara Joyful"
+                        ],
+                        "cp_snippet": "Menceritakan upaya menjaga keutuhan NKRI melalui otonomi daerah; menunjukkan sikap menghargai hak asasi manusia dalam keberagaman."
                     },
                     "genap": {
                         "elemen": [
-                            "Pancasila"
+                            "Pancasila",
+                            "Undang-Undang Dasar NRI 1945"
                         ],
                         "materi_inti": [
-                            "Profil Pancasila"
-                        ]
+                            "Profil Pelajar Pancasila dalam Aksi Nyata (Mindful Project)",
+                            "Demokrasi Pancasila & Musyawarah di Lingkungan Masyarakat"
+                        ],
+                        "cp_snippet": "Menjelaskan kedudukan dan fungsi UUD 1945 bagi bangsa Indonesia; menceritakan pelaksanaan musyawarah untuk mufakat di sekitarnya."
                     }
                 },
                 "Pendidikan Agama Islam": {
                     "ganjil": {
                         "elemen": [
-                            "Sejarah"
+                            "Sejarah Peradaban Islam"
                         ],
                         "materi_inti": [
-                            "Dakwah Walisongo"
-                        ]
+                            "Eksplorasi Strategi Dakwah Walisongo yang Bermakna",
+                            "Kearifan Lokal dalam Penyebaran Islam di Nusantara Joyful"
+                        ],
+                        "cp_snippet": "Mengenal keteladanan Walisongo dalam mendakwahkan Islam; memahami nilai-nilai moderasi dalam sejarah dakwah lokal."
                     },
                     "genap": {
                         "elemen": [
-                            "Fikih"
+                            "Fikih",
+                            "Akhlak"
                         ],
                         "materi_inti": [
-                            "Makanan Halal"
-                        ]
+                            "Investigasi Makanan & Minuman Halal bagi Kesehatan Bermakna",
+                            "Etika Bermedia Sosial yang Bijak & Mindful sesuai Syariat"
+                        ],
+                        "cp_snippet": "Memahami ketentuan makanan dan minuman halal; menerapkan adab dan etika yang baik dalam lingkungan digital."
                     }
                 },
                 "Pendidikan Agama Kristen": {
                     "ganjil": {
                         "elemen": [
-                            "Harapan"
+                            "Allah Memulihkan"
                         ],
                         "materi_inti": [
-                            "Pengharapan Kristen Lanjut"
-                        ]
+                            "Eksplorasi Pengharapan Kristen terhadap Masa Depan (Bermakna)",
+                            "Andil Anak dalam Mewartakan Kedamaian secara Joyful"
+                        ],
+                        "cp_snippet": "Memahami makna pengharapan kepada Kristus dalam segala situasi; menjadi pembawa damai sejahtera bagi sesama."
                     },
                     "genap": {
                         "elemen": [
-                            "Masyarakat"
+                            "Masyarakat",
+                            "Negara"
                         ],
                         "materi_inti": [
-                            "Keadilan Sosial Dasar"
-                        ]
+                            "Investigasi Keadilan Sosial Dasar dalam Kehidupan Bermakna",
+                            "Sikap Setia kepada Tuhan & Negara secara Joyful"
+                        ],
+                        "cp_snippet": "Memahami peran Kristen dalam memperjuangkan keadilan dan kebenaran; menunjukkan jiwa patriotisme yang berlandaskan kasih."
                     }
                 },
                 "Pendidikan Agama Katolik": {
                     "ganjil": {
                         "elemen": [
-                            "Harapan"
+                            "Keselamatan Berlanjut"
                         ],
                         "materi_inti": [
-                            "Pengharapan Katolik Lanjut"
-                        ]
+                            "Investigasi Pengharapan akan Kerajaan Allah Bermakna",
+                            "Keteladanan Para Martir dalam Mempertahankan Iman Joyful"
+                        ],
+                        "cp_snippet": "Memahami makna pengharapan Katolik; meneladani kesaksian iman para tokoh suci dalam menghadapi tantangan zaman."
                     },
                     "genap": {
                         "elemen": [
-                            "Masyarakat"
+                            "Masyarakat",
+                            "Dunia"
                         ],
                         "materi_inti": [
-                            "Ajaran Sosial Gereja Dasar"
-                        ]
+                            "Internalisasi Ajaran Sosial Gereja Dasar secara Bermakna",
+                            "Melestarikan Keutuhan Ciptaan sebagai Misi Kemanusiaan Joyful"
+                        ],
+                        "cp_snippet": "Mengenal dasar-dasar ajaran sosial Gereja; aktif terlibat dalam menjaga kelestarian lingkungan hidup."
                     }
                 },
                 "Pendidikan Agama Hindu": {
                     "ganjil": {
                         "elemen": [
-                            "Sraddha"
+                            "Sraddha dan Bhakti"
                         ],
                         "materi_inti": [
-                            "Konsep Moksa Dasar"
-                        ]
+                            "Eksplorasi Konsep Moksa sebagai Tujuan Tertinggi Bermakna",
+                            "Pendalaman Ajaran Yadnya (Pengorbanan Suci) Mindful"
+                        ],
+                        "cp_snippet": "Memahami ajaran Moksa sebagai bagian dari Panca Sradha; menjelaskan implementasi Yadnya dalam kehidupan sehari-hari."
                     },
                     "genap": {
                         "elemen": [
-                            "Budaya"
+                            "Budaya Hindu",
+                            "Susila"
                         ],
                         "materi_inti": [
-                            "Budaya Hindu Lanjut"
-                        ]
+                            "Investigasi Budaya Hindu Nusantara & Akulturasinya Bermakna",
+                            "Pemimpin yang Berlandaskan Astabrata secara Joyful"
+                        ],
+                        "cp_snippet": "Mengenali ragam budaya Hindu di berbagai daerah Indonesia; meneladani sikap kepemimpinan yang bijaksana."
                     }
                 },
                 "Pendidikan Agama Buddha": {
                     "ganjil": {
                         "elemen": [
-                            "Sejarah"
+                            "Sejarah Suci"
                         ],
                         "materi_inti": [
-                            "Riwayat Hidup Buddha Gautama: Kelahiran hingga Pencerahan"
-                        ]
+                            "Peristiwa Agung: Kelahiran hingga Pencerahan Buddha Bermakna",
+                            "Andil Buddha Gautama dalam Peradaban Dunia Joyful"
+                        ],
+                        "cp_snippet": "Menganalisis rangkaian peristiwa penting dalam riwayat hidup Buddha Gautama; meneladani sikap welas asih Buddha."
                     },
                     "genap": {
                         "elemen": [
-                            "Dhamma"
+                            "Dhamma",
+                            "Etika"
                         ],
                         "materi_inti": [
-                            "Hukum Tilakkhana (Tiga Corak Umum)"
-                        ]
+                            "Analisis Hukum Tilakkhana (Tiga Corak Umum) secara Bermakna",
+                            "Praktik Meditasi Sederhana untuk Kedamaian Batin Joyful"
+                        ],
+                        "cp_snippet": "Memahami karakteristik alam semesta dalam ajaran Buddha; mempraktikkan hidup berkesadaran (mindfulness)."
                     }
                 },
                 "Pendidikan Agama Khonghucu": {
                     "ganjil": {
                         "elemen": [
-                            "Etika"
+                            "Etika Perilaku"
                         ],
                         "materi_inti": [
-                            "Kesempurnaan Diri (Junzi)"
-                        ]
+                            "Kepribadian Junzi (Insan Mulia) dalam Masyarakat Bermakna",
+                            "Harmonisasi Alam & Manusia secara Mindful Joyful"
+                        ],
+                        "cp_snippet": "Menjelaskan ciri-ciri seorang Junzi; mewujudkan perilaku yang selaras dengan Tian (Tuhan) dan alam."
                     },
                     "genap": {
                         "elemen": [
-                            "Alam"
+                            "Alam & Lingkungan"
                         ],
                         "materi_inti": [
-                            "Harmoni Alam Lanjut"
-                        ]
+                            "Pendalaman Harmoni Alam semesta sebagai Berkah Bermakna",
+                            "Tanggung Jawab Lingkungan umat Khonghucu secara Joyful"
+                        ],
+                        "cp_snippet": "Memahami keteraturan alam semesta dalam perspektif Khonghucu; aktif menjaga kelestarian bumi."
                     }
                 },
                 "Pendidikan Kepercayaan": {
@@ -1802,16 +2065,20 @@
                             "Masyarakat"
                         ],
                         "materi_inti": [
-                            "Menghargai Sesama Ciptaan"
-                        ]
+                            "Investigasi Sikap Menghargai Sesama Ciptaan Bermakna",
+                            "Andil Penghayat dalam Pembangunan Karakter Bangsa Joyful"
+                        ],
+                        "cp_snippet": "Menganalisis prinsip kemanusiaan yang adil dan beradab dalam keseharian; menunjukkan sikap inklusif."
                     },
                     "genap": {
                         "elemen": [
-                            "Hidup"
+                            "Spiritualitas Luhur"
                         ],
                         "materi_inti": [
-                            "Pengabdian Hidup Luhur"
-                        ]
+                            "Internalisasi Pengabdian Hidup Luhur secara Bermakna",
+                            "Mewujudkan Manusia Indonesia Pintar & Berkarakter Joyful"
+                        ],
+                        "cp_snippet": "Memahami tujuan akhir hidup dalam ajaran Kepercayaan; berkomitmen dalam pengabdian kepada bangsa dan negara."
                     }
                 },
                 "Bahasa Inggris": {

@@ -106,7 +106,11 @@ const getModel = (modelName) => {
   // Defines the persona and knowledge base for the AI
   return genAI.getGenerativeModel({
     model: selectedModel,
-    systemInstruction: SMARTTY_BRAIN
+    systemInstruction: SMARTTY_BRAIN,
+    generationConfig: {
+      maxOutputTokens: 8192, // Increased for detailed multi-meeting RPPs
+      temperature: 0.7,
+    }
   });
 };
 
@@ -352,7 +356,10 @@ const createSystemInstruction = (userProfile) => {
         **5. ATURAN RESPONS (ETIKA SMARTTY):**
         - **Sapaan**: Gunakan "${userTitle}" atau "Pak/Bu" secara konsisten.
         - **Terminologi**: WAJIB gunakan kata **"peserta didik"** (bukan "murid/siswa") dalam konteks formal kurikulum.
-        - **Matematika**: Gunakan LaTeX dengan pembatas $ untuk semua rumus. Contoh: $E = mc^2$.
+        - **Matematika**: Gunakan LaTeX untuk semua istilah/rumus matematika.
+          *   **Inline**: Gunakan pembatas tunggal $ (Contoh: $x^2$).
+          *   **Block/Complex**: Gunakan pembatas ganda $$ untuk rumus panjang, tabel matematika, atau step-by-step (Contoh: $$\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$$).
+          *   **Struktur Kompleks**: Untuk array atau perhitungan bersusun, WAJIB dibungkus dengan $$ agar terbaca sempurna (Contoh: $$\\begin{array}{r} 10 \\\\ + 5 \\\\ \\hline 15 \\end{array}$$).
         - **Analisis Data**: Jika user memberikan data nilai/absen, analisis dengan tajam, tunjukkan tren, dan berikan rekomendasi aksi nyata.
         - **Source of Truth**: Dashar hukum dan filosofi Anda bersumber dari **BSKAP_DATA** (intelejen JSON).
         - **Interaksi**: Akhiri jawaban dengan 1-2 pertanyaan pemantik untuk memperdalam diskusi (Contoh: "Bagaimana Pak, apakah rencana ini sesuai dengan kondisi kelas Bapak?").
@@ -1229,6 +1236,13 @@ export const generateLessonPlan = async (data) => {
       ${data.profilLulusan ? `
       - **PROFIL LULUSAN (MANDATORY)**: Dimensi yang HARUS digunakan: **${data.profilLulusan}**. DILARANG KERAS berimprovisasi, menambah, atau mengurangi dimensi ini. Gunakan PERSIS seperti tertulis.` : ''}
       ${data.sourceType === 'atp' ? `- **SUMBER UTAMA (ATP)**: RPP ini HARUS diturunkan secara spesifik dari butir Tujuan Pembelajaran (TP) yang tercantum di Alur Tujuan Pembelajaran (ATP). Gunakan Elemen ${data.elemen} sebagai jangkar kompetensi.` : ''}
+
+      **PENTING: ATURAN MULTI-PERTEMUAN (DILARANG KERAS MERINGKAS)**:
+      - Materi ini dialokasikan untuk **${data.distribution ? data.distribution.length : 1} pertemuan**.
+      - **WAJIB HUKUMNYA**: RPP untuk ${data.distribution ? data.distribution.length : 1} pertemuan HARUS memiliki detail langkah-langkah yang **TEBAL dan EKSPANSIF**.
+      - DILARANG menulis RPP yang pendek untuk multi-pertemuan. Setiap pertemuan harus diperlakukan seperti RPP mandiri yang lengkap dengan detail skenario guru-siswa yang mendalam.
+      - Jika ada 3 pertemuan, dokumen HASILNYA HARUS 3x lebih panjang daripada 1 pertemuan.
+      - Gunakan penanda \`<div class="page-break"></div>\` di atas header Pertemuan 2, 3, dst (hanya jika multi-pertemuan).
       
       ${getRegionalLanguage(data.subject) ? `
       **INSTRUKSI BAHASA DAERAH (${getRegionalLanguage(data.subject)})**:
@@ -1533,11 +1547,15 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       - **DILARANG KERAS** menggunakan istilah di luar standar tersebut atau menulis kata "Otomatis". Gunakan sintaks spesifik sebagaimana didefinisikan dalam pedagogis operasional.
       
       **INSTRUKSI SANGAT PENTING (NARATIF & MENDALAM):** 
-      - Bagian kegiatan inti per pertemuan harus **TEBAL, NARATIF, dan MENDETAIL**. 
-      - Untuk RPP multi-pertemuan, pastikan setiap pertemuan memiliki aktivitas yang **BERBEDA** dan menunjukkan progres (misal: Pertemuan 1 fokus konsep, Pertemuan 2 fokus aplikasi/praktik).
-      - Uraikan langkah pembelajaran menjadi skenario nyata langkah-per-langkah (step-by-step).
-      - Bedakan jelas aktivitas **GURU** dan aktivitas **PESERTA DIDIK**.
-      - Pastikan urutannya logis sesuai sintaks model pembelajaran.
+      - Bagian kegiatan inti per pertemuan harus **TEBAL, NARATIF, dan SANGAT MENDETAIL**. 
+      - **DIFERENSIASI PERTEMUAN (WAJIB)**: Untuk RPP multi-pertemuan, dilarang keras hanya mengulang pola yang sama. Setiap pertemuan HARUS memiliki bobot aktivitas yang signifikan dan menunjukkan progres kognitif yang jelas:
+        * Pertemuan 1: Eksplorasi Konsep & Mindful Discovery.
+        * Pertemuan 2: Aplikasi Kontekstual & Sinkronisasi Meaningful.
+        * Pertemuan 3+: Proyek Kreatif/Evaluasi Joyful.
+      - Jika materi ini adalah rincian dari beberapa pertemuan, rincian aktivitas di setiap pertemuan harus memiliki jumlah kata (word count) yang sebanding, tidak boleh satu pertemuan sangat panjang dan yang lain sangat pendek.
+      - Uraikan langkah pembelajaran menjadi skenario nyata langkah-per-langkah (step-by-step) yang "Bernyawa".
+      - Bedakan jelas aktivitas **GURU** (misal: memantik, memfasilitasi, mengobservasi) dan aktivitas **PESERTA DIDIK** (misal: berkolaborasi, menganalisis, mencipta).
+      - Pastikan urutannya logis sesuai sintaks model pembelajaran yang dipilih.
 
       Jalin sintaks/tahapan model tersebut secara harmonis ke dalam 3 level Deep Learning berikut untuk setiap pertemuan:
       
@@ -1569,17 +1587,22 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       - **CEK KONSISTENSI TP**: Setiap Tujuan Pembelajaran (TP) yang Anda tulis di atas **HARUS** memiliki aktivitas nyata di langkah-langkah ini. Jangan ada TP yang "terlupakan" atau tidak diajarkan.
 
 
-      **CATATAN PENTING TENTANG KEDALAMAN KONTEN (TARGET: OPTIMAL 8-12 HALAMAN TOTAL):**
-      - **TARGET TOTAL DOKUMEN:** Buatlah RPP yang **PADAT BERISI** dengan estimasi total 8-12 halaman (termasuk lampiran KKTP & LKPD).
-      - **KOMPENSASI RUANG KKTP:** Karena ada penambahan tabel KKTP yang detail, mohon alokasikan ruang lebih.
+      **CATATAN PENTING TENTANG KEDALAMAN KONTEN (TARGET: OPTIMAL 10-25 HALAMAN TOTAL):**
+      - **TARGET TOTAL DOKUMEN:** Buatlah RPP yang **SANGAT BERBOBOT** dengan detail yang memadai.
+      - **KUALITAS MULTI-PERTEMUAN (MANDATORY):** Jika terdapat lebih dari 1 pertemuan, total konten harus meningkat secara signifikan. 
+        - **DILARANG KERAS** meringkas langkah-langkah hanya untuk menghemat ruang. 
+        - Setiap pertemuan harus memiliki **skenario pembelajaran yang penuh** seolah-olah itu adalah RPP tunggal.
+        - Jika ada 3 pertemuan, dokumen harus terasa 3x lebih tebal daripada 1 pertemuan.
+      - **DIFERENSIASI MATERI:** Setiap pertemuan HARUS memiliki bagian **"Materi Ajar Mendetail"** sendiri yang relevan dengan fokus pertemuan tersebut.
+      - **PAGE BREAKS**: Untuk memudahkan pencetakan, tambahkan kode HTML \`<div class="page-break"></div>\` tepat di atas setiap header **PERTEMUAN [X]** (mulai dari Pertemuan 2 dan seterusnya).
       - **JANGAN TERLALU PENDEK:**
-        - **1 Pertemuan:** Target total ~6-8 Halaman.
-        - **2-3 Pertemuan:** Target total ~10-14 Halaman.
+        - **1 Pertemuan:** Target rincian langkah pembelajaran minimal 1000-1200 kata.
+        - **2-3 Pertemuan:** Target rincian langkah pembelajaran minimal 2500-4500 kata.
       - **FOKUS PADA KUALITAS NARASI:**
-        - Setiap langkah pembelajaran harus **DETAIL** (minimal 1 paragraf utuh per langkah).
-        - Tetap tuliskan skenario/dialog guru-siswa, tapi pastikan **EFISIEN** dan tidak bertele-tele.
-        - Hindari pengulangan kata yang tidak perlu.
-      - **Pastikan Lampiran (LKPD & Instrumen Penilaian) tetap lengkap.**
+        - Setiap langkah pembelajaran harus **DETAIL** (minimal 3-5 paragraf utuh untuk langkah-langkah kunci di kegiatan inti).
+        - Tetap tuliskan skenario/dialog guru-siswa yang inspiratif agar guru yang membaca benar-benar mendapatkan gambaran suasana kelas yang Deep Learning.
+        - Hindari pengulangan kata yang tidak perlu atau instruksi yang terlalu umum (generic).
+      - **Pastikan Lampiran (LKPD & Instrumen Penilaian) tetap lengkap dan sinkron dengan jumlah pertemuan.**
       
       *--- Berikan garis pemisah jika ada pertemuan berikutnya ---*
 
@@ -1705,11 +1728,15 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       | **[Aspek 3 - e.g. Sikap]** | Kurang aktif dlm diskusi. | Cukup aktif tapi jarang berpendapat. | Aktif berdiskusi dan menghargai pendapat teman. | Sangat aktif, menjadi inisiator diskusi, dan memimpin kelompok dengan baik. |
       ` : `
       **A. PENDEKATAN KKTP (OTOMATIS PILIHAN AI)**
-      *(Karena Anda memilih mode Otomatis, AI telah menentukan metode penilaian yang paling efektif untuk materi ini)*:
+      *(AI telah menganalisis Tujuan Pembelajaran dan menentukan metode penilaian yang paling efektif)*:
 
-      **Pilihan Metode: [Sebutkan nama metode: Rubrik/Deskripsi/Interval]**
+      **Metode Terpilih: [Sebutkan: Rubrik / Deskripsi Kriteria / Interval Nilai]**
+      **Alasan Pemilihan:** [Jelaskan singkat mengapa metode ini cocok untuk TP ini]
 
-      [TULISKAN ISI PENILAIAN SECARA LENGKAP & SPESIFIK DI SINI. Jika memilih Rubrik, buat tabel rubrik minimal 3 aspek. Jika Deskripsi, buat checklist minimal 4 kriteria. Jika Interval, buat panduan tindak lanjut yang disesuaikan dengan materi ini].
+      [TULISKAN ISI PENILAIAN LENGKAP DI SINI mengikuti panduan di bawah ini]:
+      - **Jika Rubrik (Paling disarankan untuk keterampilan/proyek)**: Buat tabel minimal 3 aspek/kriteria dengan 4 level (Baru Berkembang, Layak, Cakap, Mahir).
+      - **Jika Deskripsi Kriteria (Cocok untuk checklist pengamatan)**: Buat tabel checklist minimal 4 kriteria dengan kolom "Muncul/Belum Muncul".
+      - **Jika Interval Nilai (Cocok untuk tes pengetahuan)**: Buat tabel interval 0-100% dengan tindak lanjut yang disesuaikan secara spesifik dengan materi **${data.materi}**.
       `}
 
       ---
@@ -1779,7 +1806,7 @@ export const generateHandout = async (data) => {
   const model = getModel(data.modelName || 'gemini-2.0-flash-exp');
 
   const prompt = `
-    Anda adalah "Mesin Intelijen Kurikulum Nasional" yang bertugas menyusun **Bahan Ajar (Handout/Modul)** yang inovatif dan mendalam.
+    Anda adalah "Mesin Intelijen Kurikulum Nasional" yang bertugas menyusun **Bahan Ajar (Handout/Modul)** yang inovatif, mendalam, dan selaras dengan administrasi guru.
     
     **OFFICIAL KNOWLEDGE ENGINE (BSKAP_DATA):**
     - Regulasi Dasar: **${BSKAP_DATA.standards.regulation}**
@@ -1790,7 +1817,17 @@ export const generateHandout = async (data) => {
     - Mapel: ${data.subject}
     - Jenjang/Kelas: ${data.gradeLevel}
     - Materi Pokok: ${data.materi}
+    ${data.kd ? `- **KONSTRUKSI TP/KD**: ${data.kd}` : ''}
+    ${data.elemen ? `- **ELEMEN KURIKULUM**: ${data.elemen}` : ''}
     - Guru: ${data.teacherTitle} ${data.teacherName}
+
+    ${data.rppContent ? `
+    **SINKRONISASI RPP (WAJIB)**:
+    - Berikut adalah konten RPP yang telah disusun untuk materi ini:
+    --- START RPP ---
+    ${data.rppContent}
+    --- END RPP ---
+    - Anda **WAJIB** memastikan isi Handout ini selaras dengan langkah-langkah pembelajaran, media, dan istilah yang digunakan dalam RPP di atas. Handout adalah "pendamping" siswa saat menjalankan aktivitas di RPP tersebut.` : ''}
 
     ${getRegionalLanguage(data.subject) ? `
     **INSTRUKSI BAHASA DAERAH (${getRegionalLanguage(data.subject)})**:
@@ -1836,9 +1873,9 @@ export const generateHandout = async (data) => {
     *(Bagian ini harus menjadi bagian TERPANJANG. Jangan hanya poin-poin. Jelaskan konsep selengkap-lengkapnya layaknya Anda mengajar di depan kelas).*
     
     ### 1. [Sub-Bab 1]
-    - **Definisi:** Jelaskan definisi dengan bahasa buku KEMUDIAN jelaskan ulang dengan bahasa tongkrongan/sederhana.
-    - **Penjelasan Mendalam:** Uraikan konsepnya. Bagaimana cara kerjanya? Mengapa itu terjadi?
-    - **Contoh Nyata:** Berikan minimal 2 contoh penerapan di kehidupan nyata.
+    - **Definisi dan Konsep:** Jelaskan definisi dengan bahasa buku KEMUDIAN jelaskan ulang dengan bahasa sederhana/analogis.
+    - **Penjelasan Mendalam:** Uraikan konsepnya secara naratif. Bagaimana cara kerjanya? Mengapa itu terjadi?
+    - **Contoh Nyata:** Berikan minimal 2 contoh penerapan di kehidupan nyata yang *relatable*.
     - **Analogi:** "Bayangkan materi ini seperti [Benda Sehari-hari]..."
 
     ### 2. [Sub-Bab 2]
@@ -1849,7 +1886,7 @@ export const generateHandout = async (data) => {
     ### 3. [Sub-Bab 3 dst...]
     
     > **💡 TIPS JITU:**
-    > (Masukkan tips cara menghafal (jembatan keledai) atau cara memahami konsep ini dengan jalan pintas).
+    > (Masukkan tips cara memahami konsep ini dengan mudah atau "cheat sheet" cerdas).
 
     ### 🔦 STUDI KASUS / POJOK LITERASI
     (Tambahkan satu cerita pendek atau kasus nyata yang berkaitan dengan materi untuk meningkatkan literasi siswa).
@@ -1891,9 +1928,10 @@ export const generateHandout = async (data) => {
     *Disusun dengan semangat belajar oleh ${data.teacherTitle} ${data.teacherName}*
     
     **INSTRUKSI TAMBAHAN:**
-    - Gunakan bahasa Markdown yang kaya.
-    - **PENTING:** Jangan pelit kalimat. Penjelasan harus mengalir (narrative) dan enak dibaca, bukan sekadar bullet points kaku.
+    - Gunakan bahasa Markdown yang kaya (tabel, blockquote, list).
+    - **PENTING: KEDALAMAN MATERI**. Jangan pelit kalimat. Penjelasan harus mengalir (narrative) dan sangat mendatail. Target panjang konten adalah **1500-3000 kata**.
     - Pastikan materinya **AKURASI TINGGI**, **MENDALAM**, patuh pada Capaian Pembelajaran (CP) **BSKAP No. 046/H/KR/2025**, dan merujuk pada buku resmi **Kemendikdasmen**.
+    - Output harus **langsung dalam format Markdown** tanpa komentar pembuka atau penutup dari asisten.
   `;
 
   try {
