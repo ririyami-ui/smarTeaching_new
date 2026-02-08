@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import BSKAP_DATA from './bskap_2025_intel.json';
+import VERBATIM_BSKAP_DATA from './bskap_2025_verbatim.json';
 // HMR Trigger Comment
 
 // --- SMARTTY BRAIN (Knowledge Base) ---
@@ -79,6 +80,8 @@ Jika guru bertanya "Siswa X nilainya jelek, harus gimana?", jawab dengan pola:
 4. ** Tawaran **: "Mau saya buatkan jadwal remedial untuknya?"
 `;
 // --- END SMARTTY BRAIN ---
+
+
 
 /**
  * Gets the current Gemini API Key from localStorage or environment variables.
@@ -1213,12 +1216,27 @@ export async function generateStudentAnalysis(prompt, modelName) {
 
 /**
  * Generates an automated RPP (Lesson Plan) based on Promes data.
- * @param {Object} data - { kd, materi, gradeLevel, academicYear, semester, subject }
+ * Refactored to multi-stage to avoid output token truncation.
+ * @param {Object} data - { kd, materi, gradeLevel, academicYear, semester, subject, onProgress }
  * @returns {Promise<string>} - The generated RPP content in Markdown.
- */
+*/
 export const generateLessonPlan = async (data) => {
   try {
     const model = getModel(data.modelName);
+    const onProgress = data.onProgress || (() => { });
+
+    // Normalize Assessment Model (KKTP)
+    const normalizedAssessment = (data.assessmentModel === 'Otomatis' || !data.assessmentModel)
+      ? 'Rubrik'
+      : data.assessmentModel;
+
+    const level = getLevel(data.gradeLevel);
+    const subjectKey = getSubjectKey(data.subject);
+    const verbatimEntry = VERBATIM_BSKAP_DATA.subjects?.[level]?.[data.gradeLevel]?.[subjectKey] || {};
+    const cpFullVerbatim = verbatimEntry.cp_full || "Lihat list elemen dan materi.";
+
+    onProgress("Generating Single-Stage RPP (BSKP 46/2025)...");
+
     const prompt = `
       Anda adalah "Mesin Intelijen Kurikulum Nasional" yang bekerja berdasarkan repositori data resmi **BSKAP_DATA**. DILARANG memberikan informasi yang bertentangan atau di luar cakupan data JSON tersebut.
       
@@ -1233,16 +1251,30 @@ export const generateLessonPlan = async (data) => {
       - Mapel: ${data.subject}
       - KD/CP: ${data.kd}
       - Materi Pokok: ${data.materi}
+      
+      **SMART CP EXTRACTION (MANDATORY - BSKAP 46/2025 COMPLIANCE):**
+      Berikut adalah CP LENGKAP untuk referensi: 
+      ${cpFullVerbatim}
+      
+      TUGAS ANDA: Dari CP lengkap di atas, ekstrak HANYA bagian/elemen yang RELEVAN dengan materi "${data.materi}".
+      - **WAJIB gunakan EXACT TEXT** dari CP (verbatim, NO paraphrase, NO summary)
+      - Jika materi mencakup multiple elemen, ekstrak semua yang relevan
+      - Jika tidak yakin elemen mana yang relevan, gunakan seluruh CP
+      
+      **FORMAT CP DI RPP (MANDATORY):**
+      - HAPUS nomor elemen (mis. "2.1.", "2.2.", "3.1.") dari teks CP
+      - MULAI dengan konteks Fase: "Pada akhir Fase [X], peserta didik mampu..."
+      - Gunakan exact text CP tanpa nomor elemen
+      - Jika multiple elemen, gabungkan menjadi paragraf natural dengan konektor yang sesuai
+      
+      Contoh Format yang BENAR:
+      "Pada akhir Fase B, peserta didik mampu mengidentifikasi makna sila-sila Pancasila dan penerapannya dalam kehidupan sehari-hari."
+      
+      Contoh Format yang SALAH:
+      "2.1. Pancasila Mengidentifikasi makna sila-sila Pancasila..."
       ${data.profilLulusan ? `
       - **PROFIL LULUSAN (MANDATORY)**: Dimensi yang HARUS digunakan: **${data.profilLulusan}**. DILARANG KERAS berimprovisasi, menambah, atau mengurangi dimensi ini. Gunakan PERSIS seperti tertulis.` : ''}
       ${data.sourceType === 'atp' ? `- **SUMBER UTAMA (ATP)**: RPP ini HARUS diturunkan secara spesifik dari butir Tujuan Pembelajaran (TP) yang tercantum di Alur Tujuan Pembelajaran (ATP). Gunakan Elemen ${data.elemen} sebagai jangkar kompetensi.` : ''}
-
-      **PENTING: ATURAN MULTI-PERTEMUAN (DILARANG KERAS MERINGKAS)**:
-      - Materi ini dialokasikan untuk **${data.distribution ? data.distribution.length : 1} pertemuan**.
-      - **WAJIB HUKUMNYA**: RPP untuk ${data.distribution ? data.distribution.length : 1} pertemuan HARUS memiliki detail langkah-langkah yang **TEBAL dan EKSPANSIF**.
-      - DILARANG menulis RPP yang pendek untuk multi-pertemuan. Setiap pertemuan harus diperlakukan seperti RPP mandiri yang lengkap dengan detail skenario guru-siswa yang mendalam.
-      - Jika ada 3 pertemuan, dokumen HASILNYA HARUS 3x lebih panjang daripada 1 pertemuan.
-      - Gunakan penanda \`<div class="page-break"></div>\` di atas header Pertemuan 2, 3, dst (hanya jika multi-pertemuan).
       
       ${getRegionalLanguage(data.subject) ? `
       **INSTRUKSI BAHASA DAERAH (${getRegionalLanguage(data.subject)})**:
@@ -1278,7 +1310,7 @@ export const generateLessonPlan = async (data) => {
       - Gunakan bahasa yang sangat sederhana, konkret, dan mudah dipahami anak usia 6-12 tahun.
       - Fokus pada pembelajaran berbasis permainan, cerita, dan pengalaman langsung.
       - Contoh dan ilustrasi harus dari kehidupan sehari-hari anak (keluarga, sekolah, lingkungan sekitar).
-      - Kegiatan harus melibatkan gerakan fisik, visual, dan hands-on activities.
+      - Kegiatan harus melibatkan gerakan fisik, visual, and hands-on activities.
       - Durasi fokus: 15-20 menit per aktivitas untuk kelas rendah (1-3), 25-30 menit untuk kelas tinggi (4-6).
       - Hindari konsep abstrak yang terlalu kompleks; gunakan pendekatan konkret-visual.
 
@@ -1299,17 +1331,15 @@ export const generateLessonPlan = async (data) => {
       - Persiapkan peserta didik untuk pendidikan tinggi atau dunia kerja.
 
       **PENTING - KEPATUHAN KETAT CAPAIAN PEMBELAJARAN (CP) BERDASARKAN KEPUTUSAN KEPALA BSKAP NO. 046/H/KR/2025:**
-      1. **SUMBER KEBENARAN TUNGGAL**: Data berikut adalah EKSTRAKSI RESMI dari **${BSKAP_DATA.standards.regulation}** untuk **${getSemesterLabel(data.semester)}**. Anda **WAJIB** menggunakan HANYA Elemen dan Materi Inti yang tercantum di bawah ini.
-      2. **DILARANG HALUSINASI**: Jangan gunakan CP dari peraturan lama (033/2022 or 008/2022) jika bertentangan dengan data ini. DILARANG menggunakan materi dari semester lain.
-      3. **STRUKTUR DATA RESMI (SEMESTER ${getSemesterLabel(data.semester).toUpperCase()}):**
+      1. **SUMBER KEBENARAN TUNGGAL**: Data berikut adalah EKSTRAKSI RESMI dari **${BSKAP_DATA.standards.regulation}** untuk **${getSemesterLabel(data.semester)}**.
+      2. **VERBATIM CP (HARGA MATI)**: Pada bagian "Capaian Pembelajaran (CP)", Anda **WAJIB** menyalin teks dari field **CAPAIAN PEMBELAJARAN (VERBATIM)** di atas (yaitu: "${cpFullVerbatim}") secara **VERBATIM (KATA PER KATA)**. 
+      3. **DILARANG KERAS**: Melakukan parafrase, meringkas, atau mengubah satu kata pun dari isi CP tersebut. Redaksi CP harus sesuai aslinya untuk kepatuhan audit regulasi.
+      4. **STRUKTUR DATA RESMI (SEMESTER ${getSemesterLabel(data.semester).toUpperCase()}):**
       ${JSON.stringify(
-      (BSKAP_DATA.subjects[getLevel(data.gradeLevel)]?.[data.gradeLevel]?.[getSubjectKey(data.subject)] ||
-        BSKAP_DATA.subjects[getLevel(data.gradeLevel)]?.[getSubjectKey(data.subject)])?.[getSemesterKey(data.semester)] ||
+      (BSKAP_DATA.subjects[level]?.[data.gradeLevel]?.[subjectKey] ||
+        BSKAP_DATA.subjects[level]?.[subjectKey])?.[getSemesterKey(data.semester)] ||
       BSKAP_DATA.subjects["SMA"]?.["10"]?.["Informatika"]?.["ganjil"] || {}
     )}
-      4. **TUGAS ANDA**: Susun narasi Capaian Pembelajaran (CP) satu paragraf utuh dengan pola kalimat wajib:
-         **"Pada akhir fase [Fase], peserta didik mampu [Kata Kerja Operasional dari Elemen] [Materi Inti] untuk [Tujuan/Manfaat]."**
-         *Contoh Output:* "Pada akhir fase D, peserta didik mampu menggunakan aplikasi pengolah angka untuk mengolah data, mengidentifikasi antarmuka perkakas, serta membedakan dan mengelola berbagai jenis data (angka, teks, tanggal) guna menunjang analisis data yang akurat."
       5. **AKURASI FASE**: Gunakan pemetaan Fase: ${(BSKAP_DATA.standards.phases || []).map(p => `Fase ${p.phase} (Kelas ${p.grades.join('-')} ${p.level})`).join(', ')}.
       6. **FORMAT**: Gunakan format Markdown standar (* atau -).
 
@@ -1449,6 +1479,7 @@ ${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map
       | **Materi Pokok** | ${data.materi} |
       | **Alokasi Waktu** | ${data.jp || '-'} JP (Total: .... menit) (${data.distribution ? data.distribution.length : 1} x tatap muka) |
       ${data.distribution && data.distribution.length > 1 ? `| **Rincian Pertemuan** | ${data.distribution.map((j, i) => `P${i + 1}: ${j} JP`).join(', ')} |` : ''}
+      | **Sarana & Prasarana** | [Sebutkan alat, bahan, dan sumber belajar spesifik yang digunakan] |
       | **Model Pembelajaran** | [PILIH MODEL SPESIFIK: PBL/PJBL/DLL] |
       | **Tahun Ajaran** | ${data.academicYear || '-'} |
       | **Guru Pengampu** | ${data.teacherName || '-'} |
@@ -1456,7 +1487,7 @@ ${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map
 
       ## II. KOMPETENSI INTI (CP & TP)
       **1. Capaian Pembelajaran (CP):**
-      (Tuliskan kompetensi utama yang harus dicapai peserta didik sesuai dengan fase dan materi pokok ini).
+      (Tuliskan kompetensi utama yang harus dicapai peserta didik sesuai dengan fase and materi pokok ini).
 
       **2. Tujuan Pembelajaran (TP):**
       **WAJIB: Buatlah maksimal 3 (tiga) poin Tujuan Pembelajaran yang esensial.**
@@ -1483,23 +1514,29 @@ ${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map
       (Jenis pengetahuan, relevansi dengan kehidupan, struktur materi, serta integrasi nilai & karakter).
 
       **5. Dimensi Profil Lulusan (8 Dimensi):**
+      Tuliskan Dimensi Profil Lulusan yang relevan dan **BERIKAN DESKRIPSI DETAIL** bagaimana dimensi tersebut diwujudkan dalam aktivitas pembelajaran ini.
+      
       ${data.profilLulusan ? `
       **WAJIB GUNAKAN DIMENSI INI (SESUAI PERENCANAAN):**
       ${data.profilLulusan}
       
-      (Peringatan Sistem: Jangan mengubah atau menambah dimensi lain. Gunakan persis seperti yang telah ditentukan di atas).
+      (Instruksi: Jelaskan penerapan konkret untuk setiap dimensi di atas dalam konteks materi ${data.materi}).
       ` : `
-      Sebutkan dimensi yang paling relevan dengan materi ini dari standar berikut (pilih minimal 1, maksimal 3):
-      - **Keimanan & Ketakwaan**: Beriman, bertakwa kepada Tuhan YME, dan berakhlak mulia. (Prioritaskan jika materi melibatkan: Integritas/kejujuran akademik, etika penggunaan ilmu/teknologi, rasa syukur atas keajaiban alam/logika, atau tanggung jawab moral/sosial).
-      - **Kewargaan**: Menjadi warga negara yang cinta tanah air, berkontribusi aktif, dan memahami nilai-nilai Pancasila.
-      - **Penalaran Kritis**: Mampu menganalisis informasi, mengevaluasi argumen, dan membuat keputusan rasional.
-      - **Kreativitas**: Mampu menghasilkan gagasan orisinal, inovatif, dan solusi baru.
-      - **Kolaborasi**: Mampu bekerja sama secara efektif dengan orang lain.
-      - **Kemandirian**: Bertanggung jawab atas proses belajar, memiliki inisiatif, dan mandiri dalam berpikir/bertindak.
-      - **Kesehatan**: Memiliki fisik dan mental yang prima, menjaga keseimbangan lahir dan batin (well-being).
-      - **Komunikasi**: Mampu menyampaikan ide secara efektif dan membangun relasi sehat.
+      Pilihlah minimal 1, maksimal 3 dimensi yang paling relevan dari standar berikut dan jelaskan penerapannya:
+      - **Keimanan & Ketakwaan**: (Contoh: Menumbuhkan rasa syukur, integritas akademik, atau etika).
+      - **Kewargaan**: (Contoh: Memahami peran sebagai warga negara atau nilai Pancasila).
+      - **Penalaran Kritis**: (Contoh: Menganalisis masalah, mengevaluasi data, atau berpikir logis).
+      - **Kreativitas**: (Contoh: Membuat karya orisinal, mencari solusi alternatif, atau berinovasi).
+      - **Kolaborasi**: (Contoh: Kerja kelompok, diskusi aktif, atau gotong royong).
+      - **Kemandirian**: (Contoh: Inisiatif belajar, manajemen waktu, atau kemandirian berpikir).
+      - **Kesehatan**: (Contoh: Menjaga well-being, keseimbangan diri, atau kesehatan fisik).
+      - **Komunikasi**: (Contoh: Menyampaikan ide secara efektif atau membangun relasi).
       `}
+      
+      **FORMAT OUTPUT PROFIL LULUSAN:**
+      - [Nama Dimensi]: [Penjelasan mendetail mengenai bagaimana peserta didik melatih dimensi ini melalui aktivitas spesifik di RPP ini].
 
+      
       ## III. LANGKAH-LANGKAH PEMBELAJARAN
       **PENTING - ALOKASI WAKTU:**
       Durasi total menit wajib dicantumkan dalam tabel Identifikasi. Standar Durasi:
@@ -1535,9 +1572,9 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       *(Catatan: Anda WAJIB mengulangi struktur di bawah ini untuk SETIAP pertemuan yang dijadwalkan)*
       
       **1. Pendahuluan (Mindful Connection) - [10 menit]:**
-      *   **Ritual Pembuka (Mindful):** Salam pembuka, **Berdoa bersama**, **Presensi/Mengabsen peserta didik**, dan Menanyakan Kabar untuk membangun koneksi awal yang hangat, rasa syukur, dan kesadaran penuh.
+      *   **Ritual Pembuka (Mindful):** Salam pembuka, **Berdoa bersama**, **Presensi/Mengabsen peserta didik**, dan Menanyakan Kabar untuk membangun koneksi awal yang hangat, rasa syukur, and kesadaran penuh.
       *   **Apersepsi (Meaningful):** Hubungkan materi baru dengan pengalaman atau pengetahuan siswa yang relevan dengan kehidupan nyata mereka.
-      *   **Motivasi & Tujuan (Mindful + Joyful):** Sampaikan tujuan pembelajaran dengan cara yang memotivasi dan membuat siswa antusias. Jelaskan MENGAPA materi ini penting untuk mereka.
+      *   **Motivasi & Tujuan (Mindful + Joyful):** Sampaikan tujuan pembelajaran dengan cara yang memotivasi and membuat siswa antusias. Jelaskan MENGAPA materi ini penting untuk mereka.
       *   **Pemantik (Hook - Joyful):** Berikan pemicu rasa ingin tahu seperti video menarik, pertanyaan tantangan, cerita pendek, atau fenomena mengejutkan yang membuat siswa excited untuk belajar.
 
       **2. Kegiatan Inti (Penerapan Model & Deep Learning):**
@@ -1547,15 +1584,11 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       - **DILARANG KERAS** menggunakan istilah di luar standar tersebut atau menulis kata "Otomatis". Gunakan sintaks spesifik sebagaimana didefinisikan dalam pedagogis operasional.
       
       **INSTRUKSI SANGAT PENTING (NARATIF & MENDALAM):** 
-      - Bagian kegiatan inti per pertemuan harus **TEBAL, NARATIF, dan SANGAT MENDETAIL**. 
-      - **DIFERENSIASI PERTEMUAN (WAJIB)**: Untuk RPP multi-pertemuan, dilarang keras hanya mengulang pola yang sama. Setiap pertemuan HARUS memiliki bobot aktivitas yang signifikan dan menunjukkan progres kognitif yang jelas:
-        * Pertemuan 1: Eksplorasi Konsep & Mindful Discovery.
-        * Pertemuan 2: Aplikasi Kontekstual & Sinkronisasi Meaningful.
-        * Pertemuan 3+: Proyek Kreatif/Evaluasi Joyful.
-      - Jika materi ini adalah rincian dari beberapa pertemuan, rincian aktivitas di setiap pertemuan harus memiliki jumlah kata (word count) yang sebanding, tidak boleh satu pertemuan sangat panjang dan yang lain sangat pendek.
-      - Uraikan langkah pembelajaran menjadi skenario nyata langkah-per-langkah (step-by-step) yang "Bernyawa".
-      - Bedakan jelas aktivitas **GURU** (misal: memantik, memfasilitasi, mengobservasi) dan aktivitas **PESERTA DIDIK** (misal: berkolaborasi, menganalisis, mencipta).
-      - Pastikan urutannya logis sesuai sintaks model pembelajaran yang dipilih.
+      - Bagian kegiatan inti per pertemuan harus **TEBAL, NARATIF, and MENDETAIL**. 
+      - Untuk RPP multi-pertemuan, pastikan setiap pertemuan memiliki aktivitas yang **BERBEDA** and menunjukkan progres (misal: Pertemuan 1 fokus konsep, Pertemuan 2 fokus aplikasi/praktik).
+      - Uraikan langkah pembelajaran menjadi skenario nyata langkah-per-langkah (step-by-step).
+      - Bedakan jelas aktivitas **GURU** and aktivitas **PESERTA DIDIK**.
+      - Pastikan urutannya logis sesuai sintaks model pembelajaran.
 
       Jalin sintaks/tahapan model tersebut secara harmonis ke dalam 3 level Deep Learning berikut untuk setiap pertemuan:
       
@@ -1566,9 +1599,9 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
           
       *   **Mengaplikasi (Applying - Meaningful + Joyful) - (BAGIAN TERPANJANG):** 
           - Tuliskan langkah-langkah fase aksi model (seperti Penyelidikan Mandiri/Kelompok, Pengumpulan Data, atau Pembuatan Produk/Karya).
-          - **Wajib Detil:** Jelaskan bagaimana pembagian kelompok dilakukan, apa instruksi spesifik LKPD, bagaimana guru memonitor, dan bagaimana siswa berkolaborasi.
+          - **Wajib Detil:** Jelaskan bagaimana pembagian kelompok dilakukan, apa instruksi spesifik LKPD, bagaimana guru memonitor, and bagaimana siswa berkolaborasi.
           - Sertakan estimasi waktu untuk setiap langkah, misal: "Penyelidikan Kelompok [40 menit]".
-          - Aktivitas harus menantang (Joyful) dan memiliki dampak nyata (Meaningful).
+          - Aktivitas harus menantang (Joyful) and memiliki dampak nyata (Meaningful).
           
       *   **Merefleksi (Reflecting - Mindful + Meaningful):** 
           - Tuliskan langkah-langkah fase akhir model (seperti Pembuktian, Presentasi hasil, atau Menarik Kesimpulan).
@@ -1576,10 +1609,10 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
           - Sertakan estimasi waktu untuk setiap langkah, misal: "Presentasi Hasil [15 menit]".
 
       **3. Penutup (Creative Closure - Mindful + Meaningful + Joyful) - [10 menit]:**
-      *   **Rangkuman & Refleksi (Mindful + Meaningful):** Siswa dan guru merangkum pembelajaran dan melakukan refleksi mendalam tentang makna pembelajaran hari ini.
-      *   **Apresiasi & Motivasi (Joyful):** Berikan apresiasi positif atas partisipasi siswa dan motivasi untuk terus belajar.
+      *   **Rangkuman & Refleksi (Mindful + Meaningful):** Siswa and guru merangkum pembelajaran and melakukan refleksi mendalam tentang makna pembelajaran hari ini.
+      *   **Apresiasi & Motivasi (Joyful):** Berikan apresiasi positif atas partisipasi siswa and motivasi untuk terus belajar.
       *   **Preview:** Berikan gambaran menarik tentang materi pertemuan berikutnya.
-      *   **Ritual Penutup (Mindful):** WAJIB diakhiri dengan **Doa Syukur** dan **Salam Penutup** sebagai tanda syukur atas kelancaran proses belajar.
+      *   **Ritual Penutup (Mindful):** WAJIB diakhiri dengan **Doa Syukur** and **Salam Penutup** sebagai tanda syukur atas kelancaran proses belajar.
 
       **4. Integrasi 6C & Deep Learning (PRINSIP HUTANG BAYAR):**
       - **PRINSIP HUTANG BAYAR**: Setiap Dimensi Profil Lulusan yang Anda pilih di Bagian II **WAJIB** memiliki aktivitas nyata di langkah-langkah pembelajaran ini. DILARANG mencantumkan Dimensi yang tidak diajarkan.
@@ -1587,25 +1620,18 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       - **CEK KONSISTENSI TP**: Setiap Tujuan Pembelajaran (TP) yang Anda tulis di atas **HARUS** memiliki aktivitas nyata di langkah-langkah ini. Jangan ada TP yang "terlupakan" atau tidak diajarkan.
 
 
-      **CATATAN PENTING TENTANG KEDALAMAN KONTEN (TARGET: OPTIMAL 10-25 HALAMAN TOTAL):**
-      - **TARGET TOTAL DOKUMEN:** Buatlah RPP yang **SANGAT BERBOBOT** dengan detail yang memadai.
-      - **KUALITAS MULTI-PERTEMUAN (MANDATORY):** Jika terdapat lebih dari 1 pertemuan, total konten harus meningkat secara signifikan. 
-        - **DILARANG KERAS** meringkas langkah-langkah hanya untuk menghemat ruang. 
-        - Setiap pertemuan harus memiliki **skenario pembelajaran yang penuh** seolah-olah itu adalah RPP tunggal.
-        - Jika ada 3 pertemuan, dokumen harus terasa 3x lebih tebal daripada 1 pertemuan.
-      - **DIFERENSIASI MATERI:** Setiap pertemuan HARUS memiliki bagian **"Materi Ajar Mendetail"** sendiri yang relevan dengan fokus pertemuan tersebut.
-      - **PAGE BREAKS**: Untuk memudahkan pencetakan, tambahkan kode HTML \`<div class="page-break"></div>\` tepat di atas setiap header **PERTEMUAN [X]** (mulai dari Pertemuan 2 dan seterusnya).
+      **CATATAN PENTING TENTANG KEDALAMAN KONTEN (TARGET: OPTIMAL 8-12 HALAMAN TOTAL):**
+      - **TARGET TOTAL DOKUMEN:** Buatlah RPP yang **PADAT BERISI** dengan estimasi total 8-12 halaman (termasuk lampiran KKTP & LKPD).
+      - **KOMPENSASI RUANG KKTP:** Karena ada penambahan tabel KKTP yang detail, mohon alokasikan ruang lebih.
       - **JANGAN TERLALU PENDEK:**
-        - **1 Pertemuan:** Target rincian langkah pembelajaran minimal 1000-1200 kata.
-        - **2-3 Pertemuan:** Target rincian langkah pembelajaran minimal 2500-4500 kata.
+        - **1 Pertemuan:** Target total ~6-8 Halaman.
+        - **2-3 Pertemuan:** Target total ~10-14 Halaman.
       - **FOKUS PADA KUALITAS NARASI:**
-        - Setiap langkah pembelajaran harus **DETAIL** (minimal 3-5 paragraf utuh untuk langkah-langkah kunci di kegiatan inti).
-        - Tetap tuliskan skenario/dialog guru-siswa yang inspiratif agar guru yang membaca benar-benar mendapatkan gambaran suasana kelas yang Deep Learning.
-        - Hindari pengulangan kata yang tidak perlu atau instruksi yang terlalu umum (generic).
-      - **Pastikan Lampiran (LKPD & Instrumen Penilaian) tetap lengkap dan sinkron dengan jumlah pertemuan.**
+        - Setiap langkah pembelajaran harus **DETAIL** (minimal 1 paragraf utuh per langkah).
+        - Tetap tuliskan skenario/dialog guru-siswa, tapi pastikan **EFISIEN** and tidak bertele-tele.
+        - Hindari pengulangan kata yang tidak perlu.
+      - **Pastikan Lampiran (LKPD & Instrumen Penilaian) tetap lengkap.**
       
-      *--- Berikan garis pemisah jika ada pertemuan berikutnya ---*
-
       ## IV. MEDIA BELAJAR
       (Sebutkan secara spesifik media yang akan digunakan: nama video/platform, jenis infografis, alat peraga konkret, dll. Jangan hanya menulis "video interaktif" tapi sebutkan topik/judulnya).
 
@@ -1638,7 +1664,7 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       ---
       
       **KEGIATAN 1: MENGAMATI & MEMAHAMI**
-      (Berikan stimulus berupa gambar, teks pendek, video, atau fenomena yang relevan dengan materi. Ajukan 3-4 pertanyaan pemantik yang mendorong peserta didik untuk mengamati dan memahami konsep dasar).
+      (Berikan stimulus berupa gambar, teks pendek, video, atau fenomena yang relevan dengan materi. Ajukan 3-4 pertanyaan pemantik yang mendorong peserta didik untuk mengamati and memahami konsep dasar).
       
       **Ruang Jawaban:**
       
@@ -1649,7 +1675,7 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       ---
       
       **KEGIATAN 2: MENGANALISIS & BERDISKUSI**
-      (Berikan kasus, masalah, atau data yang perlu dianalisis peserta didik. Ajukan pertanyaan yang mendorong berpikir kritis dan diskusi kelompok).
+      (Berikan kasus, masalah, atau data yang perlu dianalisis peserta didik. Ajukan pertanyaan yang mendorong berpikir kritis and diskusi kelompok).
       
       **Ruang Jawaban:**
       
@@ -1688,7 +1714,10 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
 
       ### 2. INSTRUMEN PENILAIAN (ASESMEN & KKTP)
       
-      **KRITERIA KETERCAPAIAN TUJUAN PEMBELAJARAN (KKTP)**
+      **A. ASESMEN DIAGNOSTIK (ASESMEN AWAL)**
+      (Buatlah minimal 3-5 pertanyaan singkat atau aktivitas sederhana untuk memetakan kemampuan awal peserta didik terkait materi ini. Tujuannya untuk mengetahui kesiapan belajar).
+      
+      **B. KRITERIA KETERCAPAIAN TUJUAN PEMBELAJARAN (KKTP)**
       *Pendekatan yang digunakan: ${data.assessmentModel || 'Rubrik'}*
       
       > **Catatan:** Penentuan kriteria ketercapaian tujuan pembelajaran dalam modul ini merujuk pada standar penilaian dalam **Permendikbudristek No. 21 Th 2022** dan kompetensi pada **Keputusan Kepala BSKAP No. 046/H/KR/2025**.
@@ -1697,7 +1726,7 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       Indikator/Kriteria di bawah ini **HARUS** merupakan turunan langsung dari **Tujuan Pembelajaran (TP)** yang Anda tulis di Bagian II. Jangan membuat indikator yang tidak ada di TP.
 
       ${data.assessmentModel === 'Deskripsi Kriteria' ? `
-      **A. DESKRIPSI KRITERIA (Checklist)**
+      **B.1. DESKRIPSI KRITERIA (Checklist)**
       Guru menetapkan kriteria ketuntasan yang spesifik. Peserta didik dianggap mencapai tujuan pembelajaran jika memenuhi minimal jumlah kriteria tertentu (misal 3 dari 4).
 
       | Kriteria (Indikator Ketercapaian) | Sudah Muncul (✔) | Belum Muncul (❌) |
@@ -1708,60 +1737,58 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       | 4. [Indikator 4 - turunan TP] | | |
       | **Kesimpulan:** | Tuntas (jika ... kriteria muncul) / Belum Tuntas | |
       ` : data.assessmentModel === 'Interval Nilai' ? `
-      **A. INTERVAL NILAI**
+      **B.1. INTERVAL NILAI**
       Guru menggunakan rentang nilai untuk menentukan tindak lanjut.
 
       | Rentang Nilai | Keterangan & Tindak Lanjut |
       | :--- | :--- |
-      | **0 - 40%** | **Belum Mencapai Ketuntasan (Remedial Seluruh Bagian)** <br> Siswa belum memahami konsep dasar dan memerlukan bimbingan intensif dari awal. |
+      | **0 - 40%** | **Belum Mencapai Ketuntasan (Remedial Seluruh Bagian)** <br> Siswa belum memahami konsep dasar and memerlukan bimbingan intensif dari awal. |
       | **41 - 65%** | **Belum Mencapai Ketuntasan (Remedial Bagian Tertentu)** <br> Siswa sudah memahami sebagian konsep namun masih kesulitan di bagian [Sebutkan bagian sulit]. Perlu remedial pada indikator yang belum tuntas. |
       | **66 - 85%** | **Sudah Mencapai Ketuntasan (Tidak Perlu Remedial)** <br> Siswa sudah menguasai materi dengan baik. Dapat diberikan latihan pemantapan. |
       | **86 - 100%** | **Sudah Mencapai Ketuntasan (Pengayaan)** <br> Siswa sangat mahir. Berikan tantangan lebih kompleks atau menjadi tutor sebaya. |
       ` : data.assessmentModel === 'Rubrik' ? `
-      **A. RUBRIK PENILAIAN (LEVELING)**
+      **B.1. RUBRIK PENILAIAN (LEVELING)**
       Guru menyusun tingkatan pencapaian untuk setiap indikator.
 
       | Aspek / Indikator | Baru Berkembang (1) | Layak (2) | Cakap (3) | Mahir (4) |
       | :--- | :--- | :--- | :--- | :--- |
-      | **[Aspek 1 - e.g. Pemahaman]** | Belum mampu menjelaskan [konsep] secara mandiri. | Mampu menjelaskan konsep namun masih kurang tepat/lengkap. | Mampu menjelaskan konsep dengan benar dan menggunakan bahasa sendiri. | Mampu menjelaskan konsep dengan sangat detail, logis, and memberikan contoh relevan. |
-      | **[Aspek 2 - e.g. Keterampilan]** | Belum bisa menerapkan [prosedur]. | Bisa menerapkan prosedur tapi butuh bimbingan. | Bisa menerapkan prosedur dengan benar secara mandiri. | Bisa menerapkan prosedur dengan sangat lancar, efisien, dan kreatif. |
-      | **[Aspek 3 - e.g. Sikap]** | Kurang aktif dlm diskusi. | Cukup aktif tapi jarang berpendapat. | Aktif berdiskusi dan menghargai pendapat teman. | Sangat aktif, menjadi inisiator diskusi, dan memimpin kelompok dengan baik. |
+      | **[Aspek 1 - e.g. Pemahaman]** | Belum mampu menjelaskan [konsep] secara mandiri. | Mampu menjelaskan konsep namun masih kurang tepat/lengkap. | Mampu menjelaskan konsep dengan benar and menggunakan bahasa sendiri. | Mampu menjelaskan konsep dengan sangat detail, logis, and memberikan contoh relevan. |
+      | **[Aspek 2 - e.g. Keterampilan]** | Belum bisa menerapkan [prosedur]. | Bisa menerapkan prosedur tapi butuh bimbingan. | Bisa menerapkan prosedur dengan benar secara mandiri. | Bisa menerapkan prosedur dengan sangat lancar, efisien, and kreatif. |
+      | **[Aspek 3 - e.g. Sikap]** | Kurang aktif dlm diskusi. | Cukup aktif tapi jarang berpendapat. | Aktif berdiskusi and menghargai pendapat teman. | Sangat aktif, menjadi inisiator diskusi, and memimpin kelompok dengan baik. |
       ` : `
-      **A. PENDEKATAN KKTP (OTOMATIS PILIHAN AI)**
-      *(AI telah menganalisis Tujuan Pembelajaran dan menentukan metode penilaian yang paling efektif)*:
+      **B.1. PENDEKATAN KKTP (OTOMATIS PILIHAN AI)**
+      *(Karena Anda memilih mode Otomatis, AI telah menentukan metode penilaian yang paling efektif untuk materi ini)*:
 
-      **Metode Terpilih: [Sebutkan: Rubrik / Deskripsi Kriteria / Interval Nilai]**
-      **Alasan Pemilihan:** [Jelaskan singkat mengapa metode ini cocok untuk TP ini]
+      **Pilihan Metode: [Sebutkan nama metode: Rubrik/Deskripsi/Interval]**
 
-      [TULISKAN ISI PENILAIAN LENGKAP DI SINI mengikuti panduan di bawah ini]:
-      - **Jika Rubrik (Paling disarankan untuk keterampilan/proyek)**: Buat tabel minimal 3 aspek/kriteria dengan 4 level (Baru Berkembang, Layak, Cakap, Mahir).
-      - **Jika Deskripsi Kriteria (Cocok untuk checklist pengamatan)**: Buat tabel checklist minimal 4 kriteria dengan kolom "Muncul/Belum Muncul".
-      - **Jika Interval Nilai (Cocok untuk tes pengetahuan)**: Buat tabel interval 0-100% dengan tindak lanjut yang disesuaikan secara spesifik dengan materi **${data.materi}**.
+      [TULISKAN ISI PENILAIAN SECARA LENGKAP & SPESIFIK DI SINI. Jika memilih Rubrik, buat tabel rubrik minimal 3 aspek. Jika Deskripsi, buat checklist minimal 4 kriteria. Jika Interval, buat panduan tindak lanjut yang disesuaikan dengan materi ini].
       `}
 
       ---
       
-      **B. ASESMEN FORMATIF & SUMATIF**
-      **A. Asesmen Formatif (6C Observation)**
+      **C. ASESMEN FORMATIF & SUMATIF (INSTRUMEN)**
+      **C.1. Asesmen Formatif (Selama Proses)**
       | Komponen | Teknik Penilaian | Instrumen |
       | :--- | :--- | :--- |
-      | **Observasi 6C** | Pengamatan diskusi | Lembar Observasi |
-      | **Refleksi Diri** | Exit Ticket | Jurnal Reflektif |
-      | **Peer Feedback** | Peer Assessment | Strategi 2 Stars and a Wish |
+      | **Observasi 6C** | Pengamatan aktif | Lembar Observasi (Character, Citizenship, Collaboration, Communication, Creativity, Critical Thinking) |
+      | **Refleksi Diri** | Self Assessment | Menilai pemahaman mandiri menggunakan kartu refleksi |
+      | **Feedback** | Peer Feedback | Memberikan masukan konstruktif antar teman |
 
-      **B. Asesmen Sumatif (Kriteria Ketuntasan)**
-      | Kriteria | Perlu Bimbingan (1) | Cukup (2) | Baik (3) | Sangat Baik (4) |
+      **C.2. Asesmen Sumatif (Akhir Materi)**
+      *(Sediakan minimal 2-3 contoh soal objektif atau instruksi tugas akhir yang mengukur Tujuan Pembelajaran secara utuh)*
+
+      | Kriteria Ketuntasan | Perlu Bimbingan (1) | Cukup (2) | Baik (3) | Sangat Baik (4) |
       | :--- | :--- | :--- | :--- | :--- |
-      | **Pemahaman** | Miskonsepsi | Paham terbatas | Benar | Kompleks |
-      | **Analisis** | Tanpa analisis | Kurang konsisten | Logis | Inovatif |
+      | **Pemahaman Konten** | Mengalami miskonsepsi | Paham sebagian | Paham secara utuh | Paham & mampu mengembangkan |
+      | **Aplikasi/Analisis** | Belum bisa menerapkan | Bisa menerapkan dengan bantuan | Bisa menerapkan mandiri | Bisa menganalisis & berinovasi |
 
       ### 3. MATERI AJAR MENDETAIL (KONSISTENSI TP)
       **WAJIB DIISI DENGAN KONTEN LENGKAP & RELEVAN!**
       - **CEK KONSISTENSI:** Pastikan materi yang ditulis di sini **MENJAWAB** seluruh Tujuan Pembelajaran (TP). Jika TP menuntut "Menganalisis", maka materi harus memberikan landasan teori untuk analisis tersebut.
-      - Minimal 3-5 paragraf substantif yang mencakup konsep, teori, contoh konkret, dan aplikasi nyata materi ini.
+      - Minimal 3-5 paragraf substantif yang mencakup konsep, teori, contoh konkret, and aplikasi nyata materi ini.
 
       ### 4. GLOSARIUM
-      **WAJIB DIISI!** Daftar minimal 5-10 istilah penting dan definisinya.
+      **WAJIB DIISI!** Daftar minimal 5-10 istilah penting and definisinya.
       - **[Istilah]**: Definisi...
 
       ### 5. DAFTAR PUSTAKA
@@ -1774,14 +1801,15 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
 
       ---
       **CATATAN PENTING UNTUK AI:**
-      - **WAJIB** ada baris kosong setelah tag pembuka div dan sebelum tag penutup div agar tabel Markdown tampil sempurna.
+      - **WAJIB** ada baris kosong setelah tag pembuka div and sebelum tag penutup div agar tabel Markdown tampil sempurna.
       - **JANGAN** ada baris kosong di antara baris tabel. Tabel harus rapat.
-      - Gunakan bahasa Indonesia yang **Inspiratif, Profesional, dan Terstruktur**.
+      - Gunakan bahasa Indonesia yang **Inspiratif, Profesional, and Terstruktur**.
       - Pastikan bagian **Materi Ajar Mendetail** benar-benar berisi konten akademis yang kuat.
       - **WAJIB** gunakan istilah **"Peserta Didik"** pengganti kata "Siswa" di seluruh dokumen.
       - **JANGAN** membuat bagian Tanda Tangan (Mengetahui Kepala Sekolah/Guru). Bagian ini akan ditambahkan otomatis oleh sistem.
       - **JANGAN** menggunakan placeholder seperti "NIP. ....................".
       - **PRINSIP HUTANG BAYAR (AUDIT KONSISTENSI)**: Periksa kembali hasil akhir Anda. Jika Anda mencantumkan "Penalaran Kritis" di Profil Lulusan, pastikan ada kegiatan diskusi atau analisis mendalam di langkah pembelajaran. Jika Anda mencantumkan "Kemampuan Komunikasi", pastikan ada kegiatan presentasi atau berbagi ide. RPP adalah janji yang harus "dibayar" dalam kegiatan nyata.
+
       - Output harus **langsung dalam format Markdown** tanpa komentar pembuka atau penutup dari asisten.
     `;
 
@@ -1794,6 +1822,7 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
     throw new Error(handleGeminiError(error, "generateLessonPlan"));
   }
 };
+
 
 
 
@@ -1860,7 +1889,34 @@ export const generateHandout = async (data) => {
     ---
 
     ## 🗺️ PETA KONSEP (MIND MAP)
-    (Gunakan Mermaid Diagram sederhana ATAU List berjenjang yang jelas untuk menggambarkan alur materi)
+    (Gunakan format Mermaid Diagram tipe \`graph TD\`. Agar tampil **UNIK, MEWAH & RAPI (HINDARI TUMPANG TINDIH)**, ikuti aturan ini:
+    1. Gunakan \`graph TD\`.
+    2. Gunakan bentuk **Pill (Kapsul)**: \`ID(["Isi Teks"])\`.
+    3. **UNIK & RAPI**: Gunakan \`subgraph\` HANYA untuk kelompok besar. Berikan jarak antar subgraph.
+    4. **KOMPAK & BERSIH**: Jangan menumpuk subgraph di dalam subgraph. Buat alur mengalir dari ATAS ke BAWAH secara konsisten.
+    
+    Contoh Sintaks Mewah & Rapi:
+    \`\`\`mermaid
+    graph TD
+      subgraph Utama ["🎯 Materi Pokok"]
+        A(["📘 Topik Utama"])
+      end
+      
+      subgraph Detail ["🔍 Pembahasan"]
+        B(["💡 Konsep 1"])
+        C(["🚀 Konsep 2"])
+      end
+      
+      A --> B
+      A --> C
+      
+      style A fill:#6366f1,stroke:#4338ca,color:#ffffff,stroke-width:4px
+      style B fill:#f8fafc,stroke:#6366f1,color:#1e293b
+      style C fill:#f8fafc,stroke:#6366f1,color:#1e293b
+      style Utama fill:#f1f5f9,stroke:#e2e8f0,stroke-dasharray: 5 5
+      style Detail fill:#ffffff,stroke:#e2e8f0
+    \`\`\`
+    PENTING: Pastikan tidak ada elemen yang saling menumpuk. Gunakan alur linier yang bersih).
     
     ---
 
@@ -1893,7 +1949,7 @@ export const generateHandout = async (data) => {
 
     ---
 
-    ## 🧪 CONTOH SOAL & BEDAH JAWABAN
+    ## 🧪 CONTOH SOAL & BEDAH JAWABAN (WAJIB)
     *(Berikan minimal 2 contoh soal dengan tingkat kesulitan berbeda: Mudah & Sedang).*
 
     **Contoh 1:**
@@ -1911,27 +1967,30 @@ export const generateHandout = async (data) => {
 
     ---
 
-    ## 📝 TANTANGAN MINIMU (LATIHAN)
-    *(Berikan 3-5 soal latihan untuk siswa kerjakan sendiri).*
-    1. [Soal Pemahaman Dasar]
-    2. [Soal Analisis]
-    3. [Soal High Order Thinking Skill (HOTS) / Studi Kasus]
-    4. [Soal Kreativitas/Proyek Kecil]
+    ## 📝 TANTANGAN MINIMU (LATIHAN) - WAJIB MUNCUL
+    *(Berikan tepat 5 soal latihan bervariasi).*
+    1. [Soal C1 - Pemahaman Dasar]
+    2. [Soal C2 - Penerapan]
+    3. [Soal C4 - Analisis (HOTS)]
+    4. [Soal C5 - Evaluasi/Kreativitas]
+    5. [Soal Refleksi Diri]
 
     ---
 
-    ## 📖 KAMUS MINI (GLOSARIUM)
+    ## 📖 KAMUS MINI (GLOSARIUM) - WAJIB MUNCUL
+    *(Berikan minimal 5-10 istilah penting yang muncul dalam materi).*
     - **[Istilah]**: [Penjelasan singkat dan jelas]
     - **[Istilah]**: [Penjelasan singkat dan jelas]
+    - (Lanjutkan hingga minimal 5 istilah)
     
     ---
     *Disusun dengan semangat belajar oleh ${data.teacherTitle} ${data.teacherName}*
     
-    **INSTRUKSI TAMBAHAN:**
-    - Gunakan bahasa Markdown yang kaya (tabel, blockquote, list).
-    - **PENTING: KEDALAMAN MATERI**. Jangan pelit kalimat. Penjelasan harus mengalir (narrative) dan sangat mendatail. Target panjang konten adalah **1500-3000 kata**.
-    - Pastikan materinya **AKURASI TINGGI**, **MENDALAM**, patuh pada Capaian Pembelajaran (CP) **BSKAP No. 046/H/KR/2025**, dan merujuk pada buku resmi **Kemendikdasmen**.
-    - Output harus **langsung dalam format Markdown** tanpa komentar pembuka atau penutup dari asisten.
+    **SIKAP KERJA & VERIFIKASI AKHIR (WAJIB):**
+    1. **KOMPLITNYA STRUKTUR**: Jangan berhenti sebelum bagian "KAMUS MINI" selesai ditulis. Jika materi inti terlalu panjang, ringkas sedikit agar semua bagian (Apersepsi hingga Kamus Mini) MUNCUL UTUH.
+    2. **KEDALAMAN MATERI**: Penjelasan harus mengalir (narrative) dan sangat mendetail.
+    3. **AKURASI**: Patuh pada CP BSKAP No. 046/H/KR/2025 dan buku resmi Kemendikdasmen.
+    4. **FORMAT**: Langsung format Markdown tanpa komentar basa-basi.
   `;
 
   try {
@@ -2194,8 +2253,12 @@ export async function generateATP(data) {
   const level = getLevel(data.gradeLevel);
   const levelData = BSKAP_DATA.subjects[level];
   const gradeData = levelData?.[data.gradeLevel];
-  const subjectData = (gradeData && gradeData[getSubjectKey(subject)])
-    || levelData?.[getSubjectKey(subject)];
+  const subjectKey = getSubjectKey(subject);
+  const subjectData = (gradeData && gradeData[subjectKey])
+    || levelData?.[subjectKey];
+
+  const verbatimEntry = VERBATIM_BSKAP_DATA.subjects?.[level]?.[data.gradeLevel]?.[subjectKey] || {};
+  const cpFullVerbatim = verbatimEntry.cp_full || "Lihat list elemen dan materi.";
 
   const prompt = `
     Anda adalah **Sistem Pakar Kurikulum Nasional & Auditor Administrasi Guru** dari Kemendikdasmen RI yang sangat canggih.
@@ -2207,6 +2270,19 @@ export async function generateATP(data) {
     - Fokus Fase: **${BSKAP_DATA.standards.semester_logic[getSemesterKey(semester)].focus}**
     - Peta Elemen Resmi: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.elemen || [])}
     - **LINGKUP MATERI RESMI (MANDATORY)**: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.materi_inti || [])}
+    
+    **SMART CP FOR ATP CONTEXT (BSKAP 46/2025 COMPLIANCE):**
+    Berikut adalah CP LENGKAP untuk referensi konteks: 
+    ${cpFullVerbatim}
+    
+    INSTRUKSI: CP di atas adalah referensi umum untuk Fase ini. Saat menyusun TP (Tujuan Pembelajaran) untuk setiap baris ATP:
+    - Pastikan TP turunan dari CP yang relevan dengan elemen/materi di baris tersebut
+    - Gunakan exact text dari CP saat diperlukan (verbatim, NO paraphrase)
+    
+    **FORMAT CP DI ATP (MANDATORY):**
+    - Jika mengutip CP, HAPUS nomor elemen (mis. "2.1.", "2.2.")
+    - Gunakan format narasi natural: "Pada akhir Fase [X], peserta didik mampu..."
+    - Gabungkan elemen terkait menjadi satu paragraf yang koheren
     
     **🚨 CRITICAL SEMESTER CONSTRAINT (ABSOLUTE RULE):**
     ✅ **ANDA HANYA BOLEH** menggunakan elemen dari: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.elemen || [])}
@@ -2287,6 +2363,7 @@ export async function generateATP(data) {
     - "🚨 Apakah saya TIDAK menggunakan materi dari semester ${getSemesterLabel(semester) === 'Ganjil' ? 'Genap' : 'Ganjil'}?"
     - "📚 CRITICAL: Apakah SETIAP materi yang saya pilih SESUAI dengan urutan topik/bab di Buku Teks ${data.subject} Kelas ${data.gradeLevel} Kemendikdasmen / Kemendikbudristek?"
     - "📚 CRITICAL: Apakah saya TIDAK mengambil topik yang seharusnya ada di Buku Kelas ${parseInt(data.gradeLevel) - 1} atau Kelas ${parseInt(data.gradeLevel) + 1}?"
+    - "UNIQUE TITLES: Apakah setiap materi memiliki judul yang unik dan mendalam (Deep Learning)?"
     `;
 
   try {

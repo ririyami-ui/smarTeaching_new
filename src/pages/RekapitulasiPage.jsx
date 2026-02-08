@@ -155,25 +155,29 @@ const RekapitulasiPage = () => {
         const classObj = classes.find(c => c.id === classToFetchId);
         const rombelName = classObj?.rombel || classToFetchId;
 
-        const studentsQuery = query(
+        const studentsByClassIdQuery = query(
           collection(db, 'students'),
           where('userId', '==', auth.currentUser.uid),
           where('classId', '==', classToFetchId)
         );
-        const studentsSnapshot = await getDocs(studentsQuery);
-        let fetchedStudents = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const studentsByRombelQuery = query(
+          collection(db, 'students'),
+          where('userId', '==', auth.currentUser.uid),
+          where('rombel', '==', rombelName)
+        );
 
-        // Fallback for legacy students without classId
-        if (fetchedStudents.length === 0) {
-          const legacyQuery = query(
-            collection(db, 'students'),
-            where('userId', '==', auth.currentUser.uid),
-            where('rombel', '==', rombelName)
-          );
-          const legacySnapshot = await getDocs(legacyQuery);
-          fetchedStudents = legacySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        }
+        const [snapId, snapRombel] = await Promise.all([
+          getDocs(studentsByClassIdQuery),
+          getDocs(studentsByRombelQuery)
+        ]);
 
+        const studentMap = new Map();
+        snapId.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
+        snapRombel.docs.forEach(doc => {
+          if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
+        });
+
+        const fetchedStudents = Array.from(studentMap.values());
         setStudents(fetchedStudents.sort((a, b) => a.name.localeCompare(b.name)));
       } else {
         setStudents([]);
@@ -197,27 +201,33 @@ const RekapitulasiPage = () => {
       const classObj = classes.find(c => c.id === selectedClass);
       const rombelName = classObj?.rombel || selectedClass;
 
-      const attendanceQuery = query(
+      const attendanceByClassIdQuery = query(
         collection(db, 'attendance'),
         where('userId', '==', auth.currentUser.uid),
         where('classId', '==', selectedClass),
         where('date', '>=', startDate),
         where('date', '<=', endDate)
       );
-      let querySnapshot = await getDocs(attendanceQuery);
+      const attendanceByRombelQuery = query(
+        collection(db, 'attendance'),
+        where('userId', '==', auth.currentUser.uid),
+        where('rombel', '==', rombelName),
+        where('date', '>=', startDate),
+        where('date', '<=', endDate)
+      );
 
-      // Fallback for legacy attendance without classId
-      if (querySnapshot.empty) {
-        const legacyQuery = query(
-          collection(db, 'attendance'),
-          where('userId', '==', auth.currentUser.uid),
-          where('rombel', '==', rombelName),
-          where('date', '>=', startDate),
-          where('date', '<=', endDate)
-        );
-        querySnapshot = await getDocs(legacyQuery);
-      }
-      const rawDocs = querySnapshot.docs.map(doc => doc.data());
+      const [snapAttId, snapAttRombel] = await Promise.all([
+        getDocs(attendanceByClassIdQuery),
+        getDocs(attendanceByRombelQuery)
+      ]);
+
+      const attendanceMap = new Map();
+      snapAttId.docs.forEach(doc => attendanceMap.set(doc.id, doc.data()));
+      snapAttRombel.docs.forEach(doc => {
+        if (!attendanceMap.has(doc.id)) attendanceMap.set(doc.id, doc.data());
+      });
+
+      const rawDocs = Array.from(attendanceMap.values());
       let summary = {};
       students.forEach(student => {
         summary[student.id] = { absen: student.absen, nis: student.nis, name: student.name, Hadir: 0, Sakit: 0, Ijin: 0, Alpha: 0 };
@@ -408,24 +418,31 @@ const RekapitulasiPage = () => {
         alert('Kelas atau mata pelajaran tidak ditemukan.');
         return;
       }
-      const studentsQuery = query(
+      const studentsByClassIdQuery = query(
         collection(db, 'students'),
         where('userId', '==', auth.currentUser.uid),
         where('classId', '==', selectedNilaiClass)
       );
-      let studentsSnapshot = await getDocs(studentsQuery);
+      const studentsByRombelQuery = query(
+        collection(db, 'students'),
+        where('userId', '==', auth.currentUser.uid),
+        where('rombel', '==', selectedClassObj.rombel)
+      );
 
-      // Fallback for legacy students without classId
-      if (studentsSnapshot.empty) {
-        const legacyStudentsQuery = query(
-          collection(db, 'students'),
-          where('userId', '==', auth.currentUser.uid),
-          where('rombel', '==', selectedClassObj.rombel)
-        );
-        studentsSnapshot = await getDocs(legacyStudentsQuery);
-      }
-      const fetchedStudents = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const gradesQuery = query(
+      const [snapSId, snapSRombel] = await Promise.all([
+        getDocs(studentsByClassIdQuery),
+        getDocs(studentsByRombelQuery)
+      ]);
+
+      const studentMap = new Map();
+      snapSId.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
+      snapSRombel.docs.forEach(doc => {
+        if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
+      });
+
+      const fetchedStudents = Array.from(studentMap.values());
+
+      const gradesByClassIdQuery = query(
         collection(db, 'grades'),
         where('userId', '==', auth.currentUser.uid),
         where('classId', '==', selectedClassObj.id),
@@ -433,21 +450,27 @@ const RekapitulasiPage = () => {
         where('date', '>=', nilaiStartDate),
         where('date', '<=', nilaiEndDate)
       );
-      let querySnapshot = await getDocs(gradesQuery);
+      const gradesByRombelQuery = query(
+        collection(db, 'grades'),
+        where('userId', '==', auth.currentUser.uid),
+        where('className', '==', selectedClassObj.rombel),
+        where('subjectName', '==', selectedSubjectObj.name),
+        where('date', '>=', nilaiStartDate),
+        where('date', '<=', nilaiEndDate)
+      );
 
-      // Fallback for legacy grades without classId/subjectId
-      if (querySnapshot.empty) {
-        const legacyGradesQuery = query(
-          collection(db, 'grades'),
-          where('userId', '==', auth.currentUser.uid),
-          where('className', '==', selectedClassObj.rombel),
-          where('subjectName', '==', selectedSubjectObj.name),
-          where('date', '>=', nilaiStartDate),
-          where('date', '<=', nilaiEndDate)
-        );
-        querySnapshot = await getDocs(legacyGradesQuery);
-      }
-      const rawGrades = querySnapshot.docs.map(doc => doc.data());
+      const [snapGId, snapGRombel] = await Promise.all([
+        getDocs(gradesByClassIdQuery),
+        getDocs(gradesByRombelQuery)
+      ]);
+
+      const gradeMap = new Map();
+      snapGId.docs.forEach(doc => gradeMap.set(doc.id, doc.data()));
+      snapGRombel.docs.forEach(doc => {
+        if (!gradeMap.has(doc.id)) gradeMap.set(doc.id, doc.data());
+      });
+
+      const rawGrades = Array.from(gradeMap.values());
       const recapitulation = {};
       fetchedStudents.forEach(student => {
         recapitulation[student.id] = {
@@ -613,48 +636,60 @@ const RekapitulasiPage = () => {
         return;
       }
 
-      const studentsQuery = query(
+      const studentsByClassIdQuery = query(
         collection(db, 'students'),
         where('userId', '==', auth.currentUser.uid),
         where('classId', '==', selectedViolationClass)
       );
-      let studentsSnapshot = await getDocs(studentsQuery);
+      const studentsByRombelQuery = query(
+        collection(db, 'students'),
+        where('userId', '==', auth.currentUser.uid),
+        where('rombel', '==', selectedClassObj.rombel)
+      );
 
-      // Fallback for legacy students without classId
-      if (studentsSnapshot.empty) {
-        const legacyStudentsQuery = query(
-          collection(db, 'students'),
-          where('userId', '==', auth.currentUser.uid),
-          where('rombel', '==', selectedClassObj.rombel)
-        );
-        studentsSnapshot = await getDocs(legacyStudentsQuery);
-      }
-      const fetchedStudents = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const [snapSId, snapSRombel] = await Promise.all([
+        getDocs(studentsByClassIdQuery),
+        getDocs(studentsByRombelQuery)
+      ]);
+
+      const studentMap = new Map();
+      snapSId.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
+      snapSRombel.docs.forEach(doc => {
+        if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
+      });
+
+      const fetchedStudents = Array.from(studentMap.values());
 
       const endOfDay = new Date(violationEndDate);
       endOfDay.setHours(23, 59, 59, 999);
 
-      const violationsQuery = query(
+      const violationsByClassIdQuery = query(
         collection(db, 'infractions'),
         where('userId', '==', auth.currentUser.uid),
         where('classId', '==', selectedViolationClass),
         where('date', '>=', new Date(violationStartDate).toISOString()),
         where('date', '<=', endOfDay.toISOString())
       );
-      let violationsSnapshot = await getDocs(violationsQuery);
+      const violationsByRombelQuery = query(
+        collection(db, 'infractions'),
+        where('userId', '==', auth.currentUser.uid),
+        where('classId', '==', selectedClassObj.rombel),
+        where('date', '>=', new Date(violationStartDate).toISOString()),
+        where('date', '<=', endOfDay.toISOString())
+      );
 
-      // Fallback for legacy infractions without classId (if classId used to be rombel)
-      if (violationsSnapshot.empty) {
-        const legacyViolationsQuery = query(
-          collection(db, 'infractions'),
-          where('userId', '==', auth.currentUser.uid),
-          where('classId', '==', selectedClassObj.rombel),
-          where('date', '>=', new Date(violationStartDate).toISOString()),
-          where('date', '<=', endOfDay.toISOString())
-        );
-        violationsSnapshot = await getDocs(legacyViolationsQuery);
-      }
-      const rawViolations = violationsSnapshot.docs.map(doc => doc.data());
+      const [snapVId, snapVRombel] = await Promise.all([
+        getDocs(violationsByClassIdQuery),
+        getDocs(violationsByRombelQuery)
+      ]);
+
+      const violationMap = new Map();
+      snapVId.docs.forEach(doc => violationMap.set(doc.id, doc.data()));
+      snapVRombel.docs.forEach(doc => {
+        if (!violationMap.has(doc.id)) violationMap.set(doc.id, doc.data());
+      });
+
+      const rawViolations = Array.from(violationMap.values());
 
       const studentViolationSummary = {};
       fetchedStudents.forEach(student => {

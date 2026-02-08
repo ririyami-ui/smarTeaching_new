@@ -159,13 +159,29 @@ const PenilaianKktpPage = () => {
                 return;
             }
 
-            const studentQuery = query(
+            const qByClassId = query(
+                collection(db, 'students'),
+                where('userId', '==', auth.currentUser.uid),
+                where('classId', '==', selectedClass)
+            );
+            const qByRombel = query(
                 collection(db, 'students'),
                 where('userId', '==', auth.currentUser.uid),
                 where('rombel', '==', rombelName)
             );
-            const studentSnap = await getDocs(studentQuery);
-            const studentData = studentSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            const [snapId, snapRombel] = await Promise.all([
+                getDocs(qByClassId),
+                getDocs(qByRombel)
+            ]);
+
+            const studentMap = new Map();
+            snapId.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
+            snapRombel.docs.forEach(doc => {
+                if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
+            });
+
+            const studentData = Array.from(studentMap.values());
 
             // Sort in memory by name
             studentData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));

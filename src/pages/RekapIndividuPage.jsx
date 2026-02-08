@@ -211,13 +211,32 @@ const RekapIndividuPage = () => {
             }
             setIsFetchingStudents(true);
             try {
-                const q = query(
+                const targetClass = classes.find(c => c.rombel === selectedClass);
+                const classToFetchId = targetClass?.id || selectedClass;
+
+                const qByRombel = query(
                     collection(db, 'students'),
                     where('userId', '==', currentUser.uid),
                     where('rombel', '==', selectedClass)
                 );
-                const querySnapshot = await getDocs(q);
-                const studentList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const qByClassId = query(
+                    collection(db, 'students'),
+                    where('userId', '==', currentUser.uid),
+                    where('classId', '==', classToFetchId)
+                );
+
+                const [snapRombel, snapClassId] = await Promise.all([
+                    getDocs(qByRombel),
+                    getDocs(qByClassId)
+                ]);
+
+                const studentMap = new Map();
+                snapRombel.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
+                snapClassId.docs.forEach(doc => {
+                    if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
+                });
+
+                const studentList = Array.from(studentMap.values());
                 // Sort by name in memory
                 setStudents(studentList.sort((a, b) => a.name.localeCompare(b.name)));
             } catch (err) {

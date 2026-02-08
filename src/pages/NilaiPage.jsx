@@ -133,26 +133,33 @@ export default function NilaiPage() {
     try {
       const classObj = classes.find(c => c.id === selectedClass);
 
-      let studentsQuery = query(
+      // Fetch students by both classId and rombel simultaneously to ensure inclusive list
+      const studentsByClassIdQuery = query(
         studentsCollectionRef,
         where('userId', '==', auth.currentUser.uid),
-        where('classId', '==', selectedClass),
-        orderBy('name', 'asc')
+        where('classId', '==', selectedClass)
       );
-      let studentsData = await getDocs(studentsQuery);
 
-      // Fallback for legacy students (using rombel name)
-      if (studentsData.empty && classObj) {
-        studentsQuery = query(
-          studentsCollectionRef,
-          where('userId', '==', auth.currentUser.uid),
-          where('rombel', '==', classObj.rombel),
-          orderBy('name', 'asc')
-        );
-        studentsData = await getDocs(studentsQuery);
-      }
+      const studentsByRombelQuery = query(
+        studentsCollectionRef,
+        where('userId', '==', auth.currentUser.uid),
+        where('rombel', '==', classObj?.rombel || '')
+      );
 
-      const fetchedStudents = studentsData.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const [snapshotClassId, snapshotRombel] = await Promise.all([
+        getDocs(studentsByClassIdQuery),
+        getDocs(studentsByRombelQuery)
+      ]);
+
+      const studentMap = new Map();
+      snapshotClassId.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
+      snapshotRombel.docs.forEach(doc => {
+        if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
+      });
+
+      const fetchedStudents = Array.from(studentMap.values()).sort((a, b) =>
+        (a.name || '').localeCompare(b.name || '')
+      );
       setStudents(fetchedStudents);
       const initialGrades = {};
       fetchedStudents.forEach(student => {
@@ -278,26 +285,32 @@ export default function NilaiPage() {
         fetchedGradesData[data.studentId] = data.score;
       });
 
-      let allStudentsInClassQuery = query(
+      const studentsByClassIdQuery = query(
         studentsCollectionRef,
         where('userId', '==', auth.currentUser.uid),
-        where('classId', '==', editSelectedClass),
-        orderBy('name', 'asc')
+        where('classId', '==', editSelectedClass)
       );
-      let allStudentsInClassSnapshot = await getDocs(allStudentsInClassQuery);
 
-      // Fallback for legacy students in class
-      if (allStudentsInClassSnapshot.empty && classObj) {
-        allStudentsInClassQuery = query(
-          studentsCollectionRef,
-          where('userId', '==', auth.currentUser.uid),
-          where('rombel', '==', classObj.rombel),
-          orderBy('name', 'asc')
-        );
-        allStudentsInClassSnapshot = await getDocs(allStudentsInClassQuery);
-      }
+      const studentsByRombelQuery = query(
+        studentsCollectionRef,
+        where('userId', '==', auth.currentUser.uid),
+        where('rombel', '==', classObj?.rombel || '')
+      );
 
-      const allStudentsInClass = allStudentsInClassSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const [snapshotClassId, snapshotRombel] = await Promise.all([
+        getDocs(studentsByClassIdQuery),
+        getDocs(studentsByRombelQuery)
+      ]);
+
+      const studentMap = new Map();
+      snapshotClassId.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
+      snapshotRombel.docs.forEach(doc => {
+        if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
+      });
+
+      const allStudentsInClass = Array.from(studentMap.values()).sort((a, b) =>
+        (a.name || '').localeCompare(b.name || '')
+      );
       const finalStudents = allStudentsInClass.map(student => ({
         ...student,
         score: fetchedGradesData[student.id] !== undefined ? fetchedGradesData[student.id] : 0

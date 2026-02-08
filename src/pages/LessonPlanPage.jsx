@@ -82,6 +82,17 @@ const LessonPlanPage = () => {
     const [viewingRPP, setViewingRPP] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+    const [generationProgress, setGenerationProgress] = useState('');
+    const [generationStep, setGenerationStep] = useState(0);
+    const progressSteps = [
+        "Menganalisis Kurikulum BSKP 046/2025...",
+        "Menyinkronkan Materi dengan CP & TP...",
+        "Menyusun Identitas Modul & Sarana Prasarana...",
+        "Merancang Langkah Pembelajaran (Mindful, Meaningful, Joyful)...",
+        "Menyusun Instrumen Asesmen (Diagnostik, Formatif, Sumatif)...",
+        "Finalisasi LKPD & Materi Ajar Mendetail...",
+        "Melakukan Kontrol Kualitas & Standarisasi..."
+    ];
 
     const [manualKd, setManualKd] = useState('');
     const [manualMateri, setManualMateri] = useState('');
@@ -341,7 +352,18 @@ const LessonPlanPage = () => {
         }
 
         setIsGenerating(true);
+        setGenerationStep(0);
+        setGenerationProgress(progressSteps[0]);
         setViewingRPP(null);
+
+        // Simulation Interval for smoother UX
+        const stepInterval = setInterval(() => {
+            setGenerationStep(prev => {
+                if (prev < progressSteps.length - 1) return prev + 1;
+                return prev;
+            });
+        }, 3500);
+
         try {
             const subjectData = subjects.find(s => s.id === selectedSubject);
             const subjectName = subjectData?.name || selectedSubject;
@@ -365,7 +387,11 @@ const LessonPlanPage = () => {
                 modelName: geminiModel,
                 sourceType: sourceType, // Pass sourceType to AI
                 elemen: selectedMaterial.elemen || '',
-                profilLulusan: selectedMaterial.profilLulusan || '' // Pass ATP's Profil Lulusan
+                profilLulusan: selectedMaterial.profilLulusan || '', // Pass ATP's Profil Lulusan
+                onProgress: (msg) => {
+                    // Do not override simulation unless specific
+                    console.log("AI Internal Progress:", msg);
+                }
             });
             const cleanResult = result.replace(/\|\|/g, '');
             setGeneratedRPP(cleanResult);
@@ -373,9 +399,17 @@ const LessonPlanPage = () => {
         } catch (error) {
             toast.error(error.message);
         } finally {
+            clearInterval(stepInterval);
             setIsGenerating(false);
         }
     };
+
+    // Effect to update labels based on step
+    useEffect(() => {
+        if (isGenerating) {
+            setGenerationProgress(progressSteps[generationStep]);
+        }
+    }, [generationStep, isGenerating]);
 
     const handleSave = async () => {
         if (!generatedRPP) return;
@@ -777,15 +811,57 @@ const LessonPlanPage = () => {
                 {/* Display Area */}
                 <div className="lg:col-span-3 flex flex-col h-[600px] lg:h-auto print:h-auto print:block print:w-full">
                     {isGenerating ? (
-                        <div className="bg-white dark:bg-gray-800 rounded-3xl p-12 shadow-xl border border-dashed border-blue-200 dark:border-blue-900 flex flex-col items-center justify-center space-y-4">
-                            <div className="relative">
-                                <Loader2 className="animate-spin text-blue-500" size={64} />
-                                <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-yellow-400" size={24} />
+                        <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 lg:p-12 shadow-xl border-2 border-dashed border-blue-200 dark:border-blue-900 flex flex-col items-center justify-center space-y-6 min-h-[500px] relative overflow-hidden">
+                            {/* Decorative Background Circles */}
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-full -mr-16 -mt-16 blur-3xl animate-pulse" />
+                            <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-50 dark:bg-purple-900/20 rounded-full -ml-16 -mb-16 blur-3xl animate-pulse" />
+
+                            <div className="relative z-10">
+                                <div className="p-6 bg-blue-50 dark:bg-blue-900/30 rounded-full relative">
+                                    <Loader2 className="animate-spin text-blue-500" size={80} strokeWidth={1} />
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg">
+                                        <Sparkles className="text-blue-600 animate-bounce" size={32} />
+                                    </div>
+                                </div>
                             </div>
-                            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Kecerdasan Buatan Sedang Menulis...</h2>
-                            <p className="text-gray-500 text-center max-w-sm">Mohon tunggu sebentar, AI sedang menyusun langkah-langkah pembelajaran yang kreatif untuk Anda.</p>
+
+                            <div className="text-center space-y-2 z-10 w-full max-w-md">
+                                <h2 className="text-xl lg:text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">
+                                    Membangun RPP Masa Depan
+                                </h2>
+                                <div className="space-y-4">
+                                    <p className="text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/40 px-6 py-2.5 rounded-2xl border border-blue-100 dark:border-blue-800 animate-pulse text-sm lg:text-base">
+                                        {generationProgress}
+                                    </p>
+
+                                    {/* Progress Step Indicator */}
+                                    <div className="flex justify-center gap-1.5 pt-2">
+                                        {progressSteps.map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className={`h-1.5 rounded-full transition-all duration-500 ${i === generationStep ? 'w-8 bg-blue-600' : i < generationStep ? 'w-3 bg-blue-300' : 'w-1.5 bg-gray-200 dark:bg-gray-700'}`}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 w-full max-w-sm z-10 pt-4">
+                                <div className="bg-gray-50 dark:bg-gray-900/40 p-3 rounded-2xl border dark:border-gray-700 flex items-center gap-3">
+                                    <div className="text-xs font-bold text-gray-400">STATUS</div>
+                                    <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest animate-pulse">Processing</div>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-900/40 p-3 rounded-2xl border dark:border-gray-700 flex items-center gap-3">
+                                    <div className="text-xs font-bold text-gray-400">ALREADY</div>
+                                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{Math.round(((generationStep + 1) / progressSteps.length) * 100)}%</div>
+                                </div>
+                            </div>
+
+                            <p className="text-gray-400 text-xs text-center max-w-xs z-10 leading-relaxed italic">
+                                "Guru yang baik memberikan sesuatu yang bisa dipikirkan oleh siswa di rumah." - Smart Teaching AI
+                            </p>
                         </div>
-                    ) : generatedRPP || viewingRPP ? (
+                    ) : (generatedRPP || viewingRPP) ? (
                         <div id="printable-area" className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full print:m-0 print:p-0 print:block print:h-auto print:shadow-none print:border-none">
                             <div className="p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center no-print sticky top-0 z-20">
                                 <div className="flex items-center gap-3">

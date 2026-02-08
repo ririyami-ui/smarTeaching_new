@@ -107,23 +107,30 @@ const AnalisisKelasPage = () => {
         return;
       }
 
-      // 1. Fetch students in the class
-      const studentsQuery = query(
+      // 1. Fetch students in the class (Inclusive search)
+      const studentsByClassIdQuery = query(
         collection(db, 'students'),
         where('userId', '==', currentUser.uid),
         where('classId', '==', classId)
       );
-      let studentsSnapshot = await getDocs(studentsQuery);
+      const studentsByRombelQuery = query(
+        collection(db, 'students'),
+        where('userId', '==', currentUser.uid),
+        where('rombel', '==', classInfo.rombel)
+      );
 
-      if (studentsSnapshot.empty) {
-        const fallbackStudentsQuery = query(
-          collection(db, 'students'),
-          where('userId', '==', currentUser.uid),
-          where('rombel', '==', classInfo.rombel)
-        );
-        studentsSnapshot = await getDocs(fallbackStudentsQuery);
-      }
-      const students = studentsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      const [snapStudentsId, snapStudentsRombel] = await Promise.all([
+        getDocs(studentsByClassIdQuery),
+        getDocs(studentsByRombelQuery)
+      ]);
+
+      const studentMap = new Map();
+      snapStudentsId.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
+      snapStudentsRombel.docs.forEach(doc => {
+        if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
+      });
+
+      const students = Array.from(studentMap.values());
 
       if (students.length === 0) {
         setReport("⚠️ **Daftar Siswa Kosong.** Tidak ada siswa yang ditemukan di kelas ini. Silakan input data siswa di menu Master Data terlebih dahulu.");
@@ -143,29 +150,34 @@ const AnalisisKelasPage = () => {
         return acc;
       }, {});
 
-      // 2. Fetch grades
-      const gradesQuery = query(
+      // 2. Fetch grades (Inclusive search)
+      const gradesByClassIdQuery = query(
         collection(db, 'grades'),
         where('userId', '==', currentUser.uid),
         where('classId', '==', classId),
         where('semester', '==', activeSemester),
         where('academicYear', '==', academicYear)
       );
-      let gradesSnapshot = await getDocs(gradesQuery);
+      const gradesByRombelQuery = query(
+        collection(db, 'grades'),
+        where('userId', '==', currentUser.uid),
+        where('rombel', '==', classInfo.rombel),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear)
+      );
 
-      if (gradesSnapshot.empty) {
-        const fallbackGradesQuery = query(
-          collection(db, 'grades'),
-          where('userId', '==', currentUser.uid),
-          where('rombel', '==', classInfo.rombel),
-          where('semester', '==', activeSemester),
-          where('academicYear', '==', academicYear)
-        );
-        gradesSnapshot = await getDocs(fallbackGradesQuery);
-      }
+      const [snapGradesId, snapGradesRombel] = await Promise.all([
+        getDocs(gradesByClassIdQuery),
+        getDocs(gradesByRombelQuery)
+      ]);
 
-      const grades = gradesSnapshot.docs.map(d => {
-        const grade = d.data();
+      const gradeMap = new Map();
+      snapGradesId.docs.forEach(doc => gradeMap.set(doc.id, doc.data()));
+      snapGradesRombel.docs.forEach(doc => {
+        if (!gradeMap.has(doc.id)) gradeMap.set(doc.id, doc.data());
+      });
+
+      const grades = Array.from(gradeMap.values()).map(grade => {
         const resolvedSubjectName = grade.subjectName || subjectIdToNameMap[grade.subjectId] || 'Mata Pelajaran';
         return {
           ...grade,
@@ -174,77 +186,96 @@ const AnalisisKelasPage = () => {
         };
       }).sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
 
-      // 3. Fetch attendance
-      const attendanceQuery = query(
+      // 3. Fetch attendance (Inclusive search)
+      const attendByClassIdQuery = query(
         collection(db, 'attendance'),
         where('userId', '==', currentUser.uid),
         where('classId', '==', classId),
         where('semester', '==', activeSemester),
         where('academicYear', '==', academicYear)
       );
-      let attendanceSnapshot = await getDocs(attendanceQuery);
+      const attendByRombelQuery = query(
+        collection(db, 'attendance'),
+        where('userId', '==', currentUser.uid),
+        where('rombel', '==', classInfo.rombel),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear)
+      );
 
-      if (attendanceSnapshot.empty) {
-        const fallbackAttendanceQuery = query(
-          collection(db, 'attendance'),
-          where('userId', '==', currentUser.uid),
-          where('rombel', '==', classInfo.rombel),
-          where('semester', '==', activeSemester),
-          where('academicYear', '==', academicYear)
-        );
-        attendanceSnapshot = await getDocs(fallbackAttendanceQuery);
-      }
-      const attendance = attendanceSnapshot.docs.map(d => {
-        const att = d.data();
+      const [snapAttendId, snapAttendRombel] = await Promise.all([
+        getDocs(attendByClassIdQuery),
+        getDocs(attendByRombelQuery)
+      ]);
+
+      const attendMap = new Map();
+      snapAttendId.docs.forEach(doc => attendMap.set(doc.id, doc.data()));
+      snapAttendRombel.docs.forEach(doc => {
+        if (!attendMap.has(doc.id)) attendMap.set(doc.id, doc.data());
+      });
+
+      const attendance = Array.from(attendMap.values()).map(att => {
         return { ...att, studentName: studentIdToNameMap[att.studentId] || 'Nama tidak ditemukan' };
       }).sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
 
-      // 4. Fetch violations
-      const violationsQuery = query(
+      // 4. Fetch violations (Inclusive search)
+      const violIdQuery = query(
         collection(db, 'infractions'),
         where('userId', '==', currentUser.uid),
         where('classId', '==', classId),
         where('semester', '==', activeSemester),
         where('academicYear', '==', academicYear)
       );
-      let violationsSnapshot = await getDocs(violationsQuery);
+      const violRombelQuery = query(
+        collection(db, 'infractions'),
+        where('userId', '==', currentUser.uid),
+        where('classId', '==', classInfo.rombel),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear)
+      );
 
-      if (violationsSnapshot.empty) {
-        const fallbackViolationsQuery = query(
-          collection(db, 'infractions'),
-          where('userId', '==', currentUser.uid),
-          where('classId', '==', classInfo.rombel),
-          where('semester', '==', activeSemester),
-          where('academicYear', '==', academicYear)
-        );
-        violationsSnapshot = await getDocs(fallbackViolationsQuery);
-      }
-      const infractions = violationsSnapshot.docs.map(d => {
-        const infraction = d.data();
+      const [snapViolId, snapViolRombel] = await Promise.all([
+        getDocs(violIdQuery),
+        getDocs(violRombelQuery)
+      ]);
+
+      const violMap = new Map();
+      snapViolId.docs.forEach(doc => violMap.set(doc.id, doc.data()));
+      snapViolRombel.docs.forEach(doc => {
+        if (!violMap.has(doc.id)) violMap.set(doc.id, doc.data());
+      });
+
+      const infractions = Array.from(violMap.values()).map(infraction => {
         return { ...infraction, studentName: studentIdToNameMap[infraction.studentId] || 'Nama tidak ditemukan' };
       }).sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
 
-      // 5. Fetch journals
-      const journalsQuery = query(
+      // 5. Fetch journals (Inclusive search)
+      const journIdQuery = query(
         collection(db, 'teachingJournals'),
         where('userId', '==', currentUser.uid),
         where('classId', '==', classId),
         where('semester', '==', activeSemester),
         where('academicYear', '==', academicYear)
       );
-      let journalsSnapshot = await getDocs(journalsQuery);
+      const journRombelQuery = query(
+        collection(db, 'teachingJournals'),
+        where('userId', '==', currentUser.uid),
+        where('rombel', '==', classInfo.rombel),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear)
+      );
 
-      if (journalsSnapshot.empty) {
-        const fallbackJournalsQuery = query(
-          collection(db, 'teachingJournals'),
-          where('userId', '==', currentUser.uid),
-          where('rombel', '==', classInfo.rombel),
-          where('semester', '==', activeSemester),
-          where('academicYear', '==', academicYear)
-        );
-        journalsSnapshot = await getDocs(fallbackJournalsQuery);
-      }
-      const journals = journalsSnapshot.docs.map(d => d.data()).sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+      const [snapJournId, snapJournRombel] = await Promise.all([
+        getDocs(journIdQuery),
+        getDocs(journRombelQuery)
+      ]);
+
+      const journMap = new Map();
+      snapJournId.docs.forEach(doc => journMap.set(doc.id, doc.data()));
+      snapJournRombel.docs.forEach(doc => {
+        if (!journMap.has(doc.id)) journMap.set(doc.id, doc.data());
+      });
+
+      const journals = Array.from(journMap.values()).sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
 
       // VALIDATION
       if (grades.length === 0 && attendance.length === 0 && infractions.length === 0 && journals.length === 0) {

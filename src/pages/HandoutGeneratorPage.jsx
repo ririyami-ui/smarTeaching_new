@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import mermaid from 'mermaid';
 import { db, auth } from '../firebase';
 import { doc, getDoc, collection, addDoc, deleteDoc, serverTimestamp, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth'; // Use native listener
@@ -22,6 +23,99 @@ const HandoutGeneratorPage = () => {
     const [user, setUser] = useState(auth.currentUser);
     const navigate = useNavigate();
     const [userProfile, setUserProfile] = useState(null);
+
+    // Initialize Mermaid locally
+    useEffect(() => {
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            securityLevel: 'loose',
+            themeVariables: {
+                primaryColor: '#6366f1', // Indigo 500
+                primaryTextColor: '#1e293b', // Slate 800
+                primaryBorderColor: '#4338ca', // Indigo 700
+                lineColor: '#94a3b8', // Slate 400
+                secondaryColor: '#f8fafc',
+                tertiaryColor: '#ffffff',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontSize: '16px',
+                mainBkg: '#ffffff',
+                nodeBorder: '#6366f1',
+                clusterBkg: '#f1f5f9',
+            },
+            flowchart: {
+                curve: 'basis',
+                padding: 40,
+                nodeSpacing: 80, // Increased from 40
+                rankSpacing: 80, // Increased from 40
+                useMaxWidth: true
+            }
+        });
+    }, []);
+
+    // Local Mermaid Renderer Component
+    const LocalMermaid = ({ content }) => {
+        const [svg, setSvg] = useState('');
+        const [error, setError] = useState(null);
+        const id = useRef(`mermaid-${Math.random().toString(36).substr(2, 9)}`).current;
+
+        useEffect(() => {
+            if (content) {
+                const renderDiagram = async () => {
+                    try {
+                        setError(null);
+                        const { svg } = await mermaid.render(id, content);
+                        setSvg(svg);
+                    } catch (err) {
+                        console.error("Mermaid error:", err);
+                        setError("Sintaks Mermaid tidak valid.");
+                    }
+                };
+                renderDiagram();
+            }
+        }, [content, id]);
+
+        const handleDownloadSVG = () => {
+            const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+            saveAs(blob, `diagram-${Date.now()}.svg`);
+            toast.success("Diagram berhasil diunduh (SVG)!");
+        };
+
+        if (error) {
+            return (
+                <div className="my-8 p-4 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 font-mono">
+                    ⚠️ {error}
+                </div>
+            );
+        }
+
+        return (
+            <div className="my-10 flex flex-col items-center group w-full">
+                <div
+                    className="relative bg-white p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] border border-blue-50/50 hover:shadow-[0_20px_60px_rgba(99,_102,_241,_0.12)] transition-all duration-500 w-full overflow-hidden flex justify-center items-center"
+                    dangerouslySetInnerHTML={{ __html: svg }}
+                />
+
+                <div className="flex gap-3 mt-6 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
+                    <div className="flex items-center gap-2 text-[10px] font-bold tracking-wider uppercase text-indigo-600 bg-indigo-50/50 px-4 py-2 rounded-full border border-indigo-100/50 backdrop-blur-sm">
+                        <Sparkles size={12} className="text-indigo-500" /> Desain Premium Otomatis
+                    </div>
+                    <button
+                        onClick={handleDownloadSVG}
+                        className="flex items-center gap-2 text-[10px] font-bold text-gray-600 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 shadow-sm transition-colors"
+                    >
+                        <Download size={12} /> Simpan SVG
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+    // ReactMarkdown code block component adaptation
+    const MermaidRenderer = ({ children }) => {
+        const code = String(children).replace(/\n$/, '');
+        return <LocalMermaid content={code} />;
+    };
 
     // Data Sources
     const [levels, setLevels] = useState([]);
@@ -208,34 +302,131 @@ const HandoutGeneratorPage = () => {
     const handleDownloadDocx = async () => {
         if (!generatedContent) return;
 
-        const contentHtml = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>
-                    body { font-family: 'Calibri', sans-serif; line-height: 1.5; }
-                    h1 { color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
-                    h2 { color: #1e40af; margin-top: 20px; }
-                    blockquote { background: #f3f4f6; border-left: 5px solid #2563eb; padding: 10px; margin: 10px 0; }
-                    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
-                    th, td { border: 1px solid #ddd; padding: 8px; }
-                    th { background-color: #f3f4f6; }
-                </style>
-            </head>
-            <body>
-                ${document.getElementById('handout-preview').innerHTML}
-            </body>
-            </html>
-        `;
+        toast.loading("Menyiapkan dokumen Word...", { id: 'word-export' });
 
         try {
+            // Clone the preview element to modify it for export
+            const previewEl = document.getElementById('handout-preview').cloneNode(true);
+            const originalSvgs = document.getElementById('handout-preview').querySelectorAll('svg');
+            const clonedSvgs = previewEl.querySelectorAll('svg');
+
+            // Convert each SVG to PNG for Word compatibility
+            for (let i = 0; i < clonedSvgs.length; i++) {
+                const svgNode = clonedSvgs[i];
+                const originalSvg = originalSvgs[i];
+
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // Ensure the SVG has the necessary namespaces for XMLSerializer
+                    const svgClone = originalSvg.cloneNode(true);
+                    if (!svgClone.getAttribute('xmlns')) {
+                        svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                    }
+
+                    // Remove potentially tainting external CSS/Fonts from the SVG clone
+                    const styles = svgClone.querySelectorAll('style');
+                    styles.forEach(style => {
+                        let css = style.textContent;
+                        // Strip @import and external font URLs
+                        css = css.replace(/@import\s+url\([^)]+\);/g, '');
+                        css = css.replace(/url\(['"]?http[^'"]+['"]?\)/g, 'none');
+                        style.textContent = css;
+                    });
+
+                    const svgData = new XMLSerializer().serializeToString(svgClone);
+                    // Use a data URL which is often more compatible for canvas drawing without tainting
+                    const url = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+
+                    const img = new Image();
+                    img.crossOrigin = "anonymous";
+
+                    await new Promise((resolve, reject) => {
+                        img.onload = () => {
+                            try {
+                                // High resolution for Word
+                                const scale = 2;
+                                canvas.width = (originalSvg.clientWidth || 800) * scale;
+                                canvas.height = (originalSvg.clientHeight || 600) * scale;
+
+                                ctx.fillStyle = 'white';
+                                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                                const pngUrl = canvas.toDataURL('image/png');
+
+                                const newImg = document.createElement('img');
+                                newImg.src = pngUrl;
+                                // Force width for Word compatibility
+                                newImg.style.width = '100%';
+                                newImg.style.maxWidth = '16cm'; // Standard A4 content width
+                                newImg.style.height = 'auto';
+                                newImg.style.display = 'block';
+                                newImg.style.margin = '20px auto';
+
+                                // Replace SVG with PNG Image
+                                svgNode.parentNode.replaceChild(newImg, svgNode);
+                                resolve();
+                            } catch (e) {
+                                console.error("Canvas toDataURL failed:", e);
+                                // Fallback: don't replace if it fails, just keep the SVG or log it
+                                resolve();
+                            }
+                        };
+                        img.onerror = (e) => {
+                            console.error("Image load error:", e);
+                            resolve(); // Resolve anyway to continue with other SVGs
+                        };
+                        img.src = url;
+                    });
+                } catch (err) {
+                    console.error("SVG conversion failed for item " + i, err);
+                }
+            }
+
+            // Cleanup: remove interactive UI elements like buttons
+            previewEl.querySelectorAll('button').forEach(btn => btn.remove());
+            previewEl.querySelectorAll('.opacity-0, .transition-all').forEach(el => {
+                if (el.classList.contains('opacity-0')) el.remove();
+            });
+
+            // Refine container styles for Word
+            previewEl.querySelectorAll('.my-10').forEach(div => {
+                div.style.margin = '20px 0';
+                div.style.textAlign = 'center';
+            });
+
+            const contentHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { font-family: 'Calibri', 'Arial', sans-serif; line-height: 1.6; color: #333; }
+                        h1 { color: #1e40af; border-bottom: 2px solid #1e40af; padding-bottom: 8px; margin-bottom: 20px; }
+                        h2 { color: #1e3a8a; margin-top: 30px; border-left: 5px solid #3b82f6; padding-left: 15px; }
+                        h3 { color: #1e40af; margin-top: 20px; }
+                        p { margin-bottom: 15px; text-align: justify; }
+                        blockquote { background: #f8fafc; border-left: 5px solid #6366f1; padding: 15px; margin: 20px 0; color: #475569; font-style: italic; }
+                        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+                        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
+                        th { background-color: #f1f5f9; font-weight: bold; color: #1e293b; }
+                        img { display: block; margin: 25px auto; max-width: 100%; height: auto; }
+                    </style>
+                </head>
+                <body>
+                    ${previewEl.innerHTML}
+                </body>
+                </html>
+            `;
+
             const blob = await asBlob(contentHtml);
             saveAs(blob, `Bahan Ajar - ${topic}.docx`);
-            toast.success("Dokumen Word berhasil diunduh");
+            toast.success("Dokumen Word berhasil diunduh", { id: 'word-export' });
         } catch (error) {
-            console.error(error);
-            toast.error("Gagal mengunduh dokumen");
+            console.error("Word export error:", error);
+            toast.error("Gagal mengunduh dokumen: " + error.message, { id: 'word-export' });
         }
     };
 
@@ -587,6 +778,18 @@ const HandoutGeneratorPage = () => {
                                     <ReactMarkdown
                                         remarkPlugins={[remarkGfm, remarkMath]}
                                         rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                        components={{
+                                            code({ node, inline, className, children, ...props }) {
+                                                const match = /language-mermaid/.exec(className || '');
+                                                return !inline && match ? (
+                                                    <MermaidRenderer>{children}</MermaidRenderer>
+                                                ) : (
+                                                    <code className={className} {...props}>
+                                                        {children}
+                                                    </code>
+                                                );
+                                            }
+                                        }}
                                     >
                                         {generatedContent}
                                     </ReactMarkdown>

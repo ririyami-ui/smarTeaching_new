@@ -121,68 +121,84 @@ const AbsensiPage = () => {
         }
 
         // ... existing code for fetching students and attendance ...
-        if (rombelName) {
-          console.log("Fetching students for rombel:", rombelName, "or classId:", foundActiveSchedule.classId);
-          let studentsQuery = query(
-            collection(db, 'students'),
-            where('userId', '==', userId),
-            where('classId', '==', foundActiveSchedule.classId || rombelName),
-            orderBy('absen')
-          );
-          let studentsSnapshot = await getDocs(studentsQuery);
+        // Fetch students using both classId and rombel simultaneously
+        console.log("Fetching students for rombel:", rombelName, "and/or classId:", foundActiveSchedule.classId);
 
-          // Fallback for students if first query is empty (check rombel field)
-          if (studentsSnapshot.empty) {
-            console.log("Fallback search for students using rombel name:", rombelName);
-            studentsQuery = query(
-              collection(db, 'students'),
-              where('userId', '==', userId),
-              where('rombel', '==', rombelName),
-              orderBy('absen')
-            );
-            studentsSnapshot = await getDocs(studentsQuery);
+        const studentsByClassIdQuery = query(
+          collection(db, 'students'),
+          where('userId', '==', userId),
+          where('classId', '==', foundActiveSchedule.classId || rombelName)
+        );
+
+        const studentsByRombelQuery = query(
+          collection(db, 'students'),
+          where('userId', '==', userId),
+          where('rombel', '==', rombelName)
+        );
+
+        const [snapshotByClassId, snapshotByRombel] = await Promise.all([
+          getDocs(studentsByClassIdQuery),
+          getDocs(studentsByRombelQuery)
+        ]);
+
+        // Merge results and remove duplicates based on student ID
+        const studentMap = new Map();
+
+        snapshotByClassId.docs.forEach(doc => {
+          studentMap.set(doc.id, { id: doc.id, ...doc.data() });
+        });
+
+        snapshotByRombel.docs.forEach(doc => {
+          if (!studentMap.has(doc.id)) {
+            studentMap.set(doc.id, { id: doc.id, ...doc.data() });
           }
-          const fetchedStudents = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setStudents(fetchedStudents);
-          console.log("Fetched Students:", fetchedStudents);
-          console.log("Number of students fetched:", fetchedStudents.length);
+        });
+
+        // Convert back to array and sort by 'absen'
+        const fetchedStudents = Array.from(studentMap.values()).sort((a, b) => {
+          const absenA = parseInt(a.absen) || 0;
+          const absenB = parseInt(b.absen) || 0;
+          return absenA - absenB;
+        });
+        setStudents(fetchedStudents);
+        console.log("Fetched Students:", fetchedStudents);
+        console.log("Number of students fetched:", fetchedStudents.length);
 
 
-          const existingAttendanceQuery = query(
-            collection(db, 'attendance'),
-            where('userId', '==', userId),
-            where('date', '==', attendanceDate),
-            where('classId', '==', foundActiveSchedule.classId || rombelName),
-            where('semester', '==', activeSemester),
-            where('academicYear', '==', academicYear)
-          );
-          const existingAttendanceSnapshot = await getDocs(existingAttendanceQuery);
-          const loadedAttendance = {};
-          existingAttendanceSnapshot.docs.forEach(doc => {
-            const data = doc.data();
-            loadedAttendance[data.studentId] = data.status;
+        const existingAttendanceQuery = query(
+          collection(db, 'attendance'),
+          where('userId', '==', userId),
+          where('date', '==', attendanceDate),
+          where('classId', '==', foundActiveSchedule.classId || rombelName),
+          where('semester', '==', activeSemester),
+          where('academicYear', '==', academicYear)
+        );
+        const existingAttendanceSnapshot = await getDocs(existingAttendanceQuery);
+        const loadedAttendance = {};
+        existingAttendanceSnapshot.docs.forEach(doc => {
+          const data = doc.data();
+          loadedAttendance[data.studentId] = data.status;
+        });
+
+        // FIXED: Only reset attendance if it's a DIFFERENT schedule or first load
+        // We check if the student list length is different or if the schedule ID changed
+        setAttendance(prev => {
+          // If we already have attendance data for these students, keep it.
+          // Only if it's a fresh load (empty prev) or different class logic would we want to reset?
+          // Actually, the best check is: if we are in the same schedule, DO NOT overwrite local state with DB state
+          // unless the DB state has "newer" info? But here local > DB until saved.
+          // So we effectively just initialize "Hadir" for keys that don't exist.
+
+          const newAttendance = { ...prev };
+          fetchedStudents.forEach(student => {
+            if (!newAttendance[student.id]) {
+              newAttendance[student.id] = loadedAttendance[student.id] || 'Hadir';
+            }
+            // If it exists in prev (local state), we KEEP it, ignoring loadedAttendance (server state)
+            // This acts as a "draft" mode.
           });
-
-          // FIXED: Only reset attendance if it's a DIFFERENT schedule or first load
-          // We check if the student list length is different or if the schedule ID changed
-          setAttendance(prev => {
-            // If we already have attendance data for these students, keep it.
-            // Only if it's a fresh load (empty prev) or different class logic would we want to reset?
-            // Actually, the best check is: if we are in the same schedule, DO NOT overwrite local state with DB state
-            // unless the DB state has "newer" info? But here local > DB until saved.
-            // So we effectively just initialize "Hadir" for keys that don't exist.
-
-            const newAttendance = { ...prev };
-            fetchedStudents.forEach(student => {
-              if (!newAttendance[student.id]) {
-                newAttendance[student.id] = loadedAttendance[student.id] || 'Hadir';
-              }
-              // If it exists in prev (local state), we KEEP it, ignoring loadedAttendance (server state)
-              // This acts as a "draft" mode.
-            });
-            return newAttendance;
-          });
-        }
+          return newAttendance;
+        });
       } else {
         setStudents([]);
         setAttendance({});
