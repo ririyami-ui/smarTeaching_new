@@ -16,7 +16,7 @@ import BarChart from '../components/BarChart';
 import EmptyState from '../components/EmptyState';
 import QuickDateFilter from '../components/QuickDateFilter';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { generateAttendanceRecapPDF, generateJurnalRecapPDF, generateNilaiRecapPDF, generateViolationRecapPDF } from '../utils/pdfGenerator';
+import { generateAttendanceRecapPDF, generateDetailedAttendanceRecapPDF, generateJurnalRecapPDF, generateNilaiRecapPDF, generateViolationRecapPDF } from '../utils/pdfGenerator';
 import { getAllGrades, getAllAttendance, getAllInfractions } from '../utils/analysis';
 
 const RekapitulasiPage = () => {
@@ -42,6 +42,7 @@ const RekapitulasiPage = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [attendanceData, setAttendanceData] = useState([]);
+  const [attendanceDates, setAttendanceDates] = useState([]); // New state for detailed report
   const [chartData, setChartData] = useState({ Hadir: 0, Sakit: 0, Ijin: 0, Alpha: 0 });
   const [numDays, setNumDays] = useState(0);
   const [dailyAttendanceData, setDailyAttendanceData] = useState([]);
@@ -235,12 +236,15 @@ const RekapitulasiPage = () => {
       rawDocs.forEach(record => {
         if (summary[record.studentId] && record.status) {
           summary[record.studentId][record.status]++;
+          // Store daily status for detailed report
+          summary[record.studentId][record.date] = record.status;
         }
       });
       // Calculate unique active school days from data
-      const uniqueDates = new Set(rawDocs.map(doc => doc.date));
-      const realSchoolDays = uniqueDates.size > 0 ? uniqueDates.size : dayDiff; // Fallback if no data, though if no data attendanceData is empty anyway.
+      const uniqueDates = Array.from(new Set(rawDocs.map(doc => doc.date))).sort();
+      const realSchoolDays = uniqueDates.length > 0 ? uniqueDates.length : dayDiff;
       setNumDays(realSchoolDays);
+      setAttendanceDates(uniqueDates); // Save dates for PDF export
 
       const tableData = Object.values(summary);
       setAttendanceData(tableData);
@@ -321,7 +325,8 @@ const RekapitulasiPage = () => {
       alpa: item.Alpha || 0,
     }));
     const classObj = classes.find(c => c.id === selectedClass);
-    generateAttendanceRecapPDF(pdfData, schoolName, startDate, endDate, teacherName, classObj?.rombel || selectedClass, userProfile);
+    // Use the new Detailed Generator
+    generateDetailedAttendanceRecapPDF(attendanceData, attendanceDates, schoolName, startDate, endDate, teacherName, classObj?.rombel || selectedClass, userProfile);
   };
 
   const handleKehadiranExcelExport = () => {
@@ -1053,53 +1058,62 @@ const RekapitulasiPage = () => {
           {activeTab === 'jurnal' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
-                  <div className="lg:col-span-8 flex flex-col md:flex-row gap-4">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Rentang Tanggal</label>
-                      <div className="flex items-center gap-2">
-                        <StyledInput type="date" value={jurnalStartDate} onChange={(e) => setJurnalStartDate(e.target.value)} />
-                        <span className="text-gray-400">-</span>
-                        <StyledInput type="date" value={jurnalEndDate} onChange={(e) => setJurnalEndDate(e.target.value)} />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Mata Pelajaran</label>
-                      <StyledSelect value={selectedJurnalSubject} onChange={(e) => setSelectedJurnalSubject(e.target.value)}>
-                        <option value="">-- Semua Mapel --</option>
-                        {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                      </StyledSelect>
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Kelas</label>
-                      <StyledSelect value={selectedJurnalClass} onChange={(e) => setSelectedJurnalClass(e.target.value)}>
-                        <option value="">-- Semua Kelas --</option>
-                        {classes.map(c => <option key={c.id} value={c.id}>{c.rombel}</option>)}
-                      </StyledSelect>
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Cari Materi</label>
-                      <StyledInput placeholder="Masukkan kata kunci..." value={jurnalSearchTerm} onChange={(e) => setJurnalSearchTerm(e.target.value)} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+                  {/* Rentang Tanggal */}
+                  <div className="flex flex-col">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Rentang Tanggal</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <StyledInput type="date" value={jurnalStartDate} onChange={(e) => setJurnalStartDate(e.target.value)} className="w-full" />
+                      <StyledInput type="date" value={jurnalEndDate} onChange={(e) => setJurnalEndDate(e.target.value)} className="w-full" />
                     </div>
                   </div>
-                  <div className="lg:col-span-4 flex gap-2">
-                    <StyledButton onClick={handleShowJurnal} className="flex-1">
-                      Tampilkan
-                    </StyledButton>
-                    {jurnalData.length > 0 && (
-                      <div className="flex gap-2">
-                        <StyledButton onClick={handleJurnalExport} className="bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20">
-                          <FileDown className="w-5 h-5" />
-                        </StyledButton>
-                        <StyledButton onClick={handleJurnalExcelExport} className="bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20">
-                          <FileDown className="w-5 h-5" />
-                        </StyledButton>
-                      </div>
-                    )}
+
+                  {/* Mata Pelajaran */}
+                  <div className="flex flex-col">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Mata Pelajaran</label>
+                    <StyledSelect value={selectedJurnalSubject} onChange={(e) => setSelectedJurnalSubject(e.target.value)} className="w-full">
+                      <option value="">-- Semua Mapel --</option>
+                      {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </StyledSelect>
+                  </div>
+
+                  {/* Kelas */}
+                  <div className="flex flex-col">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Kelas</label>
+                    <StyledSelect value={selectedJurnalClass} onChange={(e) => setSelectedJurnalClass(e.target.value)} className="w-full">
+                      <option value="">-- Semua Kelas --</option>
+                      {classes.map(c => <option key={c.id} value={c.id}>{c.rombel}</option>)}
+                    </StyledSelect>
+                  </div>
+
+                  {/* Cari Materi */}
+                  <div className="flex flex-col">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Cari Materi</label>
+                    <StyledInput placeholder="Kata kunci..." value={jurnalSearchTerm} onChange={(e) => setJurnalSearchTerm(e.target.value)} className="w-full" />
                   </div>
                 </div>
-                <div className="mt-4">
-                  <QuickDateFilter onSelect={(start, end) => { setJurnalStartDate(start); setJurnalEndDate(end); }} />
+
+                {/* Buttons Row and Filters */}
+                <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-between border-t border-gray-100 dark:border-gray-800 pt-4 items-center">
+                  <div className="w-full sm:w-auto">
+                    <QuickDateFilter onSelect={(start, end) => { setJurnalStartDate(start); setJurnalEndDate(end); }} />
+                  </div>
+
+                  <div className="flex gap-2 w-full sm:w-auto justify-end">
+                    <StyledButton onClick={handleShowJurnal} className="px-6">
+                      Tampilkan Data
+                    </StyledButton>
+                    {jurnalData.length > 0 && (
+                      <>
+                        <StyledButton onClick={handleJurnalExport} className="bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 border-red-100 dark:border-red-900/30 gap-2 px-3">
+                          <FileDown className="w-4 h-4" /> PDF
+                        </StyledButton>
+                        <StyledButton onClick={handleJurnalExcelExport} className="bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 border-green-100 dark:border-green-900/30 gap-2 px-3">
+                          <FileDown className="w-4 h-4" /> Excel
+                        </StyledButton>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 

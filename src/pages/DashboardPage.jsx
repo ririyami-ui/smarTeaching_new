@@ -14,6 +14,7 @@ import { LocalNotifications } from '@capacitor/local-notifications';
 import JournalReminder from '../components/JournalReminder';
 import TaskReminder from '../components/TaskReminder';
 import ClockDisplay from '../components/ClockDisplay';
+import MaterialCompletionChart from '../components/MaterialCompletionChart';
 
 // Helper function to get the next occurrence of a day of the week
 const getNextDayOccurrence = (dayOfWeek, timeString, startDate = moment()) => {
@@ -85,13 +86,26 @@ export default function DashboardPage() {
   const { activeSemester, academicYear } = useSettings();
   const [currentUserProfile, setCurrentUserProfile] = useState(null);
 
-  // Update currentTime every minute
+  const [activeSchedule, setActiveSchedule] = useState(null);
+
+  // Update currentTime every minute and detect active schedule
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(moment());
+      const now = moment();
+      setCurrentTime(now);
+
+      // Detect active schedule
+      const active = todaySchedules.find(s => {
+        if (s.type === 'non-teaching') return false;
+        const start = moment(s.startTime, 'HH:mm');
+        const end = moment(s.endTime, 'HH:mm');
+        if (end.isBefore(start)) end.add(1, 'day');
+        return now.isBetween(start, end, null, '[]');
+      });
+      setActiveSchedule(active);
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [todaySchedules]);
 
   useEffect(() => {
     let unsubscribeSnapshot;
@@ -505,7 +519,7 @@ export default function DashboardPage() {
       {/* Top Section: Clock and Reminder */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 flex flex-col justify-center items-center text-center">
-          <ClockDisplay />
+          <ClockDisplay showProgress={true} activeSchedule={activeSchedule} />
         </div>
         <div className="lg:col-span-2">
           <TeachingScheduleCard
@@ -588,7 +602,13 @@ export default function DashboardPage() {
 
 
       {/* Bottom Section: Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* Material Completion Chart */}
+        <div className="h-full">
+          <MaterialCompletionChart />
+        </div>
+
         <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-lg">
           <h2 className="text-xl font-black bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-100 dark:to-indigo-200 bg-clip-text text-transparent mb-6 tracking-tight">Grafik Kehadiran Siswa</h2>
           <div className="h-64"> {/* Removed flex and justify-center as ResponsiveContainer handles sizing */}

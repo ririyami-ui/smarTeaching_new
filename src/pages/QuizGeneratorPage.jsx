@@ -350,6 +350,8 @@ const QuizGeneratorPage = () => {
         }
 
         setGenerating(true);
+        setQuizResult(null); // Clear previous result before generating new one
+
         try {
             let result;
             if (sourceType === 'image' && previewUrl) {
@@ -367,15 +369,25 @@ const QuizGeneratorPage = () => {
                     context: contextContent,
                     gradeLevel,
                     subject,
-                    typeCounts, // Pass object instead of types + count
+                    typeCounts,
                     difficulty,
                     modelName: geminiModel
                 });
             }
-            setQuizResult(result);
-            toast.success("Soal berhasil dibuat!");
+
+            // CRITICAL: Validate result structure before setting state
+            if (result && typeof result === 'object' && Array.isArray(result.questions)) {
+                setQuizResult(result);
+                toast.success("Soal berhasil dibuat!");
+            } else {
+                console.error("Invalid quiz result structure:", result);
+                throw new Error("Format data kuis dari AI tidak sesuai standar.");
+            }
         } catch (error) {
-            toast.error("Gagal membuat soal: " + error.message);
+            console.error("Quiz generation failed:", error);
+            // Handle specific error messages or provide a generic one
+            const errMsg = error.message || "Terjadi kesalahan saat membuat soal.";
+            toast.error("Gagal membuat soal: " + errMsg, { duration: 5000 });
         } finally {
             setGenerating(false);
         }
@@ -1325,10 +1337,10 @@ const QuizGeneratorPage = () => {
 
                             {/* QUESTIONS GRID */}
                             <div className="grid grid-cols-1 gap-6">
-                                {quizResult.questions && quizResult.questions.length > 0 ? (
+                                {quizResult && Array.isArray(quizResult.questions) && quizResult.questions.length > 0 ? (
                                     quizResult.questions.map((q, idx) => (
                                         <div key={idx} id={`quiz-question-${idx}`} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 relative">
-                                            <span className="absolute top-4 right-4 text-xs font-bold text-gray-400 uppercase border px-2 py-1 rounded">{q.type.replace('_', ' ')}</span>
+                                            <span className="absolute top-4 right-4 text-xs font-bold text-gray-400 uppercase border px-2 py-1 rounded">{(q.type || 'pg').replace('_', ' ')}</span>
                                             <div className="flex gap-4">
                                                 <div className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
                                                     {idx + 1}
@@ -1352,7 +1364,7 @@ const QuizGeneratorPage = () => {
                                                             remarkPlugins={[remarkGfm, remarkMath]}
                                                             rehypePlugins={[rehypeRaw, rehypeKatex]}
                                                         >
-                                                            {q.question}
+                                                            {q.question || 'Petunjuk: Klik "Generate" untuk membuat soal.'}
                                                         </ReactMarkdown>
                                                     </div>
 
@@ -1373,7 +1385,7 @@ const QuizGeneratorPage = () => {
                                                     )}
 
                                                     {/* OPTION RENDERER */}
-                                                    {(q.type === 'pg' || q.type === 'pg_complex') && (
+                                                    {(q.type === 'pg' || q.type === 'pg_complex') && Array.isArray(q.options) && (
                                                         <div className="space-y-2 ml-2">
                                                             {q.options.map((opt, oIdx) => (
                                                                 <div key={oIdx} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -1388,7 +1400,7 @@ const QuizGeneratorPage = () => {
                                                         </div>
                                                     )}
 
-                                                    {q.type === 'matching' && (
+                                                    {q.type === 'matching' && Array.isArray(q.left_side) && Array.isArray(q.right_side) && (
                                                         <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg">
                                                             <div className="space-y-2">
                                                                 {q.left_side.map((l, i) => (
@@ -1411,7 +1423,7 @@ const QuizGeneratorPage = () => {
                                                         </div>
                                                     )}
 
-                                                    {q.type === 'true_false' && (
+                                                    {q.type === 'true_false' && Array.isArray(q.statements) && (
                                                         <div className="space-y-1">
                                                             {q.statements.map((s, i) => (
                                                                 <div key={i} className="flex justify-between items-center p-2 border-b last:border-0 border-dashed">
@@ -1459,8 +1471,8 @@ const QuizGeneratorPage = () => {
                                     ))
                                 ) : (
                                     <div className="text-center p-8 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-200">
-                                        <p className="text-gray-500 font-medium">Belum ada soal yang berhasil dibuat.</p>
-                                        <p className="text-sm text-gray-400 mt-2">Silakan coba generate ulang atau periksa input Anda.</p>
+                                        <p className="text-gray-500 font-medium font-bold">Terjadi kesalahan teknis saat memproses soal.</p>
+                                        <p className="text-sm text-gray-400 mt-2 italic">Format data dari AI tidak terbaca dengan benar. Mohon klik tombol Generate ulang untuk mendapatkan hasil yang utuh.</p>
                                     </div>
                                 )}
                             </div>

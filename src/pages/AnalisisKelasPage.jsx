@@ -13,10 +13,11 @@ import { generateClassAnalysisReport, generateConciseClassAnalysisReport } from 
 import { useSettings } from '../utils/SettingsContext';
 import { generateDataHash } from '../utils/cacheUtils';
 import html2canvas from 'html2canvas';
-import BarChart from '../components/BarChart';
+
 import PieChart from '../components/PieChart';
 import RadarChart from '../components/RadarChart';
 import SummaryCard from '../components/SummaryCard';
+import TopicMasteryHeatmap from '../components/TopicMasteryHeatmap';
 import {
   Users,
   GraduationCap,
@@ -429,23 +430,11 @@ const AnalisisKelasPage = () => {
               <span>Analisis Kelas: {analysisData.className}</span>
             </h2>
             <button
-              onClick={async () => {
-                const infographicElement = document.getElementById('class-analysis-infographic');
-                const analysisElement = document.getElementById('ai-analysis-report');
-                if (!infographicElement) return;
-
-                const [infoCanvas, analysisCanvas] = await Promise.all([
-                  html2canvas(infographicElement, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }),
-                  analysisElement ? html2canvas(analysisElement, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }) : Promise.resolve(null)
-                ]);
-
-                const imgData = infoCanvas.toDataURL('image/png');
-                const analysisImgData = analysisCanvas ? analysisCanvas.toDataURL('image/png') : null;
-
+              onClick={() => {
                 import('../utils/pdfGenerator').then(({ generateClassAnalysisPDF }) => {
                   const teacherName = auth.currentUser.displayName || 'Guru';
                   const profileData = userProfile || { school: 'Nama Sekolah Belum Diatur' };
-                  generateClassAnalysisPDF(analysisData, report, teacherName, profileData, imgData, analysisImgData);
+                  generateClassAnalysisPDF(analysisData, report, teacherName, profileData);
                 });
               }}
               className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-2xl shadow-lg transition-all active:scale-95 text-sm sm:text-base flex items-center gap-2 justify-center"
@@ -455,7 +444,7 @@ const AnalisisKelasPage = () => {
           </div>
 
           <div id="class-analysis-infographic" className="space-y-6 p-4 bg-white">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div id="pdf-summary" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <SummaryCard title="Rata-rata Kelas" value={analysisData.stats?.academic.avg || 0} icon={<Award className="text-yellow-600" size={24} />} color="bg-yellow-100" subtitle={`${analysisData.stats?.academic.lowest} - ${analysisData.stats?.academic.highest}`} />
               <SummaryCard title="Presensi Hadir" value={`${analysisData.stats?.attendance.pct || 0}%`} icon={<ClipboardCheck className="text-green-600" size={24} />} color="bg-green-100" subtitle="Kehadiran Siswa" />
               <SummaryCard title="Total Pelanggaran" value={analysisData.stats?.infractions.total || 0} icon={<ShieldAlert className="text-red-600" size={24} />} color="bg-red-100" subtitle={`Poin: ${analysisData.stats?.infractions.totalPoints}`} />
@@ -463,7 +452,7 @@ const AnalisisKelasPage = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
+              <div id="pdf-students" className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
                     <h3 className="text-xs font-black text-green-600 mb-4 uppercase tracking-widest flex items-center gap-2">
@@ -498,8 +487,16 @@ const AnalisisKelasPage = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 flex flex-col items-center">
-                <h3 className="text-sm font-bold text-gray-800 mb-6 uppercase tracking-wider self-start">Profil Kompetensi Kelas (2025)</h3>
+              <div id="pdf-radar" className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-orange-100 rounded-xl text-orange-600">
+                    <GraduationCap size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-black text-gray-800 uppercase tracking-tight">Dimensi Profil Lulusan</h2>
+                    <p className="text-xs text-gray-500">Kelas {userClasses.find(c => c.id === selectedClass)?.name || ''}</p>
+                  </div>
+                </div>
                 <div className="h-[300px] w-full flex items-center justify-center">
                   <RadarChart
                     data={{
@@ -528,18 +525,18 @@ const AnalisisKelasPage = () => {
                 <div className="mt-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest italic">*Analisis Kolektif BSKAP 046/2025</div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
-                <h3 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wider">Komposisi Kehadiran</h3>
-                <div className="h-[320px]"><PieChart data={analysisData.stats?.attendance || {}} /></div>
+              <div id="pdf-attendance" className="h-full">
+                <PieChart data={analysisData.stats?.attendance || {}} />
               </div>
+
+              {analysisData.grades && analysisData.grades.length > 0 && (
+                <div id="pdf-heatmap" className="h-full">
+                  <TopicMasteryHeatmap grades={analysisData.grades} />
+                </div>
+              )}
             </div>
 
-            {analysisData.stats?.academic.chart.length > 0 && (
-              <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
-                <h3 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wider">Rerata Nilai per Mata Pelajaran</h3>
-                <div className="h-[300px]"><BarChart data={analysisData.stats?.academic.chart || []} /></div>
-              </div>
-            )}
+
 
             <div className="flex justify-center items-center gap-2 opacity-60 pt-4">
               <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Generated by Smart Teaching AI</span>

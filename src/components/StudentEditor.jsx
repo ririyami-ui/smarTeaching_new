@@ -6,6 +6,14 @@ import StyledButton from './StyledButton';
 import StyledSelect from './StyledSelect';
 import toast from 'react-hot-toast';
 
+const normalizeGender = (input) => {
+  if (!input) return '';
+  const clean = String(input).trim().toUpperCase();
+  if (clean === 'L' || clean === 'LAKI-LAKI' || clean === 'LAKI' || clean === 'PRIA' || clean === 'LAKI - LAKI') return 'Laki-laki';
+  if (clean === 'P' || clean === 'PEREMPUAN' || clean === 'WANITA') return 'Perempuan';
+  return input;
+};
+
 export default function StudentEditor({ studentData, onSave, onClose, rombels, classes }) {
   const [code, setCode] = useState('');
   const [nis, setNis] = useState('');
@@ -24,7 +32,7 @@ export default function StudentEditor({ studentData, onSave, onClose, rombels, c
       setNis(studentData.nis || '');
       setNisn(studentData.nisn || '');
       setName(studentData.name || '');
-      setGender(studentData.gender || '');
+      setGender(normalizeGender(studentData.gender) || '');
       setBirthPlace(studentData.birthPlace || '');
 
       // Convert date format to yyyy-MM-dd for input type="date"

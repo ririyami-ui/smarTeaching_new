@@ -239,6 +239,14 @@ export default function StudentMasterData() {
     return input; // Return original if unknown format
   };
 
+  const normalizeGender = (input) => {
+    if (!input) return '';
+    const clean = String(input).trim().toUpperCase();
+    if (clean === 'L' || clean === 'LAKI-LAKI' || clean === 'LAKI' || clean === 'PRIA') return 'Laki-laki';
+    if (clean === 'P' || clean === 'PEREMPUAN' || clean === 'WANITA') return 'Perempuan';
+    return input; // Fallback
+  };
+
   const importStudents = async () => {
     if (!file) {
       toast.error('Pilih file Excel untuk diimpor.');
@@ -259,27 +267,53 @@ export default function StudentMasterData() {
         const worksheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(worksheet);
 
-        const promises = json.map(row => {
-          if (row['Kode Siswa'] && row['No. Absen'] && row['NIS'] && row['NISN'] && row['Nama Siswa'] && row['Jenis Kelamin'] && row['Tempat Lahir'] && row['Tanggal Lahir'] && row['Rombel']) {
-            const rowRombel = row['Rombel'];
-            const classObj = classes.find(c => c.rombel === rowRombel);
+        // 1. Fetch current students to check for existence (Prevent Duplicate / Enable Update)
+        const q = query(studentsCollectionRef, where('userId', '==', auth.currentUser.uid));
+        const snapshot = await getDocs(q);
+        const existingStudents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-            return addDoc(studentsCollectionRef, {
-              code: row['Kode Siswa'],
-              absen: row['No. Absen'],
-              nis: row['NIS'],
-              nisn: row['NISN'],
-              name: row['Nama Siswa'],
-              gender: row['Jenis Kelamin'],
-              birthPlace: row['Tempat Lahir'],
-              birthDate: normalizeImportDate(row['Tanggal Lahir']), // Use smart normalizer
-              classId: classObj?.id || '',
-              rombel: rowRombel,
-              userId: auth.currentUser.uid,
-            });
+        const promises = json.map(async (row) => {
+          // Check required fields
+          if (!row['Nama Siswa']) return null;
+
+          const rowNis = row['NIS'] ? String(row['NIS']).trim() : '';
+          const rowNisn = row['NISN'] ? String(row['NISN']).trim() : '';
+          const rowCode = row['Kode Siswa'] ? String(row['Kode Siswa']).trim() : '';
+
+          // Find existing student by NISN (Primary) or NIS (Secondary) or Code (Tertiary)
+          // PRIORITIZE UNIQUE ID MATCHING
+          let existingMatch = null;
+          if (rowNisn) existingMatch = existingStudents.find(s => String(s.nisn).trim() === rowNisn);
+          if (!existingMatch && rowNis) existingMatch = existingStudents.find(s => String(s.nis).trim() === rowNis);
+          if (!existingMatch && rowCode) existingMatch = existingStudents.find(s => String(s.code).trim() === rowCode);
+
+          const rowRombel = row['Rombel'];
+          const classObj = classes.find(c => c.rombel === rowRombel);
+          const finalGender = normalizeGender(row['Jenis Kelamin']); // Use smart normalizer
+
+          const studentData = {
+            code: rowCode,
+            absen: row['No. Absen'],
+            nis: rowNis,
+            nisn: rowNisn,
+            name: row['Nama Siswa'],
+            gender: finalGender,
+            birthPlace: row['Tempat Lahir'],
+            birthDate: normalizeImportDate(row['Tanggal Lahir']),
+            classId: classObj?.id || '',
+            rombel: rowRombel,
+            userId: auth.currentUser.uid,
+          };
+
+          if (existingMatch) {
+            // UPDATE EXISTING (Keep ID, Update Data)
+            const docRef = doc(db, 'students', existingMatch.id);
+            return updateDoc(docRef, studentData);
+          } else {
+            // CREATE NEW (New ID)
+            return addDoc(studentsCollectionRef, studentData);
           }
-          return null;
-        }).filter(p => p !== null);
+        });
 
         await Promise.all(promises);
         toast.success(`${promises.length} siswa berhasil diimpor.`, { id: toastId });

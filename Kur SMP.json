@@ -1,0 +1,2842 @@
+{
+    "version": "2025.10",
+    "name": "Inteligensi Kurikulum Merdeka BSKAP 2025 (Kepka 046/2025)",
+    "last_updated": "2026-02-03",
+    "standards": {
+        "regulation": "Keputusan Kepala BSKAP No. 046/H/KR/2025",
+        "foundation": "Permendikbudristek No. 13 Tahun 2025",
+        "profile_regulation": "Permendikdasmen No. 10 Tahun 2025",
+        "philosophy": {
+            "name": "Deep Learning",
+            "pillars": [
+                {
+                    "name": "Mindful",
+                    "description": "Kesadaran penuh & fokus."
+                },
+                {
+                    "name": "Meaningful",
+                    "description": "Relevansi & pemahaman mendalam."
+                },
+                {
+                    "name": "Joyful",
+                    "description": "Motivasi & kesejahteraan emosional."
+                }
+            ]
+        },
+        "profile_lulusan_2025": [
+            {
+                "id": 1,
+                "dimensi": "Keimanan & Ketakwaan"
+            },
+            {
+                "id": 2,
+                "dimensi": "Kewargaan"
+            },
+            {
+                "id": 3,
+                "dimensi": "Penalaran Kritis"
+            },
+            {
+                "id": 4,
+                "dimensi": "Kreativitas"
+            },
+            {
+                "id": 5,
+                "dimensi": "Kolaborasi"
+            },
+            {
+                "id": 6,
+                "dimensi": "Kemandirian"
+            },
+            {
+                "id": 7,
+                "dimensi": "Kesehatan"
+            },
+            {
+                "id": 8,
+                "dimensi": "Komunikasi"
+            }
+        ],
+        "industry_competencies_2025_2026": [
+            {
+                "name": "Literasi AI & Sains Data",
+                "description": "Memahami pemanfaatan AI untuk efisiensi mengajar."
+            },
+            {
+                "name": "Kewargaan Digital",
+                "description": "Etika dan keamanan dalam ekosistem digital."
+            },
+            {
+                "name": "Analisis Data Modern",
+                "description": "Pengolahan data siswa untuk prediksi hasil belajar."
+            }
+        ],
+        "early_warning_standards": {
+            "low_grade_threshold": 65,
+            "high_absence_threshold": 3,
+            "infraction_score_threshold": 80
+        },
+        "cognitive_levels": [
+            {
+                "id": "L1",
+                "level": "LOTS",
+                "description": "Mengingat & Memahami"
+            },
+            {
+                "id": "L2",
+                "level": "MOTS",
+                "description": "Menerapkan & Menganalisis"
+            },
+            {
+                "id": "L3",
+                "level": "HOTS",
+                "description": "Evaluasi & Kreasi"
+            }
+        ],
+        "assessment_item_types": [
+            {
+                "id": "pg",
+                "name": "Pilihan Ganda"
+            },
+            {
+                "id": "pg_complex",
+                "name": "Pilihan Ganda Kompleks"
+            },
+            {
+                "id": "true_false",
+                "name": "Benar Salah"
+            },
+            {
+                "id": "matching",
+                "name": "Menjodohkan"
+            },
+            {
+                "id": "essay",
+                "name": "Uraian"
+            },
+            {
+                "id": "short_answer",
+                "name": "Isian Singkat"
+            }
+        ],
+        "semester_logic": {
+            "ganjil": {
+                "focus": "Fondasi Dasar & Penguatan Konsep"
+            },
+            "genap": {
+                "focus": "Pengembangan & Penerapan Berkelanjutan"
+            }
+        },
+        "regional_languages": [
+            "Bahasa Jawa",
+            "Bahasa Sunda",
+            "Bahasa Madura",
+            "Bahasa Minangkabau",
+            "Bahasa Bugis",
+            "Bahasa Banjar",
+            "Bahasa Bali",
+            "Bahasa Betawi",
+            "Bahasa Sasak",
+            "Bahasa Batak"
+        ],
+        "cp_components_structure": {
+            "rasional": "Alasan mempelajari mata pelajaran.",
+            "tujuan": "Target kompetensi yang dicapai.",
+            "karakteristik": "Sifat dan lingkup materi.",
+            "elemen": "Pembagian bidang kompetensi."
+        },
+        "phases": [
+            {
+                "phase": "A",
+                "grades": [
+                    1,
+                    2
+                ],
+                "level": "SD"
+            },
+            {
+                "phase": "B",
+                "grades": [
+                    3,
+                    4
+                ],
+                "level": "SD"
+            },
+            {
+                "phase": "C",
+                "grades": [
+                    5,
+                    6
+                ],
+                "level": "SD"
+            },
+            {
+                "phase": "D",
+                "grades": [
+                    7,
+                    8,
+                    9
+                ],
+                "level": "SMP"
+            },
+            {
+                "phase": "E",
+                "grades": [
+                    10
+                ],
+                "level": "SMA/SMK"
+            },
+            {
+                "phase": "F",
+                "grades": [
+                    11,
+                    12
+                ],
+                "level": "SMA/SMK"
+            }
+        ],
+        "duration_per_jp": {
+            "SD": 35,
+            "SMP": 40,
+            "SMA": 45
+        }
+    },
+    "subjects": {
+        "SD": {
+            "1": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Bilangan"
+                        ],
+                        "materi_inti": [
+                            "Bilangan 0-20"
+                        ],
+                        "cp_snippet": "Menunjukkan pemahaman dan memiliki intuisi bilangan (number sense) pada bilangan cacah sampai 100; membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, serta melakukan komposisi (menyusun) dan dekomposisi (mengurai) bilangan; melakukan operasi penjumlahan dan pengurangan menggunakan benda-benda konkret yang banyaknya sampai 20; dan menunjukkan pemahaman pecahan sebagai bagian dari keseluruhan melalui konteks membagi sebuah benda atau kumpulan benda sama banyak (pecahan yang ..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Geometri"
+                        ],
+                        "materi_inti": [
+                            "Bangun Datar"
+                        ],
+                        "cp_snippet": "Menunjukkan pemahaman dan memiliki intuisi bilangan (number sense) pada bilangan cacah sampai 100; membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, serta melakukan komposisi (menyusun) dan dekomposisi (mengurai) bilangan; melakukan operasi penjumlahan dan pengurangan menggunakan benda-benda konkret yang banyaknya sampai 20; dan menunjukkan pemahaman pecahan sebagai bagian dari keseluruhan melalui konteks membagi sebuah benda atau kumpulan benda sama banyak (pecahan yang ..."
+                    }
+                },
+                "Bahasa Indonesia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak"
+                        ],
+                        "materi_inti": [
+                            "Abjad & Suku Kata"
+                        ],
+                        "cp_snippet": "Memahami informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan) berupa percakapan yang berkaitan dengan diri, keluarga, dan/atau lingkungan sekitar; dan memahami pesan teks sastra berbentuk teks aural. Membaca kata-kata sederhana dengan fasih dari bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkunga..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Kata Benda & Kerja"
+                        ],
+                        "cp_snippet": "Memahami informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan) berupa percakapan yang berkaitan dengan diri, keluarga, dan/atau lingkungan sekitar; dan memahami pesan teks sastra berbentuk teks aural. Membaca kata-kata sederhana dengan fasih dari bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkunga..."
+                    }
+                },
+                "Pendidikan Pancasila": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pancasila"
+                        ],
+                        "materi_inti": [
+                            "Simbol Negara"
+                        ],
+                        "cp_snippet": "Mengenal bendera negara, lagu kebangsaan, simbol dan sila-sila Pancasila dalam lambang negara Garuda Pancasila dan simbol Pancasila beserta sila-sila Pancasila; menerapkan nilai-nilai Pancasila di lingkungan keluarga. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengenal aturan di lingkungan keluarga; menunjukkan dan menceritakan sikap mematuhi aturan di lingkungan keluarga."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "NKRI"
+                        ],
+                        "materi_inti": [
+                            "Identitas Diri"
+                        ],
+                        "cp_snippet": "Mengenal bendera negara, lagu kebangsaan, simbol dan sila-sila Pancasila dalam lambang negara Garuda Pancasila dan simbol Pancasila beserta sila-sila Pancasila; menerapkan nilai-nilai Pancasila di lingkungan keluarga. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengenal aturan di lingkungan keluarga; menunjukkan dan menceritakan sikap mematuhi aturan di lingkungan keluarga."
+                    }
+                },
+                "Pendidikan Agama Islam": {
+                    "ganjil": {
+                        "elemen": [
+                            "Al-Qur'an"
+                        ],
+                        "materi_inti": [
+                            "Huruf Hijaiyah"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami huruf hijaiah berharakat, huruf hijaiah bersambung, Surah al-Fātiḥah, beberapa surah pendek Al-Qur’an, dan hadis tentang kebersihan. Memahami rukun iman, iman kepada Allah Swt., beberapa asmaulhusna, dan iman kepada malaikat. Memahami akhlak terhadap Allah Swt. dengan menyucikan dan memuji-Nya dan akhlak terhadap diri sendiri. Memahami rukun Islam, syahadatain, tata cara bersuci, salat fardu, azan, ikamah, zikir, dan berdoa setelah salat."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Fikih"
+                        ],
+                        "materi_inti": [
+                            "Rukun Islam"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami huruf hijaiah berharakat, huruf hijaiah bersambung, Surah al-Fātiḥah, beberapa surah pendek Al-Qur’an, dan hadis tentang kebersihan. Memahami rukun iman, iman kepada Allah Swt., beberapa asmaulhusna, dan iman kepada malaikat. Memahami akhlak terhadap Allah Swt. dengan menyucikan dan memuji-Nya dan akhlak terhadap diri sendiri. Memahami rukun Islam, syahadatain, tata cara bersuci, salat fardu, azan, ikamah, zikir, dan berdoa setelah salat."
+                    }
+                },
+                "PJOK": {
+                    "ganjil": {
+                        "elemen": [
+                            "Gerak"
+                        ],
+                        "materi_inti": [
+                            "Lari & Lompat"
+                        ],
+                        "cp_snippet": "Bergerak Mempraktikkan keterampilan gerak fundamental dan menerapkannya dalam berbagai situasi gerak yang berbeda; mengeksplorasi berbagai strategi gerak; dan mengeksplorasi berbagai konsep gerak serta menyimpulkan efektivitasnya. Melalui Gerak Menaati peraturan untuk menumbuhkan fair play di dalam berbagai aktivitas jasmani; menerapkan strategi kolaborasi ketika berpartisipasi dalam aktivitas jasmani."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Kesehatan"
+                        ],
+                        "materi_inti": [
+                            "Kebersihan Diri"
+                        ],
+                        "cp_snippet": "Bergerak Mempraktikkan keterampilan gerak fundamental dan menerapkannya dalam berbagai situasi gerak yang berbeda; mengeksplorasi berbagai strategi gerak; dan mengeksplorasi berbagai konsep gerak serta menyimpulkan efektivitasnya. Melalui Gerak Menaati peraturan untuk menumbuhkan fair play di dalam berbagai aktivitas jasmani; menerapkan strategi kolaborasi ketika berpartisipasi dalam aktivitas jasmani."
+                    }
+                },
+                "Seni Rupa": {
+                    "ganjil": {
+                        "elemen": [
+                            "Eksplorasi"
+                        ],
+                        "materi_inti": [
+                            "Garis & Warna"
+                        ],
+                        "cp_snippet": "Experiencing) Mengenali dan menyebutkan unsur-unsur rupa dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri. Artistik (Thinking and Working Artistically) Mengenali dan menguji coba alat dan/atau bahan yang dimiliki.   (Making/Creating) Membuat karya seni rupa berdasarkan pengalaman dan hasil pengamatan terhadap lingkungan sekitar.   (Impacting) Menghasilkan karya seni rupa yang berdampak pada perasaan dirinya."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Membuat"
+                        ],
+                        "materi_inti": [
+                            "Gambar Ekspresi"
+                        ],
+                        "cp_snippet": "Experiencing) Mengenali dan menyebutkan unsur-unsur rupa dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri. Artistik (Thinking and Working Artistically) Mengenali dan menguji coba alat dan/atau bahan yang dimiliki.   (Making/Creating) Membuat karya seni rupa berdasarkan pengalaman dan hasil pengamatan terhadap lingkungan sekitar.   (Impacting) Menghasilkan karya seni rupa yang berdampak pada perasaan dirinya."
+                    }
+                },
+                "Bahasa Inggris": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak"
+                        ],
+                        "materi_inti": [
+                            "Greetings"
+                        ]
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara"
+                        ],
+                        "materi_inti": [
+                            "My Family"
+                        ]
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Narasi (Diri Sendiri & Keluarga)",
+                            "Lagu Daerah/Tembang Dolanan",
+                            "Pengenalan Aksara Daerah Dasar"
+                        ],
+                        "cp_snippet": "Mengenali bunyi bahasa daerah dan simbol aksara daerah dasar; memahami isi teks narasi sederhana."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Narasi (Kegiatanku)",
+                            "Permainan Tradisional",
+                            "Aksara Daerah (Nulis Legena)"
+                        ],
+                        "cp_snippet": "Menceritakan kegiatan sehari-hari; menulis kata sederhana dengan aksara daerah."
+                    }
+                },
+                "Prakarya": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Kerajinan Bahan Alam (Biji-bijian, Daun Kering)",
+                            "Membuat Produk Mainan Sederhana"
+                        ],
+                        "cp_snippet": "Mengenali berbagai bahan alam di sekitar; menciptakan karya kerajinan sederhana dari bahan alam."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Kerajinan Kertas (Melipat, Menggunting, Menempel)",
+                            "Mengenal Alat dan Bahan Prakarya Dasar"
+                        ],
+                        "cp_snippet": "Melakukan teknik dasar pengolahan kertas; menunjukkan hasil karya dengan rasa percaya diri."
+                    }
+                }
+            },
+            "2": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Bilangan"
+                        ],
+                        "materi_inti": [
+                            "Cacah s.d 100"
+                        ],
+                        "cp_snippet": "Menunjukkan pemahaman dan memiliki intuisi bilangan (number sense) pada bilangan cacah sampai 100; membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, serta melakukan komposisi (menyusun) dan dekomposisi (mengurai) bilangan; melakukan operasi penjumlahan dan pengurangan menggunakan benda-benda konkret yang banyaknya sampai 20; dan menunjukkan pemahaman pecahan sebagai bagian dari keseluruhan melalui konteks membagi sebuah benda atau kumpulan benda sama banyak (pecahan yang ..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pengukuran"
+                        ],
+                        "materi_inti": [
+                            "Jam & Panjang"
+                        ],
+                        "cp_snippet": "Menunjukkan pemahaman dan memiliki intuisi bilangan (number sense) pada bilangan cacah sampai 100; membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, serta melakukan komposisi (menyusun) dan dekomposisi (mengurai) bilangan; melakukan operasi penjumlahan dan pengurangan menggunakan benda-benda konkret yang banyaknya sampai 20; dan menunjukkan pemahaman pecahan sebagai bagian dari keseluruhan melalui konteks membagi sebuah benda atau kumpulan benda sama banyak (pecahan yang ..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Deskripsi (Benda & Lingkungan)",
+                            "Dongeng Binatang (Fabel Lokal)",
+                            "Aksara Daerah (Suku Kata)"
+                        ],
+                        "cp_snippet": "Memahami teks deskripsi sederhana; mengidentifikasi tokoh dalam fabel lokal."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Dialog Sederhana",
+                            "Tradisi Hidup Bersih Lokal",
+                            "Aksara Daerah (Lanjutan)"
+                        ],
+                        "cp_snippet": "Melakukan percakapan sederhana; menulis kalimat pendek dengan aksara daerah."
+                    }
+                },
+                "Prakarya": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Kerajinan Bahan Buatan (Plastisin, Bekas Kemasan)",
+                            "Kebutuhan Peralatan Rumah Tangga Sederhana"
+                        ],
+                        "cp_snippet": "Mengeksplorasi bahan buatan; merancang dan membuat kerajinan dari bahan plastik atau kertas bekas."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Budi Daya Tanaman Hias Sederhana",
+                            "Laporan Pengamatan Pertumbuhan Tanaman"
+                        ],
+                        "cp_snippet": "Mempraktikkan cara merawat tanaman; mendokumentasikan hasil pengamatan secara sederhana."
+                    }
+                },
+                "Bahasa Indonesia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Membaca"
+                        ],
+                        "materi_inti": [
+                            "Teks Pendek"
+                        ],
+                        "cp_snippet": "Memahami informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan) berupa percakapan yang berkaitan dengan diri, keluarga, dan/atau lingkungan sekitar; dan memahami pesan teks sastra berbentuk teks aural. Membaca kata-kata sederhana dengan fasih dari bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkunga..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Kalimat Tanya"
+                        ],
+                        "cp_snippet": "Memahami informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan) berupa percakapan yang berkaitan dengan diri, keluarga, dan/atau lingkungan sekitar; dan memahami pesan teks sastra berbentuk teks aural. Membaca kata-kata sederhana dengan fasih dari bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkunga..."
+                    }
+                },
+                "Pendidikan Pancasila": {
+                    "ganjil": {
+                        "elemen": [
+                            "UUD 1945"
+                        ],
+                        "materi_inti": [
+                            "Aturan Sekolah"
+                        ],
+                        "cp_snippet": "Mengenal bendera negara, lagu kebangsaan, simbol dan sila-sila Pancasila dalam lambang negara Garuda Pancasila dan simbol Pancasila beserta sila-sila Pancasila; menerapkan nilai-nilai Pancasila di lingkungan keluarga. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengenal aturan di lingkungan keluarga; menunjukkan dan menceritakan sikap mematuhi aturan di lingkungan keluarga."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Bhinneka"
+                        ],
+                        "materi_inti": [
+                            "Keberagaman Teman"
+                        ],
+                        "cp_snippet": "Mengenal bendera negara, lagu kebangsaan, simbol dan sila-sila Pancasila dalam lambang negara Garuda Pancasila dan simbol Pancasila beserta sila-sila Pancasila; menerapkan nilai-nilai Pancasila di lingkungan keluarga. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengenal aturan di lingkungan keluarga; menunjukkan dan menceritakan sikap mematuhi aturan di lingkungan keluarga."
+                    }
+                },
+                "Pendidikan Agama Islam": {
+                    "ganjil": {
+                        "elemen": [
+                            "Aqidah"
+                        ],
+                        "materi_inti": [
+                            "Asmaul Husna"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami huruf hijaiah berharakat, huruf hijaiah bersambung, Surah al-Fātiḥah, beberapa surah pendek Al-Qur’an, dan hadis tentang kebersihan. Memahami rukun iman, iman kepada Allah Swt., beberapa asmaulhusna, dan iman kepada malaikat. Memahami akhlak terhadap Allah Swt. dengan menyucikan dan memuji-Nya dan akhlak terhadap diri sendiri. Memahami rukun Islam, syahadatain, tata cara bersuci, salat fardu, azan, ikamah, zikir, dan berdoa setelah salat."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Akhlak"
+                        ],
+                        "materi_inti": [
+                            "Hormat Orang Tua"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami huruf hijaiah berharakat, huruf hijaiah bersambung, Surah al-Fātiḥah, beberapa surah pendek Al-Qur’an, dan hadis tentang kebersihan. Memahami rukun iman, iman kepada Allah Swt., beberapa asmaulhusna, dan iman kepada malaikat. Memahami akhlak terhadap Allah Swt. dengan menyucikan dan memuji-Nya dan akhlak terhadap diri sendiri. Memahami rukun Islam, syahadatain, tata cara bersuci, salat fardu, azan, ikamah, zikir, dan berdoa setelah salat."
+                    }
+                },
+                "PJOK": {
+                    "ganjil": {
+                        "elemen": [
+                            "Gerak"
+                        ],
+                        "materi_inti": [
+                            "Senam Dasar"
+                        ],
+                        "cp_snippet": "Bergerak Mempraktikkan keterampilan gerak fundamental dan menerapkannya dalam berbagai situasi gerak yang berbeda; mengeksplorasi berbagai strategi gerak; dan mengeksplorasi berbagai konsep gerak serta menyimpulkan efektivitasnya. Melalui Gerak Menaati peraturan untuk menumbuhkan fair play di dalam berbagai aktivitas jasmani; menerapkan strategi kolaborasi ketika berpartisipasi dalam aktivitas jasmani."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Kesehatan"
+                        ],
+                        "materi_inti": [
+                            "Gizi Seimbang"
+                        ],
+                        "cp_snippet": "Bergerak Mempraktikkan keterampilan gerak fundamental dan menerapkannya dalam berbagai situasi gerak yang berbeda; mengeksplorasi berbagai strategi gerak; dan mengeksplorasi berbagai konsep gerak serta menyimpulkan efektivitasnya. Melalui Gerak Menaati peraturan untuk menumbuhkan fair play di dalam berbagai aktivitas jasmani; menerapkan strategi kolaborasi ketika berpartisipasi dalam aktivitas jasmani."
+                    }
+                },
+                "Bahasa Inggris": {
+                    "ganjil": {
+                        "elemen": [
+                            "Membaca"
+                        ],
+                        "materi_inti": [
+                            "Colors & Shapes"
+                        ]
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Animals"
+                        ]
+                    }
+                }
+            },
+            "3": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Bilangan"
+                        ],
+                        "materi_inti": [
+                            "Cacah s.d 1000"
+                        ],
+                        "cp_snippet": "Memiliki pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai  ; membaca, menulis, membandingkan, dan mengurutkan bilangan; menentukan dan menggunakan nilai tempat; melakukan komposisi dan dekomposisi bilangan cacah sampai   dapat melakukan dan menyelesaikan masalah operasi bilangan penjumlahan dan pengurangan bilangan cacah sampai  ; melakukan dan menyelesaikan masalah operasi perkalian dan pembagian bilangan cacah sampai 100 dengan bantuan benda konkret, gambar dan simbo..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Geometri"
+                        ],
+                        "materi_inti": [
+                            "Ciri Bangun Datar"
+                        ],
+                        "cp_snippet": "Memiliki pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai  ; membaca, menulis, membandingkan, dan mengurutkan bilangan; menentukan dan menggunakan nilai tempat; melakukan komposisi dan dekomposisi bilangan cacah sampai   dapat melakukan dan menyelesaikan masalah operasi bilangan penjumlahan dan pengurangan bilangan cacah sampai  ; melakukan dan menyelesaikan masalah operasi perkalian dan pembagian bilangan cacah sampai 100 dengan bantuan benda konkret, gambar dan simbo..."
+                    }
+                },
+                "Bahasa Indonesia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Membaca"
+                        ],
+                        "materi_inti": [
+                            "Ide Pokok"
+                        ],
+                        "cp_snippet": "Memahami ide pokok suatu informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan memahami isi teks sastra berbentuk teks aural. Membaca kata-kata baru dengan fasih dari bacaan dan/atau tayangan yang dipirsa; dan memahami ide pokok, ide pendukung, pesan, dan informasi dalam teks sastra dan nonsastra berbentuk cetak dan/atau elektronik."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Ringkasan Berita"
+                        ],
+                        "cp_snippet": "Memahami ide pokok suatu informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan memahami isi teks sastra berbentuk teks aural. Membaca kata-kata baru dengan fasih dari bacaan dan/atau tayangan yang dipirsa; dan memahami ide pokok, ide pendukung, pesan, dan informasi dalam teks sastra dan nonsastra berbentuk cetak dan/atau elektronik."
+                    }
+                },
+                "Pendidikan Pancasila": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pancasila"
+                        ],
+                        "materi_inti": [
+                            "Pengamalan Sila"
+                        ],
+                        "cp_snippet": "Mengidentifikasi makna sila-sila Pancasila, dan penerapannya dalam kehidupan sehari-hari; mengenal karakter para perumus Pancasila; menunjukkan sikap bangga menjadi anak Indonesia yang memiliki bahasa Indonesia sebagai bahasa persatuan di lingkungan sekitar. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengidentifikasi dan melaksanakan aturan di sekolah dan lingkungan tempat tinggal; mengidentifikasi dan menerapkan hak yang didapat dan kewajiban sebagai anggota keluarga dan sebagai warga..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "NKRI"
+                        ],
+                        "materi_inti": [
+                            "Cintai Produk Lokal"
+                        ],
+                        "cp_snippet": "Mengidentifikasi makna sila-sila Pancasila, dan penerapannya dalam kehidupan sehari-hari; mengenal karakter para perumus Pancasila; menunjukkan sikap bangga menjadi anak Indonesia yang memiliki bahasa Indonesia sebagai bahasa persatuan di lingkungan sekitar. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengidentifikasi dan melaksanakan aturan di sekolah dan lingkungan tempat tinggal; mengidentifikasi dan menerapkan hak yang didapat dan kewajiban sebagai anggota keluarga dan sebagai warga..."
+                    }
+                },
+                "Pendidikan Agama Islam": {
+                    "ganjil": {
+                        "elemen": [
+                            "Al-Qur'an"
+                        ],
+                        "materi_inti": [
+                            "Surah Pendek"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami beberapa surah pendek, ayat Al-Qur’an dan hadis tentang kewajiban salat dan menjaga hubungan baik dengan sesama. Memahami sifat-sifat Allah Swt., beberapa asmaulhusna, iman kepada kitab-kitab Allah Swt. dan rasul-rasul Allah Swt. Memahami akhlak terhadap Allah Swt. dengan berbaik sangka kepada-Nya, akhlak terhadap orang tua, keluarga, dan pendidik. Memahami puasa, salat jumat dan salat sunah, balig dan tanggung jawab yang menyertainya (taklīf). Peradaban Islam Memahami k..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Sejarah"
+                        ],
+                        "materi_inti": [
+                            "Kisah Nabi Muhammad"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami beberapa surah pendek, ayat Al-Qur’an dan hadis tentang kewajiban salat dan menjaga hubungan baik dengan sesama. Memahami sifat-sifat Allah Swt., beberapa asmaulhusna, iman kepada kitab-kitab Allah Swt. dan rasul-rasul Allah Swt. Memahami akhlak terhadap Allah Swt. dengan berbaik sangka kepada-Nya, akhlak terhadap orang tua, keluarga, dan pendidik. Memahami puasa, salat jumat dan salat sunah, balig dan tanggung jawab yang menyertainya (taklīf). Peradaban Islam Memahami k..."
+                    }
+                },
+                "PJOK": {
+                    "ganjil": {
+                        "elemen": [
+                            "Gerak"
+                        ],
+                        "materi_inti": [
+                            "Bola Besar"
+                        ],
+                        "cp_snippet": "Bergerak Menghaluskan keterampilan gerak fundamental dan menerapkannya dalam situasi gerak yang baru; menyesuaikan strategi gerak untuk mendapatkan capaian keterampilan gerak; dan memperagakan berbagai konsep gerak yang dapat diterapkan dalam rangkaian gerak. Melalui Gerak Menerapkan strategi gerak sederhana dan memecahkan masalah gerak; menerapkan peraturan untuk menumbuhkan fair play di dalam berbagai aktivitas jasmani; dan berpartisipasi secara positif dalam kelompok atau tim di dalam berb..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Kebugaran"
+                        ],
+                        "materi_inti": [
+                            "Daya Tahan Tubuh"
+                        ],
+                        "cp_snippet": "Bergerak Menghaluskan keterampilan gerak fundamental dan menerapkannya dalam situasi gerak yang baru; menyesuaikan strategi gerak untuk mendapatkan capaian keterampilan gerak; dan memperagakan berbagai konsep gerak yang dapat diterapkan dalam rangkaian gerak. Melalui Gerak Menerapkan strategi gerak sederhana dan memecahkan masalah gerak; menerapkan peraturan untuk menumbuhkan fair play di dalam berbagai aktivitas jasmani; dan berpartisipasi secara positif dalam kelompok atau tim di dalam berb..."
+                    }
+                },
+                "Bahasa Inggris": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak"
+                        ],
+                        "materi_inti": [
+                            "Daily Routine"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami dan merespon teks lisan atau teks multimodal sederhana tentang kehidupan sehari-hari baik secara verbal atau non-verbal sesuai konteks. (understand and respond to simple oral or multimodal texts about everyday life verbally or non-verbally in line with its context) Memirsa (Reading Viewing) Memahami teks tulis pendek sederhana atau teks multimodal tentang kehidupan sehari-hari dan meresponsnya secara verbal atau non-verbal sesuai konteks. (Understand si..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Membaca"
+                        ],
+                        "materi_inti": [
+                            "School Subjects"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami dan merespon teks lisan atau teks multimodal sederhana tentang kehidupan sehari-hari baik secara verbal atau non-verbal sesuai konteks. (understand and respond to simple oral or multimodal texts about everyday life verbally or non-verbally in line with its context) Memirsa (Reading Viewing) Memahami teks tulis pendek sederhana atau teks multimodal tentang kehidupan sehari-hari dan meresponsnya secara verbal atau non-verbal sesuai konteks. (Understand si..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Laporan sederhana (Hasil Kunjungan)",
+                            "Puisi Daerah / Pantun Lokal",
+                            "Aksara Daerah (Membaca Kalimat)"
+                        ],
+                        "cp_snippet": "Memahami teks laporan sederhana; mengapresiasi keindahan puisi daerah; membaca kalimat aksara daerah."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Narasi (Cita-citaku)",
+                            "Pengalaman Menarik (Liburan)",
+                            "Aksara Daerah (Nulis Ukara)"
+                        ],
+                        "cp_snippet": "Menceritakan cita-cita dengan bahasa daerah; menulis kalimat sederhana dengan aksara daerah."
+                    }
+                },
+                "Prakarya": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Kerajinan Tekstil Sederhana (Menjahit Jelujur)",
+                            "Membuat Boneka Jari"
+                        ],
+                        "cp_snippet": "Mengenal berbagai macam serat dan tekstil; mempraktikkan teknik menjahit dasar pada produk sederhana."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Budi Daya Tanaman Sayuran (Wadah Pot/Polybag)",
+                            "Pemanfaatan Lahan Sempit"
+                        ],
+                        "cp_snippet": "Mempraktikkan budi daya tanaman pangan sederhana; mengomunikasikan kesulitan dalam merawat tanaman."
+                    }
+                }
+            },
+            "4": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Bilangan"
+                        ],
+                        "materi_inti": [
+                            "Pecahan"
+                        ],
+                        "cp_snippet": "Memiliki pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai  ; membaca, menulis, membandingkan, dan mengurutkan bilangan; menentukan dan menggunakan nilai tempat; melakukan komposisi dan dekomposisi bilangan cacah sampai   dapat melakukan dan menyelesaikan masalah operasi bilangan penjumlahan dan pengurangan bilangan cacah sampai  ; melakukan dan menyelesaikan masalah operasi perkalian dan pembagian bilangan cacah sampai 100 dengan bantuan benda konkret, gambar dan simbo..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Data"
+                        ],
+                        "materi_inti": [
+                            "Pictogram"
+                        ],
+                        "cp_snippet": "Memiliki pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai  ; membaca, menulis, membandingkan, dan mengurutkan bilangan; menentukan dan menggunakan nilai tempat; melakukan komposisi dan dekomposisi bilangan cacah sampai   dapat melakukan dan menyelesaikan masalah operasi bilangan penjumlahan dan pengurangan bilangan cacah sampai  ; melakukan dan menyelesaikan masalah operasi perkalian dan pembagian bilangan cacah sampai 100 dengan bantuan benda konkret, gambar dan simbo..."
+                    }
+                },
+                "IPAS": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sains"
+                        ],
+                        "materi_inti": [
+                            "Fotosintesis"
+                        ],
+                        "cp_snippet": "IPAS Menjelaskan bentuk dan fungsi pancaindra; menganalisis siklus hidup makhluk hidup dan upaya pelestariannya; menghasilkan solusi untuk masalah yang berkaitan dengan pelestarian sumber daya alam sebagai upaya mitigasi perubahan iklim; menyimpulkan proses perubahan wujud zat; menjelaskan sumber dan bentuk energi, serta proses perubahan bentuk energi dalam kehidupan sehari-hari; membedakan jenis gaya dan pengaruhnya terhadap arah, gerak, dan bentuk benda; menjelaskan peran, tugas, dan tanggu..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Sosial"
+                        ],
+                        "materi_inti": [
+                            "Peta & Wilayah"
+                        ],
+                        "cp_snippet": "IPAS Menjelaskan bentuk dan fungsi pancaindra; menganalisis siklus hidup makhluk hidup dan upaya pelestariannya; menghasilkan solusi untuk masalah yang berkaitan dengan pelestarian sumber daya alam sebagai upaya mitigasi perubahan iklim; menyimpulkan proses perubahan wujud zat; menjelaskan sumber dan bentuk energi, serta proses perubahan bentuk energi dalam kehidupan sehari-hari; membedakan jenis gaya dan pengaruhnya terhadap arah, gerak, dan bentuk benda; menjelaskan peran, tugas, dan tanggu..."
+                    }
+                },
+                "Bahasa Indonesia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Membaca"
+                        ],
+                        "materi_inti": [
+                            "Teks Eksplanasi"
+                        ],
+                        "cp_snippet": "Memahami ide pokok suatu informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan memahami isi teks sastra berbentuk teks aural. Membaca kata-kata baru dengan fasih dari bacaan dan/atau tayangan yang dipirsa; dan memahami ide pokok, ide pendukung, pesan, dan informasi dalam teks sastra dan nonsastra berbentuk cetak dan/atau elektronik."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Puisi Anak"
+                        ],
+                        "cp_snippet": "Memahami ide pokok suatu informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan memahami isi teks sastra berbentuk teks aural. Membaca kata-kata baru dengan fasih dari bacaan dan/atau tayangan yang dipirsa; dan memahami ide pokok, ide pendukung, pesan, dan informasi dalam teks sastra dan nonsastra berbentuk cetak dan/atau elektronik."
+                    }
+                },
+                "Pendidikan Pancasila": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pancasila"
+                        ],
+                        "materi_inti": [
+                            "Gotong Royong"
+                        ],
+                        "cp_snippet": "Mengidentifikasi makna sila-sila Pancasila, dan penerapannya dalam kehidupan sehari-hari; mengenal karakter para perumus Pancasila; menunjukkan sikap bangga menjadi anak Indonesia yang memiliki bahasa Indonesia sebagai bahasa persatuan di lingkungan sekitar. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengidentifikasi dan melaksanakan aturan di sekolah dan lingkungan tempat tinggal; mengidentifikasi dan menerapkan hak yang didapat dan kewajiban sebagai anggota keluarga dan sebagai warga..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "UUD 1945"
+                        ],
+                        "materi_inti": [
+                            "Musyawarah"
+                        ],
+                        "cp_snippet": "Mengidentifikasi makna sila-sila Pancasila, dan penerapannya dalam kehidupan sehari-hari; mengenal karakter para perumus Pancasila; menunjukkan sikap bangga menjadi anak Indonesia yang memiliki bahasa Indonesia sebagai bahasa persatuan di lingkungan sekitar. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengidentifikasi dan melaksanakan aturan di sekolah dan lingkungan tempat tinggal; mengidentifikasi dan menerapkan hak yang didapat dan kewajiban sebagai anggota keluarga dan sebagai warga..."
+                    }
+                },
+                "Pendidikan Agama Islam": {
+                    "ganjil": {
+                        "elemen": [
+                            "Al-Qur'an"
+                        ],
+                        "materi_inti": [
+                            "Surat At-Tin"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami beberapa surah pendek, ayat Al-Qur’an dan hadis tentang kewajiban salat dan menjaga hubungan baik dengan sesama. Memahami sifat-sifat Allah Swt., beberapa asmaulhusna, iman kepada kitab-kitab Allah Swt. dan rasul-rasul Allah Swt. Memahami akhlak terhadap Allah Swt. dengan berbaik sangka kepada-Nya, akhlak terhadap orang tua, keluarga, dan pendidik. Memahami puasa, salat jumat dan salat sunah, balig dan tanggung jawab yang menyertainya (taklīf). Peradaban Islam Memahami k..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Fikih"
+                        ],
+                        "materi_inti": [
+                            "Tayamum & Salat"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami beberapa surah pendek, ayat Al-Qur’an dan hadis tentang kewajiban salat dan menjaga hubungan baik dengan sesama. Memahami sifat-sifat Allah Swt., beberapa asmaulhusna, iman kepada kitab-kitab Allah Swt. dan rasul-rasul Allah Swt. Memahami akhlak terhadap Allah Swt. dengan berbaik sangka kepada-Nya, akhlak terhadap orang tua, keluarga, dan pendidik. Memahami puasa, salat jumat dan salat sunah, balig dan tanggung jawab yang menyertainya (taklīf). Peradaban Islam Memahami k..."
+                    }
+                },
+                "PJOK": {
+                    "ganjil": {
+                        "elemen": [
+                            "Gerak"
+                        ],
+                        "materi_inti": [
+                            "Renang Dasar"
+                        ],
+                        "cp_snippet": "Bergerak Menghaluskan keterampilan gerak fundamental dan menerapkannya dalam situasi gerak yang baru; menyesuaikan strategi gerak untuk mendapatkan capaian keterampilan gerak; dan memperagakan berbagai konsep gerak yang dapat diterapkan dalam rangkaian gerak. Melalui Gerak Menerapkan strategi gerak sederhana dan memecahkan masalah gerak; menerapkan peraturan untuk menumbuhkan fair play di dalam berbagai aktivitas jasmani; dan berpartisipasi secara positif dalam kelompok atau tim di dalam berb..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Kesehatan"
+                        ],
+                        "materi_inti": [
+                            "Bahaya Narkoba"
+                        ],
+                        "cp_snippet": "Bergerak Menghaluskan keterampilan gerak fundamental dan menerapkannya dalam situasi gerak yang baru; menyesuaikan strategi gerak untuk mendapatkan capaian keterampilan gerak; dan memperagakan berbagai konsep gerak yang dapat diterapkan dalam rangkaian gerak. Melalui Gerak Menerapkan strategi gerak sederhana dan memecahkan masalah gerak; menerapkan peraturan untuk menumbuhkan fair play di dalam berbagai aktivitas jasmani; dan berpartisipasi secara positif dalam kelompok atau tim di dalam berb..."
+                    }
+                },
+                "Bahasa Inggris": {
+                    "ganjil": {
+                        "elemen": [
+                            "Berbicara"
+                        ],
+                        "materi_inti": [
+                            "Expressing Feelings"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami dan merespon teks lisan atau teks multimodal sederhana tentang kehidupan sehari-hari baik secara verbal atau non-verbal sesuai konteks. (understand and respond to simple oral or multimodal texts about everyday life verbally or non-verbally in line with its context) Memirsa (Reading Viewing) Memahami teks tulis pendek sederhana atau teks multimodal tentang kehidupan sehari-hari dan meresponsnya secara verbal atau non-verbal sesuai konteks. (Understand si..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Descriptions"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami dan merespon teks lisan atau teks multimodal sederhana tentang kehidupan sehari-hari baik secara verbal atau non-verbal sesuai konteks. (understand and respond to simple oral or multimodal texts about everyday life verbally or non-verbally in line with its context) Memirsa (Reading Viewing) Memahami teks tulis pendek sederhana atau teks multimodal tentang kehidupan sehari-hari dan meresponsnya secara verbal atau non-verbal sesuai konteks. (Understand si..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Instruksi (Makanan Tradisional)",
+                            "Cerita Rakyat Lokal (Legenda)",
+                            "Sastra Daerah (Pupuh/Sekar Dasar)"
+                        ],
+                        "cp_snippet": "Memahami prosedur pembuatan makanan lokal; mengidentifikasi nilai moral dalam legenda; mengenal sastra daerah."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Eksposisi sederhana",
+                            "Iklan Layanan Masyarakat Daerah",
+                            "Aksara Daerah (Sandhangan Lanjutan)"
+                        ],
+                        "cp_snippet": "Menyampaikan pendapat tentang isu lokal; membuat iklan sederhana; menulis kata ber-sandhangan aksara daerah."
+                    }
+                },
+                "Prakarya": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Kerajinan Anyaman (Bahan Alam/Buatan)",
+                            "Motif Hias Tradisional Daerah"
+                        ],
+                        "cp_snippet": "Mengeksplorasi teknik anyam sederhana; mengaplikasikan motif hias lokal pada hasil kerajinan."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Pengolahan Makan dari Buah (Minuman Segar)",
+                            "Teknik Penyajian dan Pengemasan Produk Pangan"
+                        ],
+                        "cp_snippet": "Mengolah bahan buah menjadi minuman; menyajikan hasil pengolahan pangan secara menarik dan higienis."
+                    }
+                }
+            },
+            "5": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Bilangan"
+                        ],
+                        "materi_inti": [
+                            "KPK & FPB"
+                        ],
+                        "cp_snippet": "Menunjukkan pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai  ; membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, melakukan komposisi dan dekomposisi bilangan; menyelesaikan masalah yang berkaitan dengan uang; melakukan operasi penjumlahan, pengurangan, perkalian, dan pembagian bilangan cacah sampai  ; serta menyelesaikan masalah yang berkaitan dengan KPK dan FPB. Murid dapat membandingkan dan mengurutkan berbagai pecahan termasuk pecahan campuran,..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Geometri"
+                        ],
+                        "materi_inti": [
+                            "Volume Bangun Ruang"
+                        ],
+                        "cp_snippet": "Menunjukkan pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai  ; membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, melakukan komposisi dan dekomposisi bilangan; menyelesaikan masalah yang berkaitan dengan uang; melakukan operasi penjumlahan, pengurangan, perkalian, dan pembagian bilangan cacah sampai  ; serta menyelesaikan masalah yang berkaitan dengan KPK dan FPB. Murid dapat membandingkan dan mengurutkan berbagai pecahan termasuk pecahan campuran,..."
+                    }
+                },
+                "IPAS": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sains"
+                        ],
+                        "materi_inti": [
+                            "Rantai Makanan"
+                        ],
+                        "cp_snippet": "IPAS Merefleksikan sistem organ tubuh manusia yang dikaitkan dengan cara menjaga kesehatan tubuhnya; menganalisis hubungan antar komponen biotik dan abiotik, serta pengaruhnya terhadap ekosistem; menjelaskan fenomena gelombang bunyi dan cahaya dalam kehidupan sehari-hari; menghasilkan upaya penghematan energi, serta pemanfaatan sumber energi alternatif dari sumber daya yang ada di sekitarnya sebagai upaya mitigasi perubahan iklim; menjelaskan sistem tata surya, serta kaitannya dengan rotasi d..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Sosial"
+                        ],
+                        "materi_inti": [
+                            "Kerajaan Indonesia"
+                        ],
+                        "cp_snippet": "IPAS Merefleksikan sistem organ tubuh manusia yang dikaitkan dengan cara menjaga kesehatan tubuhnya; menganalisis hubungan antar komponen biotik dan abiotik, serta pengaruhnya terhadap ekosistem; menjelaskan fenomena gelombang bunyi dan cahaya dalam kehidupan sehari-hari; menghasilkan upaya penghematan energi, serta pemanfaatan sumber energi alternatif dari sumber daya yang ada di sekitarnya sebagai upaya mitigasi perubahan iklim; menjelaskan sistem tata surya, serta kaitannya dengan rotasi d..."
+                    }
+                },
+                "Bahasa Indonesia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Membaca"
+                        ],
+                        "materi_inti": [
+                            "Karya Sastra"
+                        ],
+                        "cp_snippet": "Menganalisis informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan; dan menganalisis isi teks sastra berbentuk teks aural. Membaca kata-kata dengan berbagai pola kombinasi huruf dengan fasih dari bacaan dan/atau tayangan yang dipirsa; dan menganalisis informasi serta nilai-nilai dalam teks sastra dan nonsastra berwujud teks visual dan/atau audiovisual."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara"
+                        ],
+                        "materi_inti": [
+                            "Pidato Sederhana"
+                        ],
+                        "cp_snippet": "Menganalisis informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan; dan menganalisis isi teks sastra berbentuk teks aural. Membaca kata-kata dengan berbagai pola kombinasi huruf dengan fasih dari bacaan dan/atau tayangan yang dipirsa; dan menganalisis informasi serta nilai-nilai dalam teks sastra dan nonsastra berwujud teks visual dan/atau audiovisual."
+                    }
+                },
+                "Pendidikan Pancasila": {
+                    "ganjil": {
+                        "elemen": [
+                            "Bhinneka"
+                        ],
+                        "materi_inti": [
+                            "Budaya Daerah"
+                        ],
+                        "cp_snippet": "Memahami kronologi sejarah kelahiran Pancasila; meneladani sikap para perumus Pancasila dan menerapkan di lingkungan masyarakat; menghubungkan sila-sila dalam Pancasila sebagai suatu kesatuan yang utuh; menguraikan makna nilai-nilai Pancasila sebagai dasar negara, dan pandangan hidup bangsa. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengimplementasikan bentuk-bentuk norma, hak, dan kewajiban dalam kedudukannya sebagai warga negara; mengenal Pembukaan Undang-Undang Dasar Negara Republi..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "NKRI"
+                        ],
+                        "materi_inti": [
+                            "Bela Negara"
+                        ],
+                        "cp_snippet": "Memahami kronologi sejarah kelahiran Pancasila; meneladani sikap para perumus Pancasila dan menerapkan di lingkungan masyarakat; menghubungkan sila-sila dalam Pancasila sebagai suatu kesatuan yang utuh; menguraikan makna nilai-nilai Pancasila sebagai dasar negara, dan pandangan hidup bangsa. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengimplementasikan bentuk-bentuk norma, hak, dan kewajiban dalam kedudukannya sebagai warga negara; mengenal Pembukaan Undang-Undang Dasar Negara Republi..."
+                    }
+                },
+                "Pendidikan Agama Islam": {
+                    "ganjil": {
+                        "elemen": [
+                            "Aqidah"
+                        ],
+                        "materi_inti": [
+                            "Iman Kitab Allah"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami beberapa surah pendek dan ayat Al-Qur’an serta hadis tentang keragaman. Memahami beberapa asmaulhusna, iman kepada hari akhir, qadāʾ dan qadr. Memahami akhlak terhadap Allah Swt. dengan berdoa dan bertawakal kepada-Nya, akhlak terhadap teman, tetangga, non muslim, hewan, dan tumbuhan. Memahami puasa sunah, zakat, infak, sedekah, hadiah, makanan dan minuman yang halal dan haram."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Akhlak"
+                        ],
+                        "materi_inti": [
+                            "Saling Menghargai"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami beberapa surah pendek dan ayat Al-Qur’an serta hadis tentang keragaman. Memahami beberapa asmaulhusna, iman kepada hari akhir, qadāʾ dan qadr. Memahami akhlak terhadap Allah Swt. dengan berdoa dan bertawakal kepada-Nya, akhlak terhadap teman, tetangga, non muslim, hewan, dan tumbuhan. Memahami puasa sunah, zakat, infak, sedekah, hadiah, makanan dan minuman yang halal dan haram."
+                    }
+                },
+                "Bahasa Inggris": {
+                    "ganjil": {
+                        "elemen": [
+                            "Membaca"
+                        ],
+                        "materi_inti": [
+                            "Historical Events"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Writing) Memahami alur informasi teks secara keseluruhan dan merespon teks lisan atau teks multimodal sederhana tentang topik sehari-hari secara lisan dengan kalimat pendek dan sederhana sesuai konteks. (Understand the entire flow of information and respond to simple oral or multimodal texts about everyday topics using short and simple sentences verbally in line with its context) Memirsa (Reading Viewing) Memahami alur informasi secara keseluruhan, gagasan utama dan infor..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Short Stories"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Writing) Memahami alur informasi teks secara keseluruhan dan merespon teks lisan atau teks multimodal sederhana tentang topik sehari-hari secara lisan dengan kalimat pendek dan sederhana sesuai konteks. (Understand the entire flow of information and respond to simple oral or multimodal texts about everyday topics using short and simple sentences verbally in line with its context) Memirsa (Reading Viewing) Memahami alur informasi secara keseluruhan, gagasan utama dan infor..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Eksposisi (Seni Pertunjukan)",
+                            "Cerita Pahlawan/Tokoh Daerah",
+                            "Aksara Daerah (Aksara Pasangan/Gantungan)"
+                        ],
+                        "cp_snippet": "Memahami teks eksposisi tentang budaya; mengidentifikasi keteladanan tokoh daerah; menguasai aksara pasangan."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Pidato Sederhana (Perayaan)",
+                            "Menulis Teks Kreatif Daerah",
+                            "Aksara Daerah (Lanjutan Pasangan)"
+                        ],
+                        "cp_snippet": "Berpidato dalam bahasa daerah; menulis teks narasi kreatif; menulis kalimat ber-aksara pasangan."
+                    }
+                },
+                "Prakarya": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Produk Rekayasa Sederhana (Pesawat/Kapal Air)",
+                            "Pemanfaatan Energi Angin/Air dalam Prakarya"
+                        ],
+                        "cp_snippet": "Merancang produk rekayasa sederhana; menerapkan prinsip energi pada karya kreatif."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Budi Daya Tanaman Obat Keluarga (TOGA)",
+                            "Manfaat dan Cara Pengolahan Tanaman Obat"
+                        ],
+                        "cp_snippet": "Mempraktikkan budi daya tanaman obat; memahami manfaat kesehatan dari produk budi daya sendiri."
+                    }
+                }
+            },
+            "6": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Bilangan"
+                        ],
+                        "materi_inti": [
+                            "Pecahan Desimal"
+                        ],
+                        "cp_snippet": "Menunjukkan pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai  ; membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, melakukan komposisi dan dekomposisi bilangan; menyelesaikan masalah yang berkaitan dengan uang; melakukan operasi penjumlahan, pengurangan, perkalian, dan pembagian bilangan cacah sampai  ; serta menyelesaikan masalah yang berkaitan dengan KPK dan FPB. Murid dapat membandingkan dan mengurutkan berbagai pecahan termasuk pecahan campuran,..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Data"
+                        ],
+                        "materi_inti": [
+                            "Rerata & Modus"
+                        ],
+                        "cp_snippet": "Menunjukkan pemahaman dan intuisi bilangan (number sense) pada bilangan cacah sampai  ; membaca, menulis, menentukan nilai tempat, membandingkan, mengurutkan, melakukan komposisi dan dekomposisi bilangan; menyelesaikan masalah yang berkaitan dengan uang; melakukan operasi penjumlahan, pengurangan, perkalian, dan pembagian bilangan cacah sampai  ; serta menyelesaikan masalah yang berkaitan dengan KPK dan FPB. Murid dapat membandingkan dan mengurutkan berbagai pecahan termasuk pecahan campuran,..."
+                    }
+                },
+                "IPAS": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sains"
+                        ],
+                        "materi_inti": [
+                            "Tata Surya"
+                        ],
+                        "cp_snippet": "IPAS Merefleksikan sistem organ tubuh manusia yang dikaitkan dengan cara menjaga kesehatan tubuhnya; menganalisis hubungan antar komponen biotik dan abiotik, serta pengaruhnya terhadap ekosistem; menjelaskan fenomena gelombang bunyi dan cahaya dalam kehidupan sehari-hari; menghasilkan upaya penghematan energi, serta pemanfaatan sumber energi alternatif dari sumber daya yang ada di sekitarnya sebagai upaya mitigasi perubahan iklim; menjelaskan sistem tata surya, serta kaitannya dengan rotasi d..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Sosial"
+                        ],
+                        "materi_inti": [
+                            "Modernisasi Dunia"
+                        ],
+                        "cp_snippet": "IPAS Merefleksikan sistem organ tubuh manusia yang dikaitkan dengan cara menjaga kesehatan tubuhnya; menganalisis hubungan antar komponen biotik dan abiotik, serta pengaruhnya terhadap ekosistem; menjelaskan fenomena gelombang bunyi dan cahaya dalam kehidupan sehari-hari; menghasilkan upaya penghematan energi, serta pemanfaatan sumber energi alternatif dari sumber daya yang ada di sekitarnya sebagai upaya mitigasi perubahan iklim; menjelaskan sistem tata surya, serta kaitannya dengan rotasi d..."
+                    }
+                },
+                "Bahasa Indonesia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Membaca"
+                        ],
+                        "materi_inti": [
+                            "Laporan Perjalanan"
+                        ],
+                        "cp_snippet": "Menganalisis informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan; dan menganalisis isi teks sastra berbentuk teks aural. Membaca kata-kata dengan berbagai pola kombinasi huruf dengan fasih dari bacaan dan/atau tayangan yang dipirsa; dan menganalisis informasi serta nilai-nilai dalam teks sastra dan nonsastra berwujud teks visual dan/atau audiovisual."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Karya Ilmiah Anak"
+                        ],
+                        "cp_snippet": "Menganalisis informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan; dan menganalisis isi teks sastra berbentuk teks aural. Membaca kata-kata dengan berbagai pola kombinasi huruf dengan fasih dari bacaan dan/atau tayangan yang dipirsa; dan menganalisis informasi serta nilai-nilai dalam teks sastra dan nonsastra berwujud teks visual dan/atau audiovisual."
+                    }
+                },
+                "Pendidikan Pancasila": {
+                    "ganjil": {
+                        "elemen": [
+                            "NKRI"
+                        ],
+                        "materi_inti": [
+                            "Otonomi Daerah"
+                        ],
+                        "cp_snippet": "Memahami kronologi sejarah kelahiran Pancasila; meneladani sikap para perumus Pancasila dan menerapkan di lingkungan masyarakat; menghubungkan sila-sila dalam Pancasila sebagai suatu kesatuan yang utuh; menguraikan makna nilai-nilai Pancasila sebagai dasar negara, dan pandangan hidup bangsa. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengimplementasikan bentuk-bentuk norma, hak, dan kewajiban dalam kedudukannya sebagai warga negara; mengenal Pembukaan Undang-Undang Dasar Negara Republi..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pancasila"
+                        ],
+                        "materi_inti": [
+                            "Profil Pancasila"
+                        ],
+                        "cp_snippet": "Memahami kronologi sejarah kelahiran Pancasila; meneladani sikap para perumus Pancasila dan menerapkan di lingkungan masyarakat; menghubungkan sila-sila dalam Pancasila sebagai suatu kesatuan yang utuh; menguraikan makna nilai-nilai Pancasila sebagai dasar negara, dan pandangan hidup bangsa. Undang Dasar Negara Republik Indonesia Tahun 1945 Mengimplementasikan bentuk-bentuk norma, hak, dan kewajiban dalam kedudukannya sebagai warga negara; mengenal Pembukaan Undang-Undang Dasar Negara Republi..."
+                    }
+                },
+                "Pendidikan Agama Islam": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sejarah"
+                        ],
+                        "materi_inti": [
+                            "Dakwah Walisongo"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami beberapa surah pendek dan ayat Al-Qur’an serta hadis tentang keragaman. Memahami beberapa asmaulhusna, iman kepada hari akhir, qadāʾ dan qadr. Memahami akhlak terhadap Allah Swt. dengan berdoa dan bertawakal kepada-Nya, akhlak terhadap teman, tetangga, non muslim, hewan, dan tumbuhan. Memahami puasa sunah, zakat, infak, sedekah, hadiah, makanan dan minuman yang halal dan haram."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Fikih"
+                        ],
+                        "materi_inti": [
+                            "Makanan Halal"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami beberapa surah pendek dan ayat Al-Qur’an serta hadis tentang keragaman. Memahami beberapa asmaulhusna, iman kepada hari akhir, qadāʾ dan qadr. Memahami akhlak terhadap Allah Swt. dengan berdoa dan bertawakal kepada-Nya, akhlak terhadap teman, tetangga, non muslim, hewan, dan tumbuhan. Memahami puasa sunah, zakat, infak, sedekah, hadiah, makanan dan minuman yang halal dan haram."
+                    }
+                },
+                "Bahasa Inggris": {
+                    "ganjil": {
+                        "elemen": [
+                            "Berbicara"
+                        ],
+                        "materi_inti": [
+                            "Future Goals"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Writing) Memahami alur informasi teks secara keseluruhan dan merespon teks lisan atau teks multimodal sederhana tentang topik sehari-hari secara lisan dengan kalimat pendek dan sederhana sesuai konteks. (Understand the entire flow of information and respond to simple oral or multimodal texts about everyday topics using short and simple sentences verbally in line with its context) Memirsa (Reading Viewing) Memahami alur informasi secara keseluruhan, gagasan utama dan infor..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Personal Essay"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Writing) Memahami alur informasi teks secara keseluruhan dan merespon teks lisan atau teks multimodal sederhana tentang topik sehari-hari secara lisan dengan kalimat pendek dan sederhana sesuai konteks. (Understand the entire flow of information and respond to simple oral or multimodal texts about everyday topics using short and simple sentences verbally in line with its context) Memirsa (Reading Viewing) Memahami alur informasi secara keseluruhan, gagasan utama dan infor..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Persuasi (Lingkungan)",
+                            "Pidato Perpisahan",
+                            "Etika Berbahasa (Tingkatan Bahasa Dasar)"
+                        ],
+                        "cp_snippet": "Menganalisis teks persuasi; menyampaikan pidato perpisahan dengan unggah-ungguh yang tepat."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Analisis Cerita Sastra Daerah",
+                            "Rekapitulasi Budaya Daerah",
+                            "Aksara Daerah (Review & Kecepatan)"
+                        ],
+                        "cp_snippet": "Mengapresiasi karya sastra klasik daerah; memahami kearifan lokal secara luas; mahir aksara daerah."
+                    }
+                },
+                "Prakarya": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Desain/Perencanaan",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Wirausaha Cilik (Membuat Produk Sederhana)",
+                            "Menghitung Biaya Produksi dan Harga Jual"
+                        ],
+                        "cp_snippet": "Merancang usaha kreatif skala kecil; melakukan perhitungan ekonomi dasar untuk produk prakarya."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Analisis Produk Kreatif Inovatif",
+                            "Persiapan Pameran Hasil Karya (Exhibition)"
+                        ],
+                        "cp_snippet": "Mengevaluasi kualitas produk secara mandiri; menyajikan hasil karya dalam bentuk pameran sederhana."
+                    }
+                }
+            }
+        },
+        "SMP": {
+            "7": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Bilangan",
+                            "Aljabar"
+                        ],
+                        "materi_inti": [
+                            "Bilangan Bulat",
+                            "Bilangan Rasional",
+                            "Bentuk Aljabar"
+                        ],
+                        "cp_snippet": "Membaca, menulis, dan membandingkan bilangan bulat, bilangan rasional, bilangan desimal, bilangan berpangkat bulat dan akar, bilangan dalam notasi ilmiah; menerapkan operasi aritmatika pada bilangan real, dan memberikan estimasi/perkiraan dalam menyelesaikan masalah (termasuk berkaitan dengan literasi finansial). Murid dapat menggunakan rasio (skala, proporsi, dan laju perubahan) dalam penyelesaian masalah."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Aljabar",
+                            "Geometri",
+                            "Analisis Data dan Peluang"
+                        ],
+                        "materi_inti": [
+                            "Persamaan dan Pertidaksamaan Linear Satu Variabel",
+                            "Perbandingan Senilai dan Berbalik Nilai",
+                            "Garis dan Sudut",
+                            "Pengolahan Data"
+                        ],
+                        "cp_snippet": "Membaca, menulis, dan membandingkan bilangan bulat, bilangan rasional, bilangan desimal, bilangan berpangkat bulat dan akar, bilangan dalam notasi ilmiah; menerapkan operasi aritmatika pada bilangan real, dan memberikan estimasi/perkiraan dalam menyelesaikan masalah (termasuk berkaitan dengan literasi finansial). Murid dapat menggunakan rasio (skala, proporsi, dan laju perubahan) dalam penyelesaian masalah."
+                    }
+                },
+                "Bahasa Indonesia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Deskripsi (Jelajah Nusantara)",
+                            "Puisi Rakyat & Cerita Fantasi (Dunia Imajinasi)",
+                            "Teks Prosedur (Hal Baik bagi Tubuh)"
+                        ],
+                        "cp_snippet": "Menganalisis gagasan, pandangan, arahan, dan/atau pesan dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan menganalisis unsur intrinsik teks sastra berbentuk teks aural. Menganalisis informasi berupa gagasan, pandangan, arahan, dan/atau pesan dari berbagai tipe teks berwujud teks visual dan/atau audiovisual untuk menemukan makna yang tersurat dan tersirat; menginterpretasi informasi untuk mengungkapkan kepedulian dan/atau pendapat pro/kontra dari berbagai..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Berita (Pelindung Bumi)",
+                            "Buku Fiksi & Nonfiksi (Gerbang Dunia)",
+                            "Surat Resmi & Pribadi"
+                        ],
+                        "cp_snippet": "Menganalisis gagasan, pandangan, arahan, dan/atau pesan dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan menganalisis unsur intrinsik teks sastra berbentuk teks aural. Menganalisis informasi berupa gagasan, pandangan, arahan, dan/atau pesan dari berbagai tipe teks berwujud teks visual dan/atau audiovisual untuk menemukan makna yang tersurat dan tersirat; menginterpretasi informasi untuk mengungkapkan kepedulian dan/atau pendapat pro/kontra dari berbagai..."
+                    }
+                },
+                "IPA": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman IPA",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Hakikat Sains dan Metode Ilmiah",
+                            "Zat dan Perubahannya",
+                            "Suhu, Kalor, dan Pemuaian"
+                        ],
+                        "cp_snippet": "IPA Menelaah hasil identifikasi makhluk hidup sesuai dengan karakteristiknya; menganalisis klasifikasi, sifat, dan perubahan materi; menganalisis sistem organisasi kehidupan, fungsi, serta kelainan atau gangguan yang muncul pada sistem organ; menganalisis interaksi antar makhluk hidup dan lingkungannya dalam merancang upaya-upaya untuk mencegah dan mengatasi perubahan iklim; menganalisis pewarisan sifat; membuat bioteknologi konvensional di lingkungan sekitarnya; menerapkan pengukuran terhada..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman IPA",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Gerak dan Gaya",
+                            "Klasifikasi Makhluk Hidup",
+                            "Ekologi dan Keanekaragaman Hayati",
+                            "Bumi dan Tata Surya"
+                        ],
+                        "cp_snippet": "IPA Menelaah hasil identifikasi makhluk hidup sesuai dengan karakteristiknya; menganalisis klasifikasi, sifat, dan perubahan materi; menganalisis sistem organisasi kehidupan, fungsi, serta kelainan atau gangguan yang muncul pada sistem organ; menganalisis interaksi antar makhluk hidup dan lingkungannya dalam merancang upaya-upaya untuk mencegah dan mengatasi perubahan iklim; menganalisis pewarisan sifat; membuat bioteknologi konvensional di lingkungan sekitarnya; menerapkan pengukuran terhada..."
+                    }
+                },
+                "IPS": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Keluarga Awal Kehidupan",
+                            "Keberagaman Lingkungan Sekitar"
+                        ],
+                        "cp_snippet": "Konsep Menjelaskan keberagaman kondisi geografis Indonesia, konektivitas antarruang terhadap upaya pemanfaatan dan pelestarian potensi sumber daya alam, faktor aktivitas manusia terhadap perubahan iklim dan potensi bencana alam; memprediksi dampak perubahan iklim terhadap kehidupan ekonomi, sosial, budaya masyarakat serta merefleksikan pola adaptasi terhadap perubahan iklim dan upaya mitigasi bencana untuk menunjang sustainable development goals (SDGs) dalam konteks lokal, regional, dan globa..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Potensi Ekonomi Lingkungan",
+                            "Pemberdayaan Masyarakat"
+                        ],
+                        "cp_snippet": "Konsep Menjelaskan keberagaman kondisi geografis Indonesia, konektivitas antarruang terhadap upaya pemanfaatan dan pelestarian potensi sumber daya alam, faktor aktivitas manusia terhadap perubahan iklim dan potensi bencana alam; memprediksi dampak perubahan iklim terhadap kehidupan ekonomi, sosial, budaya masyarakat serta merefleksikan pola adaptasi terhadap perubahan iklim dan upaya mitigasi bencana untuk menunjang sustainable development goals (SDGs) dalam konteks lokal, regional, dan globa..."
+                    }
+                },
+                "Pendidikan Pancasila": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pancasila",
+                            "UUD NRI Tahun 1945"
+                        ],
+                        "materi_inti": [
+                            "Sejarah Kelahiran Pancasila",
+                            "Penerapan Nilai-Nilai Pancasila",
+                            "Patuh Terhadap Norma"
+                        ],
+                        "cp_snippet": "Memahami sejarah kelahiran Pancasila; memahami kedudukan Pancasila sebagai dasar negara, pandangan hidup bangsa, dan ideologi negara serta penerapannya dalam kehidupan sehari-hari; memahami makna keterkaitan Pancasila dengan Undang-Undang Dasar Negara Republik Indonesia Tahun 1945, Bhinneka Tunggal Ika, dan Negara Kesatuan Republik Indonesia. Undang Dasar Negara Republik Indonesia Tahun 1945 Menerapkan norma dan aturan; memahami tata urutan peraturan perundang-undangan yang berlaku di Indones..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Bhinneka Tunggal Ika",
+                            "NKRI"
+                        ],
+                        "materi_inti": [
+                            "Keberagaman Bangsa Indonesia",
+                            "Wilayah NKRI dan Wawasan Nusantara"
+                        ],
+                        "cp_snippet": "Memahami sejarah kelahiran Pancasila; memahami kedudukan Pancasila sebagai dasar negara, pandangan hidup bangsa, dan ideologi negara serta penerapannya dalam kehidupan sehari-hari; memahami makna keterkaitan Pancasila dengan Undang-Undang Dasar Negara Republik Indonesia Tahun 1945, Bhinneka Tunggal Ika, dan Negara Kesatuan Republik Indonesia. Undang Dasar Negara Republik Indonesia Tahun 1945 Menerapkan norma dan aturan; memahami tata urutan peraturan perundang-undangan yang berlaku di Indones..."
+                    }
+                },
+                "Informatika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Berpikir Komputasional",
+                            "Teknologi Informasi dan Komunikasi",
+                            "Sistem Komputer",
+                            "Jaringan Komputer dan Internet"
+                        ],
+                        "materi_inti": [
+                            "Informatika dan Keterampilan Generik",
+                            "BK (Himpunan, Logika)",
+                            "TIK (Folder, Perangkat Lunak)",
+                            "SK (Perangkat Keras, OS)"
+                        ],
+                        "cp_snippet": "Komputasional Menerapkan berpikir komputasional untuk problem dalam kehidupan sehari-hari maupun dalam menghadapi masalah komputasi; memahami konsep himpunan data terstruktur dalam kehidupan sehari-hari; memahami konsep lembar kerja pengolah data; menerapkan berpikir komputasional dalam menyelesaikan persoalan yang mengandung himpunan data berstruktur sederhana dengan volume kecil; serta menuliskan sekumpulan instruksi dengan menggunakan sekumpulan kosakata terbatas atau simbol dalam format p..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Analisis Data",
+                            "Algoritma dan Pemrograman",
+                            "Dampak Sosial Informatika",
+                            "Praktik Lintas Bidang"
+                        ],
+                        "materi_inti": [
+                            "Analisis Data (Perkakas, Pengolahan)",
+                            "Algoritma dan Pemrograman (Visual Scratch)",
+                            "Dampak Sosial Informatika (Informasi Palsu)",
+                            "Praktika Lintas Bidang (Proyek)"
+                        ],
+                        "cp_snippet": "Komputasional Menerapkan berpikir komputasional untuk problem dalam kehidupan sehari-hari maupun dalam menghadapi masalah komputasi; memahami konsep himpunan data terstruktur dalam kehidupan sehari-hari; memahami konsep lembar kerja pengolah data; menerapkan berpikir komputasional dalam menyelesaikan persoalan yang mengandung himpunan data berstruktur sederhana dengan volume kecil; serta menuliskan sekumpulan instruksi dengan menggunakan sekumpulan kosakata terbatas atau simbol dalam format p..."
+                    }
+                },
+                "Bahasa Inggris": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak - Berbicara"
+                        ],
+                        "materi_inti": [
+                            "Chapter 1: About Me",
+                            "Chapter 2: Culinary and Me",
+                            "Chapter 3: Home Sweet Home"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami alur informasi secara keseluruhan, gagasan utama dan informasi rinci dari teks lisan tentang topik sehari-hari atau yang sesuai dengan minat; menggunakan bahasa Inggris untuk mengungkapkan gagasan dan pengalaman dalam berbagai jenis teks secara lisan tentang topik yang dibahas dengan menggunakan kalimat sederhana dan majemuk baik formal maupun informal sesuai konteks. (Understand the entire flow of information, main ideas and details of oral texts about..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Membaca - Memirsa",
+                            "Menulis - Mempresentasikan"
+                        ],
+                        "materi_inti": [
+                            "Chapter 4: My School Activities",
+                            "Chapter 5: This is My School"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami alur informasi secara keseluruhan, gagasan utama dan informasi rinci dari teks lisan tentang topik sehari-hari atau yang sesuai dengan minat; menggunakan bahasa Inggris untuk mengungkapkan gagasan dan pengalaman dalam berbagai jenis teks secara lisan tentang topik yang dibahas dengan menggunakan kalimat sederhana dan majemuk baik formal maupun informal sesuai konteks. (Understand the entire flow of information, main ideas and details of oral texts about..."
+                    }
+                },
+                "PJOK": {
+                    "ganjil": {
+                        "elemen": [
+                            "Keterampilan Gerak",
+                            "Pengetahuan Gerak"
+                        ],
+                        "materi_inti": [
+                            "Permainan Bola Besar (Sepakbola, Basket)",
+                            "Lari Jarak Pendek",
+                            "Seni Beladiri Pencak Silat"
+                        ],
+                        "cp_snippet": "Bergerak Menerapkan keterampilan gerak serta mentransfernya ke dalam berbagai situasi gerak; memperagakan strategi gerak yang dapat dimanfaatkan untuk meningkatkan capaian keterampilan gerak. Melalui Gerak Membuktikan strategi gerak yang paling efektif dalam situasi gerak yang berbeda; menginvestigasi modifikasi peraturan yang mendukung fair play dan partisipasi inklusif; menerapkan kepemimpinan, kolaborasi, dan pengambilan keputusan kelompok ketika berpartisipasi di dalam berbagai aktivitas ..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemanfaatan Gerak",
+                            "Pengembangan Karakter"
+                        ],
+                        "materi_inti": [
+                            "Senam Lantai",
+                            "Gerak Berirama",
+                            "Bahaya Pergaulan Bebas dan Rokok"
+                        ],
+                        "cp_snippet": "Bergerak Menerapkan keterampilan gerak serta mentransfernya ke dalam berbagai situasi gerak; memperagakan strategi gerak yang dapat dimanfaatkan untuk meningkatkan capaian keterampilan gerak. Melalui Gerak Membuktikan strategi gerak yang paling efektif dalam situasi gerak yang berbeda; menginvestigasi modifikasi peraturan yang mendukung fair play dan partisipasi inklusif; menerapkan kepemimpinan, kolaborasi, dan pengambilan keputusan kelompok ketika berpartisipasi di dalam berbagai aktivitas ..."
+                    }
+                },
+                "Pendidikan Agama Islam": {
+                    "ganjil": {
+                        "elemen": [
+                            "Al-Qur'an dan Hadis",
+                            "Akidah",
+                            "Akhlak"
+                        ],
+                        "materi_inti": [
+                            "Pedoman Hidup Al-Qur'an dan Sunnah",
+                            "Meneladani Nama dan Sifat Allah",
+                            "Menghadirkan Shalat dan Zikir"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Fikih",
+                            "Sejarah Peradaban Islam"
+                        ],
+                        "materi_inti": [
+                            "Sujud Syukur, Sahwi, dan Tilawah",
+                            "Zakat, Haji, dan Umrah (Pengenalan)",
+                            "Sejarah Bani Umayyah di Damaskus"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                    }
+                },
+                "Seni Rupa": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Rupa Dasar (Titik, Garis, Bidang)",
+                            "Menggambar Flora, Fauna, dan Alam Benda",
+                            "Prinsip Gambar Perspektif"
+                        ],
+                        "cp_snippet": "Experiencing) Menganalisis unsur rupa dan prinsip desain dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri dan teman sekelas; membandingkan unsur rupa, prinsip desain, dan fungsi karya seni rupa menggunakan kosa kata seni rupa yang sesuai. Artistik (Thinking and Working Artistically) Mengaplikasikan variasi teknik penggunaan alat dan bahan yang dimiliki untuk berkarya; mengeksplorasi alternatif/potensi alat dan bahan yang ada di li..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berapresiasi"
+                        ],
+                        "materi_inti": [
+                            "Desain Poster dan Tipografi",
+                            "Mengenal Ragam Hias Nusantara",
+                            "Pameran Karya Seni Rupa"
+                        ],
+                        "cp_snippet": "Experiencing) Menganalisis unsur rupa dan prinsip desain dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri dan teman sekelas; membandingkan unsur rupa, prinsip desain, dan fungsi karya seni rupa menggunakan kosa kata seni rupa yang sesuai. Artistik (Thinking and Working Artistically) Mengaplikasikan variasi teknik penggunaan alat dan bahan yang dimiliki untuk berkarya; mengeksplorasi alternatif/potensi alat dan bahan yang ada di li..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Deskripsi (Profil Diri & Sekolah)",
+                            "Cerita Rakyat (Legenda Lokal)",
+                            "Etika Berbicara (Unggah-ungguh)"
+                        ],
+                        "cp_snippet": "Peserta didik mampu memahami informasi dari teks deskripsi dan cerita rakyat daerah; menerapkan etika berbicara sesuai konteks daerah."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Cerita Pengalaman Pribadi",
+                            "Teks Berita (Pawarta Lokal)",
+                            "Aksara Daerah (Dasar & Sandhangan)"
+                        ],
+                        "cp_snippet": "Peserta didik mampu menceritakan pengalaman pribadi dengan bahasa daerah; menulis kalimat dengan aksara daerah dasar."
+                    }
+                },
+                "Prakarya": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Desain/Perencanaan",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Kerajinan Bahan Alam (Lunak/Keras)",
+                            "Pengolahan Bahan Pangan Buah & Sayur",
+                            "Kemasan Produk Prakarya"
+                        ],
+                        "cp_snippet": "Menjelaskan aspek- aspek penting budi daya berdasarkan hasil observasi; menjelaskan produk budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan sesuai potensi lingkungan/kearifan lokal berdasarkan hasil eksplorasi.  /Perencanaan Menyusun rencana kegiatan budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan, sesuai potensi lingkungan/kearifan lokal. Menghasilkan produk budi daya yang aman berdasarkan potensi lingkungan/kearifan lokal dengan modifikasi bahan, alat, d..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Produk Rekayasa Alat Penjernih Air",
+                            "Budi Daya Tanaman Sayuran",
+                            "Pemasaran Produk Sederhana"
+                        ],
+                        "cp_snippet": "Menjelaskan aspek- aspek penting budi daya berdasarkan hasil observasi; menjelaskan produk budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan sesuai potensi lingkungan/kearifan lokal berdasarkan hasil eksplorasi.  /Perencanaan Menyusun rencana kegiatan budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan, sesuai potensi lingkungan/kearifan lokal. Menghasilkan produk budi daya yang aman berdasarkan potensi lingkungan/kearifan lokal dengan modifikasi bahan, alat, d..."
+                    }
+                }
+            },
+            "8": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Bilangan",
+                            "Geometri",
+                            "Aljabar"
+                        ],
+                        "materi_inti": [
+                            "Bilangan Berpangkat",
+                            "Teorema Pythagoras",
+                            "Persamaan Linear dan Pertidaksamaan Linear Satu Variabel"
+                        ],
+                        "cp_snippet": "Membaca, menulis, dan membandingkan bilangan bulat, bilangan rasional, bilangan desimal, bilangan berpangkat bulat dan akar, bilangan dalam notasi ilmiah; menerapkan operasi aritmatika pada bilangan real, dan memberikan estimasi/perkiraan dalam menyelesaikan masalah (termasuk berkaitan dengan literasi finansial). Murid dapat menggunakan rasio (skala, proporsi, dan laju perubahan) dalam penyelesaian masalah."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Aljabar",
+                            "Analisis Data dan Peluang"
+                        ],
+                        "materi_inti": [
+                            "Relasi dan Fungsi",
+                            "Persamaan Garis Lurus",
+                            "Statistika"
+                        ],
+                        "cp_snippet": "Membaca, menulis, dan membandingkan bilangan bulat, bilangan rasional, bilangan desimal, bilangan berpangkat bulat dan akar, bilangan dalam notasi ilmiah; menerapkan operasi aritmatika pada bilangan real, dan memberikan estimasi/perkiraan dalam menyelesaikan masalah (termasuk berkaitan dengan literasi finansial). Murid dapat menggunakan rasio (skala, proporsi, dan laju perubahan) dalam penyelesaian masalah."
+                    }
+                },
+                "Bahasa Indonesia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Laporan Hasil Observasi (LHO)",
+                            "Iklan, Slogan, dan Poster",
+                            "Artikel Ilmiah Populer"
+                        ],
+                        "cp_snippet": "Menganalisis gagasan, pandangan, arahan, dan/atau pesan dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan menganalisis unsur intrinsik teks sastra berbentuk teks aural. Menganalisis informasi berupa gagasan, pandangan, arahan, dan/atau pesan dari berbagai tipe teks berwujud teks visual dan/atau audiovisual untuk menemukan makna yang tersurat dan tersirat; menginterpretasi informasi untuk mengungkapkan kepedulian dan/atau pendapat pro/kontra dari berbagai..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Mengulas Karya Fiksi",
+                            "Menulis Teks Pidato",
+                            "Membaca Karya Fiksi"
+                        ],
+                        "cp_snippet": "Menganalisis gagasan, pandangan, arahan, dan/atau pesan dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan menganalisis unsur intrinsik teks sastra berbentuk teks aural. Menganalisis informasi berupa gagasan, pandangan, arahan, dan/atau pesan dari berbagai tipe teks berwujud teks visual dan/atau audiovisual untuk menemukan makna yang tersurat dan tersirat; menginterpretasi informasi untuk mengungkapkan kepedulian dan/atau pendapat pro/kontra dari berbagai..."
+                    }
+                },
+                "IPA": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman IPA",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Pengenalan Sel",
+                            "Struktur dan Fungsi Tubuh Makhluk Hidup",
+                            "Usaha, Energi, dan Pesawat Sederhana"
+                        ],
+                        "cp_snippet": "IPA Menelaah hasil identifikasi makhluk hidup sesuai dengan karakteristiknya; menganalisis klasifikasi, sifat, dan perubahan materi; menganalisis sistem organisasi kehidupan, fungsi, serta kelainan atau gangguan yang muncul pada sistem organ; menganalisis interaksi antar makhluk hidup dan lingkungannya dalam merancang upaya-upaya untuk mencegah dan mengatasi perubahan iklim; menganalisis pewarisan sifat; membuat bioteknologi konvensional di lingkungan sekitarnya; menerapkan pengukuran terhada..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman IPA",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Getaran, Gelombang, dan Cahaya",
+                            "Unsur, Senyawa, dan Campuran",
+                            "Struktur Bumi dan Perkembangannya"
+                        ],
+                        "cp_snippet": "IPA Menelaah hasil identifikasi makhluk hidup sesuai dengan karakteristiknya; menganalisis klasifikasi, sifat, dan perubahan materi; menganalisis sistem organisasi kehidupan, fungsi, serta kelainan atau gangguan yang muncul pada sistem organ; menganalisis interaksi antar makhluk hidup dan lingkungannya dalam merancang upaya-upaya untuk mencegah dan mengatasi perubahan iklim; menganalisis pewarisan sifat; membuat bioteknologi konvensional di lingkungan sekitarnya; menerapkan pengukuran terhada..."
+                    }
+                },
+                "IPS": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Kondisi Geografis dan Pelestarian SDA",
+                            "Kemajemukan Masyarakat Indonesia"
+                        ],
+                        "cp_snippet": "Konsep Menjelaskan keberagaman kondisi geografis Indonesia, konektivitas antarruang terhadap upaya pemanfaatan dan pelestarian potensi sumber daya alam, faktor aktivitas manusia terhadap perubahan iklim dan potensi bencana alam; memprediksi dampak perubahan iklim terhadap kehidupan ekonomi, sosial, budaya masyarakat serta merefleksikan pola adaptasi terhadap perubahan iklim dan upaya mitigasi bencana untuk menunjang sustainable development goals (SDGs) dalam konteks lokal, regional, dan globa..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Nasionalisme dan Jati Diri Bangsa",
+                            "Pembangunan Perekonomian Indonesia"
+                        ],
+                        "cp_snippet": "Konsep Menjelaskan keberagaman kondisi geografis Indonesia, konektivitas antarruang terhadap upaya pemanfaatan dan pelestarian potensi sumber daya alam, faktor aktivitas manusia terhadap perubahan iklim dan potensi bencana alam; memprediksi dampak perubahan iklim terhadap kehidupan ekonomi, sosial, budaya masyarakat serta merefleksikan pola adaptasi terhadap perubahan iklim dan upaya mitigasi bencana untuk menunjang sustainable development goals (SDGs) dalam konteks lokal, regional, dan globa..."
+                    }
+                },
+                "Pendidikan Pancasila": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pancasila",
+                            "UUD NRI Tahun 1945"
+                        ],
+                        "materi_inti": [
+                            "Kedudukan dan Fungsi Pancasila",
+                            "Kesadaran terhadap UUD NRI 1945",
+                            "Tata Urutan Peraturan Perundang-undangan"
+                        ],
+                        "cp_snippet": "Memahami sejarah kelahiran Pancasila; memahami kedudukan Pancasila sebagai dasar negara, pandangan hidup bangsa, dan ideologi negara serta penerapannya dalam kehidupan sehari-hari; memahami makna keterkaitan Pancasila dengan Undang-Undang Dasar Negara Republik Indonesia Tahun 1945, Bhinneka Tunggal Ika, dan Negara Kesatuan Republik Indonesia. Undang Dasar Negara Republik Indonesia Tahun 1945 Menerapkan norma dan aturan; memahami tata urutan peraturan perundang-undangan yang berlaku di Indones..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Bhinneka Tunggal Ika",
+                            "NKRI"
+                        ],
+                        "materi_inti": [
+                            "Kebangkitan Nasional dan Sumpah Pemuda",
+                            "Jati Diri Bangsa dalam Era Globalisasi",
+                            "Semangat Kerja Sama"
+                        ],
+                        "cp_snippet": "Memahami sejarah kelahiran Pancasila; memahami kedudukan Pancasila sebagai dasar negara, pandangan hidup bangsa, dan ideologi negara serta penerapannya dalam kehidupan sehari-hari; memahami makna keterkaitan Pancasila dengan Undang-Undang Dasar Negara Republik Indonesia Tahun 1945, Bhinneka Tunggal Ika, dan Negara Kesatuan Republik Indonesia. Undang Dasar Negara Republik Indonesia Tahun 1945 Menerapkan norma dan aturan; memahami tata urutan peraturan perundang-undangan yang berlaku di Indones..."
+                    }
+                },
+                "Informatika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Berpikir Komputasional",
+                            "Teknologi Informasi dan Komunikasi",
+                            "Sistem Komputer",
+                            "Jaringan Komputer dan Internet"
+                        ],
+                        "materi_inti": [
+                            "BK (Dekomposisi, Abstraksi)",
+                            "TIK (Informasi Digital, Berbagi Konten)",
+                            "SK (Komponen Sistem Terintegrasi)",
+                            "JKI (Keamanan Data Cloud)"
+                        ],
+                        "cp_snippet": "Komputasional Menerapkan berpikir komputasional untuk problem dalam kehidupan sehari-hari maupun dalam menghadapi masalah komputasi; memahami konsep himpunan data terstruktur dalam kehidupan sehari-hari; memahami konsep lembar kerja pengolah data; menerapkan berpikir komputasional dalam menyelesaikan persoalan yang mengandung himpunan data berstruktur sederhana dengan volume kecil; serta menuliskan sekumpulan instruksi dengan menggunakan sekumpulan kosakata terbatas atau simbol dalam format p..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Analisis Data",
+                            "Algoritma dan Pemrograman",
+                            "Dampak Sosial Informatika",
+                            "Praktik Lintas Bidang"
+                        ],
+                        "materi_inti": [
+                            "Analisis Data (Visualisasi, Pencarian)",
+                            "Algoritma dan Pemrograman (Struktur Kontrol)",
+                            "Dampak Sosial Informatika (Etika Digital)",
+                            "Praktika Lintas Bidang (Proyek Terstruktur)"
+                        ],
+                        "cp_snippet": "Komputasional Menerapkan berpikir komputasional untuk problem dalam kehidupan sehari-hari maupun dalam menghadapi masalah komputasi; memahami konsep himpunan data terstruktur dalam kehidupan sehari-hari; memahami konsep lembar kerja pengolah data; menerapkan berpikir komputasional dalam menyelesaikan persoalan yang mengandung himpunan data berstruktur sederhana dengan volume kecil; serta menuliskan sekumpulan instruksi dengan menggunakan sekumpulan kosakata terbatas atau simbol dalam format p..."
+                    }
+                },
+                "Bahasa Inggris": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak - Berbicara"
+                        ],
+                        "materi_inti": [
+                            "Celebrating Independence Day",
+                            "Kindness and Resilience",
+                            "My Experience"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami alur informasi secara keseluruhan, gagasan utama dan informasi rinci dari teks lisan tentang topik sehari-hari atau yang sesuai dengan minat; menggunakan bahasa Inggris untuk mengungkapkan gagasan dan pengalaman dalam berbagai jenis teks secara lisan tentang topik yang dibahas dengan menggunakan kalimat sederhana dan majemuk baik formal maupun informal sesuai konteks. (Understand the entire flow of information, main ideas and details of oral texts about..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Membaca - Memirsa",
+                            "Menulis - Mempresentasikan"
+                        ],
+                        "materi_inti": [
+                            "Love Our World",
+                            "No Littering",
+                            "Environment"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami alur informasi secara keseluruhan, gagasan utama dan informasi rinci dari teks lisan tentang topik sehari-hari atau yang sesuai dengan minat; menggunakan bahasa Inggris untuk mengungkapkan gagasan dan pengalaman dalam berbagai jenis teks secara lisan tentang topik yang dibahas dengan menggunakan kalimat sederhana dan majemuk baik formal maupun informal sesuai konteks. (Understand the entire flow of information, main ideas and details of oral texts about..."
+                    }
+                },
+                "PJOK": {
+                    "ganjil": {
+                        "elemen": [
+                            "Keterampilan Gerak",
+                            "Pengetahuan Gerak"
+                        ],
+                        "materi_inti": [
+                            "Permainan Bola Kecil (Softball/Bulu Tangkis)",
+                            "Atletik (Lompat Jauh)",
+                            "Beladiri (Lanjutan)"
+                        ],
+                        "cp_snippet": "Bergerak Menerapkan keterampilan gerak serta mentransfernya ke dalam berbagai situasi gerak; memperagakan strategi gerak yang dapat dimanfaatkan untuk meningkatkan capaian keterampilan gerak. Melalui Gerak Membuktikan strategi gerak yang paling efektif dalam situasi gerak yang berbeda; menginvestigasi modifikasi peraturan yang mendukung fair play dan partisipasi inklusif; menerapkan kepemimpinan, kolaborasi, dan pengambilan keputusan kelompok ketika berpartisipasi di dalam berbagai aktivitas ..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemanfaatan Gerak",
+                            "Pengembangan Karakter"
+                        ],
+                        "materi_inti": [
+                            "Aktivitas Kebugaran Jasmani",
+                            "Bahaya Narkoba dan Psikotropika",
+                            "Sex Education (Dasar)"
+                        ],
+                        "cp_snippet": "Bergerak Menerapkan keterampilan gerak serta mentransfernya ke dalam berbagai situasi gerak; memperagakan strategi gerak yang dapat dimanfaatkan untuk meningkatkan capaian keterampilan gerak. Melalui Gerak Membuktikan strategi gerak yang paling efektif dalam situasi gerak yang berbeda; menginvestigasi modifikasi peraturan yang mendukung fair play dan partisipasi inklusif; menerapkan kepemimpinan, kolaborasi, dan pengambilan keputusan kelompok ketika berpartisipasi di dalam berbagai aktivitas ..."
+                    }
+                },
+                "Pendidikan Agama Islam": {
+                    "ganjil": {
+                        "elemen": [
+                            "Al-Qur'an dan Hadis",
+                            "Akidah",
+                            "Akhlak"
+                        ],
+                        "materi_inti": [
+                            "Melestarikan Alam Menjaga Kehidupan",
+                            "Meyakini Kitab-Kitab Allah",
+                            "Menjadi Pribadi Amanah dan Jujur"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Fikih",
+                            "Sejarah Peradaban Islam"
+                        ],
+                        "materi_inti": [
+                            "Ibadah Shalat Gerhana dan Jenazah",
+                            "Jual Beli dan Hutang Piutang (Fikih Muamalah)",
+                            "Masa Keemasan Bani Abbasiyah di Baghdad"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                    }
+                },
+                "Seni Rupa": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Menggambar Perspektif Satu Titik Hilang",
+                            "Melukis dengan Berbagai Media",
+                            "Menggambar Ragam Hias Nusantara"
+                        ],
+                        "cp_snippet": "Experiencing) Menganalisis unsur rupa dan prinsip desain dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri dan teman sekelas; membandingkan unsur rupa, prinsip desain, dan fungsi karya seni rupa menggunakan kosa kata seni rupa yang sesuai. Artistik (Thinking and Working Artistically) Mengaplikasikan variasi teknik penggunaan alat dan bahan yang dimiliki untuk berkarya; mengeksplorasi alternatif/potensi alat dan bahan yang ada di li..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berapresiasi"
+                        ],
+                        "materi_inti": [
+                            "Desain Grafis dan Tipografi Dasar",
+                            "Apresiasi Karya Seni Rupa Daerah",
+                            "Persiapan dan Pelaksanaan Pameran"
+                        ],
+                        "cp_snippet": "Experiencing) Menganalisis unsur rupa dan prinsip desain dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri dan teman sekelas; membandingkan unsur rupa, prinsip desain, dan fungsi karya seni rupa menggunakan kosa kata seni rupa yang sesuai. Artistik (Thinking and Working Artistically) Mengaplikasikan variasi teknik penggunaan alat dan bahan yang dimiliki untuk berkarya; mengeksplorasi alternatif/potensi alat dan bahan yang ada di li..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Cerita Pendek (Cerkak/Dongeng)",
+                            "Cerita Asal-Usul Tempat (Legenda)",
+                            "Etika Berbahasa (Ngoko & Krama/Tingkatan)"
+                        ],
+                        "cp_snippet": "Peserta didik mampu mengidentifikasi unsur intrinsik cerita pendek daerah; membedakan tingkatan bahasa sesuai lawan bicara."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Puisi Daerah (Geguritan/Pupuh)",
+                            "Teks Berita (Pawarta Aktual)",
+                            "Aksara Daerah (Pasangan & Angka)"
+                        ],
+                        "cp_snippet": "Peserta didik mampu membaca indah puisi daerah; menulis paragraf pendek menggunakan aksara daerah berpasangan."
+                    }
+                },
+                "Prakarya": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Desain/Perencanaan",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Kerajinan Bahan Limbah (Organik/Anorganik)",
+                            "Pengolahan Serealia, Umbi, & Kacang-kacangan",
+                            "Kemasan Produk Limbah"
+                        ],
+                        "cp_snippet": "Menjelaskan aspek- aspek penting budi daya berdasarkan hasil observasi; menjelaskan produk budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan sesuai potensi lingkungan/kearifan lokal berdasarkan hasil eksplorasi.  /Perencanaan Menyusun rencana kegiatan budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan, sesuai potensi lingkungan/kearifan lokal. Menghasilkan produk budi daya yang aman berdasarkan potensi lingkungan/kearifan lokal dengan modifikasi bahan, alat, d..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Alat Penjernih Air (Bahan Buatan)",
+                            "Budi Daya Satwa Harapan",
+                            "Wirausaha Produk Prakarya"
+                        ],
+                        "cp_snippet": "Menjelaskan aspek- aspek penting budi daya berdasarkan hasil observasi; menjelaskan produk budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan sesuai potensi lingkungan/kearifan lokal berdasarkan hasil eksplorasi.  /Perencanaan Menyusun rencana kegiatan budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan, sesuai potensi lingkungan/kearifan lokal. Menghasilkan produk budi daya yang aman berdasarkan potensi lingkungan/kearifan lokal dengan modifikasi bahan, alat, d..."
+                    }
+                }
+            },
+            "9": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Bilangan",
+                            "Aljabar"
+                        ],
+                        "materi_inti": [
+                            "Perpangkatan dan Bentuk Akar",
+                            "Persamaan Kuadrat",
+                            "Fungsi Kuadrat"
+                        ],
+                        "cp_snippet": "Membaca, menulis, dan membandingkan bilangan bulat, bilangan rasional, bilangan desimal, bilangan berpangkat bulat dan akar, bilangan dalam notasi ilmiah; menerapkan operasi aritmatika pada bilangan real, dan memberikan estimasi/perkiraan dalam menyelesaikan masalah (termasuk berkaitan dengan literasi finansial). Murid dapat menggunakan rasio (skala, proporsi, dan laju perubahan) dalam penyelesaian masalah."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Geometri",
+                            "Pengukuran"
+                        ],
+                        "materi_inti": [
+                            "Transformasi Geometri (Refleksi, Translasi)",
+                            "Kesebangunan dan Kekongruenan",
+                            "Bangun Ruang Sisi Lengkung (Tabung, Kerucut, Bola)"
+                        ],
+                        "cp_snippet": "Membaca, menulis, dan membandingkan bilangan bulat, bilangan rasional, bilangan desimal, bilangan berpangkat bulat dan akar, bilangan dalam notasi ilmiah; menerapkan operasi aritmatika pada bilangan real, dan memberikan estimasi/perkiraan dalam menyelesaikan masalah (termasuk berkaitan dengan literasi finansial). Murid dapat menggunakan rasio (skala, proporsi, dan laju perubahan) dalam penyelesaian masalah."
+                    }
+                },
+                "Bahasa Indonesia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Laporan Percobaan",
+                            "Pidato Persuasif",
+                            "Menyusun Cerita Pendek (Cerpen)"
+                        ],
+                        "cp_snippet": "Menganalisis gagasan, pandangan, arahan, dan/atau pesan dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan menganalisis unsur intrinsik teks sastra berbentuk teks aural. Menganalisis informasi berupa gagasan, pandangan, arahan, dan/atau pesan dari berbagai tipe teks berwujud teks visual dan/atau audiovisual untuk menemukan makna yang tersurat dan tersirat; menginterpretasi informasi untuk mengungkapkan kepedulian dan/atau pendapat pro/kontra dari berbagai..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Diskusi",
+                            "Cerita Inspiratif",
+                            "Literasi Buku Fiksi & Nonfiksi"
+                        ],
+                        "cp_snippet": "Menganalisis gagasan, pandangan, arahan, dan/atau pesan dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan menganalisis unsur intrinsik teks sastra berbentuk teks aural. Menganalisis informasi berupa gagasan, pandangan, arahan, dan/atau pesan dari berbagai tipe teks berwujud teks visual dan/atau audiovisual untuk menemukan makna yang tersurat dan tersirat; menginterpretasi informasi untuk mengungkapkan kepedulian dan/atau pendapat pro/kontra dari berbagai..."
+                    }
+                },
+                "IPA": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman IPA",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Pertumbuhan dan Perkembangan",
+                            "Sistem Koordinasi dan Reproduksi",
+                            "Tekanan Zat (Padat, Cair, Gas)"
+                        ],
+                        "cp_snippet": "IPA Menelaah hasil identifikasi makhluk hidup sesuai dengan karakteristiknya; menganalisis klasifikasi, sifat, dan perubahan materi; menganalisis sistem organisasi kehidupan, fungsi, serta kelainan atau gangguan yang muncul pada sistem organ; menganalisis interaksi antar makhluk hidup dan lingkungannya dalam merancang upaya-upaya untuk mencegah dan mengatasi perubahan iklim; menganalisis pewarisan sifat; membuat bioteknologi konvensional di lingkungan sekitarnya; menerapkan pengukuran terhada..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman IPA",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Listrik Magnet dan Sumber Energi",
+                            "Reaksi Kimia Dasar",
+                            "Pewarisan Sifat dan Bioteknologi"
+                        ],
+                        "cp_snippet": "IPA Menelaah hasil identifikasi makhluk hidup sesuai dengan karakteristiknya; menganalisis klasifikasi, sifat, dan perubahan materi; menganalisis sistem organisasi kehidupan, fungsi, serta kelainan atau gangguan yang muncul pada sistem organ; menganalisis interaksi antar makhluk hidup dan lingkungannya dalam merancang upaya-upaya untuk mencegah dan mengatasi perubahan iklim; menganalisis pewarisan sifat; membuat bioteknologi konvensional di lingkungan sekitarnya; menerapkan pengukuran terhada..."
+                    }
+                },
+                "IPS": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Manusia dan Perubahan",
+                            "Perkembangan Ekonomi Digital"
+                        ],
+                        "cp_snippet": "Konsep Menjelaskan keberagaman kondisi geografis Indonesia, konektivitas antarruang terhadap upaya pemanfaatan dan pelestarian potensi sumber daya alam, faktor aktivitas manusia terhadap perubahan iklim dan potensi bencana alam; memprediksi dampak perubahan iklim terhadap kehidupan ekonomi, sosial, budaya masyarakat serta merefleksikan pola adaptasi terhadap perubahan iklim dan upaya mitigasi bencana untuk menunjang sustainable development goals (SDGs) dalam konteks lokal, regional, dan globa..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemahaman Konsep",
+                            "Keterampilan Proses"
+                        ],
+                        "materi_inti": [
+                            "Tantangan Pembangunan Indonesia",
+                            "Kerja Sama Dunia"
+                        ],
+                        "cp_snippet": "Konsep Menjelaskan keberagaman kondisi geografis Indonesia, konektivitas antarruang terhadap upaya pemanfaatan dan pelestarian potensi sumber daya alam, faktor aktivitas manusia terhadap perubahan iklim dan potensi bencana alam; memprediksi dampak perubahan iklim terhadap kehidupan ekonomi, sosial, budaya masyarakat serta merefleksikan pola adaptasi terhadap perubahan iklim dan upaya mitigasi bencana untuk menunjang sustainable development goals (SDGs) dalam konteks lokal, regional, dan globa..."
+                    }
+                },
+                "Pendidikan Pancasila": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pancasila",
+                            "UUD NRI Tahun 1945"
+                        ],
+                        "materi_inti": [
+                            "Dinamika Perwujudan Pancasila",
+                            "Pembukaan UUD NRI Tahun 1945",
+                            "Kedaulatan Negara RI"
+                        ],
+                        "cp_snippet": "Memahami sejarah kelahiran Pancasila; memahami kedudukan Pancasila sebagai dasar negara, pandangan hidup bangsa, dan ideologi negara serta penerapannya dalam kehidupan sehari-hari; memahami makna keterkaitan Pancasila dengan Undang-Undang Dasar Negara Republik Indonesia Tahun 1945, Bhinneka Tunggal Ika, dan Negara Kesatuan Republik Indonesia. Undang Dasar Negara Republik Indonesia Tahun 1945 Menerapkan norma dan aturan; memahami tata urutan peraturan perundang-undangan yang berlaku di Indones..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Bhinneka Tunggal Ika",
+                            "NKRI"
+                        ],
+                        "materi_inti": [
+                            "Menjaga dan Melestarikan Pancasila",
+                            "Kemerdekaan Berpendapat Warga Negara",
+                            "Bela Negara dan Keutuhan Wilayah"
+                        ],
+                        "cp_snippet": "Memahami sejarah kelahiran Pancasila; memahami kedudukan Pancasila sebagai dasar negara, pandangan hidup bangsa, dan ideologi negara serta penerapannya dalam kehidupan sehari-hari; memahami makna keterkaitan Pancasila dengan Undang-Undang Dasar Negara Republik Indonesia Tahun 1945, Bhinneka Tunggal Ika, dan Negara Kesatuan Republik Indonesia. Undang Dasar Negara Republik Indonesia Tahun 1945 Menerapkan norma dan aturan; memahami tata urutan peraturan perundang-undangan yang berlaku di Indones..."
+                    }
+                },
+                "Informatika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Berpikir Komputasional",
+                            "Teknologi Informasi dan Komunikasi",
+                            "Sistem Komputer",
+                            "Jaringan Komputer dan Internet"
+                        ],
+                        "materi_inti": [
+                            "BK (Struktur Data, Logika Lanjut)",
+                            "TIK (Integrasi Aplikasi Kantor, Blog/Vlog)",
+                            "SK (Keamanan Komputer)",
+                            "JKI (Konfigurasi Jaringan)"
+                        ],
+                        "cp_snippet": "Komputasional Menerapkan berpikir komputasional untuk problem dalam kehidupan sehari-hari maupun dalam menghadapi masalah komputasi; memahami konsep himpunan data terstruktur dalam kehidupan sehari-hari; memahami konsep lembar kerja pengolah data; menerapkan berpikir komputasional dalam menyelesaikan persoalan yang mengandung himpunan data berstruktur sederhana dengan volume kecil; serta menuliskan sekumpulan instruksi dengan menggunakan sekumpulan kosakata terbatas atau simbol dalam format p..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Analisis Data",
+                            "Algoritma dan Pemrograman",
+                            "Dampak Sosial Informatika",
+                            "Praktik Lintas Bidang"
+                        ],
+                        "materi_inti": [
+                            "Analisis Data (Prediksi, Pemodelan)",
+                            "Algoritma dan Pemrograman (Modularisasi, Blocky)",
+                            "Dampak Sosial Informatika (Isu Keamanan Siber)",
+                            "Praktika Lintas Bidang (Proyek Inovasi Digital)"
+                        ],
+                        "cp_snippet": "Komputasional Menerapkan berpikir komputasional untuk problem dalam kehidupan sehari-hari maupun dalam menghadapi masalah komputasi; memahami konsep himpunan data terstruktur dalam kehidupan sehari-hari; memahami konsep lembar kerja pengolah data; menerapkan berpikir komputasional dalam menyelesaikan persoalan yang mengandung himpunan data berstruktur sederhana dengan volume kecil; serta menuliskan sekumpulan instruksi dengan menggunakan sekumpulan kosakata terbatas atau simbol dalam format p..."
+                    }
+                },
+                "Bahasa Inggris": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak - Berbicara"
+                        ],
+                        "materi_inti": [
+                            "Exploring Fauna",
+                            "Taking Care of Our Earth",
+                            "Journey to Fantasy Worlds"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami alur informasi secara keseluruhan, gagasan utama dan informasi rinci dari teks lisan tentang topik sehari-hari atau yang sesuai dengan minat; menggunakan bahasa Inggris untuk mengungkapkan gagasan dan pengalaman dalam berbagai jenis teks secara lisan tentang topik yang dibahas dengan menggunakan kalimat sederhana dan majemuk baik formal maupun informal sesuai konteks. (Understand the entire flow of information, main ideas and details of oral texts about..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Membaca - Memirsa",
+                            "Menulis - Mempresentasikan"
+                        ],
+                        "materi_inti": [
+                            "Analytical Exposition",
+                            "Persuasive Texts",
+                            "Digital Literacy in English"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami alur informasi secara keseluruhan, gagasan utama dan informasi rinci dari teks lisan tentang topik sehari-hari atau yang sesuai dengan minat; menggunakan bahasa Inggris untuk mengungkapkan gagasan dan pengalaman dalam berbagai jenis teks secara lisan tentang topik yang dibahas dengan menggunakan kalimat sederhana dan majemuk baik formal maupun informal sesuai konteks. (Understand the entire flow of information, main ideas and details of oral texts about..."
+                    }
+                },
+                "PJOK": {
+                    "ganjil": {
+                        "elemen": [
+                            "Keterampilan Gerak",
+                            "Pengetahuan Gerak"
+                        ],
+                        "materi_inti": [
+                            "Permainan Bola Basket (Strategi Tim)",
+                            "Atletik (Estafet/Lompat Tinggi)",
+                            "Aktivitas Air (Renang)"
+                        ],
+                        "cp_snippet": "Bergerak Menerapkan keterampilan gerak serta mentransfernya ke dalam berbagai situasi gerak; memperagakan strategi gerak yang dapat dimanfaatkan untuk meningkatkan capaian keterampilan gerak. Melalui Gerak Membuktikan strategi gerak yang paling efektif dalam situasi gerak yang berbeda; menginvestigasi modifikasi peraturan yang mendukung fair play dan partisipasi inklusif; menerapkan kepemimpinan, kolaborasi, dan pengambilan keputusan kelompok ketika berpartisipasi di dalam berbagai aktivitas ..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Pemanfaatan Gerak",
+                            "Pengembangan Karakter"
+                        ],
+                        "materi_inti": [
+                            "Penyusunan Rencana Aktivitas Jasmani",
+                            "Kesehatan Reproduksi (Lanjutan)",
+                            "Etika Berolahraga"
+                        ],
+                        "cp_snippet": "Bergerak Menerapkan keterampilan gerak serta mentransfernya ke dalam berbagai situasi gerak; memperagakan strategi gerak yang dapat dimanfaatkan untuk meningkatkan capaian keterampilan gerak. Melalui Gerak Membuktikan strategi gerak yang paling efektif dalam situasi gerak yang berbeda; menginvestigasi modifikasi peraturan yang mendukung fair play dan partisipasi inklusif; menerapkan kepemimpinan, kolaborasi, dan pengambilan keputusan kelompok ketika berpartisipasi di dalam berbagai aktivitas ..."
+                    }
+                },
+                "Pendidikan Agama Islam": {
+                    "ganjil": {
+                        "elemen": [
+                            "Al-Qur'an dan Hadis",
+                            "Akidah",
+                            "Akhlak"
+                        ],
+                        "materi_inti": [
+                            "Semangat Menuntut Ilmu (Q.S. Al-Mujadilah)",
+                            "Iman kepada Hari Akhir",
+                            "Etika Komunikasi dan Media Sosial"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Fikih",
+                            "Sejarah Peradaban Islam"
+                        ],
+                        "materi_inti": [
+                            "Penyembelihan Hewan, Akikah, dan Kurban",
+                            "Haji dan Umrah (Rukun & Syarat)",
+                            "Sejarah Daulah Usmani dan Perkembangan Islam Modern"
+                        ],
+                        "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                    }
+                },
+                "Seni Rupa": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Seni Lukis (Gaya, Aliran, Tema)",
+                            "Seni Patung (Media dan Teknik)",
+                            "Prosedur Berkarya Seni Lukis"
+                        ],
+                        "cp_snippet": "Experiencing) Menganalisis unsur rupa dan prinsip desain dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri dan teman sekelas; membandingkan unsur rupa, prinsip desain, dan fungsi karya seni rupa menggunakan kosa kata seni rupa yang sesuai. Artistik (Thinking and Working Artistically) Mengaplikasikan variasi teknik penggunaan alat dan bahan yang dimiliki untuk berkarya; mengeksplorasi alternatif/potensi alat dan bahan yang ada di li..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berapresiasi"
+                        ],
+                        "materi_inti": [
+                            "Seni Grafis (Cetak Tinggi, Cetak Dalam)",
+                            "Penyelenggaraan Pameran Seni Rupa",
+                            "Apresiasi Karya Seni Rupa Modern"
+                        ],
+                        "cp_snippet": "Experiencing) Menganalisis unsur rupa dan prinsip desain dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri dan teman sekelas; membandingkan unsur rupa, prinsip desain, dan fungsi karya seni rupa menggunakan kosa kata seni rupa yang sesuai. Artistik (Thinking and Working Artistically) Mengaplikasikan variasi teknik penggunaan alat dan bahan yang dimiliki untuk berkarya; mengeksplorasi alternatif/potensi alat dan bahan yang ada di li..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Laporan Hasil Observasi (LHO)",
+                            "Cerita Wayang/Mitologi Lokal",
+                            "Aksara Daerah (Aksara Rekan & Murda/Lanjut)"
+                        ],
+                        "cp_snippet": "Peserta didik mampu menganalisis struktur teks LHO daerah; memahami nilai moral dalam cerita wayang atau mitologi lokal."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Pidato Daerah (Sesorah)",
+                            "Kesenian Tradisional (Kethoprak/Seni Rakyat)",
+                            "Literasi Sastra Daerah (Karya Klasik)"
+                        ],
+                        "cp_snippet": "Peserta didik mampu membawakan pidato bahasa daerah dengan tepat; mengapresiasi seni pertunjukan tradisional."
+                    }
+                },
+                "Prakarya": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Desain/Perencanaan",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Kerajinan Bahan Keras (Alam/Buatan)",
+                            "Pengolahan Hasil Peternakan & Perikanan",
+                            "Eksplorasi Teknologi Produksi"
+                        ],
+                        "cp_snippet": "Menjelaskan aspek- aspek penting budi daya berdasarkan hasil observasi; menjelaskan produk budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan sesuai potensi lingkungan/kearifan lokal berdasarkan hasil eksplorasi.  /Perencanaan Menyusun rencana kegiatan budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan, sesuai potensi lingkungan/kearifan lokal. Menghasilkan produk budi daya yang aman berdasarkan potensi lingkungan/kearifan lokal dengan modifikasi bahan, alat, d..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Dasar-dasar Sistem Instalasi Listrik",
+                            "Budi Daya Ikan Hias",
+                            "Laporan Keuangan & Evaluasi Bisnis Sederhana"
+                        ],
+                        "cp_snippet": "Menjelaskan aspek- aspek penting budi daya berdasarkan hasil observasi; menjelaskan produk budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan sesuai potensi lingkungan/kearifan lokal berdasarkan hasil eksplorasi.  /Perencanaan Menyusun rencana kegiatan budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan, sesuai potensi lingkungan/kearifan lokal. Menghasilkan produk budi daya yang aman berdasarkan potensi lingkungan/kearifan lokal dengan modifikasi bahan, alat, d..."
+                    }
+                }
+            }
+        },
+        "SMA": {
+            "10": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Aljabar"
+                        ],
+                        "materi_inti": [
+                            "Eksponen"
+                        ],
+                        "cp_snippet": "Menggeneralisasi sifat-sifat bilangan berpangkat (termasuk bilangan pangkat pecahan), dan menggunakannya untuk menyelesaikan masalah. Menyelesaikan masalah yang berkaitan dengan sistem pertidaksamaan linear dua variabel; menyelesaikan masalah yang berkaitan dengan persamaan dan fungsi kuadrat (termasuk akar imajiner), serta persamaan eksponensial (berbasis/ bilangan pokok sama) dan fungsi eksponensial."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Geometri"
+                        ],
+                        "materi_inti": [
+                            "Trigonometri Dasar"
+                        ],
+                        "cp_snippet": "Menggeneralisasi sifat-sifat bilangan berpangkat (termasuk bilangan pangkat pecahan), dan menggunakannya untuk menyelesaikan masalah. Menyelesaikan masalah yang berkaitan dengan sistem pertidaksamaan linear dua variabel; menyelesaikan masalah yang berkaitan dengan persamaan dan fungsi kuadrat (termasuk akar imajiner), serta persamaan eksponensial (berbasis/ bilangan pokok sama) dan fungsi eksponensial."
+                    }
+                },
+                "Bahasa Indonesia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Membaca"
+                        ],
+                        "materi_inti": [
+                            "Teks LHO"
+                        ],
+                        "cp_snippet": "Mengevaluasi gagasan, pandangan, arahan, dan/atau pesan dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan mengevaluasi unsur intrinsik dan ekstrinsik teks sastra berbentuk teks aural. Mengevaluasi informasi berupa gagasan, pandangan, arahan, dan/atau pesan dari berbagai tipe teks berwujud visual dan/atau audiovisual untuk menemukan makna yang tersurat dan tersirat; menginterpretasi informasi untuk mengungkapkan gagasan dan perasaan (simpati, peduli, dan ..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Anekdot"
+                        ],
+                        "cp_snippet": "Mengevaluasi gagasan, pandangan, arahan, dan/atau pesan dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan); dan mengevaluasi unsur intrinsik dan ekstrinsik teks sastra berbentuk teks aural. Mengevaluasi informasi berupa gagasan, pandangan, arahan, dan/atau pesan dari berbagai tipe teks berwujud visual dan/atau audiovisual untuk menemukan makna yang tersurat dan tersirat; menginterpretasi informasi untuk mengungkapkan gagasan dan perasaan (simpati, peduli, dan ..."
+                    }
+                },
+                "Bahasa Inggris": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak"
+                        ],
+                        "materi_inti": [
+                            "Descriptive Text"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami alur informasi secara keseluruhan, gagasan utama dan detail dalam teks lisan fiksi dan non fiksi mengenai berbagai macam topik yang relevan dengan topik sehari-hari atau isu terkini; menggunakan bahasa Inggris untuk mengungkapkan pendapat dan mempertahankan argumen tentang topik yang dibahas. (Understand the entire flow of information, the main idea and details in fiction and nonfiction spoken texts about various topics relevant to everyday topics or cu..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara"
+                        ],
+                        "materi_inti": [
+                            "Exposition"
+                        ],
+                        "cp_snippet": "Berbicara (Listening Speaking) Memahami alur informasi secara keseluruhan, gagasan utama dan detail dalam teks lisan fiksi dan non fiksi mengenai berbagai macam topik yang relevan dengan topik sehari-hari atau isu terkini; menggunakan bahasa Inggris untuk mengungkapkan pendapat dan mempertahankan argumen tentang topik yang dibahas. (Understand the entire flow of information, the main idea and details in fiction and nonfiction spoken texts about various topics relevant to everyday topics or cu..."
+                    }
+                },
+                "Fisika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sains"
+                        ],
+                        "materi_inti": [
+                            "Pengukuran"
+                        ],
+                        "cp_snippet": "IPA Menerapkan prinsip klasifikasi dan strategi pelestarian keanekaragaman hayati; mendeskripsikan peranan virus, bakteri, dan jamur dalam kehidupan; menganalisis interaksi antar komponen ekosistem dan pengaruhnya terhadap keseimbangan ekosistem; menggunakan sistem pengukuran dalam kerja ilmiah; menganalisis gerak dua dimensi; menganalisis pemanfaatan energi alternatif untuk mengatasi permasalahan ketersediaan energi; menganalisis partikel penyusun materi dan menerapkan konsep stoikiometri da..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Energi"
+                        ],
+                        "materi_inti": [
+                            "Energi Terbarukan"
+                        ],
+                        "cp_snippet": "IPA Menerapkan prinsip klasifikasi dan strategi pelestarian keanekaragaman hayati; mendeskripsikan peranan virus, bakteri, dan jamur dalam kehidupan; menganalisis interaksi antar komponen ekosistem dan pengaruhnya terhadap keseimbangan ekosistem; menggunakan sistem pengukuran dalam kerja ilmiah; menganalisis gerak dua dimensi; menganalisis pemanfaatan energi alternatif untuk mengatasi permasalahan ketersediaan energi; menganalisis partikel penyusun materi dan menerapkan konsep stoikiometri da..."
+                    }
+                },
+                "Kimia": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sains"
+                        ],
+                        "materi_inti": [
+                            "Struktur Atom"
+                        ],
+                        "cp_snippet": "IPA Menerapkan prinsip klasifikasi dan strategi pelestarian keanekaragaman hayati; mendeskripsikan peranan virus, bakteri, dan jamur dalam kehidupan; menganalisis interaksi antar komponen ekosistem dan pengaruhnya terhadap keseimbangan ekosistem; menggunakan sistem pengukuran dalam kerja ilmiah; menganalisis gerak dua dimensi; menganalisis pemanfaatan energi alternatif untuk mengatasi permasalahan ketersediaan energi; menganalisis partikel penyusun materi dan menerapkan konsep stoikiometri da..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Sains"
+                        ],
+                        "materi_inti": [
+                            "Kimia Hijau"
+                        ],
+                        "cp_snippet": "IPA Menerapkan prinsip klasifikasi dan strategi pelestarian keanekaragaman hayati; mendeskripsikan peranan virus, bakteri, dan jamur dalam kehidupan; menganalisis interaksi antar komponen ekosistem dan pengaruhnya terhadap keseimbangan ekosistem; menggunakan sistem pengukuran dalam kerja ilmiah; menganalisis gerak dua dimensi; menganalisis pemanfaatan energi alternatif untuk mengatasi permasalahan ketersediaan energi; menganalisis partikel penyusun materi dan menerapkan konsep stoikiometri da..."
+                    }
+                },
+                "Biologi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sains"
+                        ],
+                        "materi_inti": [
+                            "Keanekaragaman Hayati"
+                        ],
+                        "cp_snippet": "IPA Menerapkan prinsip klasifikasi dan strategi pelestarian keanekaragaman hayati; mendeskripsikan peranan virus, bakteri, dan jamur dalam kehidupan; menganalisis interaksi antar komponen ekosistem dan pengaruhnya terhadap keseimbangan ekosistem; menggunakan sistem pengukuran dalam kerja ilmiah; menganalisis gerak dua dimensi; menganalisis pemanfaatan energi alternatif untuk mengatasi permasalahan ketersediaan energi; menganalisis partikel penyusun materi dan menerapkan konsep stoikiometri da..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Sains"
+                        ],
+                        "materi_inti": [
+                            "Virus & Ekosistem"
+                        ],
+                        "cp_snippet": "IPA Menerapkan prinsip klasifikasi dan strategi pelestarian keanekaragaman hayati; mendeskripsikan peranan virus, bakteri, dan jamur dalam kehidupan; menganalisis interaksi antar komponen ekosistem dan pengaruhnya terhadap keseimbangan ekosistem; menggunakan sistem pengukuran dalam kerja ilmiah; menganalisis gerak dua dimensi; menganalisis pemanfaatan energi alternatif untuk mengatasi permasalahan ketersediaan energi; menganalisis partikel penyusun materi dan menerapkan konsep stoikiometri da..."
+                    }
+                },
+                "Ekonomi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Kelangkaan"
+                        ]
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Sistem Pembayaran"
+                        ]
+                    }
+                },
+                "Geografi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Pengantar Geografi"
+                        ]
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Peta & Pengindraan Jauh"
+                        ]
+                    }
+                },
+                "Sosiologi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Paradigma Sosiologi"
+                        ]
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Interaksi & Identitas"
+                        ]
+                    }
+                },
+                "Sejarah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pemahaman"
+                        ],
+                        "materi_inti": [
+                            "Pengantar Ilmu Sejarah"
+                        ],
+                        "cp_snippet": "Konsep Memahami konsep dasar ilmu sejarah serta menginterpretasi berbagai peristiwa sejarah Indonesia yang berkaitan dengan masa Kerajaan Hindu-Buddha, Kerajaan Islam, Penjajahan Bangsa Barat, hingga Perjuangan Pergerakan Kebangsaan Indonesia. Murid mengaplikasikan keterampilan berpikir sejarah dalam mengkritisi peristiwa masa lalu yang relevan dengan bidang kejuruannya."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Analisis"
+                        ],
+                        "materi_inti": [
+                            "Asal Usul Nenek Moyang"
+                        ],
+                        "cp_snippet": "Konsep Memahami konsep dasar ilmu sejarah serta menginterpretasi berbagai peristiwa sejarah Indonesia yang berkaitan dengan masa Kerajaan Hindu-Buddha, Kerajaan Islam, Penjajahan Bangsa Barat, hingga Perjuangan Pergerakan Kebangsaan Indonesia. Murid mengaplikasikan keterampilan berpikir sejarah dalam mengkritisi peristiwa masa lalu yang relevan dengan bidang kejuruannya."
+                    }
+                },
+                "Informatika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sistem"
+                        ],
+                        "materi_inti": [
+                            "Integrasi App"
+                        ],
+                        "cp_snippet": "Komputasional Memahami konsep struktur data dan algoritma standar; menerapkan proses komputasi yang dilakukan manusia secara mandiri atau berkelompok untuk mendapatkan data yang berkualitas; menerapkan algoritma dan struktur data standar untuk menghasilkan berbagai solusi dalam menyelesaikan persoalan; menuliskan solusi rancangan program sederhana dalam format pseudocode yang dekat dengan bahasa komputer; memahami model dan menyimulasikan dinamika Input-Process-Output dalam sebuah komputer Vo..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Data"
+                        ],
+                        "materi_inti": [
+                            "Analisis Data Lanjut"
+                        ],
+                        "cp_snippet": "Komputasional Memahami konsep struktur data dan algoritma standar; menerapkan proses komputasi yang dilakukan manusia secara mandiri atau berkelompok untuk mendapatkan data yang berkualitas; menerapkan algoritma dan struktur data standar untuk menghasilkan berbagai solusi dalam menyelesaikan persoalan; menuliskan solusi rancangan program sederhana dalam format pseudocode yang dekat dengan bahasa komputer; memahami model dan menyimulasikan dinamika Input-Process-Output dalam sebuah komputer Vo..."
+                    }
+                },
+                "Pendidikan Pancasila": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pancasila"
+                        ],
+                        "materi_inti": [
+                            "Ideologi Negara"
+                        ],
+                        "cp_snippet": "Menganalisis cara pandang para perumus Pancasila tentang dasar negara; menganalisis kedudukan Pancasila sebagai dasar negara, pandangan hidup bangsa, dan ideologi negara. Undang Dasar Negara Republik Indonesia Tahun 1945 Menerapkan perilaku taat hukum berdasarkan peraturan yang berlaku untuk mewujudkan harmoni dengan sesama manusia dan lingkungan; menganalisis tata urutan peraturan perundang undangan di Indonesia; menganalisis makna kedudukan Pancasila sebagai sumber dari segala sumber hukum ..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "UUD 1945"
+                        ],
+                        "materi_inti": [
+                            "Norma & Hukum"
+                        ],
+                        "cp_snippet": "Menganalisis cara pandang para perumus Pancasila tentang dasar negara; menganalisis kedudukan Pancasila sebagai dasar negara, pandangan hidup bangsa, dan ideologi negara. Undang Dasar Negara Republik Indonesia Tahun 1945 Menerapkan perilaku taat hukum berdasarkan peraturan yang berlaku untuk mewujudkan harmoni dengan sesama manusia dan lingkungan; menganalisis tata urutan peraturan perundang undangan di Indonesia; menganalisis makna kedudukan Pancasila sebagai sumber dari segala sumber hukum ..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Laporan Hasil Observasi (Budaya)",
+                            "Teks Anekdot/Humor Daerah",
+                            "Aksara Daerah (Review & Lanjut)"
+                        ],
+                        "cp_snippet": "Menganalisis teks LHO bertema budaya daerah; mengapresiasi teks anekdot daerah; menguasai aksara daerah tingkat mahir."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Negosiasi (Unggah-ungguh Adat)",
+                            "Teks Biografi Tokoh Daerah",
+                            "Sastra Daerah (Analisis Makna)"
+                        ],
+                        "cp_snippet": "Melakukan negosiasi dengan etika daerah; menulis biografi tokoh lokal; memaknai nilai-nilai luhur dalam sastra daerah."
+                    }
+                },
+                "PKWU": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Desain/Perencanaan"
+                        ],
+                        "materi_inti": [
+                            "Ide dan Peluang Usaha Produk Inspirasi Budaya Lokal",
+                            "Analisis Sistem Produksi Produk Grafis/Kerajinan",
+                            "Perencanaan Pemasaran Langsung"
+                        ],
+                        "cp_snippet": "Mengidentifikasi peluang usaha berbasis budaya lokal; merancang sistem produksi dan pemasaran produk."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Produksi Produk Kerajinan/Rekayasa",
+                            "Evaluasi Hasil Usaha Sederhana",
+                            "Pengembangan Ide Kreatif Wirausaha"
+                        ],
+                        "cp_snippet": "Menciptakan produk wirausaha; melakukan evaluasi keuangan dan proses produksi secara kritis."
+                    }
+                }
+            },
+            "11": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Aljabar"
+                        ],
+                        "materi_inti": [
+                            "Matriks"
+                        ],
+                        "cp_snippet": "Menjelaskan barisan dan deret (aritmetika dan geometri), menerapkannya pada beragam masalah terutama masalah bunga tunggal dan majemuk, memodelkan pinjaman dan investasi dengan bunga majemuk dan anuitas, serta menyelidiki (secara numerik atau grafis) pengaruh masing-masing parameter (suku bunga, periode pembayaran) dalam model tersebut. Menentukan fungsi invers, komposisi fungsi, dan transformasi fungsi untuk memodelkan situasi dunia nyata menggunakan fungsi yang sesuai (linear, kuadrat, eksp..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Analisis Data"
+                        ],
+                        "materi_inti": [
+                            "Regresi Linear"
+                        ],
+                        "cp_snippet": "Menjelaskan barisan dan deret (aritmetika dan geometri), menerapkannya pada beragam masalah terutama masalah bunga tunggal dan majemuk, memodelkan pinjaman dan investasi dengan bunga majemuk dan anuitas, serta menyelidiki (secara numerik atau grafis) pengaruh masing-masing parameter (suku bunga, periode pembayaran) dalam model tersebut. Menentukan fungsi invers, komposisi fungsi, dan transformasi fungsi untuk memodelkan situasi dunia nyata menggunakan fungsi yang sesuai (linear, kuadrat, eksp..."
+                    }
+                },
+                "Ekonomi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Pendapatan Nasional"
+                        ],
+                        "cp_snippet": "Pemahaman Konsep Menjelaskan berbagai konsep dasar ekonomi; Mengidentifikasi berbagai permasalahan ekonomi dan keuangan, termasuk keterkaitan permasalahan ekonomi dengan literasi ekonomi dan keuangan digital yang terjadi di lingkungan sekitar, serta menganalisis dampak dari permasalahan ekonomi dan keuangan yang sedang terjadi berdasarkan konsep yang sudah dipelajari; memahami konsep-konsep pendapatan nasional dan pertumbuhan ekonomi serta kaitannya dengan kemiskinan, kesenjangan ekonomi, ser..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "APBN & APBD"
+                        ],
+                        "cp_snippet": "Pemahaman Konsep Menjelaskan berbagai konsep dasar ekonomi; Mengidentifikasi berbagai permasalahan ekonomi dan keuangan, termasuk keterkaitan permasalahan ekonomi dengan literasi ekonomi dan keuangan digital yang terjadi di lingkungan sekitar, serta menganalisis dampak dari permasalahan ekonomi dan keuangan yang sedang terjadi berdasarkan konsep yang sudah dipelajari; memahami konsep-konsep pendapatan nasional dan pertumbuhan ekonomi serta kaitannya dengan kemiskinan, kesenjangan ekonomi, ser..."
+                    }
+                },
+                "Fisika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Fisika"
+                        ],
+                        "materi_inti": [
+                            "Kinematika"
+                        ],
+                        "cp_snippet": "Pemahaman Fisika Menganalisis hubungan gerak dan gaya serta pemanfaatannya untuk menjelaskan fenomena alam, desain, atau rekayasa struktur; membuat karya yang menunjukkan penerapan hukum fluida dalam kehidupan sehari-hari; menganalisis konsep kalor dan termodinamika serta penerapannya untuk mengidentifikasi fenomena perubahan iklim; menganalisis gejala gelombang dan penerapannya dalam kehidupan sehari-hari; mengevaluasi rangkaian listrik; menganalisis fenomena elektromagnetik; menganalisis te..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Fisika"
+                        ],
+                        "materi_inti": [
+                            "Termodinamika"
+                        ],
+                        "cp_snippet": "Pemahaman Fisika Menganalisis hubungan gerak dan gaya serta pemanfaatannya untuk menjelaskan fenomena alam, desain, atau rekayasa struktur; membuat karya yang menunjukkan penerapan hukum fluida dalam kehidupan sehari-hari; menganalisis konsep kalor dan termodinamika serta penerapannya untuk mengidentifikasi fenomena perubahan iklim; menganalisis gejala gelombang dan penerapannya dalam kehidupan sehari-hari; mengevaluasi rangkaian listrik; menganalisis fenomena elektromagnetik; menganalisis te..."
+                    }
+                },
+                "Biologi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sains"
+                        ],
+                        "materi_inti": [
+                            "Sel Lanjut"
+                        ],
+                        "cp_snippet": "Pemahaman Biologi Mengaitkan hubungan antara struktur dan fungsi organel di dalam sel; menerapkan prinsip-prinsip bioproses yang terjadi di dalam sel; menganalisis keterkaitan antar sistem organ dalam tubuh untuk merespons stimulus internal dan eksternal; menerapkan prinsip pewarisan sifat; mengaitkan mekanisme evolusi dengan proses terjadi keanekaragaman dan kelangsungan hidup organisme; menerapkan prinsip pertumbuhan dan perkembangan; serta menganalisis proses bioteknologi modern. 2. Ketera..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Sains"
+                        ],
+                        "materi_inti": [
+                            "Sistem Organ"
+                        ],
+                        "cp_snippet": "Pemahaman Biologi Mengaitkan hubungan antara struktur dan fungsi organel di dalam sel; menerapkan prinsip-prinsip bioproses yang terjadi di dalam sel; menganalisis keterkaitan antar sistem organ dalam tubuh untuk merespons stimulus internal dan eksternal; menerapkan prinsip pewarisan sifat; mengaitkan mekanisme evolusi dengan proses terjadi keanekaragaman dan kelangsungan hidup organisme; menerapkan prinsip pertumbuhan dan perkembangan; serta menganalisis proses bioteknologi modern. 2. Ketera..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Drama Tradisional (Lakon)",
+                            "Sastra Klasik/Babad/Serat Dasar",
+                            "Teks Biografi Tokoh Penemu/Ilmuwan Daerah"
+                        ],
+                        "cp_snippet": "Menganalisis struktur drama tradisional; memahami isi teks sastra klasik; meneladani perjuangan tokoh daerah."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Karya Ilmiah (Kearifan Lokal)",
+                            "Teks Cerita Rakyat (Interpretasi Baru)",
+                            "Etika Kepemimpinan Daerah"
+                        ],
+                        "cp_snippet": "Menyusun karya tulis tentang kearifan lokal; menyajikan cerita rakyat secara inovatif; memahami konsep kepemimpinan lokal."
+                    }
+                },
+                "PKWU": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Desain/Perencanaan",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Perencanaan Usaha Produk Limbah/Konversi Energi",
+                            "Sistem Produksi Produk Pembuatan (Batch/Massal)",
+                            "Perhitungan Titik Impas (BEP)"
+                        ],
+                        "cp_snippet": "Eksplorasi dan Observasi Menganalisis peluang usaha produk budidaya berdasarkan potensi internal dan eksternal. 2. Desain/Perencanaan Menyusun rencana usaha dalam bentuk proposal sederhana berdasarkan kajian ilmiah, pemanfaatan teknologi, ekosistem dan analisis kebutuhan pasar sesuai potensi lingkungan/kearifan lokal."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Strategi Promosi Produk Wirausaha",
+                            "Analisis Laporan Keuangan Tahunan",
+                            "Rencana Pengembangan Usaha (Scaling)"
+                        ],
+                        "cp_snippet": "Eksplorasi dan Observasi Menganalisis peluang usaha produk budidaya berdasarkan potensi internal dan eksternal. 2. Desain/Perencanaan Menyusun rencana usaha dalam bentuk proposal sederhana berdasarkan kajian ilmiah, pemanfaatan teknologi, ekosistem dan analisis kebutuhan pasar sesuai potensi lingkungan/kearifan lokal."
+                    }
+                }
+            },
+            "12": {
+                "Matematika": {
+                    "ganjil": {
+                        "elemen": [
+                            "Kalkulus"
+                        ],
+                        "materi_inti": [
+                            "Limit & Turunan"
+                        ],
+                        "cp_snippet": "Menjelaskan barisan dan deret (aritmetika dan geometri), menerapkannya pada beragam masalah terutama masalah bunga tunggal dan majemuk, memodelkan pinjaman dan investasi dengan bunga majemuk dan anuitas, serta menyelidiki (secara numerik atau grafis) pengaruh masing-masing parameter (suku bunga, periode pembayaran) dalam model tersebut. Menentukan fungsi invers, komposisi fungsi, dan transformasi fungsi untuk memodelkan situasi dunia nyata menggunakan fungsi yang sesuai (linear, kuadrat, eksp..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Peluang"
+                        ],
+                        "materi_inti": [
+                            "Distribusi Normal"
+                        ],
+                        "cp_snippet": "Menjelaskan barisan dan deret (aritmetika dan geometri), menerapkannya pada beragam masalah terutama masalah bunga tunggal dan majemuk, memodelkan pinjaman dan investasi dengan bunga majemuk dan anuitas, serta menyelidiki (secara numerik atau grafis) pengaruh masing-masing parameter (suku bunga, periode pembayaran) dalam model tersebut. Menentukan fungsi invers, komposisi fungsi, dan transformasi fungsi untuk memodelkan situasi dunia nyata menggunakan fungsi yang sesuai (linear, kuadrat, eksp..."
+                    }
+                },
+                "Geografi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Pembangunan Wilayah"
+                        ],
+                        "cp_snippet": "Pemahaman Konsep Menganalisis keuntungan dari posisi strategis wilayah Indonesia dari sisi astronomis, geografis, geologis dan pemanfaatan sumber daya alam yang ada; memahami pola keanekaragaman hayati Indonesia dan dunia; memahami karakteristik geografi penduduk di wilayah Indonesia; memahami perubahan iklim, kebencanaan, dan lingkungan hidup sebagai bagian yang tak terpisahkan dari kondisi alam Indonesia; dan memahami kewilayahan dan pembangunan serta kerja sama antarnegara. 2. Keterampilan..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Mitigasi Bencana"
+                        ],
+                        "cp_snippet": "Pemahaman Konsep Menganalisis keuntungan dari posisi strategis wilayah Indonesia dari sisi astronomis, geografis, geologis dan pemanfaatan sumber daya alam yang ada; memahami pola keanekaragaman hayati Indonesia dan dunia; memahami karakteristik geografi penduduk di wilayah Indonesia; memahami perubahan iklim, kebencanaan, dan lingkungan hidup sebagai bagian yang tak terpisahkan dari kondisi alam Indonesia; dan memahami kewilayahan dan pembangunan serta kerja sama antarnegara. 2. Keterampilan..."
+                    }
+                },
+                "Sosiologi": {
+                    "ganjil": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Perubahan Sosial"
+                        ],
+                        "cp_snippet": "Pemahaman Konsep Menguasai sejumlah kompetensi, yakni murid mampu berpikir kritis dan kreatif; melakukan kajian literasi atas fenomena Sosiologi, menganalisis, menyajikan, melaporkan dan mengomunikasikan hasil kajian; mampu menunjukkan sikap berkesadaran sebagai warga yang baik, dan menghasilkan projek inovatif atas fenomena Sosiologi dalam bentuk digital maupun nondigital. Kompetensi tersebut terbentuk setelah murid menganalisis berbagai permasalahan sosial, konflik, dan integrasi sosial yan..."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Konsep"
+                        ],
+                        "materi_inti": [
+                            "Kearifan Lokal"
+                        ],
+                        "cp_snippet": "Pemahaman Konsep Menguasai sejumlah kompetensi, yakni murid mampu berpikir kritis dan kreatif; melakukan kajian literasi atas fenomena Sosiologi, menganalisis, menyajikan, melaporkan dan mengomunikasikan hasil kajian; mampu menunjukkan sikap berkesadaran sebagai warga yang baik, dan menghasilkan projek inovatif atas fenomena Sosiologi dalam bentuk digital maupun nondigital. Kompetensi tersebut terbentuk setelah murid menganalisis berbagai permasalahan sosial, konflik, dan integrasi sosial yan..."
+                    }
+                },
+                "Bahasa Daerah": {
+                    "ganjil": {
+                        "elemen": [
+                            "Menyimak",
+                            "Membaca dan Memirsa"
+                        ],
+                        "materi_inti": [
+                            "Teks Artikel Ilmiah Populer (Budaya)",
+                            "Upacara Adat & Filosofi Hidup Daerah",
+                            "Aksara Daerah (Eksplorasi Prasasti)"
+                        ],
+                        "cp_snippet": "Mengevaluasi artikel budaya daerah; menjelaskan filosofi upacara adat; menginterpretasi aksara daerah pada sumber sejarah."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Berbicara dan Mempresentasikan",
+                            "Menulis"
+                        ],
+                        "materi_inti": [
+                            "Teks Kritik Sastra Daerah",
+                            "Filosofi Kepemimpinan Tradisional",
+                            "Integrasi Budaya Daerah & Global"
+                        ],
+                        "cp_snippet": "Membuat kritik sastra daerah secara objektif; menerapkan filosofi kepemimpinan lokal; mempromosikan budaya daerah di tingkat global."
+                    }
+                },
+                "PKWU": {
+                    "ganjil": {
+                        "elemen": [
+                            "Observasi dan Eksplorasi",
+                            "Desain/Perencanaan",
+                            "Produksi"
+                        ],
+                        "materi_inti": [
+                            "Wirausaha Produk Jasa/Fungsional (Pasar Global)",
+                            "Strategi Pemasaran Internasional (Digital)",
+                            "Sistem Produksi Jasa/Layanan"
+                        ],
+                        "cp_snippet": "Eksplorasi dan Observasi Menganalisis peluang usaha produk budidaya berdasarkan potensi internal dan eksternal. 2. Desain/Perencanaan Menyusun rencana usaha dalam bentuk proposal sederhana berdasarkan kajian ilmiah, pemanfaatan teknologi, ekosistem dan analisis kebutuhan pasar sesuai potensi lingkungan/kearifan lokal."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Produksi",
+                            "Refleksi dan Evaluasi"
+                        ],
+                        "materi_inti": [
+                            "Evaluasi Hasil Usaha (Laporan Akhir)",
+                            "Analisis SWOT Lanjutan",
+                            "Pembuatan Proposal Pengembangan Usaha Baru"
+                        ],
+                        "cp_snippet": "Eksplorasi dan Observasi Menganalisis peluang usaha produk budidaya berdasarkan potensi internal dan eksternal. 2. Desain/Perencanaan Menyusun rencana usaha dalam bentuk proposal sederhana berdasarkan kajian ilmiah, pemanfaatan teknologi, ekosistem dan analisis kebutuhan pasar sesuai potensi lingkungan/kearifan lokal."
+                    }
+                }
+            }
+        }
+    },
+    "kktp_standards": {
+        "methods": [
+            {
+                "type": "Deskripsi Kriteria",
+                "description": "Menggunakan kriteria kualitatif untuk menentukan ketercapaian."
+            },
+            {
+                "type": "Rubrik",
+                "description": "Menggunakan skala performa yang lebih detail untuk setiap kriteria."
+            },
+            {
+                "type": "Interval Nilai",
+                "description": "Menggunakan rentang nilai (misal: 0-70 belum tuntas) berdasarkan asesmen."
+            }
+        ]
+    },
+    "pedagogis": {
+        "preferred_models": [
+            {
+                "name": "PBL",
+                "suitability": "Analisis masalah dunia nyata, berpikir kritis, dan pemecahan masalah secara kolaboratif."
+            },
+            {
+                "name": "PjBL",
+                "suitability": "Pembuatan produk, proyek kreatif, dan integrasi lintas disiplin ilmu dalam jangka waktu tertentu."
+            },
+            {
+                "name": "Discovery Learning",
+                "suitability": "Pemberian stimulus, identifikasi masalah, pengumpulan data, pengolahan data, pembuktian, dan penarikan kesimpulan secara mandiri."
+            },
+            {
+                "name": "Inquiry Learning",
+                "suitability": "Pembelajaran berbasis penyelidikan ilmiah, observasi murni, dan pengujian hipotesis untuk menemukan konsep."
+            },
+            {
+                "name": "Cooperative Learning",
+                "suitability": "Kerja kelompok terstruktur, saling ketergantungan positif, dan tanggung jawab individu dalam tim."
+            },
+            {
+                "name": "Contextual Teaching and Learning (CTL)",
+                "suitability": "Mengaitkan materi dengan situasi dunia nyata peserta didik dan mendorong siswa membuat hubungan antara pengetahuan yang dimiliki dengan penerapannya."
+            },
+            {
+                "name": "Blended Learning",
+                "suitability": "Kombinasi pembelajaran tatap muka (luring) dengan pembelajaran mandiri berbasis teknologi (daring)."
+            },
+            {
+                "name": "Flipped Classroom",
+                "suitability": "Mempelajari materi secara mandiri di rumah sebelum pertemuan (via video/modul), dan menggunakan waktu kelas untuk diskusi/praktik."
+            },
+            {
+                "name": "Problem Solving",
+                "suitability": "Fokus pada langkah-langkah sistematis untuk menyelesaikan tantangan logis atau hitungan."
+            },
+            {
+                "name": "TaRL (Teaching at the Right Level)",
+                "suitability": "Pembelajaran yang disesuaikan dengan tingkat capaian atau kemampuan awal peserta didik, bukan hanya berdasarkan kelas."
+            },
+            {
+                "name": "CRT (Culturally Responsive Teaching)",
+                "suitability": "Mengintegrasikan latar belakang budaya, pengalaman, dan perspektif peserta didik ke dalam proses pembelajaran."
+            }
+        ]
+    }
+}

@@ -750,3 +750,38 @@ div.rpp-signature td {
 .animate-dots-blink {
   animation: dots-blink 1.4s infinite;
 }
+
+/* Progress Bar Animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes pulse-glow-head {
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+    box-shadow: 0 0 4px 1px rgba(34, 211, 238, 0.4);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+    box-shadow: 0 0 12px 3px rgba(34, 211, 238, 0.8);
+  }
+}
+
+.animate-pulse-glow-head {
+  animation: pulse-glow-head 1.5s ease-in-out infinite;
+}
