@@ -5,7 +5,7 @@ import { collection, query, where, getDocs, addDoc, doc, getDoc, orderBy, server
 import {
     BrainCircuit, FileText, Save, Download, Sliders, RefreshCw,
     CheckSquare, List, Type, ToggleLeft, AlignLeft, Grid, Upload, Image as ImageIcon,
-    History, Trash2, ChevronRight, Loader2, MapPin, Sparkles
+    History, Trash2, ChevronRight, Loader2, MapPin, Sparkles, AlertTriangle, Key, ExternalLink
 } from 'lucide-react';
 import StyledSelect from '../components/StyledSelect';
 import { generateAdvancedQuiz, generateQuizFromImage } from '../utils/gemini';
@@ -29,6 +29,7 @@ const QuizGeneratorPage = () => {
     const { activeSemester, academicYear, geminiModel } = useSettings();
     const [loading, setLoading] = useState(false);
     const [generating, setGenerating] = useState(false);
+    const [generationProgress, setGenerationProgress] = useState({ stage: '', message: '', percentage: 0 });
 
     // Context State
     const [sourceType, setSourceType] = useState('rpp'); // 'rpp', 'promes', 'manual', 'image'
@@ -63,6 +64,7 @@ const QuizGeneratorPage = () => {
     const [userProfile, setUserProfile] = useState({ name: '', school: '', nip: '', principalName: '', principalNip: '' });
     const [signingLocation, setSigningLocation] = useState('Jakarta');
     const [detectingLocation, setDetectingLocation] = useState(false);
+    const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '', type: '' });
 
 
     const [classes, setClasses] = useState([]);
@@ -141,14 +143,15 @@ const QuizGeneratorPage = () => {
         }
     };
 
-    // Fetch Sources & Reset State
+    // Fetch Sources & Reset selection only for document-specific states
     useEffect(() => {
-        // Reset selection when Source Type changes
+        // Only reset selection and specific content when Source Type changes
+        // Keep subject, gradeLevel and topic to avoid losing context
         setSelectedContextId('');
-        setContextContent('');
-        setTopic('');
-        setSubject('');
-        setGradeLevel('');
+        // Keep contextContent if it was manually entered
+        if (sourceType !== 'manual') {
+            setContextContent('');
+        }
 
         const fetchSources = async () => {
             if (!auth.currentUser) return;
@@ -198,11 +201,20 @@ const QuizGeneratorPage = () => {
         try {
             const q = query(
                 collection(db, 'quizzes'),
-                where('userId', '==', auth.currentUser.uid),
-                orderBy('createdAt', 'desc')
+                where('userId', '==', auth.currentUser.uid)
+                // REMOVED orderBy to prevent crash with malformed timestamps
             );
             const snap = await getDocs(q);
-            setSavedQuizzes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+            const quizzes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            // Manual sorting with safety check
+            const sortedQuizzes = quizzes.sort((a, b) => {
+                const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+                const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+                return bTime - aTime;
+            });
+
+            setSavedQuizzes(sortedQuizzes);
         } catch (error) {
             console.error("Error fetching quiz history:", error);
         } finally {
@@ -289,22 +301,23 @@ const QuizGeneratorPage = () => {
                 const content = selected.content || '';
                 let extractedText = "";
 
-                // 1. Ambil Tujuan Pembelajaran (TP)
-                const tpMatch = content.match(/Tujuan Pembelajaran[\s\S]*?(?=(##|\n\n\n))/i);
-                if (tpMatch) extractedText += "1. TUJUAN PEMBELAJARAN:\n" + tpMatch[0].replace(/Tujuan Pembelajaran.*:/i, "").trim() + "\n\n";
-
-                // 2. Ambil Langkah Pembelajaran (Pertemuan 1 & 2 dst)
-                const stepsMatch = content.match(/(##|###)\s*III\.\s*LANGKAH-LANGKAH PEMBELAJARAN[\s\S]*?(?=(##\s*IV|##\s*V))/i);
-                if (stepsMatch) {
-                    extractedText += "2. AKTIVITAS & STUDI KASUS (Untuk Soal Cerita):\n" + stepsMatch[0].replace(/##.*LANGKAH.*/i, "").trim() + "\n\n";
+                // 2. Ambil Materi Ajar Mendetail (Biasanya di Lampiran) - PRIORITAS UTAMA
+                const materialMatch = content.match(/(MATERI AJAR MENDETAIL|URAIAN MATERI|MATERI PEMBELAJARAN)[\s\S]*?(?=(##|###|GLOSARIUM))/i);
+                if (materialMatch) {
+                    let cleanMat = materialMatch[0].replace(/(MATERI AJAR MENDETAIL|URAIAN MATERI|MATERI PEMBELAJARAN)/i, "").trim();
+                    extractedText += "1. RINGKASAN MATERI (SUMBER UTAMA SOAL):\n" + cleanMat + "\n\n";
                 }
 
-                // 3. Ambil Materi Ajar Mendetail (Biasanya di Lampiran)
-                const materialMatch = content.match(/MATERI AJAR MENDETAIL[\s\S]*?(?=(##|###|GLOSARIUM))/i);
-                if (materialMatch) {
-                    // Bersihkan sedikit jika ada tabel markdown yang rusak
-                    let cleanMat = materialMatch[0].replace(/MATERI AJAR MENDETAIL/i, "").trim();
-                    extractedText += "3. RINGKASAN MATERI (Sumber Soal):\n" + cleanMat;
+                // 3. Ambil Tujuan Pembelajaran (TP)
+                const tpMatch = content.match(/Tujuan Pembelajaran[\s\S]*?(?=(##|\n\n\n))/i);
+                if (tpMatch) extractedText += "2. TUJUAN PEMBELAJARAN:\n" + tpMatch[0].replace(/Tujuan Pembelajaran.*:/i, "").trim() + "\n\n";
+
+                // 4. Ambil Langkah Pembelajaran HANYA jika Materi Ajar tidak ditemukan (sebagai fallback penunjang)
+                if (!materialMatch) {
+                    const stepsMatch = content.match(/(##|###)\s*III\.\s*LANGKAH-LANGKAH PEMBELAJARAN[\s\S]*?(?=(##\s*IV|##\s*V))/i);
+                    if (stepsMatch) {
+                        extractedText += "3. REFERENSI KEGIATAN (Hanya untuk inspirasi konteks):\n" + stepsMatch[0].replace(/##.*LANGKAH.*/i, "").trim() + "\n\n";
+                    }
                 }
 
                 // Fallback jika regex gagal (misal format beda), ambil 2000 karakter tengah
@@ -328,8 +341,25 @@ const QuizGeneratorPage = () => {
         const numCount = parseInt(count) || 0;
         setTypeCounts(prev => {
             const updated = { ...prev };
+
+            // Calculate total WITHOUT the current type being updated
+            const otherTotal = Object.entries(prev)
+                .filter(([id]) => id !== typeId)
+                .reduce((sum, [_, c]) => sum + c, 0);
+
             if (numCount > 0) {
-                updated[typeId] = numCount;
+                // If adding this would exceed 50, cap it
+                if (otherTotal + numCount > 50) {
+                    const allowed = 50 - otherTotal;
+                    if (allowed <= 0) {
+                        toast.error("Batas maksimal adalah 50 soal.");
+                        return prev;
+                    }
+                    toast.error(`Jumlah soal dibatasi maksimal 50. Otomatis disesuaikan ke ${allowed}.`);
+                    updated[typeId] = allowed;
+                } else {
+                    updated[typeId] = numCount;
+                }
             } else {
                 delete updated[typeId];
             }
@@ -343,16 +373,26 @@ const QuizGeneratorPage = () => {
             return;
         }
 
-        // Validation for Types only if not image mode
-        if (sourceType !== 'image' && Object.keys(typeCounts).length === 0) {
+        const totalRequested = Object.values(typeCounts).reduce((sum, c) => sum + c, 0);
+        if (sourceType !== 'image' && totalRequested === 0) {
             toast.error("Tentukan minimal 1 tipe soal dengan jumlah > 0");
             return;
         }
 
+        if (totalRequested > 50) {
+            toast.error("Maksimal pembuatan adalah 50 soal dalam satu kali proses.");
+            return;
+        }
+
         setGenerating(true);
+        setGenerationProgress({ stage: 'starting', message: 'Memulai kuis generator...', percentage: 5 });
         setQuizResult(null); // Clear previous result before generating new one
 
         try {
+            const onProgress = (prog) => {
+                setGenerationProgress(prog);
+            };
+
             let result;
             if (sourceType === 'image' && previewUrl) {
                 result = await generateQuizFromImage({
@@ -361,7 +401,8 @@ const QuizGeneratorPage = () => {
                     gradeLevel,
                     subject,
                     count: numQuestions,
-                    modelName: geminiModel
+                    modelName: geminiModel,
+                    onProgress
                 });
             } else {
                 result = await generateAdvancedQuiz({
@@ -371,7 +412,8 @@ const QuizGeneratorPage = () => {
                     subject,
                     typeCounts,
                     difficulty,
-                    modelName: geminiModel
+                    modelName: geminiModel,
+                    onProgress
                 });
             }
 
@@ -385,9 +427,45 @@ const QuizGeneratorPage = () => {
             }
         } catch (error) {
             console.error("Quiz generation failed:", error);
-            // Handle specific error messages or provide a generic one
-            const errMsg = error.message || "Terjadi kesalahan saat membuat soal.";
-            toast.error("Gagal membuat soal: " + errMsg, { duration: 5000 });
+            const errorMsg = error.message || "";
+
+            let errorInfo = {
+                title: "Gagal Membuat Soal",
+                message: "Terjadi kesalahan teknis saat menghubungi AI.",
+                type: 'generic'
+            };
+
+            if (errorMsg.includes("429") || errorMsg.toLowerCase().includes("quota")) {
+                errorInfo = {
+                    title: "Kuota AI Habis",
+                    message: "Batas penggunaan gratis API Gemini Anda telah tercapai atau server sedang sangat sibuk.",
+                    type: 'quota'
+                };
+            } else if (errorMsg.includes("API_KEY_INVALID") || errorMsg.includes("invalid api key") || errorMsg === "API_KEY_MISSING") {
+                errorInfo = {
+                    title: "API Key Bermasalah",
+                    message: "API Key Gemini tidak valid atau belum dikonfigurasi dengan benar.",
+                    type: 'apikey'
+                };
+            } else if (errorMsg.includes("Format output AI tidak valid")) {
+                errorInfo = {
+                    title: "Gagal Memproses Data",
+                    message: "AI memberikan jawaban dengan format yang tidak terbaca oleh sistem.",
+                    type: 'parse'
+                };
+            } else if (errorMsg.includes("Safety") || errorMsg.includes("blocked")) {
+                errorInfo = {
+                    title: "Konten Dibatasi",
+                    message: "AI menolak membuat soal karena mendeteksi konten yang melanggar kebijakan keamanan.",
+                    type: 'safety'
+                };
+            }
+
+            setErrorModal({
+                isOpen: true,
+                ...errorInfo
+            });
+            toast.error("Gagal membuat soal.");
         } finally {
             setGenerating(false);
         }
@@ -592,7 +670,7 @@ const QuizGeneratorPage = () => {
         const pageHeight = doc.internal.pageSize.getHeight();
 
         quizResult.questions.forEach((q, idx) => {
-            if (idx > 0) doc.addPage();
+            if (idx > 0) doc.addPage('a4', 'l');
             let currentY = 15;
 
             doc.setFontSize(14);
@@ -662,20 +740,20 @@ const QuizGeneratorPage = () => {
                 theme: 'grid',
                 styles: { fontSize: 8, cellPadding: 3, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.1 },
                 columnStyles: {
-                    0: { cellWidth: 70 },
-                    1: { cellWidth: 35 },
+                    0: { cellWidth: 60 },
+                    1: { cellWidth: 60 },
                     2: { cellWidth: 'auto' }
                 },
                 body: [
                     [
                         { content: 'Kompetensi yang diuji', styles: { fontStyle: 'bold', fillColor: [240, 240, 240] } },
                         { content: 'Buku Sumber :', styles: { fontStyle: 'bold' } },
-                        { content: '', styles: { halign: 'center' } }
+                        { content: 'DETAIL SOAL', styles: { halign: 'center', fontStyle: 'bold', fillColor: [240, 240, 240] } }
                     ],
                     [
                         { content: q.competency || '-', rowSpan: 2 },
                         { content: 'No. Soal', styles: { fillColor: [240, 240, 240], halign: 'center', fontStyle: 'bold' } },
-                        { content: questionContent, rowSpan: 5, styles: { valign: 'top' } }
+                        { content: questionContent, rowSpan: 5, styles: { valign: 'top', fontSize: 9 } }
                     ],
                     [
                         { content: String(idx + 1), styles: { halign: 'center', fontSize: 13, fontStyle: 'bold', minCellHeight: 15 } }
@@ -689,11 +767,10 @@ const QuizGeneratorPage = () => {
                         { content: formatAnswer(q), styles: { halign: 'center', fontStyle: 'bold', fontSize: 10 } }
                     ],
                     [
-                        { content: 'Indikator Soal', styles: { fontStyle: 'bold', fillColor: [240, 240, 240] } },
-                        { content: '', styles: { minCellHeight: 40 } }
+                        { content: 'Indikator Soal', styles: { fontStyle: 'bold', fillColor: [240, 240, 240] }, colSpan: 2 }
                     ],
                     [
-                        { content: q.indicator || '-', colSpan: 3, styles: { minCellHeight: 20, verticalAlign: 'top' } }
+                        { content: q.indicator || '-', colSpan: 2, styles: { minCellHeight: 25, verticalAlign: 'top' } }
                     ]
                 ],
                 margin: { left: 15, right: 15, bottom: 10 },
@@ -739,7 +816,7 @@ const QuizGeneratorPage = () => {
                 <head>
                     <meta charset="UTF-8">
                     <style>
-                        @page {size: landscape; margin: 1cm; }
+                        @page {size: A4 landscape; margin: 1cm; mso-page-orientation: landscape;}
                         body {font-family: 'Times New Roman', serif; font-size: 11pt; }
                         table {width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
                         th, td {border: 1px solid black; padding: 10px; vertical-align: top; word-wrap: break-word; }
@@ -769,7 +846,7 @@ const QuizGeneratorPage = () => {
                     <table>
                         <tr class="bg-gray">
                             <td width="25%"><strong>Deskripsi Pedagogis</strong></td>
-                            <td width="10%"><strong>No. Soal</strong></td>
+                            <td width="20%"><strong>No. Soal & Kunci</strong></td>
                             <td><strong>Rumusan Butir Soal</strong></td>
                         </tr>
                         <tr>
@@ -869,7 +946,7 @@ const QuizGeneratorPage = () => {
 
         const tableBody = quizResult.questions.map((q, idx) => [
             idx + 1,
-            q.competency || 'Menganalisis capaian pembelajaran...',
+            q.competency || '-',
             q.pedagogical_materi || topic || '-',
             `${gradeLevel || '-'}/${quizResult?.context_semester || activeSemester || '-'}`,
             q.indicator || '-',
@@ -887,13 +964,13 @@ const QuizGeneratorPage = () => {
             styles: { fontSize: 8, cellPadding: 2, valign: 'middle' },
             columnStyles: {
                 0: { cellWidth: 10, halign: 'center' },
-                1: { cellWidth: 50 },
-                2: { cellWidth: 40 },
+                1: { cellWidth: 70 },
+                2: { cellWidth: 55 },
                 3: { cellWidth: 25, halign: 'center' },
-                4: { cellWidth: 60 },
-                5: { cellWidth: 25, halign: 'center' },
-                6: { cellWidth: 25, halign: 'center' },
-                7: { cellWidth: 15, halign: 'center' }
+                4: { cellWidth: 80 },
+                5: { cellWidth: 20, halign: 'center' },
+                6: { cellWidth: 20, halign: 'center' },
+                7: { cellWidth: 12, halign: 'center' }
             },
             margin: { left: 15, right: 15 }
         });
@@ -923,7 +1000,7 @@ const QuizGeneratorPage = () => {
                 <head>
                     <meta charset="UTF-8">
                     <style>
-                        @page {size: landscape; margin: 2cm; }
+                        @page {size: A4 landscape; margin: 1cm; mso-page-orientation: landscape;}
                         body {font-family: 'Times New Roman', serif; }
                         table {width: 100%; border-collapse: collapse; }
                         th, td {border: 1px solid black; padding: 5px; vertical-align: top; }
@@ -956,7 +1033,7 @@ const QuizGeneratorPage = () => {
                             ${quizResult.questions.map((q, idx) => `
                             <tr>
                                 <td align="center">${idx + 1}</td>
-                                <td>${q.competency || 'Menganalisis capaian pembelajaran...'}</td>
+                                <td>${q.competency || '-'}</td>
                                 <td>${q.pedagogical_materi || topic || '-'}</td>
                                 <td align="center">${gradeLevel || '-'}/${quizResult?.context_semester || activeSemester || '-'}</td>
                                 <td>${q.indicator || '-'}</td>
@@ -1109,14 +1186,15 @@ const QuizGeneratorPage = () => {
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Kelas (Level)</label>
                                         <StyledSelect
-                                            value={classes.find(c => c.rombel === gradeLevel)?.id || ''}
-                                            onChange={(e) => {
-                                                const c = classes.find(cls => cls.id === e.target.value);
-                                                setGradeLevel(c ? c.rombel : e.target.value);
-                                            }}
+                                            value={gradeLevel}
+                                            onChange={(e) => setGradeLevel(e.target.value)}
                                         >
                                             <option value="">Pilih Kelas</option>
-                                            {[...new Set(classes.map(c => c.level))].sort().map(l => <option key={l} value={l}>{l}</option>)}
+                                            {[...new Set(classes.map(c => c.level).filter(Boolean))].sort((a, b) => {
+                                                const numA = parseInt(String(a).replace(/\D/g, '')) || 0;
+                                                const numB = parseInt(String(b).replace(/\D/g, '')) || 0;
+                                                return numA - numB;
+                                            }).map(level => <option key={level} value={level}>{level}</option>)}
                                         </StyledSelect>
                                     </div>
                                 </div>
@@ -1286,6 +1364,50 @@ const QuizGeneratorPage = () => {
                                     {generating ? <RefreshCw className="animate-spin" /> : <BrainCircuit />}
                                     {generating ? 'Sedang Meracik Soal...' : 'GENERATE SOAL SEKARANG'}
                                 </button>
+
+                                {/* Improved Progress Indicator */}
+                                {generating && (
+                                    <div className="mt-6 p-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-xl animate-fade-in">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-blue-500 text-white rounded-lg shadow-sm">
+                                                    <Sparkles size={20} className="animate-pulse" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-blue-900 dark:text-blue-100 uppercase tracking-wider">
+                                                        {generationProgress.stage === 'preparing' && 'Tahap 1: Persiapan'}
+                                                        {generationProgress.stage === 'generating' && 'Tahap 2: AI Berpikir'}
+                                                        {generationProgress.stage === 'parsing' && 'Tahap 3: Finalisasi'}
+                                                        {generationProgress.stage === 'complete' && 'Tahap 4: Selesai'}
+                                                        {generationProgress.stage === 'starting' && 'Memulai...'}
+                                                    </p>
+                                                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                                                        {generationProgress.message}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <span className="text-xl font-black text-blue-600 dark:text-blue-400">
+                                                {generationProgress.percentage}%
+                                            </span>
+                                        </div>
+
+                                        <div className="w-full h-3 bg-blue-200 dark:bg-blue-800 rounded-full overflow-hidden shadow-inner">
+                                            <div
+                                                className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-500 ease-out relative"
+                                                style={{ width: `${generationProgress.percentage}%` }}
+                                            >
+                                                <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-between mt-3 text-[10px] font-medium text-blue-500 dark:text-blue-400 uppercase tracking-widest">
+                                            <span className={generationProgress.percentage >= 10 ? 'opacity-100' : 'opacity-30'}>Persiapan</span>
+                                            <span className={generationProgress.percentage >= 50 ? 'opacity-100' : 'opacity-30'}>Generasi</span>
+                                            <span className={generationProgress.percentage >= 85 ? 'opacity-100' : 'opacity-30'}>Validasi</span>
+                                            <span className={generationProgress.percentage >= 100 ? 'opacity-100' : 'opacity-30'}>Selesai</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1501,6 +1623,89 @@ const QuizGeneratorPage = () => {
                             >
                                 Hapus
                             </button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+
+            {/* Troubleshooting Error Modal */}
+            {errorModal.isOpen && (
+                <Modal onClose={() => setErrorModal(prev => ({ ...prev, isOpen: false }))}>
+                    <div className="p-2">
+                        <div className="flex flex-col items-center text-center">
+                            <div className={`p-4 rounded-full mb-4 ${errorModal.type === 'quota' ? 'bg-orange-100 text-orange-600' :
+                                errorModal.type === 'apikey' ? 'bg-red-100 text-red-600' :
+                                    errorModal.type === 'parse' ? 'bg-amber-100 text-amber-600' :
+                                        errorModal.type === 'safety' ? 'bg-blue-100 text-blue-600' :
+                                            'bg-gray-100 text-gray-600'
+                                }`}>
+                                {errorModal.type === 'quota' && <AlertTriangle size={32} />}
+                                {errorModal.type === 'apikey' && <Key size={32} />}
+                                {errorModal.type === 'parse' && <RefreshCw size={32} />}
+                                {errorModal.type === 'safety' && <AlertTriangle size={32} />}
+                                {errorModal.type === 'generic' && <BrainCircuit size={32} />}
+                            </div>
+
+                            <h3 className="text-xl font-bold dark:text-white mb-2">{errorModal.title}</h3>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 max-w-sm">
+                                {errorModal.message}
+                            </p>
+
+                            <div className="w-full bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 text-left mb-6 border border-gray-100 dark:border-gray-800">
+                                <p className="text-[10px] font-bold uppercase text-gray-400 tracking-widest mb-2">Saran Pemecahan Masalah:</p>
+                                <ul className="text-xs space-y-2 text-gray-700 dark:text-gray-300">
+                                    {errorModal.type === 'quota' && (
+                                        <>
+                                            <li className="flex gap-2"><span>1.</span> Tunggu sekitar 60 detik sebelum mencoba lagi.</li>
+                                            <li className="flex gap-2"><span>2.</span> Gunakan model <b>Gemini 1.5 Flash</b> yang lebih ringan di pengaturan.</li>
+                                            <li className="flex gap-2"><span>3.</span> Ganti API Key di Master Data jika limit sudah benar-benar habis.</li>
+                                        </>
+                                    )}
+                                    {errorModal.type === 'apikey' && (
+                                        <>
+                                            <li className="flex gap-2"><span>1.</span> Pergi ke menu <b>Data Guru/Master</b>.</li>
+                                            <li className="flex gap-2"><span>2.</span> Masukkan API Key Gemini yang valid (dapat diambil di Google AI Studio).</li>
+                                            <li className="flex gap-2"><span>3.</span> Pastikan tidak ada spasi di awal atau akhir kunci.</li>
+                                        </>
+                                    )}
+                                    {errorModal.type === 'parse' && (
+                                        <>
+                                            <li className="flex gap-2"><span>1.</span> Kurangi jumlah soal dalam satu permintaan jika terlalu banyak.</li>
+                                            <li className="flex gap-2"><span>2.</span> Klik tombol "Generate" lagi; kami telah mengaktifkan sistem perbaikan otomatis.</li>
+                                            <li className="flex gap-2"><span>3.</span> Berikan konteks RPP yang lebih sederhana/jelas.</li>
+                                        </>
+                                    )}
+                                    {errorModal.type === 'safety' && (
+                                        <>
+                                            <li className="flex gap-2"><span>1.</span> Periksa apakah ada kata-kata sensitif di RPP/Topik Anda.</li>
+                                            <li className="flex gap-2"><span>2.</span> Ubah bahasa atau deskripsi materi menjadi lebih umum.</li>
+                                            <li className="flex gap-2"><span>3.</span> Gunakan model AI yang berbeda di pengaturan.</li>
+                                        </>
+                                    )}
+                                    {errorModal.type === 'generic' && (
+                                        <>
+                                            <li className="flex gap-2"><span>1.</span> Pastikan koneksi internet Anda stabil.</li>
+                                            <li className="flex gap-2"><span>2.</span> Coba refresh halaman browser Anda.</li>
+                                            <li className="flex gap-2"><span>3.</span> Jika berlanjut, hubungi admin sistem.</li>
+                                        </>
+                                    )}
+                                </ul>
+                            </div>
+
+                            <div className="flex flex-col w-full gap-2">
+                                <button
+                                    onClick={() => handleGenerate()}
+                                    className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2"
+                                >
+                                    <RefreshCw size={18} /> Coba Generate Lagi
+                                </button>
+                                <button
+                                    onClick={() => setErrorModal(prev => ({ ...prev, isOpen: false }))}
+                                    className="w-full py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+                                >
+                                    Tutup
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </Modal>

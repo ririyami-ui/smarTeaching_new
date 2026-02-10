@@ -424,7 +424,7 @@ export default function DashboardPage() {
     };
 
     fetchStudentStats();
-  }, []);
+  }, [auth.currentUser]);
 
   useEffect(() => {
     const fetchAttendanceData = async () => {
@@ -516,9 +516,14 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4">
-      {/* Top Section: Clock and Reminder */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 flex flex-col justify-center items-center text-center">
+      {/* Clock Display - Full width on mobile */}
+      <div className="block lg:hidden">
+        <ClockDisplay showProgress={true} activeSchedule={activeSchedule} />
+      </div>
+
+      {/* Top Section: Clock and Schedule - Desktop only */}
+      <div className="hidden lg:grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
           <ClockDisplay showProgress={true} activeSchedule={activeSchedule} />
         </div>
         <div className="lg:col-span-2">
@@ -533,6 +538,20 @@ export default function DashboardPage() {
             academicYear={academicYear}
           />
         </div>
+      </div>
+
+      {/* Schedule Card - Mobile only */}
+      <div className="block lg:hidden">
+        <TeachingScheduleCard
+          schedules={todaySchedules}
+          currentTime={currentTime}
+          holiday={todayHoliday}
+          programs={programs}
+          classes={classes}
+          carryOverMap={carryOverMap}
+          activeSemester={activeSemester}
+          academicYear={academicYear}
+        />
       </div>
 
 

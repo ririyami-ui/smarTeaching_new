@@ -328,12 +328,21 @@ const LessonPlanPage = () => {
         try {
             const q = query(
                 collection(db, 'lessonPlans'),
-                where('userId', '==', auth.currentUser.uid),
-                orderBy('createdAt', 'desc')
+                where('userId', '==', auth.currentUser.uid)
+                // REMOVED orderBy to prevent crash with malformed timestamps after restore
             );
             const querySnapshot = await getDocs(q);
             const plans = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setSavedRPPs(plans);
+
+            // Manual sorting with safety check for timestamps
+            const sortedPlans = plans.sort((a, b) => {
+                // Handle cases where createdAt might not be a valid Timestamp
+                const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+                const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+                return bTime - aTime; // Descending order (newest first)
+            });
+
+            setSavedRPPs(sortedPlans);
         } catch (error) {
             console.error("Error fetching RPP history:", error);
         } finally {
@@ -778,7 +787,7 @@ const LessonPlanPage = () => {
                                             }}>
                                                 <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{plan.gradeLevel} - {plan.subject}</p>
                                                 <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">{plan.topic}</p>
-                                                <p className="text-[10px] text-gray-500 mt-1">{new Date(plan.createdAt?.toDate()).toLocaleDateString('id-ID')}</p>
+                                                <p className="text-[10px] text-gray-500 mt-1">{plan.createdAt?.toDate ? new Date(plan.createdAt.toDate()).toLocaleDateString('id-ID') : 'N/A'}</p>
                                             </div>
                                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button

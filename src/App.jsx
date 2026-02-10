@@ -41,8 +41,18 @@ function App() {
   const [isWelcomeVisible, setIsWelcomeVisible] = useState(true);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallCard, setShowInstallCard] = useState(false);
+  const [isPwaInstalled, setIsPwaInstalled] = useState(false);
 
   useScheduleNotifications();
+
+  // Check if PWA is already installed
+  useEffect(() => {
+    const checkPwaInstalled = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      setIsPwaInstalled(isStandalone);
+    };
+    checkPwaInstalled();
+  }, []);
 
   useEffect(() => {
     const cachedUser = JSON.parse(localStorage.getItem('user'));
@@ -77,9 +87,17 @@ function App() {
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
+      // Prevent the browser's default prompt
       e.preventDefault();
+
+      // Store the event for later use
       setInstallPrompt(e);
-      setShowInstallCard(true);
+
+      // Check if user already dismissed it this session using session storage
+      const isDismissed = sessionStorage.getItem('pwa_dismissed') === 'true';
+      if (!isDismissed) {
+        setShowInstallCard(true);
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -105,6 +123,7 @@ function App() {
 
   const handleDismiss = () => {
     setShowInstallCard(false);
+    sessionStorage.setItem('pwa_dismissed', 'true');
   };
 
   if (isWelcomeVisible || (isLoading && !user)) {
@@ -132,7 +151,7 @@ function App() {
                   <Route path="/rekapitulasi" element={<RekapitulasiPage />} />
                   <Route path="/rekap-individu" element={<RekapIndividuPage />} />
                   <Route path="/master-data" element={<MasterDataPage />} />
-                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/about" element={<AboutPage installPrompt={installPrompt} onInstall={handleInstall} isPwaInstalled={isPwaInstalled} />} />
                   <Route path="/analisis-kelas" element={<AnalisisKelasPage />} />
                   <Route path="/sistem-peringatan" element={<EarlyWarningPage />} />
                   <Route path="/asisten-guru" element={<AsistenGuruPage />} />

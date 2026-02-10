@@ -54,7 +54,13 @@ const useTaskNotifications = (activeSemester, academicYear) => {
             const now = moment();
 
             tasks.forEach((task, index) => {
-                const deadline = moment(task.deadline).startOf('day').hour(8); // Remind at 8 AM
+                // SAFETY CHECK: Ensure deadline is a valid Timestamp
+                if (!task.deadline || !task.deadline.toDate) {
+                    console.warn(`Task "${task.title}" has invalid deadline, skipping notification`);
+                    return;
+                }
+
+                const deadline = moment(task.deadline.toDate()).startOf('day').hour(8); // Remind at 8 AM
 
                 if (deadline.isAfter(now)) {
                     // Generate a unique numeric ID for the notification

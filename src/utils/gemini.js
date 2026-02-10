@@ -96,24 +96,28 @@ const getApiKey = () => {
  * Initializes or re-initializes the Generative AI model with the latest API key.
  * @returns {Object} The initialized model.
  */
-const getModel = (modelName) => {
+const getModel = (modelName, isJson = false) => {
   const apiKey = getApiKey();
   if (!apiKey) {
     throw new Error("API_KEY_MISSING");
   }
   const genAI = new GoogleGenerativeAI(apiKey);
-  // Default fallback if not specified or invalid, but trust input first since it might be user config
+  // Default fallback if not specified or invalid
   const selectedModel = modelName || "gemini-2.0-flash-exp";
 
-  // Inject System Instruction for supported models
-  // Defines the persona and knowledge base for the AI
+  const generationConfig = {
+    maxOutputTokens: 8192,
+    temperature: 0.7,
+  };
+
+  if (isJson) {
+    generationConfig.responseMimeType = "application/json";
+  }
+
   return genAI.getGenerativeModel({
     model: selectedModel,
     systemInstruction: SMARTTY_BRAIN,
-    generationConfig: {
-      maxOutputTokens: 8192, // Increased for detailed multi-meeting RPPs
-      temperature: 0.7,
-    }
+    generationConfig
   });
 };
 
@@ -229,69 +233,54 @@ const extractJSON = (text) => {
   let cleanText = text.trim();
 
   // 1. Remove markdown code blocks if present
-  cleanText = cleanText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+  cleanText = cleanText.replace(/^```(json)?\s*/i, '').replace(/```\s*$/, '').trim();
+
+  // 2. Pre-sanitize for common AI output issues
+  // Remove possible preamble or postamble text
+  const startIdx = Math.min(
+    cleanText.indexOf('{') === -1 ? Infinity : cleanText.indexOf('{'),
+    cleanText.indexOf('[') === -1 ? Infinity : cleanText.indexOf('[')
+  );
+  const endIdx = Math.max(
+    cleanText.lastIndexOf('}'),
+    cleanText.lastIndexOf(']')
+  );
+
+  if (startIdx !== Infinity && endIdx !== -1 && endIdx > startIdx) {
+    cleanText = cleanText.substring(startIdx, endIdx + 1);
+  }
+
+  // Handle common unescaped characters in JSON strings that break parsing
+  // This is a common issue when AI puts quotes inside a JSON string without escaping
+  // We'll try a basic fix for unescaped newlines inside strings if any
+  // cleanText = cleanText.replace(/(?<=: \".*)\n(?=.*\"(,|\}|\]))/g, "\\n");
 
   try {
-    // 2. Direct parse attempt
     return JSON.parse(cleanText);
   } catch (e) {
-    // 3. Regex extraction attempt
+    console.warn("Initial JSON parse failed, attempting recovery...", e.message);
+
+    // Recovery: Try to fix common trailing commas
+    let recovered = cleanText.replace(/,\s*([}\]])/g, '$1');
+
     try {
-      // Find the first occurrence of { or [ and the last occurrence of } or ]
-      const firstCurly = cleanText.indexOf('{');
-      const firstBracket = cleanText.indexOf('[');
-      const lastCurly = cleanText.lastIndexOf('}');
-      const lastBracket = cleanText.lastIndexOf(']');
+      return JSON.parse(recovered);
+    } catch (e2) {
+      // Aggressive recovery: find the last valid object/array end
+      const openCurly = (cleanText.match(/\{/g) || []).length;
+      const closeCurly = (cleanText.match(/\}/g) || []).length;
+      const openBracket = (cleanText.match(/\[/g) || []).length;
+      const closeBracket = (cleanText.match(/\]/g) || []).length;
 
-      let start = -1;
-      let end = -1;
+      if (openCurly > closeCurly) cleanText += '}'.repeat(openCurly - closeCurly);
+      if (openBracket > closeBracket) cleanText += ']'.repeat(openBracket - closeBracket);
 
-      // Determine if we are looking for an object or an array based on what appears first
-      if (firstCurly !== -1 && (firstBracket === -1 || firstCurly < firstBracket)) {
-        start = firstCurly;
-        end = lastCurly;
-      } else if (firstBracket !== -1) {
-        start = firstBracket;
-        end = lastBracket;
+      try {
+        return JSON.parse(cleanText);
+      } catch (e3) {
+        throw new Error("Format output AI tidak valid dan tidak dapat diperbaiki otomatis.");
       }
-
-      if (start !== -1 && end !== -1 && end > start) {
-        let jsonCandidate = cleanText.substring(start, end + 1);
-
-        // Potential Fix for Truncated JSON
-        // Count brackets/braces
-        const openCurly = (jsonCandidate.match(/\{/g) || []).length;
-        const closeCurly = (jsonCandidate.match(/\}/g) || []).length;
-        const openBracket = (jsonCandidate.match(/\[/g) || []).length;
-        const closeBracket = (jsonCandidate.match(/\]/g) || []).length;
-
-        // If truncated, attempt to close them
-        if (openCurly > closeCurly) jsonCandidate += '}'.repeat(openCurly - closeCurly);
-        if (openBracket > closeBracket) jsonCandidate += ']'.repeat(openBracket - closeBracket);
-
-        try {
-          return JSON.parse(jsonCandidate);
-        } catch (innerE) {
-          // One last ditch: if it ends with a comma or property, try to close it more aggressively
-          // This is risky but often works for list-heavy outputs like quiz questions
-          let emergencyFix = jsonCandidate.trim();
-          if (emergencyFix.endsWith(',')) emergencyFix = emergencyFix.slice(0, -1);
-
-          // Re-close after trimming comma
-          const oc = (emergencyFix.match(/\{/g) || []).length;
-          const cc = (emergencyFix.match(/\}/g) || []).length;
-          const ob = (emergencyFix.match(/\[/g) || []).length;
-          const cb = (emergencyFix.match(/\]/g) || []).length;
-          if (oc > cc) emergencyFix += '}'.repeat(oc - cc);
-          if (ob > cb) emergencyFix += ']'.repeat(ob - cb);
-
-          return JSON.parse(emergencyFix);
-        }
-      }
-    } catch (innerError) {
-      console.error("Failed to extract JSON using manual range:", innerError);
     }
-    throw new Error("Format output AI tidak valid (Bukan JSON atau Terpotong).");
   }
 };
 /**
@@ -951,218 +940,130 @@ export async function polishJournalText(rawText, modelName) {
  * @param {number} params.difficulty - 0 to 100 slider value (LOTS to HOTS).
  * @returns {Promise<Object>} - The generated quiz object with stimulus and items.
  */
-export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject, typeCounts, difficulty, modelName }) {
+const BATCH_SIZE = 3;
+
+/**
+ * Generates an advanced quiz based on RPP/Promes context and specific configurations.
+ * Multi-stage/Batching implementation to ensure quality and reliability.
+ */
+export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject, typeCounts, difficulty, modelName, onProgress = () => { } }) {
   try {
-    const model = getModel(modelName);
+    onProgress({ stage: 'preparing', message: 'Mempersiapkan parameter kuis & landasan BSKAP 46/2025...', percentage: 5 });
 
-    // Extract types and calculate total count
-    const types = Object.keys(typeCounts);
-    const count = Object.values(typeCounts).reduce((sum, c) => sum + c, 0);
+    // 1. Calculate batches
+    const flattenedRequests = [];
+    Object.entries(typeCounts).forEach(([type, count]) => {
+      for (let i = 0; i < count; i++) {
+        flattenedRequests.push(type);
+      }
+    });
 
-    // Build detailed type requirements string
-    const typeDetails = types.map(t => `${t}: ${typeCounts[t]} soal`).join(', ');
-
-    // Determine HOTS/LOTS ration
-    const hotsRatio = Math.round(difficulty); // 0-100%
-    const cognitiveLevel = difficulty > 70 ? "C4-C6 (Analisis, Evaluasi, Kreasi)" : difficulty > 30 ? "C3-C4 (Aplikasi, Analisis)" : "C1-C2 (Mengingat, Memahami)";
-
-    // Determine Option Count based on Grade Level
-    let optionCount = 5; // Default SMA/SMK
-    let optionLabel = "A-E";
-    const lowerGrade = String(gradeLevel || '').toLowerCase();
-
-    // Default Example Options Array String
-    let exampleOptionsJSON = '["A. Opsi 1", "B. Opsi 2", "C. Opsi 3", "D. Opsi 4", "E. Opsi 5"]';
-
-    if (lowerGrade.includes('sd') || lowerGrade.includes('mi') || lowerGrade.match(/\b(1|2|3|4|5|6|i|ii|iii|iv|v|vi)\b/i)) {
-      optionCount = 3;
-      optionLabel = "A-C";
-      exampleOptionsJSON = '["A. Opsi 1", "B. Opsi 2", "C. Opsi 3"]';
-    } else if (lowerGrade.includes('smp') || lowerGrade.includes('mts') || lowerGrade.match(/\b(7|8|9|vii|viii|ix)\b/i)) {
-      optionCount = 4;
-      optionLabel = "A-D";
-      exampleOptionsJSON = '["A. Opsi 1", "B. Opsi 2", "C. Opsi 3", "D. Opsi 4"]';
+    const totalQuestions = flattenedRequests.length;
+    const batches = [];
+    for (let i = 0; i < totalQuestions; i += BATCH_SIZE) {
+      batches.push(flattenedRequests.slice(i, i + BATCH_SIZE));
     }
 
-    const prompt = `
-      Anda adalah "Mesin Intelijen Kurikulum Nasional" spesialis penyusunan **Instrumen Penilaian (Soal Ujian)** yang profesional.
-      
-      **OFFICIAL KNOWLEDGE ENGINE (BSKAP_DATA):**
-      - Regulasi Dasar: **${BSKAP_DATA.standards.regulation}**
-      - Filosofi Operasional: **${BSKAP_DATA.standards.philosophy.name} (Mindful, Meaningful, Joyful)**
-      - Standar Referensi Alat: **Kemendikdasmen**
-      
-      TUGAS:
-      Buatlah Instrumen Penilaian (Soal Ujian) **BERKUALITAS NASIONAL** yang **KONTEKSTUAL, AKADEMIS, dan BERBASIS DATA ILMIAH** untuk:
-      - Mapel: ${subject}
-      - Kelas: ${gradeLevel}
-      - Topik/Materi: ${topic}
-      - Konteks Pembelajaran/Bahan Bacaan: "${context}" (WAJIB DIGUNAKAN SEBAGAI SUMBER UTAMA)
-      - Tingkat Kesulitan (HOTS Meter): ${difficulty}% (${cognitiveLevel})
-      - **DISTRIBUSI SOAL (STRICT)**: ${typeDetails}
-      - TOTAL Soal: ${count} butir
+    onProgress({ stage: 'preparing', message: `Membagi ${totalQuestions} soal ke dalam ${batches.length} batch...`, percentage: 10 });
 
-      ${getRegionalLanguage(subject) ? `
-      **INSTRUKSI BAHASA DAERAH (${getRegionalLanguage(subject)})**:
-      - Karena mata pelajaran ini adalah Bahasa Daerah, Anda **WAJIB** menggunakan **Bahasa ${getRegionalLanguage(subject)}** untuk seluruh isi soal, stimulus, dan pilihan jawaban.
-      - Gunakan tingkatan bahasa yang sesuai (misal: Ngoko/Kromo untuk Jawa sesuai konteks materi).
-      ${(getRegionalLanguage(subject).toLowerCase().includes('jawa') || getRegionalLanguage(subject).toLowerCase().includes('madura')) ? `- Sertakan penggunaan **Aksara Hanacaraka (Aksara Jawa/Madura)** pada bagian yang relevan (misal: dalam stimulus teks atau pertanyaan tentang penulisan aksara).` : ''}
-      - Tetap gunakan Bahasa Indonesia HANYA untuk instruksi struktural atau field JSON.
-      ` : ''}
+    let allQuestions = [];
+    let quizTitle = "";
 
-      **ATURAN MAIN (WAJIB):**
-      1. **SOURCE OF TRUTH**: DILARANG keras berimprovisasi di luar ruang lingkup materi di konteks/RPP. Seluruh isi soal, stimulus, dan penjelasan harus selaras dengan buku teks resmi dan standar CP resmi Kemendikdasmen.
-      2. **PRINSIP DEEP LEARNING**:
-         - **Mindful (Berkesadaran)**: Soal mendorong peserta didik berpikir reflektif dan sadar akan proses kognitifnya.
-         - **Meaningful (Bermakna)**: Konteks soal relevan dengan kehidupan nyata, aplikatif, dan bermakna bagi peserta didik.
-         - **Joyful (Menggembirakan)**: Soal menantang namun tidak menakutkan, mendorong rasa ingin tahu dan eksplorasi.
-      3. **TERMINOLOGI**: Gunakan istilah "Peserta Didik" dan kosakata kependidikan yang tepat sesuai Kemendikdasmen.
-      4. **BAHASA INDONESIA BAKU (PUEBI)**: Gunakan Bahasa Indonesia sesuai PUEBI (Pedoman Umum Ejaan Bahasa Indonesia).
+    // 2. Generate each batch
+    for (let i = 0; i < batches.length; i++) {
+      const currentBatch = batches[i];
+      const batchNum = i + 1;
+      const progressBase = 10 + (batchNum / batches.length) * 80;
 
-      PRINSIP UTAMA PEMBUATAN SOAL PROFESIONAL (STRICT RULES):
-      
-      1.  **KONTEKS PROFESIONAL & AKADEMIS (CRITICAL)**:
-          - **DILARANG**: Konteks terlalu sederhana atau kasual seperti "Ani pergi ke pasar membeli 3 apel..."
-          - **WAJIB**: Gunakan konteks akademis, ilmiah, atau profesional seperti:
-            * Hasil penelitian/survei dengan data statistik
-            * Kasus nyata dari jurnal ilmiah atau berita kredibel
-            * Infografis/diagram/grafik dengan data kompleks
-            * Fenomena alam/sosial yang memerlukan analisis mendalam
-            * Studi kasus profesional (medis, teknik, ekonomi, dll)
-          - **Contoh SALAH**: "Budi membeli 5 pensil seharga Rp 2.000..."
-          - **Contoh BENAR**: "Berdasarkan data BPS 2024, inflasi Indonesia mencapai 3,2%. Grafik berikut menunjukkan perbandingan inflasi dengan negara ASEAN lainnya..."
+      onProgress({
+        stage: 'generating',
+        message: `Batch ${batchNum}/${batches.length}: Membuat ${currentBatch.length} soal...`,
+        percentage: Math.round(progressBase)
+      });
 
-      2.  **STIMULUS BERKUALITAS TINGGI (INTEGRATED)**:
-          - Masukkan stimulus ke dalam field \`stimulus\` di dalam objek soal
-          - Stimulus harus berupa: teks ilmiah, data statistik, grafik/tabel, kutipan jurnal, atau kasus kompleks
-          - Panjang stimulus: 100-300 kata untuk soal HOTS
-          - Jika satu stimulus untuk beberapa soal:
-            * Soal 1: Field \`stimulus\` berisi TEKS LENGKAP
-            * Soal 2-3: Field \`stimulus\` berisi "Lihat stimulus pada Soal no 1"
+      const batchSummary = currentBatch.reduce((acc, t) => {
+        acc[t] = (acc[t] || 0) + 1;
+        return acc;
+      }, {});
+      const batchTypeDetails = Object.entries(batchSummary).map(([t, c]) => `${t}: ${c} soal`).join(', ');
 
-      3.  **PENGOLAHAN KONTEKS RPP/MODUL**:
-          - **ANALISIS MENDALAM**: Jangan copy-paste RPP
-          - **TRANSFORMASI KREATIF**: Ubah materi RPP menjadi:
-            * Studi kasus profesional
-            * Data penelitian fiktif namun realistis
-            * Simulasi situasi nyata yang kompleks
-          - Soal harus mencerminkan Capaian Pembelajaran (CP) di RPP
+      const model = getModel(modelName, true);
 
-      4.  **STIMULUS CONSISTENCY CHECK**:
-          - Jika soal menyebut "Berdasarkan narasi/tabel/grafik tersebut...", field \`stimulus\` **TIDAK BOLEH KOSONG**
-          - Pastikan stimulus benar-benar ada dan lengkap
-          - Jangan buat peserta didik bingung mencari referensi yang hilang
-
-      5.  **TINGKAT KOGNITIF PROFESIONAL (HOTS-ORIENTED)**:
-${BSKAP_DATA.standards.cognitive_levels.map(l => `          - **${l.id} (${l.level})**: ${l.description}`).join('\n')}
-          - Untuk difficulty > 50%, minimal 60% soal harus L2-L3
-          - **DILARANG**: Soal definisi hafalan murni ("Apa pengertian X?")
-          - **DITERIMA**: Soal aplikasi dan analisis ("Berdasarkan data X, bagaimana Y mempengaruhi Z?")
-
-      6.  **ATURAN OPSI JAWABAN**:
-          - Untuk jenjang kelas ini (${gradeLevel}), wajib buat **${optionCount} Pilihan Jawaban** (${optionLabel})
-          - Semua opsi harus plausible (masuk akal)
-          - Distraktor harus mencerminkan miskonsepsi umum
-          - Hindari pola jawaban yang mudah ditebak (misal: jawaban terpanjang selalu benar)
-
-      7.  **ATURAN SOAL MENJODOHKAN (Matching)**:
-          - **VARIASI JUMLAH**: Side Kiri 3-5 items (JANGAN SELALU 4)
-          - **DISTRAKTOR**: Side Kanan = Jumlah Kiri + 1-2 pengecoh
-          - **ACAK POSISI**: Posisi \`right_side\` HARUS diacak
-          - Contoh: Kiri 3 item → Kanan 4-5 item; Kiri 5 item → Kanan 6-7 item
-
-      8.  **VISUALISASI DATA (CRITICAL)**:
-          - **TABEL**: Gunakan HTML table dengan border:
-            \`<table border="1" style="width:100%; border-collapse: collapse;">
-              <tr><th>Header 1</th><th>Header 2</th></tr>
-              <tr><td>Data 1</td><td>Data 2</td></tr>
-            </table>\`
-          - **GAMBAR/DIAGRAM**: Gunakan placeholder deskriptif:
-            \`[GAMBAR: Grafik batang perbandingan GDP 5 negara ASEAN tahun 2020-2024, sumbu X menunjukkan tahun, sumbu Y dalam miliar USD]\`
-          - **GRAFIK/CHART**: Deskripsikan dengan detail agar dapat dibayangkan
-
-      9.  **BAHASA INDONESIA BAKU (PUEBI)**:
-          - Gunakan Bahasa Indonesia sesuai PUEBI (Pedoman Umum Ejaan Bahasa Indonesia)
-          - Hindari bahasa kasual atau tidak baku
-          - Gunakan istilah teknis yang tepat sesuai bidang ilmu
-          - Konsisten dalam penggunaan istilah (misal: "peserta didik" bukan "siswa")
-
-      10. **STRICT TYPE & COUNT ENFORCEMENT**:
-          - Anda HARUS membuat **PERSIS** sesuai distribusi: ${typeDetails}
-          - DILARANG membuat tipe soal lain atau jumlah yang berbeda
-          - Contoh: Jika diminta "pg: 10, true_false: 5", maka output HARUS 10 soal pg + 5 soal true_false = 15 total
-
-      FORMAT OUTPUT YANG DIBUTUHKAN (JSON ONLY):
-      Kembalikan HANYA JSON object valid tanpa markdown formatting \`\`\`. Struktur JSON:
-      {
-        "title": "Judul Kuis / Ulangan",
-        "questions": [
-          {
-            "id": 1,
-            "type": "pg", 
-            "competency": "Menganalisis data...", 
-            "pedagogical_materi": "Materi Pokok", 
-            "indicator": "Indikator soal...", 
-            "cognitive_level": "Aplikasi",
-            "stimulus": "Konteks/Teks/Data...",
-            "question": "Pertanyaan...",
-            "options": ${exampleOptionsJSON},
-            "answer": "A. Opsi 1", 
-            "explanation": "Penjelasan..."
-          },
-          {
-            "id": 2,
-            "type": "pg_complex", 
-            "stimulus": "", 
-            "question": "Pilihlah DUA pernyataan yang benar...",
-            "options": ["1. Pernyataan A", "2. Pernyataan B", "3. Pernyataan C", "4. Pernyataan D"],
-            "answer": ["1. Pernyataan A", "3. Pernyataan C"],
-            "explanation": "..."
-          },
-          {
-            "id": 3,
-            "type": "matching",
-            "stimulus": "Data...",
-            "question": "Jodohkan...",
-            "left_side": ["Premis A", "Premis B"],
-            "right_side": ["Respon 2 (Pasangan A)", "Respon 3 (Pengecoh)", "Respon 1 (Pasangan B)"],
-            "pairs": [{"left": "Premis A", "right": "Respon 2 (Pasangan A)"}, {"left": "Premis B", "right": "Respon 1 (Pasangan B)"}]
-          },
-          {
-            "id": 4,
-            "type": "true_false",
-            "stimulus": "",
-            "question": "Tentukan kebenaran...",
-            "statements": [
-               {"text": "Pernyataan 1...", "isCorrect": true},
-               {"text": "Pernyataan 2...", "isCorrect": false}
-            ]
-          },
-          {
-            "id": 5,
-            "type": "essay",
-            "stimulus": "Kasus...",
-            "question": "Jelaskan...",
-            "answer": "Kunci jawaban...",
-            "grading_guide": "Rubrik..."
-          },
-          {
-            "id": 6,
-            "type": "uraian",
-            "question": "Uraikan...",
-            "answer": "Model jawaban...",
-            "grading_guide": "Kriteria..."
-          }
-        ]
+      // Determine Option Count based on Grade Level
+      let optionCount = 5;
+      let optionLabel = "A-E";
+      const lowerGrade = String(gradeLevel || '').toLowerCase();
+      if (lowerGrade.includes('sd') || lowerGrade.includes('mi') || lowerGrade.match(/\b(1|2|3|4|5|6|i|ii|iii|iv|v|vi)\b/i)) {
+        optionCount = 3; optionLabel = "A-C";
+      } else if (lowerGrade.includes('smp') || lowerGrade.includes('mts') || lowerGrade.match(/\b(7|8|9|vii|viii|ix)\b/i)) {
+        optionCount = 4; optionLabel = "A-D";
       }
-    `;
 
-    const result = await retryWithBackoff(() => model.generateContent(prompt));
-    const response = await result.response;
-    return extractJSON(response.text());
+      const batchInstructions = currentBatch.map((type, idx) => `- Soal No ${allQuestions.length + idx + 1}: WAJIB Tipe **${type}**`).join('\n');
+
+      const prompt = `
+        LANDASAN REGULASI: **BSKAP No. 46 Tahun 2025** (Standar Nasional Kurikulum Merdeka).
+        STANDAR PEDAGOGIS: **Buku Teks Utama Kemendikbudristek** (Mindful, Meaningful, Joyful).
+        
+        TUGAS: Buatlah ${currentBatch.length} butir soal untuk:
+        - Mapel: ${subject} | Kelas: ${gradeLevel} | Topik: ${topic}
+        - Konteks: "${context || 'INPUT MANUAL/MINIM'}" 
+        ${!context ? '(WAJIB: Gunakan Database Internal Kurikulum Merdeka & BSKAP 46/2025 Anda untuk menentukan CP/Kompetensi yang relevan secara mandiri)' : '(WAJIB JADI SUMBER UTAMA)'}
+        - HOTS Meter: ${difficulty}%
+        - Status: Batch ${batchNum} dari ${batches.length}
+
+        DAFTAR TIPE SOAL YANG WAJIB DIBUAT PADA BATCH INI:
+        ${batchInstructions}
+
+        STRICT RULES:
+        1. Gunakan Bahasa Indonesia akademis formal (PUEBI).
+        2. **REFERENSI MATERI (STRICT)**: Gunakan isi dari field "RINGKASAN MATERI" sebagai sumber utama soal. Abaikan "Langkah-Langkah Pembelajaran" atau instruksi guru jika ada; fokuslah pada konsep, fakta, dan data materi.
+        3. Soal harus berbasis data/stimulus (Tabel, Narasi Ilmiah, atau Studi Kasus). Dilarang soal hafalan definisi literal.
+        4. **PRINSIP DEEP LEARNING (WAJIB)**:
+           - **Kontekstual**: Hubungkan soal dengan kehidupan sehari-hari siswa agar bermakna.
+           - **Reflektif**: Ajak siswa melihat kembali apa yang dipelajari dan proses belajarnya.
+           - **Eksploratif**: Berikan ruang untuk berbagai kemungkinan jawaban atau solusi kreatif.
+        5. Pilihan jawaban (untuk PG) wajib ${optionCount} opsi (${optionLabel}).
+        6. **ANTI-PLACEHOLDER**: Dilarang telak menggunakan karakter "-" atau "..." pada field competency dan indicator. Jika data tidak ditemukan di RPP, AI WAJIB menyusun indikator yang logis (Disajikan..., siswa dapat...) yang selaras dengan soal.
+        STRUKTUR JSON PER TIPE (INPUT HARUS SESUAI):
+        - **Wajib Ada di Setiap Soal**: 
+          "competency": "Isi CP/Kompetensi asli dari RPP (Dilarang generic, harus spesifik materi)", 
+          "indicator": "Indikator soal (Format: Disajikan [konteks/stimulus], siswa dapat [kata kerja operasional C1-C6] [materi])", 
+          "cognitive_level": "L1/L2/L3 (L1=Pemahaman, L2=Aplikasi, L3=HOTS)"
+        - **pg**: {"type": "pg", "competency": "...", "indicator": "...", "cognitive_level": "...", "question": "...", "options": ["A...", "B..."], "answer": "A...", "explanation": "..."}
+        - **pg_complex**: {"type": "pg_complex", "competency": "...", "indicator": "...", "cognitive_level": "...", "question": "...", "options": ["1...", "2..."], "answer": ["1...", "3..."], "explanation": "..."}
+        - **matching**: {"type": "matching", "competency": "...", "indicator": "...", "cognitive_level": "...", "question": "...", "left_side": ["A", "B"], "right_side": ["1", "2", "3"], "pairs": [{"left": "A", "right": "1"}], "explanation": "..."}
+        - **true_false**: {"type": "true_false", "competency": "...", "indicator": "...", "cognitive_level": "...", "question": "...", "statements": [{"text": "S1", "isCorrect": true}], "explanation": "..."}
+        - **essay/uraian**: {"type": "essay", "competency": "...", "indicator": "...", "cognitive_level": "...", "question": "...", "answer": "Kunci jawaban (WAJIB SINGKAT & PADAT, Maksimal 2-3 kalimat)", "grading_guide": "Pedoman penskoran ringkas", "explanation": "Penjelasan singkat"}
+
+        FORMAT OUTPUT TOTAL (JSON):
+        {
+          "title": "${topic}",
+          "questions": [
+             // Masukkan ${currentBatch.length} soal di sini sesuai tipe di atas
+          ]
+        }
+      `;
+
+      const result = await retryWithBackoff(() => model.generateContent(prompt));
+      const response = await result.response;
+      const parsed = extractJSON(response.text());
+
+      if (parsed.questions && Array.isArray(parsed.questions)) {
+        allQuestions = [...allQuestions, ...parsed.questions];
+        if (!quizTitle) quizTitle = parsed.title;
+      }
+    }
+
+    onProgress({ stage: 'complete', message: 'Semua batch berhasil digabungkan!', percentage: 100 });
+
+    return {
+      title: quizTitle || topic,
+      questions: allQuestions
+    };
+
   } catch (error) {
-    console.error("Error in generateAdvancedQuiz: ", error);
-    throw error; // Throw instead of returning error string to let UI handle it properly
+    throw new Error(handleGeminiError(error, "generateAdvancedQuiz rebuild"));
   }
 }
 
@@ -1176,8 +1077,9 @@ ${BSKAP_DATA.standards.cognitive_levels.map(l => `          - **${l.id} (${l.lev
  * @param {number} count - Number of questions.
  * @returns {Promise<Object>} - Quiz object.
  */
-export async function generateQuizFromImage({ imageBase64, topic, gradeLevel, subject, count, modelName }) {
+export async function generateQuizFromImage({ imageBase64, topic, gradeLevel, subject, count, modelName, onProgress = () => { } }) {
   try {
+    onProgress({ stage: 'preparing', message: 'Menganalisis gambar...', percentage: 20 });
     const model = getModel(modelName);
 
     const prompt = `
@@ -1234,11 +1136,18 @@ export async function generateQuizFromImage({ imageBase64, topic, gradeLevel, su
       },
     };
 
+    onProgress({ stage: 'generating', message: 'Mengekstrak data kognitif dari gambar...', percentage: 50 });
     const result = await retryWithBackoff(() => model.generateContent([prompt, imagePart]));
     const response = await result.response;
-    return extractJSON(response.text());
+
+    onProgress({ stage: 'parsing', message: 'Memformat hasil analisis...', percentage: 85 });
+    const text = response.text();
+    const parsed = extractJSON(text);
+
+    onProgress({ stage: 'complete', message: 'Kuis visual berhasil dibuat!', percentage: 100 });
+    return parsed;
   } catch (error) {
-    return handleGeminiError(error, "generateQuizFromImage");
+    throw new Error(handleGeminiError(error, "generateQuizFromImage"));
   }
 }
 
@@ -2420,6 +2329,6 @@ export async function generateATP(data) {
     return extractJSON(response.text());
   } catch (error) {
     console.error("Error generating ATP:", error);
-    return handleGeminiError(error, "generateATP");
+    throw new Error(handleGeminiError(error, "generateATP"));
   }
 }

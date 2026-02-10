@@ -93,13 +93,19 @@ const LkpdGeneratorPage = () => {
         // Fetch Saved RPPs
         const rppQuery = query(
             collection(db, 'lessonPlans'),
-            where('userId', '==', auth.currentUser.uid),
-            orderBy('createdAt', 'desc')
+            where('userId', '==', auth.currentUser.uid)
+            // REMOVED orderBy to prevent crash with malformed timestamps
         );
 
         const unsubRPP = onSnapshot(rppQuery, (snapshot) => {
             const rpps = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setSavedRPPs(rpps);
+            // Manual sorting with safety check
+            const sortedRPPs = rpps.sort((a, b) => {
+                const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+                const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+                return bTime - aTime;
+            });
+            setSavedRPPs(sortedRPPs);
             setLoadingHistory(false);
         }, (error) => {
             console.error("RPP snapshot error:", error);
@@ -109,13 +115,19 @@ const LkpdGeneratorPage = () => {
         // Fetch Saved LKPDs
         const lkpdQuery = query(
             collection(db, 'lkpd_history'),
-            where('userId', '==', auth.currentUser.uid),
-            orderBy('createdAt', 'desc')
+            where('userId', '==', auth.currentUser.uid)
+            // REMOVED orderBy to prevent crash with malformed timestamps
         );
 
         const unsubLKPD = onSnapshot(lkpdQuery, (snapshot) => {
             const lkpds = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setSavedLKPDs(lkpds);
+            // Manual sorting with safety check
+            const sortedLKPDs = lkpds.sort((a, b) => {
+                const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+                const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+                return bTime - aTime;
+            });
+            setSavedLKPDs(sortedLKPDs);
         }, (error) => {
             console.error("LKPD snapshot error:", error);
         });
@@ -407,7 +419,7 @@ const LkpdGeneratorPage = () => {
                                             <div className="cursor-pointer flex-1" onClick={() => handleLoadLKPD(item)}>
                                                 <div className="flex justify-between items-center mb-1">
                                                     <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{item.gradeLevel} - {item.classRoom}</span>
-                                                    <span className="text-[10px] text-gray-400">{new Date(item.createdAt?.toDate()).toLocaleDateString('id-ID')}</span>
+                                                    <span className="text-[10px] text-gray-400">{item.createdAt?.toDate ? new Date(item.createdAt.toDate()).toLocaleDateString('id-ID') : 'N/A'}</span>
                                                 </div>
                                                 <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">{item.rppTopic || 'Topik tidak tersedia'}</p>
                                             </div>

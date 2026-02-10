@@ -169,12 +169,19 @@ const HandoutGeneratorPage = () => {
 
         const q = query(
             collection(db, 'handouts'),
-            where('userId', '==', user.uid),
-            orderBy('createdAt', 'desc')
+            where('userId', '==', user.uid)
+            // REMOVED orderBy to prevent crash with malformed timestamps
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            setSavedHandouts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            const handouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Manual sorting with safety check
+            const sortedHandouts = handouts.sort((a, b) => {
+                const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+                const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+                return bTime - aTime;
+            });
+            setSavedHandouts(sortedHandouts);
         }, (error) => {
             console.error("History subscription error:", error);
         });
@@ -214,12 +221,18 @@ const HandoutGeneratorPage = () => {
                 // Fetch Saved RPPs for Topic Selection
                 const rppQuery = query(
                     collection(db, 'lessonPlans'),
-                    where('userId', '==', user.uid),
-                    orderBy('createdAt', 'asc')
+                    where('userId', '==', user.uid)
+                    // REMOVED orderBy to prevent crash with malformed timestamps
                 );
                 const rppSnapshot = await getDocs(rppQuery);
                 const rpps = rppSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setSavedRPPs(rpps);
+                // Manual sorting with safety check (ascending for topic selection)
+                const sortedRPPs = rpps.sort((a, b) => {
+                    const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+                    const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+                    return aTime - bTime; // Ascending order
+                });
+                setSavedRPPs(sortedRPPs);
 
             } catch (error) {
                 console.error("Error fetching data:", error);

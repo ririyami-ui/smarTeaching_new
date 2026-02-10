@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { collection, getDocs, writeBatch, query, limit, where, doc } from 'firebase/firestore';
+import { collection, getDocs, writeBatch, query, limit, where, doc, Timestamp } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import { Trash2, Upload, Download, AlertTriangle, Database, RefreshCw, Users, BookOpen, Calendar, ClipboardList, FileText, ShieldAlert, BadgeCheck, Sparkles, Zap } from 'lucide-react';
+import { Trash2, Upload, Download, AlertTriangle, Database, RefreshCw, Users, BookOpen, Calendar, ClipboardList, FileText, ShieldAlert, BadgeCheck, Sparkles, Zap, History, Layout, FileUp } from 'lucide-react';
 import StyledButton from './StyledButton';
 import Modal from './Modal';
 import { generateCleanupReport, executeAutoCleanup } from '../utils/databaseCleaner';
@@ -37,7 +37,38 @@ const DatabaseManager = () => {
     { id: 'infractions', label: 'Pelanggaran Siswa', icon: <ShieldAlert size={20} /> },
     { id: 'holidays', label: 'Agenda & Libur', icon: <Calendar size={20} /> },
     { id: 'teachingPrograms', label: 'Program Mengajar', icon: <BookOpen size={20} /> },
+    { id: 'kktpAssessments', label: 'Penilaian KKTP Digital', icon: <ClipboardList size={20} /> },
+    { id: 'studentTasks', label: 'Penugasan Siswa', icon: <Layout size={20} /> },
+    { id: 'class_agreements', label: 'Kesepakatan Kelas', icon: <FileText size={20} /> },
+    { id: 'handouts', label: 'Bahan Ajar (Handout)', icon: <History size={20} /> },
+    { id: 'lkpd_history', label: 'Riwayat LKPD', icon: <FileUp size={20} /> },
   ];
+
+  // Helper to recursively restore Firestore Timestamps from JSON
+  const convertTimestamps = (obj) => {
+    if (obj === null || typeof obj !== 'object') return obj;
+
+    // Check if it's a serialized Firestore Timestamp
+    // JSON restoration sometimes results in objects with seconds/nanoseconds
+    if (
+      obj.seconds !== undefined &&
+      obj.nanoseconds !== undefined
+    ) {
+      return new Timestamp(obj.seconds, obj.nanoseconds);
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(convertTimestamps);
+    }
+
+    const newObj = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        newObj[key] = convertTimestamps(obj[key]);
+      }
+    }
+    return newObj;
+  };
 
   const [confirmationText, setConfirmationText] = useState('');
 
@@ -229,17 +260,38 @@ const DatabaseManager = () => {
   };
 
   const performRestore = async (file) => {
-    setRestoreStatus('Restoring...');
+    setRestoreStatus('Memulai pemulihan...');
     const reader = new FileReader();
 
     reader.onload = async (e) => {
       try {
         const backupData = JSON.parse(e.target.result);
         let restoredCount = 0;
+        const idMap = {}; // { collectionId: { oldId: newId } }
 
-        for (const collectionId in backupData) {
-          if (Object.hasOwnProperty.call(backupData, collectionId)) {
+        // Define tiers to respect dependencies
+        const tiers = [
+          ['classes', 'subjects', 'holidays', 'teachingPrograms', 'lessonPlans', 'quizzes'],
+          ['students', 'teachingSchedules', 'handouts', 'lkpd_history'],
+          ['attendance', 'teachingJournals', 'kktpAssessments', 'infractions', 'studentTasks', 'class_agreements'],
+          ['grades']
+        ];
+
+        const refFieldMap = {
+          classId: 'classes',
+          subjectId: 'subjects',
+          studentId: 'students',
+          kktpAssessmentId: 'kktpAssessments',
+          rppId: 'lessonPlans',
+          teachingProgramId: 'teachingPrograms'
+        };
+
+        for (const tier of tiers) {
+          for (const collectionId of tier) {
+            if (!backupData[collectionId] || backupData[collectionId].length === 0) continue;
+
             const collectionData = backupData[collectionId];
+            idMap[collectionId] = idMap[collectionId] || {};
 
             // Firebase limits batch to 500 operations
             for (let i = 0; i < collectionData.length; i += 500) {
@@ -247,37 +299,77 @@ const DatabaseManager = () => {
               const chunk = collectionData.slice(i, i + 500);
 
               chunk.forEach(docData => {
-                const { id, ...data } = docData;
+                const { id: oldId, ...rawData } = docData;
 
-                // CRITICAL FIX: Ensure the restored data is owned by the current user
-                // This satisfies Firestore security rules (userId == auth.uid)
+                // CRITICAL: Convert plain objects back to Timestamps
+                const data = convertTimestamps(rawData);
+
+                // 1. Update ownership
                 data.userId = auth.currentUser.uid;
 
-                let targetId = id;
-                // Special case for teachingPrograms collection which enforces UID in docId
-                // (rules require docId.matches(request.auth.uid + '_.*'))
-                if (collectionId === 'teachingPrograms' && !id.startsWith(auth.currentUser.uid)) {
-                  // If the ID from backup doesn't match current UID, remap it
-                  const subjectPart = id.includes('_') ? id.split('_').slice(1).join('_') : id;
+                // 2. Update references from previous tiers
+                Object.keys(refFieldMap).forEach(field => {
+                  const targetCollection = refFieldMap[field];
+                  if (data[field] && idMap[targetCollection] && idMap[targetCollection][data[field]]) {
+                    const oldVal = data[field];
+                    data[field] = idMap[targetCollection][oldVal];
+
+                    // Legacy support: update .class property if it was a string
+                    if (field === 'classId' && (typeof data.class === 'string')) {
+                      // We keep class name as is, but logic usually prefers classId
+                    }
+                  }
+                });
+
+                // 3. Determine New ID (Collision Prevention)
+                let targetId;
+
+                // Case A: teachingPrograms (UID-prefixed)
+                if (collectionId === 'teachingPrograms') {
+                  const subjectPart = oldId.includes('_') ? oldId.split('_').slice(1).join('_') : oldId;
                   targetId = `${auth.currentUser.uid}_${subjectPart}`;
-                  console.log(`Remapping teachingProgram ID: ${id} -> ${targetId}`);
+                }
+                // Case B: attendance (Composite key)
+                else if (collectionId === 'attendance' && data.date && data.classId && data.studentId) {
+                  targetId = `${data.date}-${data.classId}-${data.studentId}`;
+                }
+                // Case C: Standard (Generate new random ID to avoid cross-account collisions)
+                else {
+                  // We ALWAYS generate a new ID for cross-account safety in shared project
+                  const newDocRef = doc(collection(db, collectionId));
+                  targetId = newDocRef.id;
                 }
 
-                const docRef = doc(db, collectionId, targetId);
-                batch.set(docRef, data, { merge: true });
+                idMap[collectionId][oldId] = targetId;
+
+                try {
+                  const docRef = doc(db, collectionId, targetId);
+                  batch.set(docRef, data, { merge: true });
+                } catch (innerError) {
+                  console.error(`Error adding to batch: ${collectionId}/${targetId}:`, innerError);
+                  throw innerError;
+                }
               });
 
-              await batch.commit();
-              restoredCount += chunk.length;
-              setRestoreStatus(`Memulihkan... (${restoredCount} data)`);
+              try {
+                console.log(`Committing tier batch for ${collectionId} (${i} to ${Math.min(i + 500, collectionData.length)})...`);
+                await batch.commit();
+                restoredCount += chunk.length;
+                setRestoreStatus(`Memulihkan ${collectionId}... (${restoredCount} data)`);
+              } catch (commitError) {
+                console.error(`FAILED to commit batch for ${collectionId}:`, commitError);
+                throw commitError;
+              }
             }
           }
         }
 
         setRestoreStatus('Pemulihan berhasil dilakukan!');
+        toast.success('Data berhasil dipulihkan dengan ID baru.');
       } catch (error) {
         console.error('Error restoring data:', error);
         setRestoreStatus(`Gagal: ${error.message}`);
+        toast.error('Gagal memulihkan data: ' + error.message);
       }
     };
 

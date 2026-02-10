@@ -63,6 +63,12 @@ const useScheduleNotifications = () => {
         const dayOfWeek = daysMap[schedule.day];
         if (dayOfWeek === undefined) return; // Skip if day is not recognized
 
+        // SAFETY CHECK: Ensure startTime is valid
+        if (!schedule.startTime || typeof schedule.startTime !== 'string' || !schedule.startTime.includes(':')) {
+          console.warn(`Schedule for ${schedule.subject} has invalid startTime, skipping notification`);
+          return;
+        }
+
         // Calculate next occurrence of this day
         let nextOccurrence = moment().day(dayOfWeek);
         if (nextOccurrence.isBefore(today, 'day')) {
@@ -71,6 +77,13 @@ const useScheduleNotifications = () => {
 
         // Set time for 5 minutes before start time
         const [startHour, startMinute] = schedule.startTime.split(':').map(Number);
+
+        // Validate parsed time
+        if (isNaN(startHour) || isNaN(startMinute)) {
+          console.warn(`Schedule for ${schedule.subject} has invalid time format, skipping notification`);
+          return;
+        }
+
         const notificationTime = nextOccurrence
           .hour(startHour)
           .minute(startMinute)

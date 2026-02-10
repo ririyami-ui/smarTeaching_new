@@ -231,10 +231,10 @@ const ClockDisplay = ({ size = 'lg', variant = 'card', showProgress = false, act
   const isSmall = size === 'sm';
   const isMinimal = variant === 'minimal';
 
-  const segmentSize = isSmall ? 'text-2xl sm:text-3xl' : 'text-4xl sm:text-5xl';
-  const labelSize = isSmall ? 'text-[8px]' : 'text-[10px]';
+  const segmentSize = isSmall ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl lg:text-4xl xl:text-5xl';
+  const labelSize = isSmall ? 'text-[8px]' : 'text-[9px] sm:text-[10px]';
   const dotSize = isSmall ? 'w-1 h-1' : 'w-1.5 h-1.5 sm:w-2 sm:h-2';
-  const gapSize = isSmall ? 'gap-1' : 'gap-1.5 sm:gap-3';
+  const gapSize = isSmall ? 'gap-1.5' : 'gap-2 sm:gap-2.5 lg:gap-2';
 
   const SegmentDisplay = ({ value, label }) => (
     <div className="flex flex-col items-center">
@@ -265,8 +265,8 @@ const ClockDisplay = ({ size = 'lg', variant = 'card', showProgress = false, act
 
   return (
     <div className={`
-      relative group overflow-hidden animate-fade-in-up
-      ${isSmall ? 'p-2' : 'p-4 sm:p-6'}
+      relative group overflow-hidden animate-fade-in-up w-full mx-0
+      ${isSmall ? 'py-2 px-3' : 'py-4 px-4 sm:py-6 sm:px-5'}
       ${variant === 'card' ? 'bg-white/80 dark:bg-purple-900/40 backdrop-blur-xl border border-white/20 dark:border-purple-700/30 shadow-xl rounded-3xl' : ''}
       ${variant === 'glass' ? 'bg-white/10 dark:bg-purple-900/20 backdrop-blur-md border border-white/10 rounded-2xl' : ''}
       ${variant === 'minimal' ? 'bg-transparent' : ''}
