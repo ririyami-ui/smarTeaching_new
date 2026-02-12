@@ -17,6 +17,12 @@ import { Printer, FileText } from 'lucide-react';
 import { asBlob } from 'html-docx-js-typescript';
 import BSKAP_DATA from '../utils/bskap_2025_intel.json';
 
+// Utility for Month Mapping
+const MONTH_MAP = {
+    'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4, 'Mei': 5, 'Juni': 6,
+    'Juli': 7, 'Agustus': 8, 'September': 9, 'Oktober': 10, 'November': 11, 'Desember': 12
+};
+
 // Utility for Docx Export
 const exportToDocx = async (htmlContent, fileName, options = {}) => {
     const fullHtml = `
@@ -498,6 +504,9 @@ const ProgramMengajarPage = () => {
     );
 };
 
+
+
+
 // --- Reusable Signature Section ---
 const SignatureSection = ({ userProfile, signingLocation }) => {
     return (
@@ -527,7 +536,18 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
         const semesterMonths = semester === 'Ganjil'
             ? ['Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
             : ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni'];
-        return semesterMonths.map(m => ({ name: m, totalWeeks: 4, nonEffectiveWeeks: 0, keterangan: '' }));
+
+        const years = year.split('/');
+
+        return semesterMonths.map(m => {
+            const mNum = MONTH_MAP[m];
+            const actualYear = mNum >= 7 ? years[0] : years[1];
+            // Logika: Jika hari > 28 (semua bulan kecuali Februari non-kabisat), maka 5 pekan (Kolom P1-P5)
+            const daysInMonth = moment(`${actualYear}-${mNum}`, 'YYYY-M').daysInMonth();
+            const totalWeeks = daysInMonth > 28 ? 5 : 4;
+
+            return { name: m, totalWeeks: totalWeeks, nonEffectiveWeeks: 0, keterangan: '' };
+        });
     };
 
     const [months, setMonths] = useState(getInitialTemplate());
@@ -729,6 +749,20 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSyncWeeksWithCalendar = () => {
+        const years = year.split('/');
+        const newMonths = months.map(m => {
+            const mNum = MONTH_MAP[m.name];
+            const actualYear = mNum >= 7 ? years[0] : years[1];
+            const daysInMonth = moment(`${actualYear}-${mNum}`, 'YYYY-M').daysInMonth();
+            const totalWeeks = daysInMonth > 28 ? 5 : 4;
+            return { ...m, totalWeeks };
+        });
+        setMonths(newMonths);
+        isInternalChange.current = true;
+        toast.success("Jumlah pekan telah disinkronkan dengan kalender nyata.");
     };
 
 
@@ -1023,10 +1057,17 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
                             />
                             <button
                                 onClick={handleSyncJP}
-                                title="Sinkronkan dari Jadwal Mengajar"
+                                title="Sinkronkan JP dari Jadwal Mengajar"
                                 className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200 bg-white shadow-sm"
                             >
                                 <RefreshCw size={16} />
+                            </button>
+                            <button
+                                onClick={handleSyncWeeksWithCalendar}
+                                title="Sinkronkan Pekan dengan Kalender Nyata"
+                                className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors border border-green-200 bg-white shadow-sm"
+                            >
+                                <Calendar size={16} />
                             </button>
                         </div>
                     </div>
@@ -1706,11 +1747,6 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
         }
     }, [sharedEfektifData]);
 
-    const monthMap = {
-        'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4, 'Mei': 5, 'Juni': 6,
-        'Juli': 7, 'Agustus': 8, 'September': 9, 'Oktober': 10, 'November': 11, 'Desember': 12
-    };
-
     useEffect(() => {
         let ignore = false;
         const fetchData = async () => {
@@ -1774,7 +1810,7 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
     }, [grade, subject, semester, year, activeTab]);
 
     const getHolidayForWeek = (monthName, wIndex) => {
-        const monthNum = monthMap[monthName];
+        const monthNum = MONTH_MAP[monthName];
         if (!monthNum) return null;
 
         // Determine actual year for this month based on Academic Year (e.g., 2025/2026)
@@ -2253,10 +2289,7 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
         if (sharedEfektifData && sharedEfektifData.jpPerWeek > 0) {
             weeklyJP = sharedEfektifData.jpPerWeek;
         } else {
-            // 2. Fallback to calculating from schedules if Pekan Efektif is not visited/missing
             const targetSubjectObj = subjects.find(s => s.name === subject);
-
-            // Helper to handle Roman/Arabic grade mapping
             const getAltGrade = (g) => {
                 const map = { '1': 'I', '2': 'II', '3': 'III', '4': 'IV', '5': 'V', '6': 'VI', '7': 'VII', '8': 'VIII', '9': 'IX', '10': 'X', '11': 'XI', '12': 'XII' };
                 const rev = Object.fromEntries(Object.entries(map).map(([k, v]) => [v, k]));
@@ -2617,6 +2650,7 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
     const [loading, setLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [docId, setDocId] = useState(null);
+    const [generationProgress, setGenerationProgress] = useState({ stage: '', message: '', percentage: 0 });
 
     const [manualTotalJP, setManualTotalJP] = useState(0);
     const [manualJpPerWeek, setManualJpPerWeek] = useState(0);
@@ -2683,6 +2717,7 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
 
     const handleGenerate = async () => {
         setIsGenerating(true);
+        setGenerationProgress({ stage: 'init', message: 'Memulai koneksi ke sistem pakar...', percentage: 5 });
         try {
             // 1. Fetch Existing RPPs for Context
             const rppQuery = query(
@@ -2703,7 +2738,8 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
                 totalWeeks: manualTotalWeeks,
                 modelName: geminiModel,
                 existingRPPs: existingRPPs,
-                userProfile: userProfile
+                userProfile: userProfile,
+                onProgress: (progress) => setGenerationProgress(progress)
             });
 
             if (Array.isArray(result)) {
@@ -2934,14 +2970,31 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
                         </div>
                     </div>
 
-                    <button
-                        onClick={handleGenerate}
-                        disabled={isGenerating}
-                        className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 h-full"
-                    >
-                        {isGenerating ? <Loader2 className="animate-spin" /> : <Zap size={20} />}
-                        {isGenerating ? 'AI Sedang Menyusun...' : 'Generate ATP Otomatis'}
-                    </button>
+                    {isGenerating ? (
+                        <div className="flex flex-col gap-1 w-full md:w-64">
+                            <div className="flex justify-between text-[10px] font-bold text-purple-600 dark:text-purple-300 uppercase tracking-wider">
+                                <span className="truncate max-w-[150px]">{generationProgress.message || 'Memproses...'}</span>
+                                <span>{generationProgress.percentage}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden border border-purple-100 dark:border-purple-900">
+                                <div
+                                    className="bg-gradient-to-r from-purple-500 to-indigo-600 h-full rounded-full transition-all duration-500 ease-out relative"
+                                    style={{ width: `${generationProgress.percentage}%` }}
+                                >
+                                    <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={handleGenerate}
+                            disabled={isGenerating}
+                            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 h-full whitespace-nowrap"
+                        >
+                            <Zap size={20} />
+                            Generate ATP Otomatis
+                        </button>
+                    )}
                 </div>
             </div>
 

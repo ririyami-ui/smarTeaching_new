@@ -237,16 +237,22 @@ const extractJSON = (text) => {
 
   // 2. Pre-sanitize for common AI output issues
   // Remove possible preamble or postamble text
-  const startIdx = Math.min(
-    cleanText.indexOf('{') === -1 ? Infinity : cleanText.indexOf('{'),
-    cleanText.indexOf('[') === -1 ? Infinity : cleanText.indexOf('[')
-  );
-  const endIdx = Math.max(
-    cleanText.lastIndexOf('}'),
-    cleanText.lastIndexOf(']')
-  );
+  const firstOpenBrace = cleanText.indexOf('{');
+  const firstOpenBracket = cleanText.indexOf('[');
 
-  if (startIdx !== Infinity && endIdx !== -1 && endIdx > startIdx) {
+  let startIdx = -1;
+  let endIdx = -1;
+
+  // Determine if it looks like an Object or Array based on which comes first
+  if (firstOpenBrace !== -1 && (firstOpenBracket === -1 || firstOpenBrace < firstOpenBracket)) {
+    startIdx = firstOpenBrace;
+    endIdx = cleanText.lastIndexOf('}');
+  } else if (firstOpenBracket !== -1 && (firstOpenBrace === -1 || firstOpenBracket < firstOpenBrace)) {
+    startIdx = firstOpenBracket;
+    endIdx = cleanText.lastIndexOf(']');
+  }
+
+  if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
     cleanText = cleanText.substring(startIdx, endIdx + 1);
   }
 
@@ -408,6 +414,12 @@ const createSystemInstruction = (userProfile) => {
     - 3 Pilar: ${BSKAP_DATA.standards?.philosophy?.name} (${BSKAP_DATA.standards?.philosophy?.pillars?.map(p => p.name).join(', ')})
     - Profil Lulusan (8 Dimensi): ${JSON.stringify(BSKAP_DATA.standards?.profile_lulusan_2025?.map(p => p.dimensi) || [])}
     - Kompetensi Masa Depan: ${JSON.stringify(BSKAP_DATA.standards?.industry_competencies_2025_2026?.map(c => c.name) || [])}
+    
+    **REFERENSI BUKU RESMI (DATABASE):**
+    Anda memiliki akses ke peta materi/bab dari Buku Teks Utama Kemdikbudristek:
+    ${JSON.stringify(BSKAP_DATA.textbooks || {})}
+    
+    **PENTING**: Jika mata pelajaran, jenjang, dan kelas yang sedang dibahas tersedia dalam database di atas, Anda **WAJIB** merujuk pada urutan bab dan penomoran yang ada di sana sebagai prioritas utama.
   `;
 
   return { parts: [{ text: instruction }] };
@@ -1011,30 +1023,39 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
         ${!context ? '(WAJIB: Gunakan Database Internal Kurikulum Merdeka & BSKAP 46/2025 Anda untuk menentukan CP/Kompetensi yang relevan secara mandiri)' : '(WAJIB JADI SUMBER UTAMA)'}
         - HOTS Meter: ${difficulty}%
         - Status: Batch ${batchNum} dari ${batches.length}
+        ${allQuestions.length > 0 ? `- TOPIK YANG SUDAH DICAKUP: [${allQuestions.map(q => q.pedagogical_materi).join(', ')}] (HINDARI pengulangan materi yang sama jika konteks masih luas)` : ''}
 
-        DAFTAR TIPE SOAL YANG WAJIB DIBUAT PADA BATCH INI:
+        TUGAS UTAMA: 
+        1. Analisis SELURUH materi dalam "Konteks".
+        2. Buatlah soal yang **BERIMBANG** dan mencakup berbagai sub-inti materi agar tidak menumpuk di satu bagian saja.
         ${batchInstructions}
 
         STRICT RULES:
         1. Gunakan Bahasa Indonesia akademis formal (PUEBI).
-        2. **REFERENSI MATERI (STRICT)**: Gunakan isi dari field "RINGKASAN MATERI" sebagai sumber utama soal. Abaikan "Langkah-Langkah Pembelajaran" atau instruksi guru jika ada; fokuslah pada konsep, fakta, dan data materi.
+        2. **REFERENSI MATERI (STRICT)**: Gunakan isi dari "Konteks" atau "RINGKASAN MATERI" sebagai sumber utama soal. Abaikan instruksi teknis guru jika ada; fokuslah pada konsep, fakta, dan data materi.
         3. Soal harus berbasis data/stimulus (Tabel, Narasi Ilmiah, atau Studi Kasus). Dilarang soal hafalan definisi literal.
         4. **PRINSIP DEEP LEARNING (WAJIB)**:
            - **Kontekstual**: Hubungkan soal dengan kehidupan sehari-hari siswa agar bermakna.
            - **Reflektif**: Ajak siswa melihat kembali apa yang dipelajari dan proses belajarnya.
            - **Eksploratif**: Berikan ruang untuk berbagai kemungkinan jawaban atau solusi kreatif.
         5. Pilihan jawaban (untuk PG) wajib ${optionCount} opsi (${optionLabel}).
-        6. **ANTI-PLACEHOLDER**: Dilarang telak menggunakan karakter "-" atau "..." pada field competency dan indicator. Jika data tidak ditemukan di RPP, AI WAJIB menyusun indikator yang logis (Disajikan..., siswa dapat...) yang selaras dengan soal.
+        6. **ANTI-PLACEHOLDER & SPESIFIKASI (MANDATORY)**: 
+           - **pedagogical_materi**: Tuliskan SUB-TOPIK yang SANGAT SPESIFIK terkait butir soal ini saja. JANGAN salin seluruh topik RPP. Maksimal 3-5 kata (Contoh: "Hukum Ohm", "Fotosintesis pada Daun", "Struktur Atom").
+           - **competency**: Ambil bagian CP/Kompetensi asli yang paling relevan. Jika teks asli sangat panjang, potong dan ambil intisari kompetensinya saja agar tidak memenuhi kartu soal.
+           - **indicator**: Indikator soal (Format: Disajikan [konteks/stimulus], siswa dapat [KKO] [materi]). Harus SINGKAT dan PADAT.
+        
         STRUKTUR JSON PER TIPE (INPUT HARUS SESUAI):
         - **Wajib Ada di Setiap Soal**: 
-          "competency": "Isi CP/Kompetensi asli dari RPP (Dilarang generic, harus spesifik materi)", 
-          "indicator": "Indikator soal (Format: Disajikan [konteks/stimulus], siswa dapat [kata kerja operasional C1-C6] [materi])", 
-          "cognitive_level": "L1/L2/L3 (L1=Pemahaman, L2=Aplikasi, L3=HOTS)"
-        - **pg**: {"type": "pg", "competency": "...", "indicator": "...", "cognitive_level": "...", "question": "...", "options": ["A...", "B..."], "answer": "A...", "explanation": "..."}
-        - **pg_complex**: {"type": "pg_complex", "competency": "...", "indicator": "...", "cognitive_level": "...", "question": "...", "options": ["1...", "2..."], "answer": ["1...", "3..."], "explanation": "..."}
-        - **matching**: {"type": "matching", "competency": "...", "indicator": "...", "cognitive_level": "...", "question": "...", "left_side": ["A", "B"], "right_side": ["1", "2", "3"], "pairs": [{"left": "A", "right": "1"}], "explanation": "..."}
-        - **true_false**: {"type": "true_false", "competency": "...", "indicator": "...", "cognitive_level": "...", "question": "...", "statements": [{"text": "S1", "isCorrect": true}], "explanation": "..."}
-        - **essay/uraian**: {"type": "essay", "competency": "...", "indicator": "...", "cognitive_level": "...", "question": "...", "answer": "Kunci jawaban (WAJIB SINGKAT & PADAT, Maksimal 2-3 kalimat)", "grading_guide": "Pedoman penskoran ringkas", "explanation": "Penjelasan singkat"}
+          "pedagogical_materi": "Materi spesifik soal ini (max 5 kata)",
+          "competency": "Intisari CP relevan (Singkat)", 
+          "indicator": "Indikator operasional (Singkat)", 
+          "cognitive_level": "L1/L2/L3",
+          "stimulus": "Teks stimulus/kasus untuk soal ini (jika ada)"
+        - **pg**: {"type": "pg", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["A...", "B..."], "answer": "A...", "explanation": "..."}
+        - **pg_complex**: {"type": "pg_complex", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["1...", "2..."], "answer": ["1...", "3..."], "explanation": "..."}
+        - **matching**: {"type": "matching", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "left_side": ["A", "B"], "right_side": ["1", "2", "3"], "pairs": [{"left": "A", "right": "1"}], "explanation": "..."}
+        - **true_false**: {"type": "true_false", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "statements": [{"text": "S1", "isCorrect": true}], "explanation": "..."}
+        - **essay/uraian**: {"type": "essay", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "answer": "Kunci jawaban (WAJIB SINGKAT & PADAT)", "grading_guide": "Pedoman penskoran ringkas", "explanation": "Penjelasan singkat"}
 
         FORMAT OUTPUT TOTAL (JSON):
         {
@@ -1107,19 +1128,14 @@ export async function generateQuizFromImage({ imageBase64, topic, gradeLevel, su
       
       FORMAT OUTPUT (JSON ONLY):
       {
-        "stimulus": [
-           { 
-             "id": "visual_1", 
-             "type": "image", 
-             "content": "Referensi Gambar Utama", 
-             "caption": "Gambar yang dianalisis"
-           } 
-        ],
         "questions": [
            {
              "id": 1,
              "type": "pg",
-             "stimulus_ref": "visual_1",
+             "pedagogical_materi": "Sub-materi spesifik dari gambar (max 5 kata)",
+             "competency": "Kompetensi relevan (Singkat)",
+             "indicator": "Indikator (Format: Disajikan gambar..., siswa dapat...)",
+             "stimulus": "Penjelasan singkat tentang bagian gambar yang dirujuk",
              "question": "Berdasarkan gambar di atas, ...?",
              "options": ["A...", "B...", "C...", "D...", "E..."],
              "answer": "A...",
@@ -1212,10 +1228,10 @@ export const generateLessonPlan = async (data) => {
       Berikut adalah CP LENGKAP untuk referensi: 
       ${cpFullVerbatim}
       
-      TUGAS ANDA: Dari CP lengkap di atas, ekstrak HANYA bagian/elemen yang RELEVAN dengan materi "${data.materi}".
+      TUGAS ANDA: Dari CP lengkap di atas, ekstrak HANYA bagian/elemen yang RELEVAN dengan Elemen "${data.elemen || 'N/A'}" dan Materi "${data.materi}".
       - **WAJIB gunakan EXACT TEXT** dari CP (verbatim, NO paraphrase, NO summary)
-      - Jika materi mencakup multiple elemen, ekstrak semua yang relevan
-      - Jika tidak yakin elemen mana yang relevan, gunakan seluruh CP
+      - Fokus pada kalimat yang benar-benar menggambarkan kompetensi untuk materi ini.
+      - Jika tidak yakin elemen mana yang relevan, gunakan elemen yang setara dengan konten "${data.materi}".
       
       **FORMAT CP DI RPP (MANDATORY):**
       - HAPUS nomor elemen (mis. "2.1.", "2.2.", "3.1.") dari teks CP
@@ -1288,8 +1304,8 @@ export const generateLessonPlan = async (data) => {
 
       **PENTING - KEPATUHAN KETAT CAPAIAN PEMBELAJARAN (CP) BERDASARKAN KEPUTUSAN KEPALA BSKAP NO. 046/H/KR/2025:**
       1. **SUMBER KEBENARAN TUNGGAL**: Data berikut adalah EKSTRAKSI RESMI dari **${BSKAP_DATA.standards.regulation}** untuk **${getSemesterLabel(data.semester)}**.
-      2. **VERBATIM CP (HARGA MATI)**: Pada bagian "Capaian Pembelajaran (CP)", Anda **WAJIB** menyalin teks dari field **CAPAIAN PEMBELAJARAN (VERBATIM)** di atas (yaitu: "${cpFullVerbatim}") secara **VERBATIM (KATA PER KATA)**. 
-      3. **DILARANG KERAS**: Melakukan parafrase, meringkas, atau mengubah satu kata pun dari isi CP tersebut. Redaksi CP harus sesuai aslinya untuk kepatuhan audit regulasi.
+      2. **VERBATIM CP (HARGA MATI)**: Pada bagian "Capaian Pembelajaran (CP)" di hasil RPP, Anda **WAJIB** menyalin teks hasil ekstraksi yang RELEVAN (dari langkah "SMART CP EXTRACTION") secara **VERBATIM (KATA PER KATA)**. 
+      3. **DILARANG KERAS**: Melakukan parafrase, meringkas, atau mengubah satu kata pun dari isi CP yang telah diekstrak tersebut. Redaksi harus sesuai aslinya.
       4. **STRUKTUR DATA RESMI (SEMESTER ${getSemesterLabel(data.semester).toUpperCase()}):**
       ${JSON.stringify(
       (BSKAP_DATA.subjects[level]?.[data.gradeLevel]?.[subjectKey] ||
@@ -1421,11 +1437,21 @@ ${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map
       - Materi yang diambil harus akurat dan tidak menyimpang dari buku sumber
       - Jika ada perbedaan antara buku lama dan CP 2025, prioritaskan CP 2025
 
+      **OFFICIAL TEXTBOOK REFERENCE (INTERNAL ONLY - DO NOT SHOW IN RPP OUTPUT):**
+      Berdasarkan database BSKAP_DATA, berikut adalah buku yang relevan untuk materi "${data.materi}":
+      - **Buku**: ${BSKAP_DATA.textbooks?.[getLevel(data.gradeLevel)]?.[data.gradeLevel]?.[getSubjectKey(data.subject)]?.title || `Buku Siswa ${data.subject} Kelas ${data.gradeLevel} Kurikulum Merdeka`}
+      - **Penerbit**: ${BSKAP_DATA.textbooks?.[getLevel(data.gradeLevel)]?.[data.gradeLevel]?.[getSubjectKey(data.subject)]?.publisher || 'Kemendikbudristek'}
+      - **Peta Bab Resmi**: ${JSON.stringify(BSKAP_DATA.textbooks?.[getLevel(data.gradeLevel)]?.[data.gradeLevel]?.[getSubjectKey(data.subject)]?.chapters || [])}
+
+      **INSTRUKSI**: 
+      1. Jika materi "${data.materi}" cocok dengan salah satu bab di atas, Anda **WAJIB** menyebutkan nama bab tersebut secara spesifik di bagian "Buku Sumber".
+      2. Gunakan urutan logika dari buku tersebut untuk menyusun langkah pembelajaran.
+
       **STRUKTUR RPP YANG HARUS DIHASILKAN (Gunakan Format Markdown Ini):**
 
       # MODUL AJAR DEEP LEARNING (STANDARD 2026)
 
-      ## I. IDENTIFIKASI PEMBELAJARAN
+      ## IDENTIFIKASI PEMBELAJARAN
       | Komponen | Detail Informasi |
       | :--- | :--- |
       | **Satuan Pendidikan** | ${data.schoolName || '-'} |
@@ -1441,7 +1467,7 @@ ${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map
       | **Guru Pengampu** | ${data.teacherName || '-'} |
       | **NIP Guru** | ${data.teacherNip || '-'} |
 
-      ## II. KOMPETENSI INTI (CP & TP)
+      ## I. KOMPETENSI INTI (CP & TP)
       **1. Capaian Pembelajaran (CP):**
       (Tuliskan kompetensi utama yang harus dicapai peserta didik sesuai dengan fase and materi pokok ini).
 
@@ -1493,7 +1519,7 @@ ${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map
       - [Nama Dimensi]: [Penjelasan mendetail mengenai bagaimana peserta didik melatih dimensi ini melalui aktivitas spesifik di RPP ini].
 
       
-      ## III. LANGKAH-LANGKAH PEMBELAJARAN
+      ## II. LANGKAH-LANGKAH PEMBELAJARAN
       **PENTING - ALOKASI WAKTU:**
       Durasi total menit wajib dicantumkan dalam tabel Identifikasi. Standar Durasi:
 ${Object.entries(BSKAP_DATA.standards.duration_per_jp || {}).map(([lvl, min]) => `      - ${lvl}: 1 JP = ${min} Menit`).join('\n')}
@@ -1541,7 +1567,11 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       
       **INSTRUKSI SANGAT PENTING (NARATIF & MENDALAM):** 
       - Bagian kegiatan inti per pertemuan harus **TEBAL, NARATIF, and MENDETAIL**. 
-      - Untuk RPP multi-pertemuan, pastikan setiap pertemuan memiliki aktivitas yang **BERBEDA** and menunjukkan progres (misal: Pertemuan 1 fokus konsep, Pertemuan 2 fokus aplikasi/praktik).
+      - **KERANGKA PROGRESIVITAS (WAJIB UNTUK 2+ PERTEMUAN):**
+        - **Pertemuan 1 (Fondasi)**: Fokus pada pengenalan konsep, pemahaman dasar, dan koneksi awal (Conceptual).
+        - **Pertemuan 2 (Aplikasi/Praktik)**: Fokus pada prosedur, eksperimen, latihan terbimbing, atau pengembangan keterampilan (Procedural).
+        - **Pertemuan 3+ (Ekspansi/Evaluasi)**: Fokus pada proyek kompleks, pemecahan masalah nyata, presentasi karya, atau asesmen sumatif (Creative/Evaluation).
+      - Anda **WAJIB** memastikan setiap pertemuan memiliki sub-topik yang spesifik dan aktivitas yang **BERBEDA** secara signifikan. Jangan mengulang aktivitas yang sama di pertemuan yang berbeda.
       - Uraikan langkah pembelajaran menjadi skenario nyata langkah-per-langkah (step-by-step).
       - Bedakan jelas aktivitas **GURU** and aktivitas **PESERTA DIDIK**.
       - Pastikan urutannya logis sesuai sintaks model pembelajaran.
@@ -1571,27 +1601,27 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       *   **Ritual Penutup (Mindful):** WAJIB diakhiri dengan **Doa Syukur** and **Salam Penutup** sebagai tanda syukur atas kelancaran proses belajar.
 
       **4. Integrasi 6C & Deep Learning (PRINSIP HUTANG BAYAR):**
-      - **PRINSIP HUTANG BAYAR**: Setiap Dimensi Profil Lulusan yang Anda pilih di Bagian II **WAJIB** memiliki aktivitas nyata di langkah-langkah pembelajaran ini. DILARANG mencantumkan Dimensi yang tidak diajarkan.
+      - **PRINSIP HUTANG BAYAR**: Setiap Dimensi Profil Lulusan yang Anda pilih di Bagian I **WAJIB** memiliki aktivitas nyata di langkah-langkah pembelajaran ini. DILARANG mencantumkan Dimensi yang tidak diajarkan.
       - Pastikan seluruh langkah di pertemuan ini secara eksplisit mengintegrasikan: Character, Citizenship, Collaboration, Communication, Creativity, Critical Thinking.
       - **CEK KONSISTENSI TP**: Setiap Tujuan Pembelajaran (TP) yang Anda tulis di atas **HARUS** memiliki aktivitas nyata di langkah-langkah ini. Jangan ada TP yang "terlupakan" atau tidak diajarkan.
 
 
-      **CATATAN PENTING TENTANG KEDALAMAN KONTEN (TARGET: OPTIMAL 8-12 HALAMAN TOTAL):**
-      - **TARGET TOTAL DOKUMEN:** Buatlah RPP yang **PADAT BERISI** dengan estimasi total 8-12 halaman (termasuk lampiran KKTP & LKPD).
-      - **KOMPENSASI RUANG KKTP:** Karena ada penambahan tabel KKTP yang detail, mohon alokasikan ruang lebih.
-      - **JANGAN TERLALU PENDEK:**
-        - **1 Pertemuan:** Target total ~6-8 Halaman.
-        - **2-3 Pertemuan:** Target total ~10-14 Halaman.
+      **CATATAN PENTING TENTANG KEDALAMAN KONTEN (TARGET: 7-12 HALAMAN):**
+      - **TARGET HALAMAN (STRICT - JANGAN IMPROVISASI):**
+        - **1 Pertemuan:** Target ~7-9 Halaman.
+        - **2+ Pertemuan:** Target ~9-12 Halaman (Maksimal).
+      - **TARGET TOTAL DOKUMEN:** Jaga kedalaman materi and langkah pembelajaran agar tetap padat and berisi tanpa berlebihan.
+      - **EFISIENSI:** Meskipun jumlah pertemuan bertambah, pastikan narasi tetap fokus, efisien, and tidak bertele-tele. Hindari pengulangan yang tidak perlu.
       - **FOKUS PADA KUALITAS NARASI:**
         - Setiap langkah pembelajaran harus **DETAIL** (minimal 1 paragraf utuh per langkah).
         - Tetap tuliskan skenario/dialog guru-siswa, tapi pastikan **EFISIEN** and tidak bertele-tele.
         - Hindari pengulangan kata yang tidak perlu.
       - **Pastikan Lampiran (LKPD & Instrumen Penilaian) tetap lengkap.**
       
-      ## IV. MEDIA BELAJAR
+      ## III. MEDIA BELAJAR
       (Sebutkan secara spesifik media yang akan digunakan: nama video/platform, jenis infografis, alat peraga konkret, dll. Jangan hanya menulis "video interaktif" tapi sebutkan topik/judulnya).
 
-      ## V. LAMPIRAN
+      ## IV. LAMPIRAN
       
       ### 1. LKPD (LEMBAR KERJA PESERTA DIDIK)
       
@@ -1609,7 +1639,7 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       | Tanggal | : _________________________________ |
       
       **Tujuan Pembelajaran:**
-      (Tuliskan maksimal 3 tujuan pembelajaran yang akan dicapai peserta didik melalui LKPD ini, harus konsisten dengan bagian II di atas, menggunakan bahasa yang mudah dipahami peserta didik).
+      (Tuliskan maksimal 3 tujuan pembelajaran yang akan dicapai peserta didik melalui LKPD ini, harus konsisten dengan bagian I di atas, menggunakan bahasa yang mudah dipahami peserta didik).
       
       **Petunjuk Penggunaan:**
       1. Bacalah setiap instruksi dengan cermat sebelum mengerjakan.
@@ -1679,7 +1709,7 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       > **Catatan:** Penentuan kriteria ketercapaian tujuan pembelajaran dalam modul ini merujuk pada standar penilaian dalam **Permendikbudristek No. 21 Th 2022** dan kompetensi pada **Keputusan Kepala BSKAP No. 046/H/KR/2025**.
 
       **ATURAN WAJIB KORELASI:** 
-      Indikator/Kriteria di bawah ini **HARUS** merupakan turunan langsung dari **Tujuan Pembelajaran (TP)** yang Anda tulis di Bagian II. Jangan membuat indikator yang tidak ada di TP.
+      Indikator/Kriteria di bawah ini **HARUS** merupakan turunan langsung dari **Tujuan Pembelajaran (TP)** yang Anda tulis di Bagian I. Jangan membuat indikator yang tidak ada di TP.
 
       ${data.assessmentModel === 'Deskripsi Kriteria' ? `
       **B.1. DESKRIPSI KRITERIA (Checklist)**
@@ -2205,6 +2235,7 @@ export async function generateATP(data) {
   const userProfile = data.userProfile;
   const semester = data.semester;
   const subject = data.subject;
+  const onProgress = data.onProgress || (() => { }); // Progress callback
 
   const level = getLevel(data.gradeLevel);
   const levelData = BSKAP_DATA.subjects[level];
@@ -2216,6 +2247,8 @@ export async function generateATP(data) {
   const verbatimEntry = VERBATIM_BSKAP_DATA.subjects?.[level]?.[data.gradeLevel]?.[subjectKey] || {};
   const cpFullVerbatim = verbatimEntry.cp_full || "Lihat list elemen dan materi.";
 
+  onProgress({ stage: 'analyzing', message: 'Menganalisis Capaian Pembelajaran (CP) & Karakteristik Sekolah...', percentage: 20 });
+
   const prompt = `
     Anda adalah **Sistem Pakar Kurikulum Nasional & Auditor Administrasi Guru** dari Kemendikdasmen RI yang sangat canggih.
     Tugas Anda: Menyusun **Alur Tujuan Pembelajaran (ATP)** yang memiliki kecerdasan analisa tinggi dan presisi matematis 100%.
@@ -2226,6 +2259,12 @@ export async function generateATP(data) {
     - Fokus Fase: **${BSKAP_DATA.standards.semester_logic[getSemesterKey(semester)].focus}**
     - Peta Elemen Resmi: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.elemen || [])}
     - **LINGKUP MATERI RESMI (MANDATORY)**: ${JSON.stringify(subjectData?.[getSemesterKey(semester)]?.materi_inti || [])}
+    
+    **📚 REFERENSI BUKU TEKS UTAMA (MANDATORY):**
+    - **Buku**: ${BSKAP_DATA.textbooks?.[getLevel(data.gradeLevel)]?.[data.gradeLevel]?.[getSubjectKey(data.subject)]?.title || `Buku Siswa ${data.subject} Kelas ${data.gradeLevel} Kurikulum Merdeka`}
+    - **Peta Bab Resmi**: ${JSON.stringify(BSKAP_DATA.textbooks?.[getLevel(data.gradeLevel)]?.[data.gradeLevel]?.[getSubjectKey(data.subject)]?.chapters || [])}
+    
+    **INSTRUKSI**: Anda HARUS menyesuaikan urutan TP (Tujuan Pembelajaran) agar selaras dengan urutan Bab/Topik dalam buku teks resmi di atas.
     
     **SMART CP FOR ATP CONTEXT (BSKAP 46/2025 COMPLIANCE):**
     Berikut adalah CP LENGKAP untuk referensi konteks: 
@@ -2320,15 +2359,35 @@ export async function generateATP(data) {
     - "📚 CRITICAL: Apakah SETIAP materi yang saya pilih SESUAI dengan urutan topik/bab di Buku Teks ${data.subject} Kelas ${data.gradeLevel} Kemendikdasmen / Kemendikbudristek?"
     - "📚 CRITICAL: Apakah saya TIDAK mengambil topik yang seharusnya ada di Buku Kelas ${parseInt(data.gradeLevel) - 1} atau Kelas ${parseInt(data.gradeLevel) + 1}?"
     - "UNIQUE TITLES: Apakah setiap materi memiliki judul yang unik dan mendalam (Deep Learning)?"
+    
+    **FINAL OUTPUT INSTRUCTION:**
+    - **OUTPUT ONLY RAW JSON**.
+    - **NO MARKDOWN** (No \`\`\`json ... \`\`\`).
+    - **NO INTRO/OUTRO TEXT**.
+    - START WITH \`[\` AND END WITH \`]\`.
     `;
+
+  onProgress({ stage: 'drafting', message: 'Mulai menyusun kerangka Alur Tujuan Pembelajaran (ATP)...', percentage: 40 });
 
   try {
     const model = getModel(modelName);
     const result = await retryWithBackoff(() => model.generateContent(prompt));
     const response = await result.response;
-    return extractJSON(response.text());
+
+    onProgress({ stage: 'finalizing', message: 'Memvalidasi total JP dan menyelaraskan dengan Buku Teks...', percentage: 80 });
+
+    const output = extractJSON(response.text());
+
+    if (output && Array.isArray(output)) {
+      onProgress({ stage: 'completed', message: 'ATP berhasil disusun!', percentage: 100 });
+      return output;
+    } else {
+      throw new Error("Format output AI tidak valid: JSON yang diharapkan tidak ditemukan.");
+    }
+
   } catch (error) {
     console.error("Error generating ATP:", error);
+    onProgress({ stage: 'error', message: 'Terjadi kesalahan saat menyusun ATP.', percentage: 0 });
     throw new Error(handleGeminiError(error, "generateATP"));
   }
 }
