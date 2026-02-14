@@ -36,7 +36,7 @@ const useTaskNotifications = (activeSemester, academicYear) => {
 
     useEffect(() => {
         const scheduleTaskNotifications = async () => {
-            if (tasks.length === 0) return;
+            // Even if tasks is empty, we must run this to CLEAR old notifications for completed tasks
 
             let permStatus = await LocalNotifications.checkPermissions();
             if (permStatus.display !== 'granted') {
@@ -44,11 +44,22 @@ const useTaskNotifications = (activeSemester, academicYear) => {
                 if (permStatus.display !== 'granted') return;
             }
 
-            // We don't want to clear all notifications because useScheduleNotifications might have some
-            // Instead, we should probably follow a naming convention or track them
-            // For now, let's just schedule future ones and rely on Capacitor's override if IDs match
-            // A better way would be using specific channel IDs or tags if supported, 
-            // but let's just use unique ID prefix for Tasks (e.g. starts with 9)
+            // 1. Get ALL pending notifications
+            const pending = await LocalNotifications.getPending();
+
+            // 2. Identify which ones are "Task" notifications (ID starts with '9')
+            // This is crucial: we MUST clean up old task notifications before setting new ones
+            // because if a task is completed, it won't be in the `tasks` array anymore,
+            // so we need to remove its potential notification.
+            const taskNotificationsToCancel = pending.notifications.filter(n => n.id.toString().startsWith('9'));
+
+            // 3. Cancel ONLY those
+            if (taskNotificationsToCancel.length > 0) {
+                await LocalNotifications.cancel({ notifications: taskNotificationsToCancel });
+                console.log(`Cancelled ${taskNotificationsToCancel.length} old task notifications.`);
+            }
+
+            if (tasks.length === 0) return;
 
             const notificationsToSchedule = [];
             const now = moment();
@@ -64,9 +75,18 @@ const useTaskNotifications = (activeSemester, academicYear) => {
 
                 if (deadline.isAfter(now)) {
                     // Generate a unique numeric ID for the notification
-                    // Using hash or similar to make it stable
+                    // Prefix with '9' to distinguish from Schedule notifications
                     const idStr = task.id.substring(0, 8);
-                    const id = parseInt(idStr, 16) % 1000000 + 9000000; // 9xxxxxx range for tasks
+                    // Ensure it starts with 9 and is 9 digits max for safety (though int32 limit is 2B)
+                    // We use 90000000 base + (some hash of ID)
+                    // Simplified: Use simple hash of ID string to get a number
+                    let hash = 0;
+                    for (let i = 0; i < task.id.length; i++) {
+                        hash = ((hash << 5) - hash) + task.id.charCodeAt(i);
+                        hash |= 0; // Convert to 32bit integer
+                    }
+                    const uniqueIdSuffix = Math.abs(hash) % 1000000;
+                    const id = 90000000 + uniqueIdSuffix;
 
                     notificationsToSchedule.push({
                         id: id,
@@ -74,7 +94,7 @@ const useTaskNotifications = (activeSemester, academicYear) => {
                         body: `Tugas "${task.title}" kelas ${task.className} berakhir hari ini.`,
                         schedule: { at: deadline.toDate() },
                         sound: null,
-                        extra: { taskId: task.id }
+                        extra: { taskId: task.id, type: 'task' }
                     });
                 }
             });

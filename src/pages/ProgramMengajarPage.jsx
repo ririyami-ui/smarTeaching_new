@@ -465,6 +465,7 @@ const ProgramMengajarPage = () => {
                                     onUpdateData={handleUpdateGlobalEfektif} // Use stable callback
                                     sharedEfektifData={sharedEfektifData}
                                     subjects={subjects}
+                                    levels={levels}
                                 />
                             )}
                             {activeTab === 'prota' && (
@@ -530,7 +531,7 @@ const SignatureSection = ({ userProfile, signingLocation }) => {
 };
 
 
-const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab, userProfile, signingLocation, onUpdateData, sharedEfektifData, subjects }) => {
+const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab, userProfile, signingLocation, onUpdateData, sharedEfektifData, subjects, levels }) => {
     // Point 4: Initialize with template to avoid "kosong" UI flash
     const getInitialTemplate = () => {
         const semesterMonths = semester === 'Ganjil'
@@ -646,6 +647,69 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
                     setJpPerWeek(0);
                 }
 
+                // --- NEW: AUTO-CALCULATE NON-EFFECTIVE WEEKS FROM HOLIDAYS ---
+                // Only if not already set or explicitly requested (future feature)
+                // For now, we mix existing data with fresh holiday calculations if "keterangan" is empty
+
+                const hQuery = query(collection(db, 'holidays'), where('userId', '==', auth.currentUser.uid));
+                const hSnapshot = await getDocs(hQuery);
+                const allHolidays = hSnapshot.docs.map(doc => doc.data());
+
+                setMonths(prevMonths => {
+                    return prevMonths.map(m => {
+                        // Calculate how many weeks in this month are affected by manual holidays
+                        const mNum = MONTH_MAP[m.name];
+                        const years = year.split('/');
+                        const actualYear = mNum >= 7 ? years[0] : years[1];
+                        const daysInMonth = moment(`${actualYear}-${mNum}`, 'YYYY-M').daysInMonth();
+
+                        let calculatedNonEffective = 0;
+                        let holidaynotes = [];
+
+                        // Check each week
+                        const totalWeeks = daysInMonth > 28 ? 5 : 4;
+                        for (let w = 0; w < totalWeeks; w++) {
+                            const weekStart = moment(`${actualYear}-${mNum}-${(w * 7) + 1}`, 'YYYY-MM-D').startOf('day');
+                            const weekEnd = weekStart.clone().add(6, 'days').endOf('day');
+
+                            const blockingHoliday = allHolidays.find(h => {
+                                if (h.type !== 'manual') return false;
+                                const hStart = moment(h.startDate || h.date).startOf('day');
+                                const hEnd = moment(h.endDate || h.date).endOf('day');
+
+                                // Intersection
+                                const overlapStart = moment.max(weekStart, hStart);
+                                const overlapEnd = moment.min(weekEnd, hEnd);
+
+                                if (overlapEnd.isBefore(overlapStart)) return false;
+
+                                const overlapDays = overlapEnd.diff(overlapStart, 'days') + 1;
+                                return overlapDays >= 4; // At least 4 days overlap to block
+                            });
+
+                            if (blockingHoliday) {
+                                calculatedNonEffective++;
+                                if (!holidaynotes.includes(blockingHoliday.name)) holidaynotes.push(blockingHoliday.name);
+                            }
+                        }
+
+                        // Only override if current value is 0 or empty, to respect previous manual edits if any
+                        // OR if we want to enforce calendar (User said: "sesuai kalender pendidikan")
+                        // Let's enforce it but keep existing notes if they are different
+
+                        // We'll update if calculated > 0
+                        if (calculatedNonEffective > 0) {
+                            return {
+                                ...m,
+                                nonEffectiveWeeks: calculatedNonEffective, // Auto-set
+                                keterangan: m.keterangan ? m.keterangan : holidaynotes.join(', '),
+                                isAuto: true // Marker
+                            };
+                        }
+                        return m;
+                    });
+                });
+
             } catch (error) {
                 console.error("Error fetching Pekan Efektif:", error);
             } finally {
@@ -746,6 +810,116 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
         } catch (error) {
             console.error("Error saving Pekan Efektif:", error);
             toast.error("Gagal menyimpan data.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Manual Sync Button Handler
+    const handleSyncWithCalendar = async () => {
+        if (!auth.currentUser) return;
+        setLoading(true);
+        try {
+            const hQuery = query(collection(db, 'holidays'), where('userId', '==', auth.currentUser.uid));
+            const hSnapshot = await getDocs(hQuery);
+            const allHolidays = hSnapshot.docs.map(doc => doc.data());
+
+            setMonths(prevMonths => {
+                const updatedMonths = prevMonths.map(m => {
+                    const mNum = MONTH_MAP[m.name];
+                    const years = year.split('/');
+                    const actualYear = mNum >= 7 ? years[0] : years[1];
+                    const daysInMonth = moment(`${actualYear}-${mNum}`, 'YYYY-M').daysInMonth();
+
+                    let calculatedNonEffective = 0;
+                    let holidaynotes = [];
+
+                    const totalWeeks = daysInMonth > 28 ? 5 : 4;
+                    for (let w = 0; w < totalWeeks; w++) {
+                        const weekStart = moment(`${actualYear}-${mNum}-${(w * 7) + 1}`, 'YYYY-MM-D').startOf('day');
+                        const weekEnd = weekStart.clone().add(6, 'days').endOf('day');
+
+                        const blockingHoliday = allHolidays.find(h => {
+                            // Use both manual and national holidays for sync
+                            const hStart = moment(h.startDate || h.date).startOf('day');
+                            const hEnd = moment(h.endDate || h.date).endOf('day');
+
+                            const overlapStart = moment.max(weekStart, hStart);
+                            const overlapEnd = moment.min(weekEnd, hEnd);
+
+                            if (overlapEnd.isBefore(overlapStart)) return false;
+
+                            const overlapDays = overlapEnd.diff(overlapStart, 'days') + 1;
+                            return overlapDays >= 4;
+                        });
+
+                        if (blockingHoliday) {
+                            calculatedNonEffective++;
+                            if (!holidaynotes.includes(blockingHoliday.name)) holidaynotes.push(blockingHoliday.name);
+                        }
+                    }
+
+                    if (calculatedNonEffective > 0) {
+                        return {
+                            ...m,
+                            nonEffectiveWeeks: calculatedNonEffective,
+                            keterangan: holidaynotes.join(', '),
+                            isAuto: true
+                        };
+                    } else {
+                        // Reset if no holidays found during sync
+                        return {
+                            ...m,
+                            nonEffectiveWeeks: 0,
+                            keterangan: '',
+                        };
+                    }
+                });
+                return updatedMonths;
+            });
+            isInternalChange.current = true;
+            toast.success("Berhasil sinkronisasi dengan Agenda Sekolah!");
+        } catch (error) {
+            console.error("Sync error:", error);
+            toast.error("Gagal sinkronisasi.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Apply to All Grades Handler
+    const handleApplyToAllGrades = async () => {
+        if (!levels || levels.length <= 1) {
+            toast.error("Tidak ada tingkat kelas lain untuk disalin.");
+            return;
+        }
+
+        if (!window.confirm(`Apakah Anda yakin ingin menyalin pengaturan Pekan Efektif ini ke SEMUA KELAS LAIN (${levels.filter(l => l !== grade).join(', ')})? \n\nTindakan ini akan menimpa data Pekan Efektif di kelas lain.`)) {
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const promises = levels.map(lvl => {
+                if (lvl === grade) return Promise.resolve(); // Skip current
+
+                const targetCId = `calendar_${auth.currentUser.uid}_${lvl}_${year.replace('/', '-')}_${semester}`;
+                return setDoc(doc(db, 'teachingPrograms', targetCId), {
+                    userId: auth.currentUser.uid,
+                    academicYear: year,
+                    semester: semester,
+                    gradeLevel: lvl,
+                    pekanEfektif: months,
+                    updatedAt: new Date().toISOString(),
+                    type: 'calendar_structure'
+                }, { merge: true });
+            });
+
+            await Promise.all(promises);
+            toast.success(`Berhasil menyalin data ke kelas: ${levels.filter(l => l !== grade).join(', ')}`);
+        } catch (error) {
+            console.error("Apply All error:", error);
+            toast.error("Gagal menyalin data ke semua kelas.");
         } finally {
             setLoading(false);
         }
@@ -1063,11 +1237,20 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
                                 <RefreshCw size={16} />
                             </button>
                             <button
-                                onClick={handleSyncWeeksWithCalendar}
-                                title="Sinkronkan Pekan dengan Kalender Nyata"
-                                className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors border border-green-200 bg-white shadow-sm"
+                                onClick={handleSyncWithCalendar}
+                                title="Sinkronkan Pekan dengan Kalender Pendidikan (Agenda)"
+                                className="flex items-center gap-2 px-3 py-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm ml-2"
                             >
                                 <Calendar size={16} />
+                                <span className="hidden sm:inline">Sinkron Kalender</span>
+                            </button>
+                            <button
+                                onClick={handleApplyToAllGrades}
+                                title="Salin pengaturan ini ke semua tingkat kelas lain"
+                                className="flex items-center gap-2 px-3 py-2 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors shadow-sm ml-2"
+                            >
+                                <span className="hidden sm:inline font-semibold">Salin ke Semua Kelas</span>
+                                <span className="sm:hidden font-bold">Salin</span>
                             </button>
                         </div>
                     </div>
@@ -1116,7 +1299,8 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
                                         min="0"
                                         value={month.nonEffectiveWeeks}
                                         onChange={(e) => updateMonth(index, 'nonEffectiveWeeks', e.target.value)}
-                                        className="w-16 p-1 text-center border rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        className={`w-16 p-1 text-center border rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${month.isAuto ? 'border-green-400 bg-green-50 dark:bg-green-900/20' : ''}`}
+                                        title={month.isAuto ? "Terisi otomatis dari Kalender" : ""}
                                     />
                                 </td>
                                 <td className="px-6 py-4 text-center font-bold text-blue-600 border-r">
@@ -2339,12 +2523,53 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                 while (currentM < pekanEfektifSource.length) {
                     const month = pekanEfektifSource[currentM];
                     const totalWeeks = parseInt(month.totalWeeks || 4);
+                    // Critical: Get the user-inputted non-effective count (or auto-calculated)
+                    const allowedNonEffective = parseInt(month.nonEffectiveWeeks || 0);
 
+                    // Check if this SPECIFIC week is a holiday
                     const holiday = getHolidayForWeek(month.name, currentW);
-                    const nonEffectiveCount = parseInt(month.nonEffectiveWeeks || 0);
-                    const isManualNonEffective = currentW >= (totalWeeks - nonEffectiveCount);
+                    const isHolidayWeek = holiday && holiday.isBlocking;
 
-                    if ((!holiday || !holiday.isBlocking) && !isManualNonEffective) {
+                    // ADVANCED LOGIC:
+                    // 1. If it's a specific holiday week -> SKIP IT (Primary Rule)
+                    // 2. If we need to skip MORE weeks to match "allowedNonEffective" count (e.g. user manually added buffer),
+                    //    we fall back to skipping from the end.
+
+                    // But first, let's count how many specific holidays exist in this month
+                    let specificHolidaysCount = 0;
+                    for (let w = 0; w < totalWeeks; w++) {
+                        if (getHolidayForWeek(month.name, w)?.isBlocking) specificHolidaysCount++;
+                    }
+
+                    // Determine if current week should be skipped
+                    let shouldSkip = false;
+
+                    if (isHolidayWeek) {
+                        shouldSkip = true;
+                    } else {
+                        // If no specific holiday here, do we still need to skip to meet the quota?
+                        // Only if we haven't found enough specific holidays to explain the "nonEffectiveWeeks" count
+                        // We treat extra non-effective weeks as "End of Month" buffers (Cadangan/TryOut/Ujian)
+
+                        // Example: User inputs 3 non-effective weeks. Calendar has 1 holiday.
+                        // specificHolidaysCount = 1
+                        // extraNonEffective = 3 - 1 = 2
+                        // We need to skip 2 extra weeks from the end.
+
+                        const extraNonEffective = Math.max(0, allowedNonEffective - specificHolidaysCount);
+
+                        // Logic to skip from end:
+                        // If totalWeeks = 5, extra = 2. We skip week 3 and 4 (indices 3, 4).
+                        // wait, weeks are 0-indexed. Indices: 0, 1, 2, 3, 4.
+                        // Target indices to skip: 3, 4.
+                        // Condition: currentW >= (5 - 2) => currentW >= 3. Correct.
+
+                        if (currentW >= (totalWeeks - extraNonEffective)) {
+                            shouldSkip = true;
+                        }
+                    }
+
+                    if (!shouldSkip) {
                         break; // Found a clean effective week
                     } else {
                         currentW++;
@@ -2373,7 +2598,7 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
         });
 
         setPromesData(newPromesData);
-        toast.success(`Berhasil mendistribusikan JP secara otomatis(${weeklyJP} JP / minggu).`);
+        toast.success(`Berhasil mendistribusikan JP secara otomatis (${weeklyJP} JP / minggu).`);
     };
 
     const handleKeyDown = (e, rIndex, mIndex, wIndex) => {
@@ -2949,29 +3174,29 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
     return (
         <div className="space-y-6 animate-fade-in">
             <div className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-xl border border-purple-100 dark:border-purple-800 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div>
-                    <h3 className="text-xl font-bold text-purple-800 dark:text-purple-100">Alur Tujuan Pembelajaran (ATP)</h3>
-                    <p className="text-sm text-purple-600 dark:text-purple-300 max-w-2xl mt-1">
-                        Pecah Capaian Pembelajaran (CP) menjadi urutan tujuan yang logis. Gunakan AI untuk menyusun kerangka awal, lalu sesuaikan dengan kebutuhan kelas Anda.
+                <div className="text-center md:text-left">
+                    <h3 className="text-lg md:text-xl font-bold text-purple-800 dark:text-purple-100">Alur Tujuan Pembelajaran (ATP)</h3>
+                    <p className="text-xs md:text-sm text-purple-600 dark:text-purple-300 max-w-2xl mt-1">
+                        Pecah CP menjadi urutan tujuan yang logis. Gunakan AI untuk menyusun kerangka awal, lalu sesuaikan dengan kebutuhan kelas Anda.
                     </p>
                 </div>
 
-                <div className="flex items-end gap-3">
-                    <div className="flex flex-col gap-1">
-                        <label className="text-xs font-bold text-purple-700 dark:text-purple-300 uppercase">Total JP (Semester Ini)</label>
-                        <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-700 rounded-lg px-3 py-2 w-32 shadow-sm">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 w-full md:w-auto">
+                    <div className="flex flex-col gap-1 flex-1 sm:flex-none">
+                        <label className="text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">Total JP (Semester Ini)</label>
+                        <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-700 rounded-lg px-3 py-2 w-full sm:w-32 shadow-sm">
                             <input
                                 type="number"
                                 value={manualTotalJP}
                                 onChange={(e) => setManualTotalJP(parseInt(e.target.value) || 0)}
-                                className="w-full bg-transparent font-bold text-center text-purple-800 dark:text-purple-100 outline-none"
+                                className="w-full bg-transparent font-bold text-center text-purple-800 dark:text-purple-100 outline-none text-sm"
                             />
                             <span className="text-xs font-bold text-gray-400">JP</span>
                         </div>
                     </div>
 
                     {isGenerating ? (
-                        <div className="flex flex-col gap-1 w-full md:w-64">
+                        <div className="flex flex-col gap-1 w-full sm:w-64">
                             <div className="flex justify-between text-[10px] font-bold text-purple-600 dark:text-purple-300 uppercase tracking-wider">
                                 <span className="truncate max-w-[150px]">{generationProgress.message || 'Memproses...'}</span>
                                 <span>{generationProgress.percentage}%</span>
@@ -2989,10 +3214,10 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
                         <button
                             onClick={handleGenerate}
                             disabled={isGenerating}
-                            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 h-full whitespace-nowrap"
+                            className="px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 h-full min-h-[44px]"
                         >
-                            <Zap size={20} />
-                            Generate ATP Otomatis
+                            <Zap size={18} />
+                            <span className="text-sm md:text-base">Generate ATP Otomatis</span>
                         </button>
                     )}
                 </div>

@@ -81,6 +81,17 @@ Jika guru bertanya "Siswa X nilainya jelek, harus gimana?", jawab dengan pola:
 `;
 // --- END SMARTTY BRAIN ---
 
+// Helper to shuffle array (Fisher-Yates)
+const shuffleArray = (array) => {
+  if (!array || !Array.isArray(array)) return array;
+  const newArr = [...array];
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+  return newArr;
+};
+
 
 
 /**
@@ -1053,9 +1064,12 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
           "stimulus": "Teks stimulus/kasus untuk soal ini (jika ada)"
         - **pg**: {"type": "pg", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["A...", "B..."], "answer": "A...", "explanation": "..."}
         - **pg_complex**: {"type": "pg_complex", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["1...", "2..."], "answer": ["1...", "3..."], "explanation": "..."}
-        - **matching**: {"type": "matching", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "left_side": ["A", "B"], "right_side": ["1", "2", "3"], "pairs": [{"left": "A", "right": "1"}], "explanation": "..."}
-        - **true_false**: {"type": "true_false", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "statements": [{"text": "S1", "isCorrect": true}], "explanation": "..."}
-        - **essay/uraian**: {"type": "essay", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "answer": "Kunci jawaban (WAJIB SINGKAT & PADAT)", "grading_guide": "Pedoman penskoran ringkas", "explanation": "Penjelasan singkat"}
+         - **pg_matrix**: {"type": "pg_matrix", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "rows": ["Pernyataan 1", "Pernyataan 2"], "columns": ["Kategori A", "Kategori B"], "answer": [{"row": "Pernyataan 1", "column": "Kategori A"}], "explanation": "..."}
+         - **matching**: {"type": "matching", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "left_side": ["A", "B"], "right_side": ["1", "2", "3"], "pairs": [{"left": "A", "right": "1"}], "explanation": "..."}
+         - **true_false**: {"type": "true_false", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "statements": [{"text": "S1", "isCorrect": true}], "explanation": "..."}
+         - **short_answer**: {"type": "short_answer", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "answer": "Kunci jawaban (Singkat 1-3 kata)", "explanation": "..."}
+         - **sequencing**: {"type": "sequencing", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "items": ["Langkah A", "Langkah B", "Langkah C"], "correct_order": ["Langkah B", "Langkah A", "Langkah C"], "explanation": "..."}
+         - **essay/uraian**: {"type": "essay", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "answer": "Kunci jawaban (WAJIB SINGKAT & PADAT)", "grading_guide": "Pedoman penskoran ringkas", "explanation": "Penjelasan singkat"}
 
         FORMAT OUTPUT TOTAL (JSON):
         {
@@ -1071,7 +1085,13 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
       const parsed = extractJSON(response.text());
 
       if (parsed.questions && Array.isArray(parsed.questions)) {
-        allQuestions = [...allQuestions, ...parsed.questions];
+        const processedQuestions = parsed.questions.map(q => {
+          if (q.type === 'matching' && Array.isArray(q.right_side)) {
+            return { ...q, right_side: shuffleArray(q.right_side) };
+          }
+          return q;
+        });
+        allQuestions = [...allQuestions, ...processedQuestions];
         if (!quizTitle) quizTitle = parsed.title;
       }
     }
@@ -1160,6 +1180,16 @@ export async function generateQuizFromImage({ imageBase64, topic, gradeLevel, su
     const text = response.text();
     const parsed = extractJSON(text);
 
+    // Shuffle matching if exists (Question from image usually outputs PG but for future proofing)
+    if (parsed.questions && Array.isArray(parsed.questions)) {
+      parsed.questions = parsed.questions.map(q => {
+        if (q.type === 'matching' && Array.isArray(q.right_side)) {
+          return { ...q, right_side: shuffleArray(q.right_side) };
+        }
+        return q;
+      });
+    }
+
     onProgress({ stage: 'complete', message: 'Kuis visual berhasil dibuat!', percentage: 100 });
     return parsed;
   } catch (error) {
@@ -1223,6 +1253,7 @@ export const generateLessonPlan = async (data) => {
       - Mapel: ${data.subject}
       - KD/CP: ${data.kd}
       - Materi Pokok: ${data.materi}
+      ${data.studentCharacteristics ? `- Karakteristik Peserta Didik (Manual): ${data.studentCharacteristics}` : ''}
       
       **SMART CP EXTRACTION (MANDATORY - BSKAP 46/2025 COMPLIANCE):**
       Berikut adalah CP LENGKAP untuk referensi: 
@@ -1490,7 +1521,10 @@ ${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map
       *❌ "Menyimpulkan sifat-sifat magnet." (Tidak ada Condition, Audience, dan Degree)*
 
       **3. Kesiapan Peserta Didik:**
-      (Analisis pengetahuan awal, minat, latar belakang, dan motivasi peserta didik terkait materi ini).
+      ${data.studentCharacteristics
+        ? `(PENTING: Gunakan data manual ini sebagai basis utama: "${data.studentCharacteristics}". Rangkai kata-kata tersebut menjadi narasi yang profesional tentang kesiapan peserta didik. Anda WAJIB menyesuaikan seluruh strategi, level tantangan, dan langkah pembelajaran di RPP ini agar selaras dengan kondisi peserta didik tersebut.)`
+        : `(Analisis secara otomatis pengetahuan awal, minat, latar belakang, dan motivasi peserta didik terkait materi ini sesuai dengan jenjang kelas dan mata pelajarannya).`
+      }
 
       **4. Karakteristik Materi:**
       (Jenis pengetahuan, relevansi dengan kehidupan, struktur materi, serta integrasi nilai & karakter).

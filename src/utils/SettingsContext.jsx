@@ -13,6 +13,7 @@ export const SettingsProvider = ({ children }) => {
     const [userProfile, setUserProfile] = useState(null); // Full user profile
     const [academicWeight, setAcademicWeight] = useState(50);
     const [attitudeWeight, setAttitudeWeight] = useState(50);
+    const [scheduleNotificationsEnabled, setScheduleNotificationsEnabled] = useState(true);
     const [loadingSettings, setLoadingSettings] = useState(true);
 
     useEffect(() => {
@@ -37,6 +38,7 @@ export const SettingsProvider = ({ children }) => {
                         if (data.geminiModel) setGeminiModel(data.geminiModel);
                         if (data.academicWeight !== undefined) setAcademicWeight(data.academicWeight);
                         if (data.attitudeWeight !== undefined) setAttitudeWeight(data.attitudeWeight);
+                        if (data.scheduleNotificationsEnabled !== undefined) setScheduleNotificationsEnabled(data.scheduleNotificationsEnabled);
                         setUserProfile(data); // Store full profile
                     }
                     setLoadingSettings(false);
@@ -66,7 +68,8 @@ export const SettingsProvider = ({ children }) => {
         geminiModel,
         academicWeight,
         attitudeWeight,
-        userProfile: { activeSemester, academicYear, geminiModel, academicWeight, attitudeWeight, ...userProfile }, // Expose full profile
+        scheduleNotificationsEnabled,
+        userProfile: { activeSemester, academicYear, geminiModel, academicWeight, attitudeWeight, scheduleNotificationsEnabled, ...userProfile }, // Expose full profile
         loadingSettings
     };
 

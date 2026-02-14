@@ -100,6 +100,7 @@ const LessonPlanPage = () => {
     const [userProfile, setUserProfile] = useState({ name: '', school: '', nip: '', principalName: '', principalNip: '' });
     const [signingLocation, setSigningLocation] = useState('Jakarta');
     const [detectingLocation, setDetectingLocation] = useState(false);
+    const [studentCharacteristics, setStudentCharacteristics] = useState('');
 
     // Load saved location
     useEffect(() => {
@@ -397,6 +398,7 @@ const LessonPlanPage = () => {
                 sourceType: sourceType, // Pass sourceType to AI
                 elemen: selectedMaterial.elemen || '',
                 profilLulusan: selectedMaterial.profilLulusan || '', // Pass ATP's Profil Lulusan
+                studentCharacteristics: studentCharacteristics, // Pass manual characteristics
                 onProgress: (msg) => {
                     // Do not override simulation unless specific
                     console.log("AI Internal Progress:", msg);
@@ -434,6 +436,7 @@ const LessonPlanPage = () => {
                 gradeLevel: selectedGrade,
                 topic: manualMateri || selectedMaterial.materi,
                 kd: manualKd || selectedMaterial.kd,
+                studentCharacteristics: studentCharacteristics,
                 content: generatedRPP,
                 assessmentModel,
                 academicYear,
@@ -691,6 +694,18 @@ const LessonPlanPage = () => {
                                 </div>
                             </div>
                         )}
+
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Karakteristik Peserta Didik (Opsional)</label>
+                            <textarea
+                                value={studentCharacteristics}
+                                onChange={(e) => setStudentCharacteristics(e.target.value)}
+                                rows={3}
+                                className="w-full p-3 text-sm border dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="Contoh: Sebagian peserta didik sudah memahami tentang perhitungan aritmatika dasar..."
+                            />
+                            <p className="text-[10px] text-gray-400 ml-1 italic">* Kosongkan untuk generate otomatis oleh AI</p>
+                        </div>
 
                         <StyledSelect
                             label="Model Pembelajaran"

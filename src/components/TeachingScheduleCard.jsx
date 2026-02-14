@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import 'moment/locale/id'; // Import Indonesian locale
-import { Clock, CheckCircle, PlayCircle, Bell, CalendarOff, Gift, Coffee, Sparkles, Smile, FileText, Book, Zap, RefreshCw } from 'lucide-react';
+import { Clock, CheckCircle, PlayCircle, Bell, CalendarOff, Calendar, Gift, Coffee, Sparkles, Smile, FileText, Book, Zap, RefreshCw } from 'lucide-react';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import Countdown from './Countdown'; // Import Countdown component
 import { getTopicForSchedule } from '../utils/topicUtils';
@@ -299,7 +299,10 @@ const TeachingScheduleCard = ({ schedules, currentTime, holiday, programs, class
 
       <div className="relative z-10">
         <h2 className="text-xl font-bold mb-5 text-gray-800 dark:text-gray-100 flex items-center justify-between">
-          <span>Jadwal Hari Ini</span>
+          <div className="flex items-center gap-2">
+            <Calendar size={20} className="text-primary" />
+            <span>Jadwal Hari Ini</span>
+          </div>
         </h2>
 
         {visibleSchedules.length === 0 && !holiday ? (
@@ -440,7 +443,7 @@ const TeachingScheduleCard = ({ schedules, currentTime, holiday, programs, class
               return (
                 <div
                   key={schedule.id}
-                  className={`relative overflow-hidden ${isNonTeaching ? 'p-3 px-4' : 'p-4'} rounded-xl border transition-all duration-300 group ${currentVariant.bg} ${currentVariant.border} ${status === 'ongoing' ? 'shadow-lg ring-1 ring-inset ring-black/5 scale-[1.01]' : 'hover:bg-opacity-80'} ${status === 'upcoming-soon' ? 'animate-pulse-subtle' : ''}`}
+                  className={`relative overflow-hidden ${isNonTeaching ? 'p-3 px-4' : 'p-4'} rounded-xl border transition-all duration-300 group ${currentVariant.bg} ${currentVariant.border} ${status === 'ongoing' ? 'shadow-lg ring-1 ring-inset ring-black/5 md:scale-[1.01]' : 'hover:bg-opacity-80'} ${status === 'upcoming-soon' ? 'animate-pulse-subtle' : ''}`}
                 >
                   <div className={`absolute top-0 left-0 w-1.5 h-full ${currentVariant.accent}`}></div>
 

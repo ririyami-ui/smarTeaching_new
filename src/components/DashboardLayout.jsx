@@ -36,12 +36,14 @@ import {
   Sparkles,
   BrainCircuit,
   ListTodo,
+  WifiOff,
 } from 'lucide-react';
 import useDarkMode from '../hooks/useDarkMode';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import OfflineIndicator from './OfflineIndicator'; // Import OfflineIndicator component
 import { LocalNotifications } from '@capacitor/local-notifications';
 import useTaskNotifications from '../hooks/useTaskNotifications';
+import useScheduleNotifications from '../hooks/useScheduleNotifications';
 import { useSettings } from '../utils/SettingsContext';
 
 export default function DashboardLayout({ children, user }) {
@@ -63,8 +65,21 @@ export default function DashboardLayout({ children, user }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { activeSemester, academicYear } = useSettings();
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOffline = () => setIsOffline(true);
+    const handleOnline = () => setIsOffline(false);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
 
   useTaskNotifications(activeSemester, academicYear);
+  useScheduleNotifications();
 
   // Categories definitions
   const navCategories = [
@@ -198,7 +213,7 @@ export default function DashboardLayout({ children, user }) {
         }}
         className={`flex items-center w-full gap-3 p-2.5 rounded-xl transition-all duration-500 group relative overflow-hidden ${isActive
           ? 'text-white scale-[1.02]'
-          : 'text-text-muted-light dark:text-text-muted-dark hover:bg-primary/5 dark:hover:bg-primary/10 hover:text-primary'
+          : 'text-text-muted-light dark:text-text-muted-dark md:hover:bg-primary/5 dark:md:hover:bg-primary/10 md:hover:text-primary'
           }`}
       >
         {/* Active Background Pill */}
@@ -221,11 +236,11 @@ export default function DashboardLayout({ children, user }) {
   };
 
   const footerNavItems = [
-    navCategories[0].items[0], // Dashboard
-    navCategories[2].items[0], // Absensi Siswa
-    navCategories[2].items[2], // Input Nilai
-    navCategories[2].items[1], // Jurnal Mengajar
-    navCategories[0].items[1]  // Asisten Guru
+    { ...navCategories[0].items[0], shortName: 'Dashboard' }, // Dashboard
+    { ...navCategories[2].items[0], shortName: 'Absen' }, // Absensi Siswa
+    { ...navCategories[2].items[2], shortName: 'Nilai' }, // Input Nilai
+    { ...navCategories[2].items[1], shortName: 'Jurnal' }, // Jurnal Mengajar
+    { ...navCategories[0].items[1], shortName: 'Smartty' }  // Asisten Guru
   ].filter(Boolean);
 
   if (profileStatus === 'loading') {
@@ -318,18 +333,24 @@ export default function DashboardLayout({ children, user }) {
       </aside>
 
       {/* Header */}
-      <header className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-lg p-4 shadow-sm transition-all duration-300 ${isSidebarOpen ? 'md:left-64' : 'md:left-0'}`}>
-        <div className="flex items-center gap-4">
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2">
+      <header className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-lg p-3 md:p-4 shadow-sm transition-all duration-300 ${isSidebarOpen ? 'md:left-64' : 'md:left-0'}`}>
+        <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 mr-2">
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 flex-shrink-0">
             <Menu size={24} />
           </button>
-          <div className="flex flex-col md:flex-row md:items-baseline md:gap-2">
-            <h1 className="text-2xl font-bold">
+          <div className="flex flex-col md:flex-row md:items-baseline md:gap-2 min-w-0 flex-1">
+            <h1 className="text-base sm:text-lg md:text-2xl font-bold text-text-primary-light dark:text-text-primary-dark line-clamp-2 md:line-clamp-none leading-tight md:leading-normal">
               {navCategories.flatMap(c => c.items).find((item) => item.path === location.pathname)?.name || 'Dashboard'}
             </h1>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+          {isOffline && (
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-red-500/10 dark:bg-red-500/20 text-red-500 rounded-lg animate-pulse">
+              <WifiOff size={16} />
+              <span className="text-[10px] font-bold uppercase hidden sm:inline">Offline</span>
+            </div>
+          )}
           <button onClick={() => setTheme(colorTheme)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
             {colorTheme === 'light' ? <Sun size={24} /> : <Moon size={24} />}
           </button>
@@ -423,24 +444,51 @@ export default function DashboardLayout({ children, user }) {
 
       {/* Main Content with Entry Animation */}
       <main className={`pt-20 pb-24 md:pb-6 flex-1 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-0'} ${location.pathname === '/asisten-guru' ? '' : 'overflow-y-auto'}`}>
-        <div key={location.pathname} className={`w-full animate-fade-in-up ${location.pathname === '/asisten-guru' ? '' : 'p-3 sm:p-6'}`}>
-          {children}
+        <div key={location.pathname} className={`w-full animate-fade-in-up ${location.pathname === '/asisten-guru' ? '' : 'p-4 md:p-8'}`}>
+          <div className={location.pathname === '/asisten-guru' ? '' : 'max-w-7xl mx-auto w-full'}>
+            {children}
+          </div>
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-surface-light dark:bg-surface-dark border-t border-gray-200 dark:border-gray-700 flex justify-around p-2">
-        {footerNavItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`flex flex-col items-center justify-center flex-1 min-w-0 p-2 rounded-lg transition-colors duration-200 ${location.pathname === item.path ? 'text-primary' : 'text-text-muted-light dark:text-text-muted-dark'
-              }`}
-          >
-            {item.icon}
-            <span className="text-xs font-medium text-center">{item.name}</span>
-          </Link>
-        ))}
+      {/* Mobile Bottom Navigation - Solid Fixed Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.3)] pb-[env(safe-area-inset-bottom,0px)]">
+        <div className="flex items-center justify-around h-16 px-2">
+          {footerNavItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`relative flex-1 flex flex-col items-center justify-center h-full transition-all duration-300 group ${isActive ? 'text-primary' : 'text-gray-500 dark:text-gray-400'
+                  }`}
+              >
+                {/* Active Indicator Bar */}
+                {isActive && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-b-full animate-in slide-in-from-top duration-300"></div>
+                )}
+
+                <div className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 ${isActive ? 'scale-105' : 'group-active:scale-95'
+                  }`}>
+                  <div className={`p-2 rounded-xl transition-all duration-300 ${isActive
+                    ? 'bg-primary/10 dark:bg-primary/20'
+                    : 'group-hover:bg-gray-100 dark:group-hover:bg-gray-800'
+                    }`}>
+                    {React.cloneElement(item.icon, {
+                      size: 22,
+                      strokeWidth: isActive ? 2.5 : 2,
+                      className: "transition-transform duration-300"
+                    })}
+                  </div>
+                  <span className={`text-[9px] font-bold tracking-tight text-center transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-70'
+                    }`}>
+                    {item.shortName || item.name}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Mobile Sidebar (Off-canvas) */}

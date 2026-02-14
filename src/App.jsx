@@ -29,7 +29,6 @@ import AssessmentKktpPage from './pages/PenilaianKktpPage.jsx';
 import DatabaseCleanupPage from './pages/DatabaseCleanupPage.jsx';
 import { ChatProvider } from './utils/ChatContext.jsx';
 import { SettingsProvider } from './utils/SettingsContext.jsx';
-import useScheduleNotifications from './hooks/useScheduleNotifications';
 import InstallPwaCard from './components/InstallPwaCard.jsx';
 import WelcomeScreen from './components/WelcomeScreen.jsx';
 
@@ -42,8 +41,6 @@ function App() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallCard, setShowInstallCard] = useState(false);
   const [isPwaInstalled, setIsPwaInstalled] = useState(false);
-
-  useScheduleNotifications();
 
   // Check if PWA is already installed
   useEffect(() => {

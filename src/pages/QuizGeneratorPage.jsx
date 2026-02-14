@@ -4,8 +4,9 @@ import { db, auth } from '../firebase';
 import { collection, query, where, getDocs, addDoc, doc, getDoc, orderBy, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import {
     BrainCircuit, FileText, Save, Download, Sliders, RefreshCw,
-    CheckSquare, List, Type, ToggleLeft, AlignLeft, Grid, Upload, Image as ImageIcon,
-    History, Trash2, ChevronRight, Loader2, MapPin, Sparkles, AlertTriangle, Key, ExternalLink
+    CheckSquare, List, Type, ToggleLeft, AlignLeft, Grid, Table, Upload, Image as ImageIcon,
+    History, Trash2, ChevronRight, Loader2, MapPin, Sparkles, AlertTriangle, Key, ExternalLink,
+    Hash, ArrowDownUp, ChevronUp, ChevronDown
 } from 'lucide-react';
 import StyledSelect from '../components/StyledSelect';
 import { generateAdvancedQuiz, generateQuizFromImage } from '../utils/gemini';
@@ -93,25 +94,35 @@ const QuizGeneratorPage = () => {
         fetchMasters();
     }, []);
 
-    const QUESTION_TYPES = BSKAP_DATA.standards.assessment_item_types.map(t => {
+    const QUESTION_TYPES = [
+        ...BSKAP_DATA.standards.assessment_item_types,
+        { id: 'pg_matrix', name: 'PG Kompleks Tabel' },
+        { id: 'sequencing', name: 'Urutan' }
+    ].map(t => {
         const simplifiedDescriptions = {
             'pg': 'Pilihan ganda',
             'pg_complex': 'Pilihan ganda lebih dari 1',
+            'pg_matrix': 'PG Kompleks (Tabel/Matrix)',
             'matching': 'Menjodohkan',
             'true_false': 'Benar salah',
+            'short_answer': 'Isian singkat',
+            'sequencing': 'Mengurutkan',
             'essay': 'Essay',
             'uraian': 'Uraian'
         };
         return {
             id: t.id,
-            label: t.name,
+            label: t.id === 'pg_matrix' ? 'PG Kompleks Tabel' : t.name,
             description: simplifiedDescriptions[t.id] || t.description,
             icon: t.id === 'pg' ? <List size={16} /> :
                 t.id === 'pg_complex' ? <CheckSquare size={16} /> :
-                    t.id === 'matching' ? <Grid size={16} /> :
-                        t.id === 'true_false' ? <ToggleLeft size={16} /> :
-                            t.id === 'essay' ? <Type size={16} /> :
-                                t.id === 'uraian' ? <AlignLeft size={16} /> : <FileText size={16} />
+                    t.id === 'pg_matrix' ? <Table size={16} /> :
+                        t.id === 'matching' ? <Grid size={16} /> :
+                            t.id === 'true_false' ? <ToggleLeft size={16} /> :
+                                t.id === 'short_answer' ? <Hash size={16} /> :
+                                    t.id === 'sequencing' ? <ArrowDownUp size={16} /> :
+                                        t.id === 'essay' ? <Type size={16} /> :
+                                            t.id === 'uraian' ? <AlignLeft size={16} /> : <FileText size={16} />
         };
     });
 
@@ -133,11 +144,23 @@ const QuizGeneratorPage = () => {
                     }).join(', ');
                 }
                 return '-';
+            case 'pg_matrix':
+                if (Array.isArray(q.answer)) {
+                    return q.answer.map(ans => `${ans.row}: ${ans.column}`).join('; ');
+                }
+                return '-';
             case 'true_false':
                 if (q.statements && q.statements.length > 0) {
                     return q.statements.map((s, i) => `${i + 1}-${s.isCorrect ? 'B' : 'S'}`).join(', ');
                 }
                 return '-';
+            case 'sequencing':
+                if (q.correct_order && Array.isArray(q.correct_order)) {
+                    return q.correct_order.join(' → ');
+                }
+                return '-';
+            case 'short_answer':
+                return q.answer || '-';
             default:
                 return q.answer || '-';
         }
@@ -547,22 +570,39 @@ const QuizGeneratorPage = () => {
 
         quizResult.questions.forEach((q, idx) => {
             html += `<div style="margin-bottom: 20px;">`;
-            if (q.stimulus) {
-                html += `
-                    <div style="border: 1px solid #ddd; border-left: 4px solid #f59e0b; padding: 10px; margin-bottom: 10px; background-color: #fffbeb; font-style: italic;">
-                        ${q.stimulus.replace(/\n/g, '<br/>')}
-                    </div>
-                `;
-            }
 
-            html += `<p><strong>${idx + 1}. ${q.question}</strong></p>`;
+            // CONSOLIDATED STIMULUS & QUESTION (SINGLE PARAGRAPH)
+            let combinedText = '';
+            if (q.stimulus) {
+                combinedText += `${q.stimulus.replace(/\n/g, '<br/>')}<br/><br/>`;
+            }
+            combinedText += q.question;
+
+            html += `<p><strong>${idx + 1}.</strong> ${combinedText}</p>`;
 
             if (q.type === 'pg' || q.type === 'pg_complex') {
-                html += `<ul style="list-style-type: none; padding-left: 0;">`;
-                q.options.forEach(opt => {
-                    html += `<li style="margin-bottom: 5px;">${opt}</li>`;
+                html += '<ul>';
+                q.options.forEach((opt, oIdx) => {
+                    html += `<li>${String.fromCharCode(65 + oIdx)}. ${opt}</li>`;
                 });
-                html += `</ul>`;
+                html += '</ul>';
+            } else if (q.type === 'pg_matrix') {
+                html += '<table border="1" style="border-collapse: collapse; width: 100%; margin-top: 10px;">';
+                html += '<tr style="background-color: #f3f4f6;">';
+                html += '<th style="border: 1px solid #000; padding: 5px;">Pernyataan</th>';
+                q.columns.forEach(col => {
+                    html += `<th style="border: 1px solid #000; padding: 5px; text-align: center;">${col}</th>`;
+                });
+                html += '</tr>';
+                q.rows.forEach(row => {
+                    html += '<tr>';
+                    html += `<td style="border: 1px solid #000; padding: 5px;">${row}</td>`;
+                    q.columns.forEach(() => {
+                        html += '<td style="border: 1px solid #000; padding: 5px; text-align: center;">[ ]</td>';
+                    });
+                    html += '</tr>';
+                });
+                html += '</table>';
             } else if (q.type === 'matching') {
                 html += `<table style="width:100%; border:none;"><tr>`;
                 html += `<td style="vertical-align:top; width:45%;">`;
@@ -576,6 +616,14 @@ const QuizGeneratorPage = () => {
                     html += `<tr><td>${s.text}</td><td style="text-align:center;"></td><td style="text-align:center;"></td></tr>`;
                 });
                 html += `</table>`;
+            } else if (q.type === 'short_answer') {
+                html += `<p style="margin-left: 10px; border-bottom: 1px dotted #ccc; width: 300px; padding-bottom: 5px; color: #888;">Jawab: ............................................................</p>`;
+            } else if (q.type === 'sequencing' && q.items) {
+                html += `<ul style="list-style-type: decimal;">`;
+                q.items.forEach(item => {
+                    html += `<li style="margin-bottom: 5px;">${item}</li>`;
+                });
+                html += `</ul>`;
             }
             html += `</div>`;
         });
@@ -696,18 +744,16 @@ const QuizGeneratorPage = () => {
 
             const tableW = pageWidth - 30;
 
-            // Build question content with stimulus and options
+            // Build question content with stimulus and question (CONSOLIDATED)
             let questionContent = '';
 
-            // Add stimulus if exists
             if (q.stimulus && q.stimulus.trim() !== '' && !q.stimulus.includes('Lihat stimulus')) {
                 const cleanStimulus = q.stimulus.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-                questionContent += `STIMULUS:\n${cleanStimulus}\n\n`;
+                questionContent += `${cleanStimulus}\n\n`;
             }
 
-            // Add question
             const cleanQuestion = q.question.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-            questionContent += `PERTANYAAN:\n${cleanQuestion}`;
+            questionContent += cleanQuestion;
 
             // Add options for PG types
             if ((q.type === 'pg' || q.type === 'pg_complex') && q.options && q.options.length > 0) {
@@ -733,6 +779,18 @@ const QuizGeneratorPage = () => {
             if (q.type === 'true_false' && q.statements && q.statements.length > 0) {
                 questionContent += '\n\nPERNYATAAN:\n';
                 q.statements.forEach((s, i) => questionContent += `${i + 1}. ${s.text}\n`);
+            }
+
+            // Add pg_matrix (Table-based)
+            if (q.type === 'pg_matrix' && q.rows && q.columns) {
+                questionContent += '\n\nPERNYATAAN (TABEL):\n';
+                q.rows.forEach((row, rIdx) => {
+                    questionContent += `${rIdx + 1}. ${row}\n`;
+                });
+                questionContent += '\nOPSI KATEGORI:\n';
+                q.columns.forEach((col, cIdx) => {
+                    questionContent += `${String.fromCharCode(65 + cIdx)}. ${col}\n`;
+                });
             }
 
             autoTable(doc, {
@@ -861,9 +919,9 @@ const QuizGeneratorPage = () => {
                                 ${(() => {
                     let html = '';
                     if (q.stimulus && q.stimulus.trim() !== '' && !q.stimulus.includes('Lihat stimulus')) {
-                        html += `<div style="background:#f9f9f9; padding:10px; margin-bottom:15px; border-left:4px solid #f59e0b;"><strong>STIMULUS:</strong><br/>${q.stimulus}</div>`;
+                        html += `<div style="margin-bottom:10px; font-style:italic;">${q.stimulus}</div>`;
                     }
-                    html += `<div style="margin-bottom:10px;"><strong>PERTANYAAN:</strong><br/>${q.question}</div>`;
+                    html += `<div style="margin-bottom:10px;"><strong>${q.question}</strong></div>`;
                     if ((q.type === 'pg' || q.type === 'pg_complex') && q.options && q.options.length > 0) {
                         html += '<div><strong>OPSI JAWABAN:</strong><br/>';
                         q.options.forEach((opt, oIdx) => { html += `${String.fromCharCode(65 + oIdx)}. ${opt}<br/>`; });
@@ -1463,130 +1521,181 @@ const QuizGeneratorPage = () => {
                                     quizResult.questions.map((q, idx) => (
                                         <div key={idx} id={`quiz-question-${idx}`} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 relative">
                                             <span className="absolute top-4 right-4 text-xs font-bold text-gray-400 uppercase border px-2 py-1 rounded">{(q.type || 'pg').replace('_', ' ')}</span>
-                                            <div className="flex gap-4">
-                                                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
+                                            <div className="flex gap-4 mb-4">
+                                                <div className="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-lg shadow-sm">
                                                     {idx + 1}
                                                 </div>
-                                                <div className="flex-grow space-y-3">
-                                                    {/* EMBEDDED STIMULUS (HTML SUPPORT) */}
-                                                    {q.stimulus && (
-                                                        <div className="mb-3 p-4 bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-500 rounded-r text-sm text-gray-800 dark:text-gray-200 prose dark:prose-invert max-w-none">
-                                                            <ReactMarkdown
-                                                                remarkPlugins={[remarkGfm, remarkMath]}
-                                                                rehypePlugins={[rehypeRaw, rehypeKatex]}
-                                                            >
-                                                                {q.stimulus}
-                                                            </ReactMarkdown>
-                                                        </div>
-                                                    )}
-
-                                                    {/* QUESTION TEXT (HTML SUPPORT) */}
-                                                    <div className="font-medium text-lg text-gray-800 dark:text-white prose dark:prose-invert max-w-none">
+                                                <div className="flex-grow">
+                                                    <div className="font-normal text-lg text-gray-800 dark:text-white prose dark:prose-invert max-w-none">
                                                         <ReactMarkdown
                                                             remarkPlugins={[remarkGfm, remarkMath]}
                                                             rehypePlugins={[rehypeRaw, rehypeKatex]}
                                                         >
-                                                            {q.question || 'Petunjuk: Klik "Generate" untuk membuat soal.'}
+                                                            {`${q.stimulus ? q.stimulus + '\n\n' : ''}${q.question || 'Petunjuk: Klik "Generate" untuk membuat soal.'}`}
                                                         </ReactMarkdown>
                                                     </div>
+                                                </div>
+                                            </div>
 
-                                                    {/* PEDAGOGICAL METADATA (NEW) */}
-                                                    {(q.indicator || q.cognitive_level) && (
-                                                        <div className="flex flex-wrap gap-2 mt-1 mb-3">
-                                                            {q.cognitive_level && (
-                                                                <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-bold uppercase border border-purple-200">
-                                                                    Level: {q.cognitive_level}
-                                                                </span>
-                                                            )}
-                                                            {q.indicator && (
-                                                                <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-100 italic">
-                                                                    Indikator: {q.indicator}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    )}
+                                            <div className="ml-0 md:ml-14 space-y-4">
+                                                {/* PEDAGOGICAL METADATA (NEW) */}
+                                                {(q.indicator || q.cognitive_level) && (
+                                                    <div className="flex flex-wrap gap-2 mb-4">
+                                                        {q.cognitive_level && (
+                                                            <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-bold uppercase border border-purple-200">
+                                                                Level: {q.cognitive_level}
+                                                            </span>
+                                                        )}
+                                                        {q.indicator && (
+                                                            <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-100 italic">
+                                                                Indikator: {q.indicator}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
 
-                                                    {/* OPTION RENDERER */}
-                                                    {(q.type === 'pg' || q.type === 'pg_complex') && Array.isArray(q.options) && (
-                                                        <div className="space-y-2 ml-2">
-                                                            {q.options.map((opt, oIdx) => (
-                                                                <div key={oIdx} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                                    <div className={`w-4 h-4 border rounded-full flex items-center justify-center ${q.type === 'pg_complex' ? 'rounded-md' : 'rounded-full'} border-gray-400`}></div>
-                                                                    <span className="text-gray-600 dark:text-gray-300">
-                                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
-                                                                            {opt}
-                                                                        </ReactMarkdown>
-                                                                    </span>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-
-                                                    {q.type === 'matching' && Array.isArray(q.left_side) && Array.isArray(q.right_side) && (
-                                                        <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg">
-                                                            <div className="space-y-2">
-                                                                {q.left_side.map((l, i) => (
-                                                                    <div key={i} className="p-2 border bg-white dark:bg-gray-800 rounded text-sm">
-                                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
-                                                                            {l}
-                                                                        </ReactMarkdown>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                {q.right_side.map((r, i) => (
-                                                                    <div key={i} className="p-2 border bg-white dark:bg-gray-800 rounded text-sm">
-                                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
-                                                                            {r}
-                                                                        </ReactMarkdown>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {q.type === 'true_false' && Array.isArray(q.statements) && (
-                                                        <div className="space-y-1">
-                                                            {q.statements.map((s, i) => (
-                                                                <div key={i} className="flex justify-between items-center p-2 border-b last:border-0 border-dashed">
-                                                                    <span className="text-sm">
-                                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
-                                                                            {s.text}
-                                                                        </ReactMarkdown>
-                                                                    </span>
-                                                                    <div className="flex gap-2 text-xs font-bold text-gray-400">
-                                                                        <span className="border px-2 py-1 rounded">B</span>
-                                                                        <span className="border px-2 py-1 rounded">S</span>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-
-                                                    {/* ANSWER KEY REVEAL */}
-                                                    <div className="mt-4 pt-4 border-t border-dashed dark:border-gray-700">
-                                                        <details className="group">
-                                                            <summary className="cursor-pointer text-sm font-semibold text-green-600 flex items-center gap-2 selection:bg-none">
-                                                                <span>Lihat Kunci & Pembahasan</span>
-                                                            </summary>
-                                                            <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 bg-green-50 dark:bg-green-900/10 p-3 rounded">
-                                                                <div className="flex gap-1">
-                                                                    <strong>Jawaban:</strong>
+                                                {/* OPTION RENDERER */}
+                                                {(q.type === 'pg' || q.type === 'pg_complex') && Array.isArray(q.options) && (
+                                                    <div className="space-y-2 ml-2">
+                                                        {q.options.map((opt, oIdx) => (
+                                                            <div key={oIdx} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                                <div className={`w-4 h-4 border rounded-full flex items-center justify-center ${q.type === 'pg_complex' ? 'rounded-md' : 'rounded-full'} border-gray-400`}></div>
+                                                                <span className="text-gray-600 dark:text-gray-300">
                                                                     <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
-                                                                        {formatAnswer(q)}
+                                                                        {opt}
+                                                                    </ReactMarkdown>
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {q.type === 'matching' && Array.isArray(q.left_side) && Array.isArray(q.right_side) && (
+                                                    <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg">
+                                                        <div className="space-y-2">
+                                                            {q.left_side.map((l, i) => (
+                                                                <div key={i} className="p-2 border bg-white dark:bg-gray-800 rounded text-sm">
+                                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                        {l}
                                                                     </ReactMarkdown>
                                                                 </div>
-                                                                {q.explanation && (
-                                                                    <div className="mt-2">
-                                                                        <strong>Pembahasan:</strong>
-                                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
-                                                                            {q.explanation}
-                                                                        </ReactMarkdown>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </details>
+                                                            ))}
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            {q.right_side.map((r, i) => (
+                                                                <div key={i} className="p-2 border bg-white dark:bg-gray-800 rounded text-sm">
+                                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                        {r}
+                                                                    </ReactMarkdown>
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
+                                                )}
+
+                                                {q.type === 'pg_matrix' && Array.isArray(q.rows) && Array.isArray(q.columns) && (
+                                                    <div className="overflow-x-auto mt-2 border rounded-lg dark:border-gray-700">
+                                                        <table className="w-full text-sm text-left border-collapse">
+                                                            <thead className="bg-gray-100 dark:bg-gray-700">
+                                                                <tr>
+                                                                    <th className="p-2 border dark:border-gray-600 font-bold">Pernyataan</th>
+                                                                    {q.columns.map((col, cIdx) => (
+                                                                        <th key={cIdx} className="p-2 border dark:border-gray-600 text-center font-bold">
+                                                                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                                {col}
+                                                                            </ReactMarkdown>
+                                                                        </th>
+                                                                    ))}
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {q.rows.map((row, rIdx) => (
+                                                                    <tr key={rIdx} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                                        <td className="p-2 border dark:border-gray-600">
+                                                                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                                {row}
+                                                                            </ReactMarkdown>
+                                                                        </td>
+                                                                        {q.columns.map((col, cIdx) => (
+                                                                            <td key={cIdx} className="p-2 border dark:border-gray-600 text-center">
+                                                                                <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-500 rounded mx-auto"></div>
+                                                                            </td>
+                                                                        ))}
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+
+                                                {q.type === 'true_false' && Array.isArray(q.statements) && (
+                                                    <div className="space-y-1">
+                                                        {q.statements.map((s, i) => (
+                                                            <div key={i} className="flex justify-between items-center p-2 border-b last:border-0 border-dashed">
+                                                                <span className="text-sm">
+                                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                        {s.text}
+                                                                    </ReactMarkdown>
+                                                                </span>
+                                                                <div className="flex gap-2 text-xs font-bold text-gray-400">
+                                                                    <span className="border px-2 py-1 rounded">B</span>
+                                                                    <span className="border px-2 py-1 rounded">S</span>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {q.type === 'short_answer' && (
+                                                    <div className="mt-2 p-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900/50">
+                                                        <div className="flex items-center gap-2 text-gray-400 italic text-sm">
+                                                            <Hash size={14} /> Jawab: ................................................................................
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {q.type === 'sequencing' && Array.isArray(q.items) && (
+                                                    <div className="mt-2 space-y-2">
+                                                        {q.items.map((item, i) => (
+                                                            <div key={i} className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-sm">
+                                                                <div className="flex flex-col gap-1">
+                                                                    <ChevronUp size={12} className="text-gray-400" />
+                                                                    <ChevronDown size={12} className="text-gray-400" />
+                                                                </div>
+                                                                <div className="flex-grow text-sm">
+                                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                        {item}
+                                                                    </ReactMarkdown>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        <p className="text-[10px] text-gray-400 italic">Petunjuk: Urutkan langkah-langkah di atas dengan benar.</p>
+                                                    </div>
+                                                )}
+
+                                                {/* ANSWER KEY REVEAL */}
+                                                <div className="mt-6 pt-4 border-t border-dashed dark:border-gray-700">
+                                                    <details className="group">
+                                                        <summary className="cursor-pointer text-sm font-semibold text-green-600 flex items-center gap-2 selection:bg-none">
+                                                            <span>Lihat Kunci & Pembahasan</span>
+                                                        </summary>
+                                                        <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 bg-green-50 dark:bg-green-900/10 p-3 rounded">
+                                                            <div className="flex gap-1">
+                                                                <strong>Jawaban:</strong>
+                                                                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                    {formatAnswer(q)}
+                                                                </ReactMarkdown>
+                                                            </div>
+                                                            {q.explanation && (
+                                                                <div className="mt-2">
+                                                                    <strong>Pembahasan:</strong>
+                                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                                        {q.explanation}
+                                                                    </ReactMarkdown>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </details>
                                                 </div>
                                             </div>
                                         </div>
@@ -1602,114 +1711,118 @@ const QuizGeneratorPage = () => {
                     )}
                 </div>
             </div>
-            {confirmModal.isOpen && (
-                <Modal onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
-                    <div className="text-center">
-                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                            <Trash2 className="h-8 w-8 text-red-600" />
+            {
+                confirmModal.isOpen && (
+                    <Modal onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
+                        <div className="text-center">
+                            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                                <Trash2 className="h-8 w-8 text-red-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{confirmModal.title}</h3>
+                            <p className="text-gray-500 dark:text-gray-400 mb-6">{confirmModal.message}</p>
+                            <div className="flex gap-3 justify-center">
+                                <button
+                                    onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                                    className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={confirmModal.onConfirm}
+                                    className="px-6 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 dark:shadow-none transition"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{confirmModal.title}</h3>
-                        <p className="text-gray-500 dark:text-gray-400 mb-6">{confirmModal.message}</p>
-                        <div className="flex gap-3 justify-center">
-                            <button
-                                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-                                className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                onClick={confirmModal.onConfirm}
-                                className="px-6 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 dark:shadow-none transition"
-                            >
-                                Hapus
-                            </button>
-                        </div>
-                    </div>
-                </Modal>
-            )}
+                    </Modal>
+                )
+            }
 
             {/* Troubleshooting Error Modal */}
-            {errorModal.isOpen && (
-                <Modal onClose={() => setErrorModal(prev => ({ ...prev, isOpen: false }))}>
-                    <div className="p-2">
-                        <div className="flex flex-col items-center text-center">
-                            <div className={`p-4 rounded-full mb-4 ${errorModal.type === 'quota' ? 'bg-orange-100 text-orange-600' :
-                                errorModal.type === 'apikey' ? 'bg-red-100 text-red-600' :
-                                    errorModal.type === 'parse' ? 'bg-amber-100 text-amber-600' :
-                                        errorModal.type === 'safety' ? 'bg-blue-100 text-blue-600' :
-                                            'bg-gray-100 text-gray-600'
-                                }`}>
-                                {errorModal.type === 'quota' && <AlertTriangle size={32} />}
-                                {errorModal.type === 'apikey' && <Key size={32} />}
-                                {errorModal.type === 'parse' && <RefreshCw size={32} />}
-                                {errorModal.type === 'safety' && <AlertTriangle size={32} />}
-                                {errorModal.type === 'generic' && <BrainCircuit size={32} />}
-                            </div>
+            {
+                errorModal.isOpen && (
+                    <Modal onClose={() => setErrorModal(prev => ({ ...prev, isOpen: false }))}>
+                        <div className="p-2">
+                            <div className="flex flex-col items-center text-center">
+                                <div className={`p-4 rounded-full mb-4 ${errorModal.type === 'quota' ? 'bg-orange-100 text-orange-600' :
+                                    errorModal.type === 'apikey' ? 'bg-red-100 text-red-600' :
+                                        errorModal.type === 'parse' ? 'bg-amber-100 text-amber-600' :
+                                            errorModal.type === 'safety' ? 'bg-blue-100 text-blue-600' :
+                                                'bg-gray-100 text-gray-600'
+                                    }`}>
+                                    {errorModal.type === 'quota' && <AlertTriangle size={32} />}
+                                    {errorModal.type === 'apikey' && <Key size={32} />}
+                                    {errorModal.type === 'parse' && <RefreshCw size={32} />}
+                                    {errorModal.type === 'safety' && <AlertTriangle size={32} />}
+                                    {errorModal.type === 'generic' && <BrainCircuit size={32} />}
+                                </div>
 
-                            <h3 className="text-xl font-bold dark:text-white mb-2">{errorModal.title}</h3>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 max-w-sm">
-                                {errorModal.message}
-                            </p>
+                                <h3 className="text-xl font-bold dark:text-white mb-2">{errorModal.title}</h3>
+                                <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 max-w-sm">
+                                    {errorModal.message}
+                                </p>
 
-                            <div className="w-full bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 text-left mb-6 border border-gray-100 dark:border-gray-800">
-                                <p className="text-[10px] font-bold uppercase text-gray-400 tracking-widest mb-2">Saran Pemecahan Masalah:</p>
-                                <ul className="text-xs space-y-2 text-gray-700 dark:text-gray-300">
-                                    {errorModal.type === 'quota' && (
-                                        <>
-                                            <li className="flex gap-2"><span>1.</span> Tunggu sekitar 60 detik sebelum mencoba lagi.</li>
-                                            <li className="flex gap-2"><span>2.</span> Gunakan model <b>Gemini 1.5 Flash</b> yang lebih ringan di pengaturan.</li>
-                                            <li className="flex gap-2"><span>3.</span> Ganti API Key di Master Data jika limit sudah benar-benar habis.</li>
-                                        </>
-                                    )}
-                                    {errorModal.type === 'apikey' && (
-                                        <>
-                                            <li className="flex gap-2"><span>1.</span> Pergi ke menu <b>Data Guru/Master</b>.</li>
-                                            <li className="flex gap-2"><span>2.</span> Masukkan API Key Gemini yang valid (dapat diambil di Google AI Studio).</li>
-                                            <li className="flex gap-2"><span>3.</span> Pastikan tidak ada spasi di awal atau akhir kunci.</li>
-                                        </>
-                                    )}
-                                    {errorModal.type === 'parse' && (
-                                        <>
-                                            <li className="flex gap-2"><span>1.</span> Kurangi jumlah soal dalam satu permintaan jika terlalu banyak.</li>
-                                            <li className="flex gap-2"><span>2.</span> Klik tombol "Generate" lagi; kami telah mengaktifkan sistem perbaikan otomatis.</li>
-                                            <li className="flex gap-2"><span>3.</span> Berikan konteks RPP yang lebih sederhana/jelas.</li>
-                                        </>
-                                    )}
-                                    {errorModal.type === 'safety' && (
-                                        <>
-                                            <li className="flex gap-2"><span>1.</span> Periksa apakah ada kata-kata sensitif di RPP/Topik Anda.</li>
-                                            <li className="flex gap-2"><span>2.</span> Ubah bahasa atau deskripsi materi menjadi lebih umum.</li>
-                                            <li className="flex gap-2"><span>3.</span> Gunakan model AI yang berbeda di pengaturan.</li>
-                                        </>
-                                    )}
-                                    {errorModal.type === 'generic' && (
-                                        <>
-                                            <li className="flex gap-2"><span>1.</span> Pastikan koneksi internet Anda stabil.</li>
-                                            <li className="flex gap-2"><span>2.</span> Coba refresh halaman browser Anda.</li>
-                                            <li className="flex gap-2"><span>3.</span> Jika berlanjut, hubungi admin sistem.</li>
-                                        </>
-                                    )}
-                                </ul>
-                            </div>
+                                <div className="w-full bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 text-left mb-6 border border-gray-100 dark:border-gray-800">
+                                    <p className="text-[10px] font-bold uppercase text-gray-400 tracking-widest mb-2">Saran Pemecahan Masalah:</p>
+                                    <ul className="text-xs space-y-2 text-gray-700 dark:text-gray-300">
+                                        {errorModal.type === 'quota' && (
+                                            <>
+                                                <li className="flex gap-2"><span>1.</span> Tunggu sekitar 60 detik sebelum mencoba lagi.</li>
+                                                <li className="flex gap-2"><span>2.</span> Gunakan model <b>Gemini 1.5 Flash</b> yang lebih ringan di pengaturan.</li>
+                                                <li className="flex gap-2"><span>3.</span> Ganti API Key di Master Data jika limit sudah benar-benar habis.</li>
+                                            </>
+                                        )}
+                                        {errorModal.type === 'apikey' && (
+                                            <>
+                                                <li className="flex gap-2"><span>1.</span> Pergi ke menu <b>Data Guru/Master</b>.</li>
+                                                <li className="flex gap-2"><span>2.</span> Masukkan API Key Gemini yang valid (dapat diambil di Google AI Studio).</li>
+                                                <li className="flex gap-2"><span>3.</span> Pastikan tidak ada spasi di awal atau akhir kunci.</li>
+                                            </>
+                                        )}
+                                        {errorModal.type === 'parse' && (
+                                            <>
+                                                <li className="flex gap-2"><span>1.</span> Kurangi jumlah soal dalam satu permintaan jika terlalu banyak.</li>
+                                                <li className="flex gap-2"><span>2.</span> Klik tombol "Generate" lagi; kami telah mengaktifkan sistem perbaikan otomatis.</li>
+                                                <li className="flex gap-2"><span>3.</span> Berikan konteks RPP yang lebih sederhana/jelas.</li>
+                                            </>
+                                        )}
+                                        {errorModal.type === 'safety' && (
+                                            <>
+                                                <li className="flex gap-2"><span>1.</span> Periksa apakah ada kata-kata sensitif di RPP/Topik Anda.</li>
+                                                <li className="flex gap-2"><span>2.</span> Ubah bahasa atau deskripsi materi menjadi lebih umum.</li>
+                                                <li className="flex gap-2"><span>3.</span> Gunakan model AI yang berbeda di pengaturan.</li>
+                                            </>
+                                        )}
+                                        {errorModal.type === 'generic' && (
+                                            <>
+                                                <li className="flex gap-2"><span>1.</span> Pastikan koneksi internet Anda stabil.</li>
+                                                <li className="flex gap-2"><span>2.</span> Coba refresh halaman browser Anda.</li>
+                                                <li className="flex gap-2"><span>3.</span> Jika berlanjut, hubungi admin sistem.</li>
+                                            </>
+                                        )}
+                                    </ul>
+                                </div>
 
-                            <div className="flex flex-col w-full gap-2">
-                                <button
-                                    onClick={() => handleGenerate()}
-                                    className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2"
-                                >
-                                    <RefreshCw size={18} /> Coba Generate Lagi
-                                </button>
-                                <button
-                                    onClick={() => setErrorModal(prev => ({ ...prev, isOpen: false }))}
-                                    className="w-full py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
-                                >
-                                    Tutup
-                                </button>
+                                <div className="flex flex-col w-full gap-2">
+                                    <button
+                                        onClick={() => handleGenerate()}
+                                        className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2"
+                                    >
+                                        <RefreshCw size={18} /> Coba Generate Lagi
+                                    </button>
+                                    <button
+                                        onClick={() => setErrorModal(prev => ({ ...prev, isOpen: false }))}
+                                        className="w-full py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+                                    >
+                                        Tutup
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </Modal>
-            )}
+                    </Modal>
+                )
+            }
         </div >
     );
 };

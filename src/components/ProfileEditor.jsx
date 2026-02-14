@@ -26,6 +26,7 @@ export default function ProfileEditor() {
   const [geminiModel, setGeminiModel] = useState('gemini-3-flash-preview');
   const [academicWeight, setAcademicWeight] = useState(50);
   const [attitudeWeight, setAttitudeWeight] = useState(50);
+  const [scheduleNotificationsEnabled, setScheduleNotificationsEnabled] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -52,6 +53,7 @@ export default function ProfileEditor() {
             setGeminiModel(profileData.geminiModel || 'gemini-3-flash-preview');
             setAcademicWeight(profileData.academicWeight !== undefined ? profileData.academicWeight : 50);
             setAttitudeWeight(profileData.attitudeWeight !== undefined ? profileData.attitudeWeight : 50);
+            setScheduleNotificationsEnabled(profileData.scheduleNotificationsEnabled !== undefined ? profileData.scheduleNotificationsEnabled : true);
           } else {
             setError('Profil tidak ditemukan.');
           }
@@ -95,6 +97,7 @@ export default function ProfileEditor() {
         geminiModel,
         academicWeight,
         attitudeWeight,
+        scheduleNotificationsEnabled,
       });
 
       // Update Gemini API Key in localStorage
@@ -366,6 +369,28 @@ export default function ProfileEditor() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="space-y-4 pt-4 border-t dark:border-gray-700">
+          <h4 className="font-semibold text-gray-700 dark:text-gray-300 border-b pb-2 flex items-center gap-2">
+            Pusat Notifikasi
+            <span className="text-xs font-normal bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Lokal & Gratis</span>
+          </h4>
+          <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-2xl flex items-center justify-between group transition-all hover:bg-gray-100 dark:hover:bg-gray-800/60">
+            <div className="space-y-1">
+              <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Pengingat Jadwal Mengajar</label>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Dapatkan notifikasi otomatis 5 menit sebelum kelas dimulai.</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={scheduleNotificationsEnabled}
+                onChange={(e) => setScheduleNotificationsEnabled(e.target.checked)}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            </label>
           </div>
         </div>
 

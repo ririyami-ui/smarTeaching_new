@@ -15,6 +15,9 @@ import JournalReminder from '../components/JournalReminder';
 import TaskReminder from '../components/TaskReminder';
 import ClockDisplay from '../components/ClockDisplay';
 import MaterialCompletionChart from '../components/MaterialCompletionChart';
+import AnalyticsOverview from '../components/AnalyticsOverview';
+import AttendanceTrendChart from '../components/AttendanceTrendChart';
+import GradeDistributionChart from '../components/GradeDistributionChart';
 
 // Helper function to get the next occurrence of a day of the week
 const getNextDayOccurrence = (dayOfWeek, timeString, startDate = moment()) => {
@@ -51,7 +54,7 @@ const getNextDayOccurrence = (dayOfWeek, timeString, startDate = moment()) => {
 
 
 const StatCard = ({ icon, label, value, color }) => (
-  <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-xl flex items-center gap-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-blue-500/10 dark:hover:shadow-none">
+  <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-xl flex items-center gap-6 transition-all duration-300 md:hover:scale-[1.02] hover:shadow-blue-500/10 dark:hover:shadow-none overflow-hidden">
     <div className={`p-4 rounded-2xl ${color} shadow-inner`}>
       {icon}
     </div>
@@ -581,7 +584,10 @@ export default function DashboardPage() {
 
         {/* Student Recap Section (2/3) */}
         <div className="lg:col-span-2 bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-lg">
-          <h2 className="text-2xl font-black bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-100 dark:to-indigo-200 bg-clip-text text-transparent mb-6 tracking-tight">Rekap Siswa</h2>
+          <h2 className="text-2xl font-black mb-6 tracking-tight flex items-center gap-3">
+            <Users size={24} className="text-primary" />
+            <span className="bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-100 dark:to-indigo-200 bg-clip-text text-transparent">Rekap Siswa</span>
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"> {/* Grid for total counts */}
             <div className="p-4 rounded-2xl border border-green-200/50 dark:border-green-800/50 bg-green-50/50 dark:bg-green-900/20 text-green-800 dark:text-green-200 flex flex-col items-center justify-center shadow-sm">
@@ -600,10 +606,13 @@ export default function DashboardPage() {
 
           {Object.keys(studentStats.studentsByRombel).length > 0 && (
             <div className="mt-6">
-              <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-3">Siswa per Rombel:</h3>
+              <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-3 flex items-center gap-2">
+                <Users size={18} className="text-primary" />
+                <span>Siswa per Rombel:</span>
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"> {/* Adjusted grid layout for 2/3 width */}
                 {Object.entries(studentStats.studentsByRombel).sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true })).map(([rombel, data]) => (
-                  <Link to={`/analisis-rombel/${rombel}`} key={rombel} className="block p-4 rounded-[1.5rem] border border-blue-200/30 dark:border-blue-800/30 bg-white/40 dark:bg-black/40 backdrop-blur-sm text-blue-800 dark:text-blue-200 flex items-center space-x-4 hover:bg-blue-500 hover:text-white transition-all duration-500 group shadow-sm hover:shadow-blue-500/20 hover:scale-[1.03]">
+                  <Link to={`/analisis-rombel/${rombel}`} key={rombel} className="block p-4 rounded-[1.5rem] border border-blue-200/30 dark:border-blue-800/30 bg-white/40 dark:bg-black/40 backdrop-blur-sm text-blue-800 dark:text-blue-200 flex items-center space-x-4 hover:bg-blue-500 hover:text-white transition-all duration-500 group shadow-sm hover:shadow-blue-500/20 md:hover:scale-[1.03]">
                     <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900 group-hover:bg-white/20 transition-colors">
                       <Users size={20} className="flex-shrink-0" />
                     </div>
@@ -620,74 +629,18 @@ export default function DashboardPage() {
       </div>
 
 
-      {/* Bottom Section: Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Analytics Overview Section */}
+      <AnalyticsOverview />
 
-        {/* Material Completion Chart */}
-        <div className="h-full">
-          <MaterialCompletionChart />
-        </div>
+      {/* Enhanced Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AttendanceTrendChart />
+        <GradeDistributionChart />
+      </div>
 
-        <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-lg">
-          <h2 className="text-xl font-black bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-100 dark:to-indigo-200 bg-clip-text text-transparent mb-6 tracking-tight">Grafik Kehadiran Siswa</h2>
-          <div className="h-64"> {/* Removed flex and justify-center as ResponsiveContainer handles sizing */}
-            {attendanceChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
-                  <Pie
-                    data={attendanceChartData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {attendanceChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-text-muted-light dark:text-text-muted-dark">
-                Tidak ada data kehadiran untuk ditampilkan.
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-lg">
-          <h2 className="text-xl font-black bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-100 dark:to-indigo-200 bg-clip-text text-transparent mb-6 tracking-tight">Perkembangan Nilai Rata-rata</h2>
-          <div className="h-64">
-            {gradeChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={gradeChartData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="Rata-rata Nilai" stroke="#8884d8" activeDot={{ r: 8 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-text-muted-light dark:text-text-muted-dark">
-                Tidak ada data nilai untuk ditampilkan.
-              </div>
-            )}
-          </div>
-        </div>
+      {/* Bottom Section: Material Completion */}
+      <div className="grid grid-cols-1 gap-6">
+        <MaterialCompletionChart />
       </div>
     </div>
   );

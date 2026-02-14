@@ -529,12 +529,11 @@ const HandoutGeneratorPage = () => {
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-bg-light dark:bg-bg-dark p-6">
                     <div className="max-w-7xl mx-auto space-y-6">
 
-                        {/* Header */}
-                        <div className="flex justify-between items-center">
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                             <div>
-                                <h1 className="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark flex items-center gap-2">
-                                    <BookOpen className="w-8 h-8 text-primary-light" />
-                                    Generator Bahan Ajar (Handout)
+                                <h1 className="text-xl md:text-2xl font-bold text-text-primary-light dark:text-text-primary-dark flex items-center gap-2">
+                                    <BookOpen className="w-6 h-6 md:w-8 md:h-8 text-primary-light flex-shrink-0" />
+                                    <span>Generator Bahan Ajar (Handout)</span>
                                 </h1>
                                 <p className="text-text-muted-light dark:text-text-muted-dark mt-1">
                                     Buat modul belajar visual dan menarik untuk siswa dalam sekejap.

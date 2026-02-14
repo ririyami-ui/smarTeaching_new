@@ -217,10 +217,13 @@ const ScheduleInputMasterData = () => {
     return labels[cat] || cat;
   };
 
-  // Add Manual Holiday
+  const [editingHolidayId, setEditingHolidayId] = useState(null); // New State for editing
+
+  // Add or Update Manual Holiday
   const handleAddManualHoliday = async (e) => {
     e.preventDefault();
     if (!newHolidayDate || !auth.currentUser) return;
+
     try {
       const holidayData = {
         userId: auth.currentUser.uid,
@@ -236,19 +239,33 @@ const ScheduleInputMasterData = () => {
         holidayData.date = newHolidayDate; // Fallback for simple queries
       } else {
         holidayData.date = newHolidayDate;
+        holidayData.startDate = newHolidayDate; // Consistency
+        holidayData.endDate = newHolidayDate;   // Consistency
       }
 
-      await addDoc(collection(db, 'holidays'), holidayData);
+      if (editingHolidayId) {
+        // UPDATE MODE
+        await updateDoc(doc(db, 'holidays', editingHolidayId), holidayData);
+        toast.success('Agenda berhasil diperbarui.');
+        setEditingHolidayId(null);
+      } else {
+        // ADD MODE
+        await addDoc(collection(db, 'holidays'), holidayData);
+        toast.success('Agenda sekolah berhasil ditambahkan.');
+      }
 
       await fetchHolidays(auth.currentUser);
+
+      // Reset Form
       setNewHolidayDate('');
       setNewHolidayEndDate('');
       setNewHolidayName('');
       setNewHolidayDescription('');
-      toast.success('Agenda sekolah berhasil ditambahkan.');
+      setNewHolidayCategory('lainnya'); // Reset to default if needed, or keep last selected
+
     } catch (error) {
-      console.error("Error adding holiday:", error);
-      toast.error('Gagal menambah hari libur.');
+      console.error("Error saving holiday:", error);
+      toast.error('Gagal menyimpan agenda.');
     }
   };
 
@@ -963,7 +980,9 @@ const ScheduleInputMasterData = () => {
                 </div>
 
                 <div className="border-t pt-4">
-                  <h4 className="font-bold mb-2">Tambah Agenda / Libur Manual</h4>
+                  <h4 className="font-bold mb-2">
+                    {editingHolidayId ? 'Edit Agenda / Libur' : 'Tambah Agenda / Libur Manual'}
+                  </h4>
                   <form onSubmit={handleAddManualHoliday} className="flex flex-col gap-2">
                     <div className="flex gap-2">
                       <div className="flex-1">
@@ -1019,9 +1038,28 @@ const ScheduleInputMasterData = () => {
                         />
                       )}
 
-                      <button type="submit" className="bg-green-600 text-white p-2 rounded hover:bg-green-700 flex justify-center items-center gap-2 font-semibold">
-                        <Plus size={18} /> Simpan Agenda
+
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button type="submit" className={`flex-1 ${editingHolidayId ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'} text-white p-2 rounded flex justify-center items-center gap-2 font-semibold transition-colors`}>
+                        {editingHolidayId ? <RefreshCw size={18} /> : <Plus size={18} />}
+                        {editingHolidayId ? 'Update Agenda' : 'Simpan Agenda'}
                       </button>
+                      {editingHolidayId && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingHolidayId(null);
+                            setNewHolidayDate('');
+                            setNewHolidayEndDate('');
+                            setNewHolidayDescription('');
+                          }}
+                          className="bg-gray-300 text-gray-700 p-2 rounded hover:bg-gray-400"
+                        >
+                          Batal
+                        </button>
+                      )}
                     </div>
                   </form>
                 </div>
@@ -1057,12 +1095,29 @@ const ScheduleInputMasterData = () => {
                           ) : h.name}
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleDeleteHoliday(h.id)}
-                        className="text-red-500 hover:bg-red-50 p-1 rounded"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingHolidayId(h.id);
+                            setNewHolidayDate(h.startDate || h.date);
+                            setNewHolidayEndDate(h.endDate || h.date);
+                            setNewHolidayCategory(h.category || 'lainnya');
+                            setNewHolidayDescription(h.description || h.name);
+                            // Scroll to form (optional)
+                          }}
+                          className="text-blue-500 hover:bg-blue-50 p-1 rounded"
+                          title="Edit Agenda"
+                        >
+                          <RefreshCw size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteHoliday(h.id)}
+                          className="text-red-500 hover:bg-red-50 p-1 rounded"
+                          title="Hapus Agenda"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}

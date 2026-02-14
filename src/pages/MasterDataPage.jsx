@@ -3,65 +3,84 @@ import StudentMasterData from '../components/StudentMasterData';
 import ClassMasterData from '../components/ClassMasterData';
 import ScheduleInputMasterData from '../components/ScheduleInputMasterData';
 import ProfileEditor from '../components/ProfileEditor';
-import SubjectMasterData from '../components/SubjectMasterData'; // Import SubjectMasterData
-import DatabaseManager from '../components/DatabaseManager'; // Import DatabaseManager
+import SubjectMasterData from '../components/SubjectMasterData';
+import DatabaseManager from '../components/DatabaseManager';
+import {
+  User,
+  Users,
+  GraduationCap,
+  BookOpen,
+  Calendar,
+  Database,
+  Sparkles
+} from 'lucide-react';
 
 export default function MasterDataPage() {
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'classes', 'students', 'subjects', 'scheduleInput', 'database'
+  const [activeTab, setActiveTab] = useState('profile');
 
-  // Helper component for tabs
-  const TabButton = ({ tabKey, label }) => (
-    <li className="me-2" role="presentation">
-      <button
-        className={`inline-block px-5 py-3 border-b-2 rounded-t-lg transition-all duration-300 ease-in-out ${
-          activeTab === tabKey
-            ? 'border-purple-600 text-purple-600 dark:border-purple-500 dark:text-purple-500 font-semibold bg-purple-50 dark:bg-purple-900/20'
-            : 'border-transparent text-gray-500 hover:text-purple-600 hover:border-purple-300 dark:text-gray-400 dark:hover:text-purple-500 dark:hover:border-purple-700 hover:bg-gray-100 dark:hover:bg-gray-700/30'
-        }`}
-        onClick={() => setActiveTab(tabKey)}
-        type="button"
-        aria-selected={activeTab === tabKey}
-      >
-        {label}
-      </button>
-    </li>
-  );
+  const tabs = [
+    { id: 'profile', label: 'Profil', icon: User },
+    { id: 'classes', label: 'Kelas', icon: Users },
+    { id: 'students', label: 'Siswa', icon: GraduationCap },
+    { id: 'subjects', label: 'Mata Pelajaran', icon: BookOpen },
+    { id: 'scheduleInput', label: 'Jadwal Mengajar', icon: Calendar },
+    { id: 'database', label: 'Kelola Database', icon: Database },
+  ];
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'profile':
-        return <ProfileEditor />;
-      case 'classes':
-        return <ClassMasterData />;
-      case 'students':
-        return <StudentMasterData />;
-      case 'subjects': // New case for subjects
-        return <SubjectMasterData />;
-      case 'scheduleInput':
-        return <ScheduleInputMasterData />;
-      case 'database': // New case for database manager
-        return <DatabaseManager />;
-      default:
-        return <ProfileEditor />;
+      case 'profile': return <ProfileEditor />;
+      case 'classes': return <ClassMasterData />;
+      case 'students': return <StudentMasterData />;
+      case 'subjects': return <SubjectMasterData />;
+      case 'scheduleInput': return <ScheduleInputMasterData />;
+      case 'database': return <DatabaseManager />;
+      default: return <ProfileEditor />;
     }
   };
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800">
-      <h2 className="text-xl font-semibold text-purple-800 dark:text-purple-100 mb-4">Master Data / Setting</h2>
-
-      <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-        <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab" role="tablist">
-          <TabButton tabKey="profile" label="Profil" />
-          <TabButton tabKey="classes" label="Kelas" />
-          <TabButton tabKey="students" label="Siswa" />
-          <TabButton tabKey="subjects" label="Mata Pelajaran" /> {/* New Tab Button */}
-          <TabButton tabKey="scheduleInput" label="Jadwal Mengajar" />
-          <TabButton tabKey="database" label="Kelola Database" /> {/* New Tab Button for Database Manager */}
-        </ul>
+    <div className="space-y-6 animate-fade-in">
+      {/* Header Section */}
+      <div className="flex items-center gap-3 mb-2">
+        <div className="p-3 rounded-2xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+          <Sparkles size={24} />
+        </div>
+        <div>
+          <h2 className="text-2xl font-black text-gray-800 dark:text-white tracking-tight">Master Data</h2>
+          <p className="text-sm text-text-muted-light dark:text-text-muted-dark font-medium">Pengaturan dan manajemen basis data aplikasi</p>
+        </div>
       </div>
 
-      <div id="default-tab-content">
+      {/* Modern Glassmorphic Tab Navigation */}
+      <div className="bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-md p-1.5 rounded-2xl inline-flex flex-wrap gap-1 border border-gray-200/50 dark:border-gray-800/50">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`
+                flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 relative
+                ${isActive
+                  ? 'bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5 scale-[1.02]'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/30'
+                }
+              `}
+            >
+              <Icon size={18} className={isActive ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'} />
+              <span>{tab.label}</span>
+              {isActive && (
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-purple-500 rounded-full blur-[2px] opacity-20 mt-1"></div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Content Area */}
+      <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-500">
         {renderContent()}
       </div>
     </div>

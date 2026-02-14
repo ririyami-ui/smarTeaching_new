@@ -3,8 +3,10 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import moment from 'moment';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { useSettings } from '../utils/SettingsContext';
 
 const useScheduleNotifications = () => {
+  const { scheduleNotificationsEnabled } = useSettings();
   const [schedules, setSchedules] = useState([]);
   const [user, setUser] = useState(null);
 
@@ -35,10 +37,21 @@ const useScheduleNotifications = () => {
     fetchSchedules();
   }, [user]);
 
-  // Schedule notifications when schedules change
   useEffect(() => {
     const scheduleNotifications = async () => {
-      if (schedules.length === 0) return;
+      if (!scheduleNotificationsEnabled) {
+        // If disabled, we still need to clear existing schedule notifications
+        // Getting pending notifications
+        const pending = await LocalNotifications.getPending();
+        // Filter for schedule notifications (IDs starting with '1')
+        const scheduleNotificationsToCancel = pending.notifications.filter(n => n.id.toString().startsWith('1'));
+
+        if (scheduleNotificationsToCancel.length > 0) {
+          await LocalNotifications.cancel({ notifications: scheduleNotificationsToCancel });
+          console.log(`Cancelled ${scheduleNotificationsToCancel.length} disabled schedule notifications.`);
+        }
+        return;
+      }
 
       // Request notification permissions
       let permStatus = await LocalNotifications.checkPermissions();
@@ -50,8 +63,16 @@ const useScheduleNotifications = () => {
         }
       }
 
-      // Clear any previously scheduled notifications to avoid duplicates
-      await LocalNotifications.cancel({ notifications: (await LocalNotifications.getPending()).notifications });
+      // 1. Get ALL pending notifications
+      const pending = await LocalNotifications.getPending();
+
+      // 2. Identify which ones are "Schedule" notifications (ID starts with '1')
+      const scheduleNotificationsToCancel = pending.notifications.filter(n => n.id.toString().startsWith('1'));
+
+      // 3. Cancel ONLY those
+      if (scheduleNotificationsToCancel.length > 0) {
+        await LocalNotifications.cancel({ notifications: scheduleNotificationsToCancel });
+      }
 
       const notificationsToSchedule = [];
       const today = moment();
@@ -70,13 +91,16 @@ const useScheduleNotifications = () => {
         }
 
         // Calculate next occurrence of this day
-        let nextOccurrence = moment().day(dayOfWeek);
-        if (nextOccurrence.isBefore(today, 'day')) {
-          nextOccurrence.add(1, 'week'); // If day has passed this week, schedule for next week
-        }
-
         // Set time for 5 minutes before start time
-        const [startHour, startMinute] = schedule.startTime.split(':').map(Number);
+        let [startHour, startMinute] = schedule.startTime.split(':').map(Number);
+
+        // Subtract 5 minutes for reminder
+        startMinute -= 5;
+        if (startMinute < 0) {
+          startMinute += 60;
+          startHour -= 1;
+        }
+        if (startHour < 0) startHour += 24;
 
         // Validate parsed time
         if (isNaN(startHour) || isNaN(startMinute)) {
@@ -84,46 +108,50 @@ const useScheduleNotifications = () => {
           return;
         }
 
-        const notificationTime = nextOccurrence
-          .hour(startHour)
-          .minute(startMinute)
-          .second(0)
-          .subtract(5, 'minutes');
+        const displayClass = typeof schedule.class === 'object' && schedule.class !== null
+          ? schedule.class.rombel
+          : schedule.class;
 
-        // Only schedule if the notification time is in the future
-        if (notificationTime.isAfter(moment())) {
-          const displayClass = typeof schedule.class === 'object' && schedule.class !== null
-            ? schedule.class.rombel
-            : schedule.class;
+        // Use a prefix '1' for Schedule notifications to distinguish from Tasks (which use '9')
+        // ID Format: 1 + Day(1) + Hour(2) + Minute(2) + Index(2) -> 8 digits
+        // Example: 1 1 07 25 01 (Monday, 07:25, 2nd schedule)
+        const idString = `1${dayOfWeek}${startHour.toString().padStart(2, '0')}${startMinute.toString().padStart(2, '0')}${index.toString().padStart(2, '0')}`;
 
-          notificationsToSchedule.push({
-            id: parseInt(`${dayOfWeek}${startHour}${startMinute}${index}`), // Unique ID for notification
-            title: 'Jadwal Mengajar Segera Dimulai!',
-            body: `${schedule.subject} Kelas ${displayClass} akan dimulai dalam 5 menit.`,
-            schedule: { at: notificationTime.toDate() },
-            sound: null, // Use default sound
-            attachments: null,
-            actionTypeId: '',
-            extra: {
-              scheduleId: schedule.id,
-              subject: schedule.subject,
-              class: displayClass,
+        notificationsToSchedule.push({
+          id: parseInt(idString.substring(0, 9)),
+          title: 'Jadwal Mengajar Segera Dimulai!',
+          body: `${schedule.subject} di Kelas ${displayClass} akan dimulai dalam 5 menit.`,
+          schedule: {
+            on: {
+              weekday: dayOfWeek,
+              hour: startHour,
+              minute: startMinute
             },
-          });
-        }
+            repeats: true,
+            allowWhileIdle: true
+          },
+          sound: null,
+          extra: {
+            scheduleId: schedule.id,
+            subject: schedule.subject,
+            class: displayClass,
+            type: 'schedule' // Mark type for easier debugging if needed
+          },
+        });
       });
 
       if (notificationsToSchedule.length > 0) {
         await LocalNotifications.schedule({ notifications: notificationsToSchedule });
-        console.log(`Scheduled ${notificationsToSchedule.length} notifications.`);
+        console.log(`Re-scheduled ${notificationsToSchedule.length} class notifications.`);
       }
     };
 
     scheduleNotifications();
-    // Re-schedule daily to catch new schedules or for next week's occurrences
-    const interval = setInterval(scheduleNotifications, 24 * 60 * 60 * 1000); // Run once every 24 hours
+
+    // Re-schedule daily to ensure consistency
+    const interval = setInterval(scheduleNotifications, 24 * 60 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [schedules]); // Re-run when schedules change
+  }, [schedules, scheduleNotificationsEnabled]);
 
   return null; // This hook doesn't render anything
 };

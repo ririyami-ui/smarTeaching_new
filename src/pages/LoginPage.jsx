@@ -1,9 +1,10 @@
 // src/pages/LoginPage.jsx
 import React, { useState } from 'react';
 import { GraduationCap } from 'lucide-react';
-import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithCredential, signInWithPopup } from 'firebase/auth';
 import { auth } from '../firebase';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import { Capacitor } from '@capacitor/core';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -17,36 +18,40 @@ export default function LoginPage() {
     }
     setIsSigningIn(true);
     try {
-      // Gunakan plugin Capacitor Firebase Authentication untuk Google Sign-In
-      const result = await FirebaseAuthentication.signInWithGoogle();
+      // Check if running in a native environment (Android/iOS)
+      const isNative = ['android', 'ios'].includes(Capacitor.getPlatform());
 
-      // Extract tokens from the correct location in the result
-      const idToken = result.credential?.idToken;
-      const accessToken = result.credential?.accessToken;
+      if (isNative) {
+        // Use Capacitor Native Plugin for native apps
+        const result = await FirebaseAuthentication.signInWithGoogle();
+        const idToken = result.credential?.idToken;
+        const accessToken = result.credential?.accessToken;
 
-      // Validate tokens exist
-      if (!idToken) {
-        throw new Error('Failed to get ID token from Google Sign-In');
+        if (!idToken) {
+          throw new Error('Failed to get ID token from Google Sign-In');
+        }
+
+        const credential = GoogleAuthProvider.credential(idToken, accessToken);
+        await signInWithCredential(auth, credential);
+      } else {
+        // Fallback to standard Firebase Web Auth for browsers (localhost or local IP)
+        const provider = new GoogleAuthProvider();
+        const { signInWithPopup } = await import('firebase/auth');
+        await signInWithPopup(auth, provider);
       }
 
-      // Buat kredensial Firebase dari token yang didapat
-      const credential = GoogleAuthProvider.credential(idToken, accessToken);
-
-      // Masuk ke Firebase menggunakan kredensial ini (Firebase v9+ modular syntax)
-      await signInWithCredential(auth, credential);
-
-      // Success toast and navigation
       toast.success('Berhasil masuk! Selamat datang kembali.');
       navigate('/');
     } catch (error) {
       setIsSigningIn(false);
       console.error("Gagal masuk dengan Google:", error);
 
-      // User-friendly error messages
       if (error.code === 'auth/popup-closed-by-user') {
         toast.error('Login dibatalkan');
       } else if (error.code === 'auth/network-request-failed') {
-        toast.error('Tidak ada koneksi internet');
+        toast.error('Gagal koneksi atau domain belum di-whitelist (Authorized Domains)');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        toast.error('Domain/IP ini belum diizinkan di Firebase Console. Silakan tambahkan ' + window.location.hostname);
       } else {
         toast.error('Gagal masuk. Silakan coba lagi.');
       }
