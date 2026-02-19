@@ -125,34 +125,35 @@ const AIBriefing = ({ user, schedules, tasks, missingJournalsCount }) => {
                     utterance.pitch = 1.02;
                     utterance.volume = 1;
 
-                    // Prioritize specific high-quality/Natural voices if available
-                    const preferredVoices = [
-                        'Google Bahasa Indonesia',
-                        'Natural',
-                        'Microsoft Ardi',
-                        'Microsoft Gadis',
-                        'id-ID'
-                    ];
+                    // Optimized priority for Smartty's persona
+                    const voices = availableVoices.length > 0 ? availableVoices : synth.getVoices();
 
-                    let selectedVoice = null;
-                    for (const pref of preferredVoices) {
-                        selectedVoice = availableVoices.find(v =>
-                            v.name.includes(pref) || v.lang.includes(pref)
+                    // 1. Google/Natural/Premium voices
+                    let selectedVoice = voices.find(v =>
+                        (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Premium')) &&
+                        (v.lang.includes('id-ID') || v.lang.includes('id_ID') || v.lang === 'id')
+                    );
+
+                    // 2. High-quality platform defaults (Microsoft/Apple)
+                    if (!selectedVoice) {
+                        selectedVoice = voices.find(v =>
+                            (v.name.includes('Ardi') || v.name.includes('Gadis') || v.name.includes('Damayanti')) &&
+                            v.lang.includes('id')
                         );
-                        if (selectedVoice) break;
                     }
 
+                    // 3. Generic Indonesian
                     if (!selectedVoice) {
-                        selectedVoice = availableVoices.find(v =>
-                            v.lang.includes('id-ID') || v.lang === 'id_ID'
-                        ) || availableVoices.find(v => v.lang.includes('id'));
+                        selectedVoice = voices.find(v =>
+                            v.lang.includes('id-ID') || v.lang === 'id_ID' || v.lang.includes('id')
+                        );
                     }
 
                     if (selectedVoice) {
                         utterance.voice = selectedVoice;
-                        console.log("Using prioritized voice:", selectedVoice.name);
+                        console.log("Smartty optimized voice:", selectedVoice.name);
                     } else {
-                        console.log("No Indonesian voice found, using system default.");
+                        console.log("No Indonesian voice found for briefing.");
                     }
 
                     utterance.onend = () => {

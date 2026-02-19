@@ -298,11 +298,11 @@ export default function ProfileEditor() {
               value={geminiModel}
               onChange={(e) => setGeminiModel(e.target.value)}
             >
-              <option value="gemini-3-flash-preview">Gemini 3.0 Flash (Terbaru & Tercanggih) - REKOMENDASI</option>
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Seimbang)</option>
-              <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Stabil)</option>
-              <option value="gemini-1.5-flash">Gemini 1.5 Flash (Sangat Stabil)</option>
-              <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Reasoning)</option>
+              <option value="gemini-3-flash-preview">Gemini 3.0 Flash (Terbaru & Tercepat) - REKOMENDASI</option>
+              <option value="gemini-3-pro-preview">Gemini 3.0 Pro (Paling Cerdas - Preview)</option>
+              <option value="gemini-2.5-pro">Gemini 2.5 Pro (Sangat Cerdas - Stabil)</option>
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Cepat & Stabil)</option>
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash (Sangat Cepat)</option>
             </StyledSelect>
             <p className="text-[10px] text-gray-400 mt-1 italic">
               *Jika model terbaru sedang sibuk, sistem akan otomatis menggunakan model stabil sebagai cadangan.

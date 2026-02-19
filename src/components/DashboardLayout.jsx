@@ -46,6 +46,66 @@ import useTaskNotifications from '../hooks/useTaskNotifications';
 import useScheduleNotifications from '../hooks/useScheduleNotifications';
 import { useSettings } from '../utils/SettingsContext';
 
+const NAV_CATEGORIES = [
+  {
+    title: 'Utama',
+    icon: <Zap size={14} />,
+    items: [
+      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
+      { name: 'Asisten Guru', icon: <Bot size={20} />, path: '/asisten-guru' },
+    ]
+  },
+  {
+    title: 'Perencanaan',
+    icon: <Edit3 size={14} />,
+    items: [
+      { name: 'Jadwal Mengajar', icon: <Calendar size={20} />, path: '/jadwal' },
+      { name: 'Program Mengajar', icon: <BookOpen size={20} />, path: '/program-mengajar' },
+      { name: 'Penyusunan RPP', icon: <Sparkles size={20} />, path: '/rpp' },
+      { name: 'Generator LKPD', icon: <ClipboardList size={20} />, path: '/lkpd-generator' },
+      { name: 'Generator Bahan Ajar', icon: <BookOpen size={20} />, path: '/handout-generator' },
+      { name: 'Generator Soal', icon: <BrainCircuit size={20} />, path: '/quiz-generator' },
+    ]
+  },
+  {
+    title: 'Akademik',
+    icon: <BookOpen size={14} />,
+    items: [
+      { name: 'Absensi Siswa', icon: <ClipboardList size={20} />, path: '/absensi' },
+      { name: 'Jurnal Mengajar', icon: <FileText size={20} />, path: '/jurnal' },
+      { name: 'Input Nilai', icon: <GraduationCap size={20} />, path: '/nilai' },
+      { name: 'Penilaian KKTP', icon: <ClipboardCheck size={20} />, path: '/penilaian-kktp' },
+      { name: 'Penugasan Siswa', icon: <ListTodo size={20} />, path: '/penugasan' },
+    ]
+  },
+  {
+    title: 'Kedisiplinan',
+    icon: <ShieldCheck size={14} />,
+    items: [
+      { name: 'Catatan Pelanggaran', icon: <ShieldX size={20} />, path: '/pelanggaran' },
+      { name: 'Leaderboard', icon: <Trophy size={20} />, path: '/leaderboard' },
+    ]
+  },
+  {
+    title: 'Analisis & Rekap',
+    icon: <PieChart size={14} />,
+    items: [
+      { name: 'Rekapitulasi', icon: <Archive size={20} />, path: '/rekapitulasi' },
+      { name: 'Rekap Individu', icon: <User size={20} />, path: '/rekap-individu' },
+      { name: 'Analisis Kelas', icon: <ClipboardCheck size={20} />, path: '/analisis-kelas' },
+      { name: 'Sistem Peringatan Dini', icon: <ShieldAlert size={20} />, path: '/sistem-peringatan' },
+    ]
+  },
+  {
+    title: 'Sistem',
+    icon: <Settings2 size={14} />,
+    items: [
+      { name: 'Master Data', icon: <Settings size={20} />, path: '/master-data' },
+      { name: 'Tentang Aplikasi', icon: <Info size={20} />, path: '/about' },
+    ]
+  }
+];
+
 export default function DashboardLayout({ children, user }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -81,71 +141,10 @@ export default function DashboardLayout({ children, user }) {
   useTaskNotifications(activeSemester, academicYear);
   useScheduleNotifications();
 
-  // Categories definitions
-  const navCategories = [
-    {
-      title: 'Utama',
-      icon: <Zap size={14} />,
-      items: [
-        { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
-        { name: 'Asisten Guru', icon: <Bot size={20} />, path: '/asisten-guru' },
-      ]
-    },
-    {
-      title: 'Perencanaan',
-      icon: <Edit3 size={14} />,
-      items: [
-        { name: 'Jadwal Mengajar', icon: <Calendar size={20} />, path: '/jadwal' },
-        { name: 'Program Mengajar', icon: <BookOpen size={20} />, path: '/program-mengajar' },
-        { name: 'Penyusunan RPP', icon: <Sparkles size={20} />, path: '/rpp' },
-        { name: 'Generator LKPD', icon: <ClipboardList size={20} />, path: '/lkpd-generator' },
-        { name: 'Generator Bahan Ajar', icon: <BookOpen size={20} />, path: '/handout-generator' },
-        { name: 'Generator Soal', icon: <BrainCircuit size={20} />, path: '/quiz-generator' },
-      ]
-    },
-    {
-      title: 'Akademik',
-      icon: <BookOpen size={14} />,
-      items: [
-        { name: 'Absensi Siswa', icon: <ClipboardList size={20} />, path: '/absensi' },
-        { name: 'Jurnal Mengajar', icon: <FileText size={20} />, path: '/jurnal' },
-        { name: 'Input Nilai', icon: <GraduationCap size={20} />, path: '/nilai' },
-        { name: 'Penilaian KKTP', icon: <ClipboardCheck size={20} />, path: '/penilaian-kktp' },
-        { name: 'Penugasan Siswa', icon: <ListTodo size={20} />, path: '/penugasan' },
-      ]
-    },
-    {
-      title: 'Kedisiplinan',
-      icon: <ShieldCheck size={14} />,
-      items: [
-        { name: 'Catatan Pelanggaran', icon: <ShieldX size={20} />, path: '/pelanggaran' },
-        { name: 'Leaderboard', icon: <Trophy size={20} />, path: '/leaderboard' },
-      ]
-    },
-    {
-      title: 'Analisis & Rekap',
-      icon: <PieChart size={14} />,
-      items: [
-        { name: 'Rekapitulasi', icon: <Archive size={20} />, path: '/rekapitulasi' },
-        { name: 'Rekap Individu', icon: <User size={20} />, path: '/rekap-individu' },
-        { name: 'Analisis Kelas', icon: <ClipboardCheck size={20} />, path: '/analisis-kelas' },
-        { name: 'Sistem Peringatan Dini', icon: <ShieldAlert size={20} />, path: '/sistem-peringatan' },
-      ]
-    },
-    {
-      title: 'Sistem',
-      icon: <Settings2 size={14} />,
-      items: [
-        { name: 'Master Data', icon: <Settings size={20} />, path: '/master-data' },
-        { name: 'Tentang Aplikasi', icon: <Info size={20} />, path: '/about' },
-      ]
-    }
-  ];
-
   // State for expanded categories
   const [expandedCategories, setExpandedCategories] = useState(() => {
     // Find category that contains the current path to expand it by default
-    const activeCategory = navCategories.find(cat =>
+    const activeCategory = NAV_CATEGORIES.find(cat =>
       cat.items.some(item => item.path === location.pathname)
     );
     return activeCategory ? { [activeCategory.title]: true } : { 'Utama': true };
@@ -173,14 +172,19 @@ export default function DashboardLayout({ children, user }) {
 
   useEffect(() => {
     const checkUserProfile = async () => {
-      if (user) {
-        const userDocRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(userDocRef);
-        if (docSnap.exists()) {
-          setUserProfile(docSnap.data());
-          setProfileStatus('exists');
-        } else {
-          setProfileStatus('not_exists');
+      if (user && profileStatus === 'loading') {
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(userDocRef);
+          if (docSnap.exists()) {
+            setUserProfile(docSnap.data());
+            setProfileStatus('exists');
+          } else {
+            setProfileStatus('not_exists');
+          }
+        } catch (err) {
+          console.error("Error checking profile:", err);
+          setProfileStatus('not_exists'); // Fallback to allow progress
         }
       }
     };
@@ -204,6 +208,7 @@ export default function DashboardLayout({ children, user }) {
 
   const NavItem = ({ item, isMobile }) => {
     const isActive = location.pathname === item.path;
+    const showLabel = isMobile || isSidebarOpen;
 
     return (
       <Link
@@ -211,36 +216,33 @@ export default function DashboardLayout({ children, user }) {
         onClick={() => {
           if (isMobile) setIsSidebarOpen(false);
         }}
-        className={`flex items-center w-full gap-3 p-2.5 rounded-xl transition-all duration-500 group relative overflow-hidden ${isActive
-          ? 'text-white scale-[1.02]'
-          : 'text-text-muted-light dark:text-text-muted-dark md:hover:bg-primary/5 dark:md:hover:bg-primary/10 md:hover:text-primary'
-          }`}
+        className={`flex items-center w-full gap-3 px-4 py-2.5 rounded-xl transition-all duration-300 group relative ${isActive
+          ? 'bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20'
+          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
+          } ${!showLabel ? 'justify-center px-0' : ''}`}
+        title={!showLabel ? item.name : ''}
       >
-        {/* Active Background Pill */}
-        {isActive && (
-          <div className="absolute inset-0 bg-primary shadow-lg shadow-primary/20 animate-fade-in-up" />
-        )}
-
-        {/* Content */}
-        <span className={`relative z-10 ${isActive ? 'text-white' : 'text-primary'} transition-transform duration-500 group-hover:scale-110`}>
-          {item.icon}
+        <span className={`transition-all duration-300 ${isActive ? 'scale-110 rotate-3' : 'group-hover:scale-110 opacity-70 group-hover:opacity-100'}`}>
+          {React.cloneElement(item.icon, { size: 18, strokeWidth: isActive ? 2.5 : 2 })}
         </span>
-        <span className="relative z-10 text-sm font-bold tracking-tight">{item.name}</span>
-
-        {/* Glow effect for active item */}
-        {isActive && (
-          <div className="absolute -inset-1 bg-white/20 blur-xl rounded-full opacity-50 z-0 pointer-events-none" />
+        {showLabel && (
+          <span className={`text-[13px] font-semibold tracking-tight transition-all duration-300 animate-in fade-in slide-in-from-left-2 ${isActive ? 'font-bold' : ''}`}>
+            {item.name}
+          </span>
+        )}
+        {isActive && showLabel && (
+          <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
         )}
       </Link>
     );
   };
 
   const footerNavItems = [
-    { ...navCategories[0].items[0], shortName: 'Dashboard' }, // Dashboard
-    { ...navCategories[2].items[0], shortName: 'Absen' }, // Absensi Siswa
-    { ...navCategories[2].items[2], shortName: 'Nilai' }, // Input Nilai
-    { ...navCategories[2].items[1], shortName: 'Jurnal' }, // Jurnal Mengajar
-    { ...navCategories[0].items[1], shortName: 'Smartty' }  // Asisten Guru
+    { ...NAV_CATEGORIES[0].items[0], shortName: 'Dashboard' }, // Dashboard
+    { ...NAV_CATEGORIES[2].items[0], shortName: 'Absen' }, // Absensi Siswa
+    { ...NAV_CATEGORIES[2].items[2], shortName: 'Nilai' }, // Input Nilai
+    { ...NAV_CATEGORIES[2].items[1], shortName: 'Jurnal' }, // Jurnal Mengajar
+    { ...NAV_CATEGORIES[0].items[1], shortName: 'Smartty' }  // Asisten Guru
   ].filter(Boolean);
 
   if (profileStatus === 'loading') {
@@ -256,26 +258,33 @@ export default function DashboardLayout({ children, user }) {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans overflow-hidden">
+    <div className="h-screen flex flex-col bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans">
       {/* Desktop Sidebar - Premium Glassmorphic Refresh */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 flex-col bg-white/80 dark:bg-black/80 backdrop-blur-2xl border-r border-gray-100 dark:border-gray-800/50 p-4 shadow-2xl transition-transform duration-300 ease-in-out hidden md:flex ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="mb-6 flex items-center justify-between gap-3 px-4 py-2 h-20 border-b border-gray-100 dark:border-gray-800/50">
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white/80 dark:bg-black/80 backdrop-blur-2xl border-r border-gray-100 dark:border-gray-800/50 shadow-2xl transition-all duration-300 ease-in-out hidden md:flex ${isSidebarOpen ? 'w-72' : 'w-24'}`}
+      >
+        <div className={`flex items-center justify-between gap-3 px-4 py-2 h-24 border-b border-gray-100 dark:border-gray-800/50 transition-all duration-300 ${isSidebarOpen ? '' : 'flex-col justify-center'}`}>
           <div className="flex items-center gap-3">
-            <img src="/Logo Smart Teaching Baru_.png" alt="Logo" className="h-10 w-auto" />
-            <div className="flex flex-col">
-              <h1 className="font-sans text-lg font-extrabold text-blue-600 dark:text-blue-500 tracking-tight leading-tight">Smart</h1>
-              <h1 className="font-sans text-lg font-extrabold text-gray-800 dark:text-white tracking-tight leading-tight -mt-1">Teaching</h1>
+            <div className="shrink-0 p-2 bg-primary/10 rounded-xl">
+              <img src="/Logo Smart Teaching Baru_.png" alt="Logo" className="h-8 w-auto mix-blend-multiply dark:mix-blend-normal" />
             </div>
+            {isSidebarOpen && (
+              <div className="flex flex-col animate-in fade-in duration-500">
+                <h1 className="font-sans text-lg font-black text-primary tracking-tight leading-none">Smart</h1>
+                <h1 className="font-sans text-lg font-black text-gray-800 dark:text-white tracking-tight leading-none">School</h1>
+              </div>
+            )}
           </div>
           <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className={`p-2 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-primary/10 hover:text-primary transition-all duration-300 text-gray-400 ${!isSidebarOpen ? 'rotate-180' : ''}`}
           >
-            <ChevronRight className="rotate-180" size={18} />
+            <ChevronRight size={18} />
           </button>
         </div>
-        <nav className="flex-1 h-full overflow-y-auto pr-2 custom-scrollbar">
-          {navCategories.map((category, idx) => {
+
+        <nav className="flex-1 px-4 py-6 overflow-y-auto pr-2 custom-scrollbar space-y-2">
+          {NAV_CATEGORIES.map((category, idx) => {
             const isExpanded = expandedCategories[category.title];
             const hasActiveItem = category.items.some(item => item.path === location.pathname);
 
@@ -283,20 +292,23 @@ export default function DashboardLayout({ children, user }) {
               <div key={category.title} className={idx > 0 ? 'mt-4' : ''}>
                 <button
                   onClick={() => toggleCategory(category.title)}
-                  className={`flex items-center justify-between w-full px-4 py-3 mb-1 text-xs font-bold uppercase tracking-wider transition-all duration-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800/50 group ${hasActiveItem
-                    ? 'text-primary bg-primary/10 dark:bg-primary/20 shadow-sm'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                    }`}
+                  className={`flex items-center justify-between w-full px-4 py-2.5 mb-1 text-[11px] font-black uppercase tracking-[0.18em] transition-all duration-300 rounded-xl group ${hasActiveItem
+                    ? 'text-primary bg-primary/5 dark:bg-primary/10'
+                    : 'text-gray-400 dark:text-gray-500 hover:text-primary hover:bg-primary/5'
+                    } ${!isSidebarOpen ? 'justify-center' : ''}`}
+                  title={!isSidebarOpen ? category.title : ''}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className={`transition-transform duration-300 ${isExpanded ? 'scale-110' : 'opacity-70'}`}>
+                  <div className="flex items-center gap-3">
+                    <span className={`transition-all duration-300 ${isExpanded ? 'scale-110 opacity-100' : 'opacity-60 group-hover:opacity-100'}`}>
                       {category.icon}
                     </span>
-                    <span>{category.title}</span>
+                    {isSidebarOpen && <span className="animate-in fade-in slide-in-from-left-1 duration-300">{category.title}</span>}
                   </div>
-                  <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                    <ChevronDown size={14} />
-                  </div>
+                  {isSidebarOpen && (
+                    <div className={`transition-transform duration-500 ${isExpanded ? 'rotate-180' : 'opacity-40'}`}>
+                      <ChevronDown size={14} />
+                    </div>
+                  )}
                 </button>
                 <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
                   <ul className="space-y-1.5 ml-2.5 pl-2 border-l-2 border-primary/10 dark:border-primary/5">
@@ -311,36 +323,66 @@ export default function DashboardLayout({ children, user }) {
             );
           })}
         </nav>
-        <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-              {user?.photoURL ? (
-                <img src={user.photoURL} alt="User Avatar" className="h-full w-full rounded-full object-cover" />
-              ) : (
-                <User size={20} className="text-primary dark:text-primary-300" />
+        <div className={`mt-auto px-4 pb-6 transition-all duration-300 ${isSidebarOpen ? '' : 'px-2'}`}>
+          <div className={`bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800/50 shadow-sm transition-all duration-300 ${isSidebarOpen ? 'p-4' : 'p-2 flex flex-col items-center'}`}>
+            <div className={`flex items-center gap-3 ${isSidebarOpen ? 'mb-4' : 'mb-2'}`}>
+              <div className="relative group/avatar">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-primary to-blue-400 p-[2px] transition-transform duration-300 group-hover/avatar:scale-110">
+                  <div className="h-full w-full rounded-full bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden">
+                    {user?.photoURL ? (
+                      <img src={user.photoURL} alt="Avatar" className="h-full w-full object-cover" />
+                    ) : (
+                      <User size={20} className="text-primary" />
+                    )}
+                  </div>
+                </div>
+                {isSidebarOpen && (
+                  <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-900"></div>
+                )}
+              </div>
+              {isSidebarOpen && (
+                <div className="min-w-0 flex-1 animate-in fade-in slide-in-from-left-2">
+                  <p className="truncate text-sm font-bold text-gray-800 dark:text-gray-100 tracking-tight leading-none mb-1">
+                    {userProfile?.name?.split(' ')[0] || user?.email?.split('@')[0]}
+                  </p>
+                  <p className="truncate text-[10px] font-bold text-primary uppercase tracking-widest opacity-70">Guru {userProfile?.schoolLevel || 'Cerdas'}</p>
+                </div>
               )}
             </div>
-            <p className="truncate text-sm font-medium text-text-light dark:text-text-dark">{userProfile?.name || user?.email}</p>
+            <div className={`grid gap-2 ${isSidebarOpen ? 'grid-cols-2' : 'grid-cols-1 w-full'}`}>
+              <button
+                onClick={() => navigate('/master-data')}
+                className="flex items-center justify-center p-2.5 bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-primary/10 hover:border-primary/30 transition-all text-gray-500 hover:text-primary active:scale-95"
+                title="Profil & Pengaturan"
+              >
+                <Settings2 size={16} />
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center justify-center p-2.5 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl hover:bg-red-500 hover:text-white transition-all text-red-500 active:scale-95"
+                title="Keluar"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg p-3 text-red-500 transition-colors duration-200 hover:bg-red-100 dark:hover:bg-red-900/50 dark:hover:text-white"
-          >
-            <LogOut size={20} />
-            <span className="font-medium">Keluar</span>
-          </button>
+          {isSidebarOpen && (
+            <div className="mt-4 text-center animate-in fade-in slide-in-from-bottom-2 duration-700">
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-600 tracking-[0.3em] uppercase">Smart School v2.0</p>
+            </div>
+          )}
         </div>
       </aside>
 
       {/* Header */}
-      <header className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-lg p-3 md:p-4 shadow-sm transition-all duration-300 ${isSidebarOpen ? 'md:left-64' : 'md:left-0'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-3 md:p-4 border-b border-gray-100 dark:border-gray-800/50 shadow-sm transition-all duration-300 ${isSidebarOpen ? 'md:left-72' : 'md:left-24'}`}>
         <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 mr-2">
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 flex-shrink-0">
             <Menu size={24} />
           </button>
           <div className="flex flex-col md:flex-row md:items-baseline md:gap-2 min-w-0 flex-1">
             <h1 className="text-base sm:text-lg md:text-2xl font-bold text-text-primary-light dark:text-text-primary-dark line-clamp-2 md:line-clamp-none leading-tight md:leading-normal">
-              {navCategories.flatMap(c => c.items).find((item) => item.path === location.pathname)?.name || 'Dashboard'}
+              {NAV_CATEGORIES.flatMap(c => c.items).find((item) => item.path === location.pathname)?.name || 'Dashboard'}
             </h1>
           </div>
         </div>
@@ -443,16 +485,16 @@ export default function DashboardLayout({ children, user }) {
       </header>
 
       {/* Main Content with Entry Animation */}
-      <main className={`pt-20 pb-24 md:pb-6 flex-1 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-0'} ${location.pathname === '/asisten-guru' ? '' : 'overflow-y-auto'}`}>
-        <div key={location.pathname} className={`w-full animate-fade-in-up ${location.pathname === '/asisten-guru' ? '' : 'p-4 md:p-8'}`}>
-          <div className={location.pathname === '/asisten-guru' ? '' : 'max-w-7xl mx-auto w-full'}>
+      <main className={`flex-1 pt-24 transition-all duration-300 ${isSidebarOpen ? 'md:ml-72' : 'md:ml-24'} ${location.pathname === '/asisten-guru' ? 'pb-16 md:pb-0' : 'pb-24 md:pb-6'} overflow-y-auto`}>
+        <div key={location.pathname} className={`w-full animate-fade-in-up ${location.pathname === '/asisten-guru' ? '' : 'p-4 md:p-10'}`}>
+          <div className={location.pathname === '/asisten-guru' ? '' : 'max-w-[1400px] mx-auto w-full'}>
             {children}
           </div>
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation - Solid Fixed Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.3)] pb-[env(safe-area-inset-bottom,0px)]">
+      {/* Mobile Bottom Navigation - Premium Glassmorphic Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border-t border-gray-100 dark:border-gray-800/50 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom,0px)]">
         <div className="flex items-center justify-around h-16 px-2">
           {footerNavItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -460,28 +502,21 @@ export default function DashboardLayout({ children, user }) {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative flex-1 flex flex-col items-center justify-center h-full transition-all duration-300 group ${isActive ? 'text-primary' : 'text-gray-500 dark:text-gray-400'
-                  }`}
+                className={`relative flex-1 flex flex-col items-center justify-center h-full transition-all duration-300 ${isActive ? 'text-primary' : 'text-gray-400 dark:text-gray-500'}`}
               >
-                {/* Active Indicator Bar */}
+                {/* Active Indicator Glow */}
                 {isActive && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-b-full animate-in slide-in-from-top duration-300"></div>
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] animate-in fade-in zoom-in duration-500"></div>
                 )}
 
-                <div className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 ${isActive ? 'scale-105' : 'group-active:scale-95'
-                  }`}>
-                  <div className={`p-2 rounded-xl transition-all duration-300 ${isActive
-                    ? 'bg-primary/10 dark:bg-primary/20'
-                    : 'group-hover:bg-gray-100 dark:group-hover:bg-gray-800'
-                    }`}>
+                <div className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 ${isActive ? 'scale-110' : 'active:scale-90'}`}>
+                  <div className={`p-2 rounded-xl transition-all duration-300 ${isActive ? 'bg-primary/10 dark:bg-primary/20' : ''}`}>
                     {React.cloneElement(item.icon, {
-                      size: 22,
+                      size: 20,
                       strokeWidth: isActive ? 2.5 : 2,
-                      className: "transition-transform duration-300"
                     })}
                   </div>
-                  <span className={`text-[9px] font-bold tracking-tight text-center transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-70'
-                    }`}>
+                  <span className={`text-[10px] font-bold tracking-tight text-center transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
                     {item.shortName || item.name}
                   </span>
                 </div>
@@ -512,7 +547,7 @@ export default function DashboardLayout({ children, user }) {
           </button>
         </div>
         <nav className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-          {navCategories.map((category, idx) => {
+          {NAV_CATEGORIES.map((category, idx) => {
             const isExpanded = expandedCategories[category.title];
             const hasActiveItem = category.items.some(item => item.path === location.pathname);
 

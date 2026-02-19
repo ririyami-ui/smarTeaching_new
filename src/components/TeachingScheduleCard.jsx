@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import 'moment/locale/id'; // Import Indonesian locale
-import { Clock, CheckCircle, PlayCircle, Bell, CalendarOff, Calendar, Gift, Coffee, Sparkles, Smile, FileText, Book, Zap, RefreshCw } from 'lucide-react';
+import { Clock, CheckCircle, PlayCircle, Bell, CalendarOff, Calendar, Gift, Coffee, Sparkles, Smile, FileText, Book, Zap, RefreshCw, Share2, Camera } from 'lucide-react';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import Countdown from './Countdown'; // Import Countdown component
 import { getTopicForSchedule } from '../utils/topicUtils';
+import { getHolidayGreeting } from '../utils/greetingUtils.jsx';
 
 moment.updateLocale('id', {
   relativeTime: {
@@ -25,84 +26,10 @@ moment.updateLocale('id', {
   }
 });
 
-const TeachingScheduleCard = ({ schedules, currentTime, holiday, programs, classes, carryOverMap, activeSemester, academicYear }) => {
+const TeachingScheduleCard = ({ schedules, currentTime, holiday, programs, classes, carryOverMap, activeSemester, academicYear, userProfile }) => {
   const [notifiedSchedules, setNotifiedSchedules] = useState(new Set());
 
-  const getHolidayGreeting = (h) => {
-    const cat = h.category || '';
-    const name = (h.name || '').toLowerCase();
-
-    if (cat === 'semester_ganjil' || cat === 'semester_genap') {
-      return {
-        message: "Selamat berlibur dan selamat beristirahat dari rutinitas mengajar!",
-        icon: <Coffee size={24} className="text-white" />,
-        sub: "Waktunya merefresh semangat!"
-      };
-    }
-    if (cat === 'ujian' || cat === 'ujian_semester' || name.includes('ujian') || name.includes('asasesmen')) {
-      return {
-        message: "Semangat mendampingi siswa di masa ujian. Semoga lancar!",
-        icon: <FileText size={24} className="text-white" />,
-        sub: "Tetap teliti dan sabar!"
-      };
-    }
-    if (cat === 'tengah_semester' || name.includes('kts')) {
-      return {
-        message: "Selamat mengikuti kegiatan tengah semester bersama para siswa!",
-        icon: <Smile size={24} className="text-white" />,
-        sub: "Ciptakan momen belajar yang menyenangkan!"
-      };
-    }
-    if (cat === 'rapat' || name.includes('rapat')) {
-      return {
-        message: "Selamat berdiskusi untuk kemajuan sekolah. Semoga berkah!",
-        icon: <Coffee size={24} className="text-white" />,
-        sub: "Rapat Pengabdian & Koordinasi"
-      };
-    }
-    if (cat === 'workshop' || name.includes('workshop') || name.includes('iht')) {
-      return {
-        message: "Selamat menambah wawasan dan kompetensi baru hari ini!",
-        icon: <Book size={24} className="text-white" />,
-        sub: "Workshop & Pengembangan Diri"
-      };
-    }
-    if (cat === 'class_meeting' || name.includes('class meeting')) {
-      return {
-        message: "Waktunya seru-seruan dan menjalin kekompakan antar siswa!",
-        icon: <Smile size={24} className="text-white" />,
-        sub: "Class Meeting Competition"
-      };
-    }
-    if (cat === 'studi_tiru' || name.includes('studi tiru') || name.includes('outbound')) {
-      return {
-        message: "Selamat belajar dari pengalaman baru di luar sekolah!",
-        icon: <Sparkles size={24} className="text-white" />,
-        sub: "Studi Tiru & Kegiatan Luar"
-      };
-    }
-    if (cat === 'keagamaan' || name.includes('pengajian') || name.includes('sholat')) {
-      return {
-        message: "Mari tingkatkan spiritualitas dan kebersamaan dalam ibadah.",
-        icon: <Zap size={24} className="text-white" />,
-        sub: "Kegiatan Spiritual"
-      };
-    }
-    if (name.includes('upacara') || name.includes('senam')) {
-      return {
-        message: "Awali pagi dengan semangat kebersamaan dan kesehatan!",
-        icon: <Sparkles size={24} className="text-white" />,
-        sub: "Sehat fisik, cerdas pikiran!"
-      };
-    }
-
-    // Default / National Holiday
-    return {
-      message: "Selamat menikmati waktu luang Anda. Selamat beristirahat!",
-      icon: <Gift size={24} className="text-white" />,
-      sub: "Hari ini adalah hari istimewa!"
-    };
-  };
+  // getHolidayGreeting removed (moved to utility)
 
   const getClosingGreeting = () => {
     const greetings = [
@@ -355,37 +282,59 @@ const TeachingScheduleCard = ({ schedules, currentTime, holiday, programs, class
           <div className="w-full space-y-3">
             {/* Holiday Agenda at Top */}
             {holiday && (() => {
-              const greeting = getHolidayGreeting(holiday);
-              return (
-                <div className="w-full p-5 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-xl border border-white/30 text-white animate-fade-in-up relative overflow-hidden group">
-                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700"></div>
+              const card = getHolidayGreeting(holiday);
+              const teacherName = userProfile?.name || 'Bapak/Ibu Guru';
+              const schoolName = userProfile?.school || 'Sekolah';
 
-                  <div className="relative z-10 flex flex-col gap-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-md shadow-lg border border-white/20">
-                          {greeting.icon}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-extrabold tracking-tight leading-tight">{holiday.name}</h3>
-                            <span className="flex h-2 w-2 rounded-full bg-white animate-ping"></span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-black/20 backdrop-blur-md border border-white/20">
-                        Agenda Khusus
+              return (
+                <div className={`w-full p-6 bg-gradient-to-br ${card.gradient} rounded-3xl shadow-xl text-white animate-fade-in-up relative overflow-hidden group border-2 border-white/20`}>
+                  {/* Decorative Elements for Screenshot */}
+                  <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none transform rotate-12 scale-150">
+                    {card.icon}
+                  </div>
+                  <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                  <div className="relative z-10 flex flex-col items-center text-center gap-4 py-2">
+                    {/* Header Info */}
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-80 mb-0.5">Agenda Hari Ini</span>
+                      <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight drop-shadow-md uppercase italic">
+                        {holiday.name}
+                      </h3>
+                    </div>
+
+                    {/* Main Icon */}
+                    <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-md shadow-xl border border-white/30 transform group-hover:scale-105 transition-transform duration-500">
+                      {React.cloneElement(card.icon, { size: 40 })}
+                    </div>
+
+                    {/* Message Box */}
+                    <div className="max-w-md">
+                      <p className="text-base md:text-lg font-bold italic opacity-100 leading-snug mb-3 drop-shadow-sm">
+                        "{card.message}"
+                      </p>
+
+                      {/* Divider */}
+                      <div className="w-12 h-1 bg-white/30 mx-auto rounded-full mb-3"></div>
+
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-white/80">{card.sub}</span>
                       </div>
                     </div>
 
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10 mt-1">
-                      <p className="text-sm font-medium italic opacity-95 leading-relaxed">
-                        "{greeting.message}"
-                      </p>
-                      <div className="flex items-center gap-1.5 mt-2 opacity-80">
-                        <title size={12} />
-                        <span className="text-[10px] font-bold uppercase tracking-tighter">{greeting.sub}</span>
+                    {/* Footer / Signature for Status */}
+                    <div className="w-full mt-2 pt-4 border-t border-white/20 flex flex-col items-center gap-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="h-px w-8 bg-white/30"></div>
+                        <p className="text-[11px] font-bold tracking-wider">{teacherName}</p>
+                        <div className="h-px w-8 bg-white/30"></div>
                       </div>
+                      <p className="text-[9px] font-black uppercase opacity-60 tracking-tighter">{schoolName}</p>
+                    </div>
+
+                    {/* Instructions hint - hidden on desktop hover maybe? */}
+                    <div className="absolute top-4 right-4 opacity-40">
+                      <Camera size={16} />
                     </div>
                   </div>
                 </div>

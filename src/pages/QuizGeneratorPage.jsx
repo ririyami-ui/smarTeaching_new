@@ -11,19 +11,19 @@ import {
 import StyledSelect from '../components/StyledSelect';
 import { generateAdvancedQuiz, generateQuizFromImage } from '../utils/gemini';
 import BSKAP_DATA from '../utils/bskap_2025_intel.json';
-import { asBlob } from 'html-docx-js-typescript';
-import { saveAs } from 'file-saver';
+
+
 import toast from 'react-hot-toast';
-import * as XLSX from 'xlsx';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+
+
+
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeRaw from 'rehype-raw';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
-import html2canvas from 'html2canvas';
+
 import Modal from '../components/Modal';
 
 const QuizGeneratorPage = () => {
@@ -309,6 +309,40 @@ const QuizGeneratorPage = () => {
         );
     };
 
+    // Helper to strip administrative boilerplate to save tokens
+    const cleanAdministrativeBoilerplate = (text) => {
+        if (!text) return "";
+        let cleaned = text;
+
+        // 1. Remove common administrative headers/metadata lines
+        const patternsToStrip = [
+            /NIP\s*:\s*.*/gi,
+            /Nama Sekolah\s*:\s*.*/gi,
+            /Alokasi Waktu\s*:\s*.*/gi,
+            /Tahun Pelajaran\s*:\s*.*/gi,
+            /Modul Ajar\s*:.*/gi,
+            /Kurikulum\s*:.*/gi,
+            /Semester\s*:.*/gi,
+            /Model Pembelajaran\s*:.*/gi,
+            /Metode Pembelajaran\s*:.*/gi,
+            /Media Pembelajaran\s*:.*/gi,
+            /Bahan\s*&\s*Alat\s*:.*/gi,
+            /Sumber Belajar\s*:.*/gi,
+            /Profil Pelajar Pancasila\s*:.*/gi,
+            /Sarana\s*&\s*Prasarana\s*:.*/gi,
+            /Target Peserta Didik\s*:.*/gi
+        ];
+
+        patternsToStrip.forEach(pattern => {
+            cleaned = cleaned.replace(pattern, "");
+        });
+
+        // 2. Remove redundant whitespace and lines
+        cleaned = cleaned.replace(/\n\s*\n/g, '\n\n').trim();
+
+        return cleaned;
+    };
+
     // Handle Source Selection
     const handleSourceChange = (id) => {
         setSelectedContextId(id);
@@ -353,7 +387,7 @@ const QuizGeneratorPage = () => {
                     }
                 }
 
-                setContextContent(`(RANGKUMAN RPP OTOMATIS)\n\n${extractedText.substring(0, 3000)}`); // Limit to 3000 chars to be safe
+                setContextContent(`(RANGKUMAN MATERI BERSIH)\n\n${cleanAdministrativeBoilerplate(extractedText).substring(0, 3000)}`); // Cleaned and Limited
             } else if (sourceType === 'promes') {
                 setContextContent(JSON.stringify(selected.prota || []));
             }
@@ -371,14 +405,14 @@ const QuizGeneratorPage = () => {
                 .reduce((sum, [_, c]) => sum + c, 0);
 
             if (numCount > 0) {
-                // If adding this would exceed 50, cap it
-                if (otherTotal + numCount > 50) {
-                    const allowed = 50 - otherTotal;
+                // If adding this would exceed 20, cap it
+                if (otherTotal + numCount > 20) {
+                    const allowed = 20 - otherTotal;
                     if (allowed <= 0) {
-                        toast.error("Batas maksimal adalah 50 soal.");
+                        toast.error("Batas maksimal adalah 20 soal.");
                         return prev;
                     }
-                    toast.error(`Jumlah soal dibatasi maksimal 50. Otomatis disesuaikan ke ${allowed}.`);
+                    toast.error(`Jumlah soal dibatasi maksimal 20. Otomatis disesuaikan ke ${allowed}.`);
                     updated[typeId] = allowed;
                 } else {
                     updated[typeId] = numCount;
@@ -402,8 +436,8 @@ const QuizGeneratorPage = () => {
             return;
         }
 
-        if (totalRequested > 50) {
-            toast.error("Maksimal pembuatan adalah 50 soal dalam satu kali proses.");
+        if (totalRequested > 20) {
+            toast.error("Maksimal pembuatan adalah 20 soal dalam satu kali proses.");
             return;
         }
 
@@ -506,6 +540,7 @@ const QuizGeneratorPage = () => {
                 indicator: q.indicator || '',
                 cognitive_level: q.cognitive_level || '',
                 stimulus: q.stimulus || '',
+                image_hint: q.image_hint || '',
                 answer: q.answer || '',
                 // Ensure arrays exist
                 options: q.options || [],
@@ -559,6 +594,8 @@ const QuizGeneratorPage = () => {
 
 
     const exportWord = async () => {
+        const { asBlob } = await import("html-docx-js-typescript");
+        const { saveAs } = await import("file-saver");
         if (!quizResult) return;
 
         let html = `
@@ -575,6 +612,9 @@ const QuizGeneratorPage = () => {
             let combinedText = '';
             if (q.stimulus) {
                 combinedText += `${q.stimulus.replace(/\n/g, '<br/>')}<br/><br/>`;
+            }
+            if (q.image_hint) {
+                combinedText += `<div style="background-color: #f0f7ff; color: #1e40af; border: 1px dashed #34d399; padding: 10px; margin-bottom: 10px; text-align: center; font-style: italic;">${q.image_hint}</div>`;
             }
             combinedText += q.question;
 
@@ -644,6 +684,8 @@ const QuizGeneratorPage = () => {
     };
 
     const exportPDF = async () => {
+        const { jsPDF } = await import("jspdf");
+        const { default: html2canvas } = await import("html2canvas");
         if (!quizResult) return;
 
         const doc = new jsPDF();
@@ -710,7 +752,9 @@ const QuizGeneratorPage = () => {
         toast.success("Download PDF Berhasil");
     };
 
-    const exportKartuSoalPDF = () => {
+    const exportKartuSoalPDF = async () => {
+        const { jsPDF } = await import("jspdf");
+        const { default: autoTable } = await import("jspdf-autotable");
         if (!quizResult) return;
 
         const doc = new jsPDF('l', 'mm', 'a4');
@@ -753,6 +797,9 @@ const QuizGeneratorPage = () => {
             }
 
             const cleanQuestion = q.question.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+            if (q.image_hint) {
+                questionContent += `\n[INSTRUKSI GAMBAR: ${q.image_hint}]\n\n`;
+            }
             questionContent += cleanQuestion;
 
             // Add options for PG types
@@ -866,6 +913,8 @@ const QuizGeneratorPage = () => {
     };
 
     const exportKartuSoalWord = async () => {
+        const { asBlob } = await import("html-docx-js-typescript");
+        const { saveAs } = await import("file-saver");
         if (!quizResult) return;
 
         let html = `
@@ -920,6 +969,9 @@ const QuizGeneratorPage = () => {
                     let html = '';
                     if (q.stimulus && q.stimulus.trim() !== '' && !q.stimulus.includes('Lihat stimulus')) {
                         html += `<div style="margin-bottom:10px; font-style:italic;">${q.stimulus}</div>`;
+                    }
+                    if (q.image_hint) {
+                        html += `<div style="margin-bottom:10px; text-align:center; border:1px dashed #666; padding:10px; background:#f9f9f9;">${q.image_hint}</div>`;
                     }
                     html += `<div style="margin-bottom:10px;"><strong>${q.question}</strong></div>`;
                     if ((q.type === 'pg' || q.type === 'pg_complex') && q.options && q.options.length > 0) {
@@ -981,7 +1033,9 @@ const QuizGeneratorPage = () => {
         }
     };
 
-    const exportKisiKisiPDF = () => {
+    const exportKisiKisiPDF = async () => {
+        const { jsPDF } = await import("jspdf");
+        const { default: autoTable } = await import("jspdf-autotable");
         if (!quizResult) return;
         const doc = new jsPDF('landscape', 'mm', 'a4');
         const pageWidth = doc.internal.pageSize.getWidth();
@@ -1049,6 +1103,8 @@ const QuizGeneratorPage = () => {
     };
 
     const exportKisiKisiWord = async () => {
+        const { asBlob } = await import("html-docx-js-typescript");
+        const { saveAs } = await import("file-saver");
         if (!quizResult) return;
         const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -1531,7 +1587,7 @@ const QuizGeneratorPage = () => {
                                                             remarkPlugins={[remarkGfm, remarkMath]}
                                                             rehypePlugins={[rehypeRaw, rehypeKatex]}
                                                         >
-                                                            {`${q.stimulus ? q.stimulus + '\n\n' : ''}${q.question || 'Petunjuk: Klik "Generate" untuk membuat soal.'}`}
+                                                            {`${q.stimulus ? q.stimulus + '\n\n' : ''}${q.image_hint ? '> 🖼️ **INSTRUKSI GAMBAR:** ' + q.image_hint + '\n\n' : ''}${q.question || 'Petunjuk: Klik "Generate" untuk membuat soal.'}`}
                                                         </ReactMarkdown>
                                                     </div>
                                                 </div>

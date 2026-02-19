@@ -44,6 +44,9 @@ const useTaskNotifications = (activeSemester, academicYear) => {
                 if (permStatus.display !== 'granted') return;
             }
 
+            // Clear previously delivered task notifications
+            await LocalNotifications.removeAllDeliveredNotifications();
+
             // 1. Get ALL pending notifications
             const pending = await LocalNotifications.getPending();
 

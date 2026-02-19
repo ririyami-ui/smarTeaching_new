@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import { AlertTriangle, CheckCircle, ChevronRight, BookX } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
+import { indonesianHolidays } from '../utils/holidayData';
 
 const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCount }) => {
     const [missingJournals, setMissingJournals] = useState([]);
@@ -15,6 +16,35 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
 
             setIsLoading(true);
             try {
+                // 0. Build Holiday Date Set (Firestore + static holidays)
+                const holidayDates = new Set();
+
+                // Fetch from Firestore holidays collection
+                try {
+                    const holidaysQuery = query(collection(db, 'holidays'), where('userId', '==', user.uid));
+                    const holidaysSnap = await getDocs(holidaysQuery);
+                    holidaysSnap.docs.forEach(doc => {
+                        const h = doc.data();
+                        if (h.startDate && h.endDate) {
+                            // Range holiday: add all dates in range
+                            const start = moment(h.startDate).startOf('day');
+                            const end = moment(h.endDate).startOf('day');
+                            let cursor = start.clone();
+                            while (cursor.isSameOrBefore(end, 'day')) {
+                                holidayDates.add(cursor.format('YYYY-MM-DD'));
+                                cursor.add(1, 'day');
+                            }
+                        } else if (h.date) {
+                            holidayDates.add(moment(h.date).format('YYYY-MM-DD'));
+                        }
+                    });
+                } catch (err) {
+                    console.warn('Could not fetch Firestore holidays for JournalReminder:', err);
+                }
+
+                // Also add static national holidays
+                indonesianHolidays.forEach(h => holidayDates.add(h.date));
+
                 // 1. Get Teaching Schedule (Routine)
                 const scheduleQuery = query(collection(db, 'teachingSchedules'), where('userId', '==', user.uid));
                 const scheduleSnap = await getDocs(scheduleQuery);
@@ -28,9 +58,8 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
                 }
 
                 // 2. Get Journals from last 7 days from DB to compare
-                // We can't query "NOT IN" easily for complex dates, so we fetch relevant journals and filter in JS
                 const today = moment().endOf('day');
-                const sevenDaysAgo = moment().subtract(6, 'days').startOf('day'); // Include today + 6 previous days = 7 days window
+                const sevenDaysAgo = moment().subtract(6, 'days').startOf('day');
                 const sevenDaysAgoDate = sevenDaysAgo.format('YYYY-MM-DD');
 
                 const journalsQuery = query(
@@ -42,8 +71,6 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
                 );
 
                 const journalsSnap = await getDocs(journalsQuery);
-                // Map as "YYYY-MM-DD_ClassName_SubjectName" for easy lookup
-                // We use a normalized string (lowercase, trimmed) to avoid mismatch
                 const journalKeys = new Set(journalsSnap.docs.map(doc => {
                     const data = doc.data();
                     const date = data.date || '';
@@ -60,6 +87,10 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
 
                     // Skip future dates
                     if (checkDate.isAfter(today)) continue;
+
+                    // Skip holidays - no journal required on holidays
+                    const checkDateStr = checkDate.format('YYYY-MM-DD');
+                    if (holidayDates.has(checkDateStr)) continue;
 
                     const dayNameIndex = checkDate.day(); // 0-6
                     const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];

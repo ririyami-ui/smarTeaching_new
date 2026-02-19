@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, query, where } from 'firebase/firestore'; // Added updateDoc
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, setDoc, query, where } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -46,7 +46,8 @@ const getNextDayOccurrence = (dayOfWeek, timeString, startDate = moment()) => {
 };
 
 const ScheduleInputMasterData = () => {
-  const { activeSemester, academicYear } = useSettings();
+  const { activeSemester, academicYear, schoolDays: contextSchoolDays } = useSettings();
+  const [schoolDays, setSchoolDays] = useState(contextSchoolDays || 6);
   const [day, setDay] = useState('');
   const [selectedClass, setSelectedClass] = useState(null);
   const [startPeriod, setStartPeriod] = useState('');
@@ -112,6 +113,27 @@ const ScheduleInputMasterData = () => {
     const unsubscribe = auth.onAuthStateChanged(fetchMasterData);
     return () => unsubscribe(); // Cleanup subscription on unmount
   }, []);
+
+  // Sync schoolDays from context
+  useEffect(() => {
+    if (contextSchoolDays !== undefined) setSchoolDays(contextSchoolDays);
+  }, [contextSchoolDays]);
+
+  // Save schoolDays to Firestore
+  const handleSchoolDaysChange = async (value) => {
+    const numVal = parseInt(value);
+    if (numVal !== 5 && numVal !== 6) return;
+    setSchoolDays(numVal);
+    if (auth.currentUser) {
+      try {
+        await setDoc(doc(db, 'users', auth.currentUser.uid), { schoolDays: numVal }, { merge: true });
+        toast.success(`Hari sekolah diubah ke ${numVal} hari/minggu`);
+      } catch (e) {
+        console.error('Error saving schoolDays:', e);
+        toast.error('Gagal menyimpan pengaturan.');
+      }
+    }
+  };
 
   // Fetch Holidays from Firestore
   const fetchHolidays = useCallback(async (user) => {
@@ -676,13 +698,35 @@ const ScheduleInputMasterData = () => {
             Semester: {activeSemester} (Tahun Ajaran {academicYear})
           </p>
         </div>
-        <button
-          onClick={() => setIsHolidayModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-sm"
-        >
-          <CalendarIcon size={18} />
-          Kelola Agenda Sekolah
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* School Days Toggle */}
+          <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg border border-blue-200 dark:border-blue-800">
+            <span className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase whitespace-nowrap">Hari Sekolah:</span>
+            <div className="flex bg-white dark:bg-gray-800 rounded-md overflow-hidden border border-blue-300 dark:border-blue-700">
+              <button
+                type="button"
+                onClick={() => handleSchoolDaysChange(5)}
+                className={`px-3 py-1.5 text-sm font-semibold transition-all ${schoolDays === 5 ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50'}`}
+              >
+                5 Hari
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSchoolDaysChange(6)}
+                className={`px-3 py-1.5 text-sm font-semibold transition-all ${schoolDays === 6 ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50'}`}
+              >
+                6 Hari
+              </button>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsHolidayModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-sm"
+          >
+            <CalendarIcon size={18} />
+            Kelola Agenda Sekolah
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

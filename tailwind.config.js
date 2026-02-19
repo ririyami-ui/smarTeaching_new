@@ -58,7 +58,7 @@ export default {
         orbitron: ['Orbitron', 'sans-serif'],
         dseg7classic: ['DSEG7Classic', 'monospace'], // Added DSEG7Classic
       },
-    keyframes: {
+      keyframes: {
         'pulse-yellow': {
           '0%, 100%': { boxShadow: '0 0 0 0 rgba(250, 204, 21, 0.7)' },
           '50%': { boxShadow: '0 0 0 8px rgba(250, 204, 21, 0)' },

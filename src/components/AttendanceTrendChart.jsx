@@ -86,28 +86,41 @@ const AttendanceTrendChart = () => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
-                    <p className="font-bold text-gray-900 dark:text-white mb-2">{data.displayDate}</p>
-                    <div className="space-y-1 text-xs">
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                            <span className="text-gray-700 dark:text-gray-300">Hadir: <strong>{data.Hadir}</strong> ({data.hadirPct}%)</span>
+                <div className="bg-white/80 dark:bg-black/80 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/20 dark:border-white/10 ring-1 ring-black/5">
+                    <p className="font-black text-gray-900 dark:text-white mb-2 tracking-tight">{data.displayDate}</p>
+                    <div className="space-y-2 text-xs">
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                <span className="text-gray-600 dark:text-gray-400 font-bold">Hadir</span>
+                            </div>
+                            <span className="text-gray-900 dark:text-white font-black">{data.Hadir} <span className="text-[10px] font-bold text-gray-400">({data.hadirPct}%)</span></span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                            <span className="text-gray-700 dark:text-gray-300">Sakit: <strong>{data.Sakit}</strong></span>
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+                                <span className="text-gray-600 dark:text-gray-400 font-bold">Sakit</span>
+                            </div>
+                            <span className="text-gray-900 dark:text-white font-black">{data.Sakit}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                            <span className="text-gray-700 dark:text-gray-300">Ijin: <strong>{data.Ijin}</strong></span>
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+                                <span className="text-gray-600 dark:text-gray-400 font-bold">Ijin</span>
+                            </div>
+                            <span className="text-gray-900 dark:text-white font-black">{data.Ijin}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                            <span className="text-gray-700 dark:text-gray-300">Alpha: <strong>{data.Alpha}</strong></span>
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
+                                <span className="text-gray-600 dark:text-gray-400 font-bold">Alpha</span>
+                            </div>
+                            <span className="text-gray-900 dark:text-white font-black">{data.Alpha}</span>
                         </div>
                     </div>
-                    <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-                        <span className="text-xs text-gray-600 dark:text-gray-400">Total: <strong>{data.total}</strong></span>
+                    <div className="mt-3 pt-2 border-t border-gray-100 dark:border-white/5 flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
+                        <span>Total Siswa</span>
+                        <span>{data.total}</span>
                     </div>
                 </div>
             );
@@ -117,129 +130,153 @@ const AttendanceTrendChart = () => {
 
     if (loading) {
         return (
-            <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-lg">
-                <div className="animate-pulse">
-                    <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
-                    <div className="h-64 bg-gray-300 dark:bg-gray-700 rounded-2xl"></div>
+            <div className="chart-container-glass p-6 h-[400px]">
+                <div className="animate-pulse h-full flex flex-col">
+                    <div className="flex justify-between mb-8">
+                        <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded-xl w-1/3"></div>
+                        <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded-xl w-1/4"></div>
+                    </div>
+                    <div className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-2xl"></div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-lg">
-            <div className="flex justify-between items-start mb-6">
-                <div className="flex items-center gap-2">
-                    <TrendingUp className="text-blue-600 dark:text-blue-400" size={24} />
+        <div className="chart-container-glass p-6 md:p-8 hover:chart-glow-blue group animate-fade-in-up">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-500/20">
+                        <TrendingUp size={24} />
+                    </div>
                     <div>
-                        <h2 className="text-xl font-black bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-100 dark:to-indigo-200 bg-clip-text text-transparent tracking-tight">
+                        <h2 className="text-2xl font-black bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent tracking-tight">
                             Tren Kehadiran
                         </h2>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                            {viewMode === 'week' ? '7 Hari Terakhir' : '30 Hari Terakhir'}
-                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                {viewMode === 'week' ? '7 Hari Terakhir' : '30 Hari Terakhir'}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="inline-flex p-1 bg-gray-100 dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800">
                     <button
                         onClick={() => setViewMode('week')}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${viewMode === 'week'
-                                ? 'bg-blue-600 text-white shadow-lg'
-                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                        className={`px-5 py-2 rounded-xl text-xs font-black tracking-tighter transition-all duration-300 ${viewMode === 'week'
+                            ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm border border-gray-200/50 dark:border-white/5'
+                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                     >
-                        Minggu
+                        MINGGUAN
                     </button>
                     <button
                         onClick={() => setViewMode('month')}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${viewMode === 'month'
-                                ? 'bg-blue-600 text-white shadow-lg'
-                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                        className={`px-5 py-2 rounded-xl text-xs font-black tracking-tighter transition-all duration-300 ${viewMode === 'month'
+                            ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm border border-gray-200/50 dark:border-white/5'
+                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                     >
-                        Bulan
+                        BULANAN
                     </button>
                 </div>
             </div>
 
-            <div className="h-80">
+            <div className="h-80 w-full">
                 {data.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorHadir" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor="#10B981" stopOpacity={0.1} />
+                                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="colorSakit" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.1} />
+                                    <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#F59E0B" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="colorIjin" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1} />
+                                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="colorAlpha" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor="#EF4444" stopOpacity={0.1} />
+                                    <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
+                            <CartesianGrid strokeDasharray="8 8" stroke="currentColor" className="text-gray-200 dark:text-gray-800" vertical={false} />
                             <XAxis
                                 dataKey="displayDate"
-                                tick={{ fontSize: 12, fill: '#6B7280' }}
-                                stroke="#9CA3AF"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }}
+                                dy={10}
                             />
                             <YAxis
-                                tick={{ fontSize: 12, fill: '#6B7280' }}
-                                stroke="#9CA3AF"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }}
                             />
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }} />
                             <Legend
-                                wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                                verticalAlign="top"
+                                align="right"
+                                height={36}
                                 iconType="circle"
+                                formatter={(value) => <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-2">{value}</span>}
                             />
                             <Area
                                 type="monotone"
                                 dataKey="Hadir"
                                 stackId="1"
                                 stroke="#10B981"
+                                strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorHadir)"
+                                animationDuration={2000}
                             />
                             <Area
                                 type="monotone"
                                 dataKey="Sakit"
                                 stackId="1"
                                 stroke="#F59E0B"
+                                strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorSakit)"
+                                animationDuration={2200}
                             />
                             <Area
                                 type="monotone"
                                 dataKey="Ijin"
                                 stackId="1"
                                 stroke="#3B82F6"
+                                strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorIjin)"
+                                animationDuration={2400}
                             />
                             <Area
                                 type="monotone"
                                 dataKey="Alpha"
                                 stackId="1"
                                 stroke="#EF4444"
+                                strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorAlpha)"
+                                animationDuration={2600}
                             />
                         </AreaChart>
                     </ResponsiveContainer>
                 ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400">
+                    <div className="flex flex-col items-center justify-center h-full gap-4 text-gray-400">
+                        <div className="p-6 rounded-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+                            <Calendar size={48} className="opacity-20" />
+                        </div>
                         <div className="text-center">
-                            <Calendar size={48} className="mx-auto mb-3 opacity-30" />
-                            <p className="text-sm font-medium">Belum ada data kehadiran</p>
-                            <p className="text-xs text-gray-500 mt-1">untuk periode ini</p>
+                            <p className="text-sm font-black uppercase tracking-widest text-gray-500">Belum Ada Data</p>
+                            <p className="text-[10px] font-bold text-gray-400 mt-1">Lakukan absensi untuk melihat tren</p>
                         </div>
                     </div>
                 )}

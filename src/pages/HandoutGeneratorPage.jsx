@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import mermaid from 'mermaid';
+// import mermaid from 'mermaid'; // Moved to dynamic import
 import { db, auth } from '../firebase';
 import { doc, getDoc, collection, addDoc, deleteDoc, serverTimestamp, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth'; // Use native listener
@@ -24,33 +24,37 @@ const HandoutGeneratorPage = () => {
     const navigate = useNavigate();
     const [userProfile, setUserProfile] = useState(null);
 
-    // Initialize Mermaid locally
+    // Initialize Mermaid dynamically
     useEffect(() => {
-        mermaid.initialize({
-            startOnLoad: false,
-            theme: 'base',
-            securityLevel: 'loose',
-            themeVariables: {
-                primaryColor: '#6366f1', // Indigo 500
-                primaryTextColor: '#1e293b', // Slate 800
-                primaryBorderColor: '#4338ca', // Indigo 700
-                lineColor: '#94a3b8', // Slate 400
-                secondaryColor: '#f8fafc',
-                tertiaryColor: '#ffffff',
-                fontFamily: 'Inter, system-ui, sans-serif',
-                fontSize: '16px',
-                mainBkg: '#ffffff',
-                nodeBorder: '#6366f1',
-                clusterBkg: '#f1f5f9',
-            },
-            flowchart: {
-                curve: 'basis',
-                padding: 40,
-                nodeSpacing: 80, // Increased from 40
-                rankSpacing: 80, // Increased from 40
-                useMaxWidth: true
-            }
-        });
+        const initMermaid = async () => {
+            const { default: mermaid } = await import('mermaid');
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    primaryColor: '#6366f1', // Indigo 500
+                    primaryTextColor: '#1e293b', // Slate 800
+                    primaryBorderColor: '#4338ca', // Indigo 700
+                    lineColor: '#94a3b8', // Slate 400
+                    secondaryColor: '#f8fafc',
+                    tertiaryColor: '#ffffff',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                    fontSize: '16px',
+                    mainBkg: '#ffffff',
+                    nodeBorder: '#6366f1',
+                    clusterBkg: '#f1f5f9',
+                },
+                flowchart: {
+                    curve: 'basis',
+                    padding: 40,
+                    nodeSpacing: 80,
+                    rankSpacing: 80,
+                    useMaxWidth: true
+                }
+            });
+        };
+        initMermaid();
     }, []);
 
     // Local Mermaid Renderer Component
@@ -64,6 +68,7 @@ const HandoutGeneratorPage = () => {
                 const renderDiagram = async () => {
                     try {
                         setError(null);
+                        const { default: mermaid } = await import('mermaid');
                         const { svg } = await mermaid.render(id, content);
                         setSvg(svg);
                     } catch (err) {

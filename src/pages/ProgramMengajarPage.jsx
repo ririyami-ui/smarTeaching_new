@@ -1,6 +1,6 @@
 // Forced refresh: 2026-01-26 14:05
 import React from 'react';
-const { useState, useEffect, useCallback, useRef } = React;
+const { useState, useEffect, useCallback, useMemo, useRef } = React;
 import { useSettings } from '../utils/SettingsContext';
 import { generateATP } from '../utils/gemini';
 import { BookOpen, Calendar, List, Clock, Save, ChevronDown, Check, Trash, Upload, Download, FileSpreadsheet, Plus, Zap, RefreshCw, MapPin, Loader2, Workflow, Lock, Unlock } from 'lucide-react';
@@ -9,12 +9,13 @@ import 'moment/locale/id';
 import { db, auth } from '../firebase';
 import { collection, doc, getDoc, setDoc, updateDoc, query, where, getDocs, deleteField } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { Printer, FileText } from 'lucide-react';
-import { asBlob } from 'html-docx-js-typescript';
+// import * as XLSX from 'xlsx'; // Moved to dynamic import
+// import { saveAs } from 'file-saver'; // Moved to dynamic import
+// import jsPDF from 'jspdf'; // Moved to dynamic import
+// import autoTable from 'jspdf-autotable'; // Moved to dynamic import
+import { Printer, FileText, Copy } from 'lucide-react';
+// import { asBlob } from 'html-docx-js-typescript'; // Moved to dynamic import
+import Modal from '../components/Modal';
 import BSKAP_DATA from '../utils/bskap_2025_intel.json';
 
 // Utility for Month Mapping
@@ -51,6 +52,8 @@ const exportToDocx = async (htmlContent, fileName, options = {}) => {
     `;
 
     try {
+        const { asBlob } = await import('html-docx-js-typescript');
+        const { saveAs } = await import('file-saver');
         const blob = await asBlob(fullHtml, { orientation: options.orientation || 'portrait', margins: { top: 720, right: 720, bottom: 720, left: 720 } }); // ~1 inch margins
         saveAs(blob, fileName);
         toast.success(`Word ${fileName} berhasil diunduh!`);
@@ -61,7 +64,7 @@ const exportToDocx = async (htmlContent, fileName, options = {}) => {
 };
 
 const ProgramMengajarPage = () => {
-    const { activeSemester, academicYear } = useSettings();
+    const { activeSemester, academicYear, schoolDays } = useSettings();
     const [activeTab, setActiveTab] = useState('pekan-efektif');
     const [selectedGrade, setSelectedGrade] = useState('');
     const [selectedSubject, setSelectedSubject] = useState('');
@@ -462,10 +465,11 @@ const ProgramMengajarPage = () => {
                                     activeTab={activeTab}
                                     userProfile={userProfile}
                                     signingLocation={signingLocation}
-                                    onUpdateData={handleUpdateGlobalEfektif} // Use stable callback
+                                    onUpdateData={handleUpdateGlobalEfektif}
                                     sharedEfektifData={sharedEfektifData}
                                     subjects={subjects}
                                     levels={levels}
+                                    schoolDays={schoolDays}
                                 />
                             )}
                             {activeTab === 'prota' && (
@@ -495,6 +499,7 @@ const ProgramMengajarPage = () => {
                                     signingLocation={signingLocation}
                                     sharedEfektifData={sharedEfektifData}
                                     subjects={subjects}
+                                    schoolDays={schoolDays}
                                 />
                             )}
                         </>
@@ -531,7 +536,7 @@ const SignatureSection = ({ userProfile, signingLocation }) => {
 };
 
 
-const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab, userProfile, signingLocation, onUpdateData, sharedEfektifData, subjects, levels }) => {
+const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab, userProfile, signingLocation, onUpdateData, sharedEfektifData, subjects, levels, schoolDays = 6 }) => {
     // Point 4: Initialize with template to avoid "kosong" UI flash
     const getInitialTemplate = () => {
         const semesterMonths = semester === 'Ganjil'
@@ -579,6 +584,9 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
         }
     }, [sharedEfektifData]);
     const [loading, setLoading] = useState(false);
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+
+    const totalEffectiveWeeks = months.reduce((acc, m) => acc + (parseInt(m.totalWeeks || 0) - parseInt(m.nonEffectiveWeeks || 0)), 0);
     const [programId, setProgramId] = useState(null);
     const [calendarId, setCalendarId] = useState(null);
 
@@ -668,42 +676,53 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
 
                         // Check each week
                         const totalWeeks = daysInMonth > 28 ? 5 : 4;
+                        const overlapThreshold = Math.floor(schoolDays / 2) + 1; // 3 for 5-day, 4 for 6-day
                         for (let w = 0; w < totalWeeks; w++) {
                             const weekStart = moment(`${actualYear}-${mNum}-${(w * 7) + 1}`, 'YYYY-MM-D').startOf('day');
                             const weekEnd = weekStart.clone().add(6, 'days').endOf('day');
 
-                            const blockingHoliday = allHolidays.find(h => {
-                                if (h.type !== 'manual') return false;
+                            const holidayDateList = allHolidays.filter(h => {
                                 const hStart = moment(h.startDate || h.date).startOf('day');
                                 const hEnd = moment(h.endDate || h.date).endOf('day');
-
-                                // Intersection
-                                const overlapStart = moment.max(weekStart, hStart);
-                                const overlapEnd = moment.min(weekEnd, hEnd);
-
-                                if (overlapEnd.isBefore(overlapStart)) return false;
-
-                                const overlapDays = overlapEnd.diff(overlapStart, 'days') + 1;
-                                return overlapDays >= 4; // At least 4 days overlap to block
+                                return hStart.isSameOrBefore(weekEnd) && hEnd.isSameOrAfter(weekStart);
                             });
 
-                            if (blockingHoliday) {
+                            let schoolDayOverlap = 0;
+                            const holidayNotesInWeek = [];
+
+                            const cursor = weekStart.clone();
+                            while (cursor.isSameOrBefore(weekEnd)) {
+                                const dow = cursor.day();
+                                const isSchoolDay = dow >= 1 && dow <= (schoolDays === 5 ? 5 : 6);
+                                if (isSchoolDay) {
+                                    // Check if this day is ANY of the holidays found for this week
+                                    const match = holidayDateList.find(h => {
+                                        const hStart = moment(h.startDate || h.date).startOf('day');
+                                        const hEnd = moment(h.endDate || h.date).endOf('day');
+                                        return cursor.isBetween(hStart, hEnd, 'day', '[]');
+                                    });
+                                    if (match) {
+                                        schoolDayOverlap++;
+                                        if (!holidayNotesInWeek.includes(match.name)) holidayNotesInWeek.push(match.name);
+                                    }
+                                }
+                                cursor.add(1, 'day');
+                            }
+
+                            if (schoolDayOverlap >= overlapThreshold) {
                                 calculatedNonEffective++;
-                                if (!holidaynotes.includes(blockingHoliday.name)) holidaynotes.push(blockingHoliday.name);
+                                holidayNotesInWeek.forEach(note => {
+                                    if (!holidaynotes.includes(note)) holidaynotes.push(note);
+                                });
                             }
                         }
 
-                        // Only override if current value is 0 or empty, to respect previous manual edits if any
-                        // OR if we want to enforce calendar (User said: "sesuai kalender pendidikan")
-                        // Let's enforce it but keep existing notes if they are different
-
-                        // We'll update if calculated > 0
                         if (calculatedNonEffective > 0) {
                             return {
                                 ...m,
-                                nonEffectiveWeeks: calculatedNonEffective, // Auto-set
+                                nonEffectiveWeeks: calculatedNonEffective,
                                 keterangan: m.keterangan ? m.keterangan : holidaynotes.join(', '),
-                                isAuto: true // Marker
+                                isAuto: true
                             };
                         }
                         return m;
@@ -835,27 +854,43 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
                     let holidaynotes = [];
 
                     const totalWeeks = daysInMonth > 28 ? 5 : 4;
+                    const overlapThreshold = Math.floor(schoolDays / 2) + 1; // 3 for 5-day, 4 for 6-day
                     for (let w = 0; w < totalWeeks; w++) {
                         const weekStart = moment(`${actualYear}-${mNum}-${(w * 7) + 1}`, 'YYYY-MM-D').startOf('day');
                         const weekEnd = weekStart.clone().add(6, 'days').endOf('day');
 
-                        const blockingHoliday = allHolidays.find(h => {
-                            // Use both manual and national holidays for sync
+                        const holidayDateList = allHolidays.filter(h => {
                             const hStart = moment(h.startDate || h.date).startOf('day');
                             const hEnd = moment(h.endDate || h.date).endOf('day');
-
-                            const overlapStart = moment.max(weekStart, hStart);
-                            const overlapEnd = moment.min(weekEnd, hEnd);
-
-                            if (overlapEnd.isBefore(overlapStart)) return false;
-
-                            const overlapDays = overlapEnd.diff(overlapStart, 'days') + 1;
-                            return overlapDays >= 4;
+                            return hStart.isSameOrBefore(weekEnd) && hEnd.isSameOrAfter(weekStart);
                         });
 
-                        if (blockingHoliday) {
+                        let schoolDayOverlap = 0;
+                        const holidayNotesInWeek = [];
+
+                        const cursor = weekStart.clone();
+                        while (cursor.isSameOrBefore(weekEnd)) {
+                            const dow = cursor.day();
+                            const isSchoolDay = dow >= 1 && dow <= (schoolDays === 5 ? 5 : 6);
+                            if (isSchoolDay) {
+                                const match = holidayDateList.find(h => {
+                                    const hStart = moment(h.startDate || h.date).startOf('day');
+                                    const hEnd = moment(h.endDate || h.date).endOf('day');
+                                    return cursor.isBetween(hStart, hEnd, 'day', '[]');
+                                });
+                                if (match) {
+                                    schoolDayOverlap++;
+                                    if (!holidayNotesInWeek.includes(match.name)) holidayNotesInWeek.push(match.name);
+                                }
+                            }
+                            cursor.add(1, 'day');
+                        }
+
+                        if (schoolDayOverlap >= overlapThreshold) {
                             calculatedNonEffective++;
-                            if (!holidaynotes.includes(blockingHoliday.name)) holidaynotes.push(blockingHoliday.name);
+                            holidayNotesInWeek.forEach(note => {
+                                if (!holidaynotes.includes(note)) holidaynotes.push(note);
+                            });
                         }
                     }
 
@@ -894,35 +929,39 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
             return;
         }
 
-        if (!window.confirm(`Apakah Anda yakin ingin menyalin pengaturan Pekan Efektif ini ke SEMUA KELAS LAIN (${levels.filter(l => l !== grade).join(', ')})? \n\nTindakan ini akan menimpa data Pekan Efektif di kelas lain.`)) {
-            return;
-        }
+        setConfirmModal({
+            isOpen: true,
+            title: 'Salin ke Semua Kelas',
+            message: `Apakah Anda yakin ingin menyalin pengaturan Pekan Efektif ini ke SEMUA KELAS LAIN (${levels.filter(l => l !== grade).join(', ')})? Tindakan ini akan menimpa data Pekan Efektif di kelas lain.`,
+            onConfirm: async () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                setLoading(true);
+                try {
+                    const promises = levels.map(lvl => {
+                        if (lvl === grade) return Promise.resolve(); // Skip current
 
-        setLoading(true);
-        try {
-            const promises = levels.map(lvl => {
-                if (lvl === grade) return Promise.resolve(); // Skip current
+                        const targetCId = `calendar_${auth.currentUser.uid}_${lvl}_${year.replace('/', '-')}_${semester}`;
+                        return setDoc(doc(db, 'teachingPrograms', targetCId), {
+                            userId: auth.currentUser.uid,
+                            academicYear: year,
+                            semester: semester,
+                            gradeLevel: lvl,
+                            pekanEfektif: months,
+                            updatedAt: new Date().toISOString(),
+                            type: 'calendar_structure'
+                        }, { merge: true });
+                    });
 
-                const targetCId = `calendar_${auth.currentUser.uid}_${lvl}_${year.replace('/', '-')}_${semester}`;
-                return setDoc(doc(db, 'teachingPrograms', targetCId), {
-                    userId: auth.currentUser.uid,
-                    academicYear: year,
-                    semester: semester,
-                    gradeLevel: lvl,
-                    pekanEfektif: months,
-                    updatedAt: new Date().toISOString(),
-                    type: 'calendar_structure'
-                }, { merge: true });
-            });
-
-            await Promise.all(promises);
-            toast.success(`Berhasil menyalin data ke kelas: ${levels.filter(l => l !== grade).join(', ')}`);
-        } catch (error) {
-            console.error("Apply All error:", error);
-            toast.error("Gagal menyalin data ke semua kelas.");
-        } finally {
-            setLoading(false);
-        }
+                    await Promise.all(promises);
+                    toast.success(`Berhasil menyalin data ke kelas: ${levels.filter(l => l !== grade).join(', ')}`);
+                } catch (error) {
+                    console.error("Apply All error:", error);
+                    toast.error("Gagal menyalin data ke semua kelas.");
+                } finally {
+                    setLoading(false);
+                }
+            }
+        });
     };
 
     const handleSyncWeeksWithCalendar = () => {
@@ -940,7 +979,7 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
     };
 
 
-    const handleExportExcel = () => {
+    const handleExportExcel = async () => {
         try {
             // 1. Header & Metadata Section
             const header = [
@@ -973,6 +1012,8 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
             ];
 
             const finalData = [...header, ...tableData, summaryRow];
+            const XLSX = await import("xlsx");
+            const { saveAs } = await import("file-saver");
             const ws = XLSX.utils.aoa_to_sheet(finalData);
 
             // 4. Set Column Widths (wch = characters)
@@ -998,8 +1039,10 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
         }
     };
 
-    const handleExportPDF = () => {
+    const handleExportPDF = async () => {
         try {
+            const { default: jsPDF } = await import("jspdf");
+            const { default: autoTable } = await import("jspdf-autotable");
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
@@ -1103,7 +1146,7 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
         }
     };
 
-    const handleExportWord = () => {
+    const handleExportWord = async () => {
         const rows = months.map(m => `
             <tr>
                 <td>${m.name}</td>
@@ -1203,7 +1246,6 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
         setMonths(newMonths);
     };
 
-    const totalEffectiveWeeks = months.reduce((acc, curr) => acc + (parseInt(curr.totalWeeks || 0) - parseInt(curr.nonEffectiveWeeks || 0)), 0);
     const totalEffectiveHours = totalEffectiveWeeks * jpPerWeek; // Calculate total effective hours
 
     return (
@@ -1246,9 +1288,10 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
                             </button>
                             <button
                                 onClick={handleApplyToAllGrades}
-                                title="Salin pengaturan ini ke semua tingkat kelas lain"
-                                className="flex items-center gap-2 px-3 py-2 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors shadow-sm ml-2"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition"
+                                title="Salin pengaturan pekan efektif ini ke semua tingkat kelas yang Anda ajar"
                             >
+                                <Copy size={16} />
                                 <span className="hidden sm:inline font-semibold">Salin ke Semua Kelas</span>
                                 <span className="sm:hidden font-bold">Salin</span>
                             </button>
@@ -1264,8 +1307,8 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
                         <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Total Jam Efektif</div>
                         <div className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400">{totalEffectiveHours} JP</div>
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
 
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
@@ -1372,6 +1415,33 @@ const PekanEfektifView = ({ grade, subject, semester, year, schedules, activeTab
                     {loading ? 'Menyimpan...' : 'Simpan Data'}
                 </button>
             </div>
+
+            {/* Confirmation Modal */}
+            {confirmModal.isOpen && (
+                <Modal onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
+                    <div className="text-center">
+                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+                            <Copy className="h-8 w-8 text-blue-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{confirmModal.title}</h3>
+                        <p className="text-gray-500 dark:text-gray-400 mb-6">{confirmModal.message}</p>
+                        <div className="flex gap-3 justify-center">
+                            <button
+                                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                                className="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={confirmModal.onConfirm}
+                                className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none transition"
+                            >
+                                Ya, Salin Sekarang
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 };
@@ -1532,7 +1602,7 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
         }
     };
 
-    const handleExportWord = () => {
+    const handleExportWord = async () => {
         const rows = protaData.map((row, index) => `
             <tr>
                 <td class="text-center">${index + 1}</td>
@@ -1612,7 +1682,7 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
         exportToDocx(html, fileName);
     };
 
-    const handleExportExcel = () => {
+    const handleExportExcel = async () => {
         try {
             // 1. Header Section
             const header = [
@@ -1634,6 +1704,8 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
             const summaryRow = ['TOTAL', '', '', '', totalJP, ''];
 
             const finalData = [...header, ...tableData, summaryRow];
+            const XLSX = await import("xlsx");
+            const { saveAs } = await import("file-saver");
             const ws = XLSX.utils.aoa_to_sheet(finalData);
 
             // 4. Formatting
@@ -1660,8 +1732,10 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
         }
     };
 
-    const handleExportPDF = () => {
+    const handleExportPDF = async () => {
         try {
+            const { default: jsPDF } = await import("jspdf");
+            const { default: autoTable } = await import("jspdf-autotable");
             const doc = new jsPDF();
 
             doc.setFontSize(14);
@@ -1908,7 +1982,7 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
     );
 };
 
-const PromesView = ({ grade, subject, semester, year, schedules, activeTab, userProfile, signingLocation, sharedEfektifData, subjects }) => {
+const PromesView = ({ grade, subject, semester, year, schedules, activeTab, userProfile, signingLocation, sharedEfektifData, subjects, schoolDays = 6 }) => {
     const [protaSource, setProtaSource] = useState([]);
     // Point 7: Init with template to avoid empty view
     const getInitialTemplate = () => {
@@ -1978,10 +2052,9 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                     if (data.promes) setPromesData(data.promes);
                 }
 
-                // 3. Holidays (Store only MANUAL ones for highlighting/blocking in Promes)
+                // 3. Holidays (ALL types for accurate blocking in Promes)
                 const allHolidays = hSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                const manualHolidays = allHolidays.filter(h => h.type === 'manual');
-                setUserHolidays(manualHolidays);
+                setUserHolidays(allHolidays);
 
             } catch (error) {
                 console.error("Error fetching Promes data:", error);
@@ -2005,31 +2078,76 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
         const weekStart = moment(`${actualYear}-${monthNum}-${(wIndex * 7) + 1}`, 'YYYY-MM-D').startOf('day');
         const weekEnd = weekStart.clone().add(6, 'days').endOf('day');
 
-        const holiday = (userHolidays || []).find(h => {
-            // CRITICAL: Only include manual school agendas (semester breaks, exams, etc.)
-            // as requested by the user. National/Public holidays are ignored in Promes.
-            if (h.type !== 'manual') return false;
+        const overlapThreshold = Math.floor(schoolDays / 2) + 1;
 
+        const holidayDateList = (userHolidays || []).filter(h => {
             const hStart = moment(h.startDate || h.date).startOf('day');
             const hEnd = moment(h.endDate || h.date).endOf('day');
-            // Overlaps if hStart <= weekEnd AND hEnd >= weekStart
             return hStart.isSameOrBefore(weekEnd) && hEnd.isSameOrAfter(weekStart);
         });
 
-        if (!holiday) return null;
+        if (holidayDateList.length === 0) return null;
 
-        // Calculate overlap duration to determine if it should block the week
-        const hStart = moment(holiday.startDate || holiday.date).startOf('day');
-        const hEnd = moment(holiday.endDate || holiday.date).endOf('day');
-        const overlapStart = moment.max(weekStart, hStart);
-        const overlapEnd = moment.min(weekEnd, hEnd);
-        const overlapDays = overlapEnd.diff(overlapStart, 'days') + 1;
+        let schoolDayOverlap = 0;
+        const cursor = weekStart.clone();
+        while (cursor.isSameOrBefore(weekEnd)) {
+            const dow = cursor.day();
+            const isSchoolDay = dow >= 1 && dow <= (schoolDays === 5 ? 5 : 6);
+            if (isSchoolDay) {
+                const match = holidayDateList.some(h => {
+                    const hStart = moment(h.startDate || h.date).startOf('day');
+                    const hEnd = moment(h.endDate || h.date).endOf('day');
+                    return cursor.isBetween(hStart, hEnd, 'day', '[]');
+                });
+                if (match) schoolDayOverlap++;
+            }
+            cursor.add(1, 'day');
+        }
 
         return {
-            ...holiday,
-            isBlocking: overlapDays >= 4
+            name: holidayDateList.map(h => h.name).join(', '),
+            isBlocking: schoolDayOverlap >= overlapThreshold
         };
     };
+
+    // Helper to format holiday range text
+    const formatHolidayRange = (h) => {
+        const start = moment(h.startDate || h.date);
+        const end = moment(h.endDate || h.date);
+        const name = h.name || h.description || 'Agenda Sekolah';
+
+        if (start.isSame(end, 'day')) {
+            return `${start.format('D MMMM YYYY')}: ${name}`;
+        }
+
+        if (start.isSame(end, 'month')) {
+            return `${start.format('D')}-${end.format('D MMMM YYYY')}: ${name}`;
+        }
+
+        return `${start.format('D MMMM')} - ${end.format('D MMMM YYYY')}: ${name}`;
+    };
+
+    // Filtered and sorted holidays for the current semester
+    const semesterHolidays = useMemo(() => {
+        if (!userHolidays || userHolidays.length === 0) return [];
+
+        const years = year.split('/');
+        const startMonth = semester === 'Ganjil' ? 7 : 1; // July or January
+        const endMonth = semester === 'Ganjil' ? 12 : 6; // December or June
+        const startYear = semester === 'Ganjil' ? years[0] : years[1];
+        const endYear = semester === 'Ganjil' ? years[0] : years[1];
+
+        const semStart = moment(`${startYear}-${startMonth}-01`, 'YYYY-M-D').startOf('month');
+        const semEnd = moment(`${endYear}-${endMonth}-01`, 'YYYY-M-D').endOf('month');
+
+        return userHolidays
+            .filter(h => {
+                const hStart = moment(h.startDate || h.date);
+                const hEnd = moment(h.endDate || h.date);
+                return hStart.isSameOrBefore(semEnd) && hEnd.isSameOrAfter(semStart);
+            })
+            .sort((a, b) => moment(a.startDate || a.date).diff(moment(b.startDate || b.date)));
+    }, [userHolidays, semester, year]);
 
     const handleSave = async () => {
         if (!auth.currentUser || !programId) return;
@@ -2118,14 +2236,31 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
     };
 
 
-    const handleExportWord = () => {
+    const handleExportWord = async () => {
+        // Style Dictionary for cleaner HTML strings
+        const S = {
+            border: 'border: 1px solid black;',
+            cell: 'border: 1px solid black; padding: 4px;',
+            header: 'text-align: center; border: 1px solid black; background-color: #f2f2f2;',
+            center: 'text-align: center;',
+            bold: 'font-weight: bold;',
+            font8: 'font-size: 8pt;',
+            font9: 'font-size: 9pt;',
+            font10: 'font-size: 10pt;',
+            font14: 'font-size: 14pt;',
+            none: 'border: none;',
+            full: 'width: 100%; border-collapse: collapse;',
+            bgGreen: 'background-color: #e8f5e9;',
+            bgRed: 'background-color: #ffebee; color: #c62828;',
+        };
+
         // Build Header for Months
         let monthHeader = '';
         let weekHeader = '';
         pekanEfektifSource.forEach(m => {
-            monthHeader += `<th colspan="${m.totalWeeks || 4}" class="text-center">${m.name}</th>`;
+            monthHeader += `<th colspan="${m.totalWeeks || 4}" style="${S.header}">${m.name}</th>`;
             for (let w = 1; w <= (m.totalWeeks || 4); w++) {
-                weekHeader += `<th class="text-center" style="min-width: 25px;">${w}</th>`;
+                weekHeader += `<th style="${S.header} width: 25px;">${w}</th>`;
             }
         });
 
@@ -2142,108 +2277,144 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                     let content = '';
 
                     if (holiday && holiday.isBlocking) {
-                        bgStyle = 'background-color: #ffebee; color: #c62828; font-size: 8pt; writing-mode: vertical-rl; text-orientation: mixed;';
-                        content = holiday.label; // Simpler for word
-                    } else if (val) {
-                        bgStyle = 'background-color: #e8f5e9; font-weight: bold;';
-                        content = val;
+                        bgStyle = S.bgRed;
+                        content = 'L';
+                    } else if (val && val !== '0' && val !== '') {
+                        bgStyle = S.bgGreen;
+                        content = `<strong>${val}</strong>`;
                     }
 
-                    cells += `<td style="${bgStyle} text-align: center;">${content || ''}</td>`;
+                    cells += `<td style="${S.border} ${S.center} ${bgStyle}">${content || ''}</td>`;
                 }
             });
 
             return `
                 <tr>
-                    <td class="text-center">${index + 1}</td>
-                    <td>${row.elemen}</td>
-                    <td>${row.materi}</td>
-                    <td class="text-center">${row.jp}</td>
+                    <td style="${S.cell} ${S.center}">${index + 1}</td>
+                    <td style="${S.cell}">
+                        <div style="font-size: 7pt; color: #555555;">[${row.elemen || '-'}]</div>
+                        <div style="${S.bold}">${row.kd}</div>
+                    </td>
+                    <td style="${S.cell}">${row.materi}</td>
+                    <td style="${S.cell} ${S.center}">${row.jp}</td>
                     ${cells}
                 </tr>
             `;
         }).join('');
 
+        // Prepare Holiday List in 2 Columns
+        let holidayHtml = '';
+        if (semesterHolidays.length > 0) {
+            const midIndex = Math.ceil(semesterHolidays.length / 2);
+            const leftCol = semesterHolidays.slice(0, midIndex);
+            const rightCol = semesterHolidays.slice(midIndex);
+
+            holidayHtml = `
+                <div style="margin-top: 15px; ${S.font9}">
+                    <strong>AGENDA & LIBUR SEKOLAH:</strong><br>
+                    <table border="0" style="${S.full} ${S.none}">
+                        <tr>
+                            <td style="${S.none} width: 50%; vertical-align: top; padding: 0;">
+                                <ul style="margin: 0; padding-left: 20px;">
+                                    ${leftCol.map(h => `<li>${formatHolidayRange(h)}</li>`).join('')}
+                                </ul>
+                            </td>
+                            <td style="${S.none} width: 50%; vertical-align: top; padding: 0;">
+                                <ul style="margin: 0; padding-left: 20px;">
+                                    ${rightCol.map(h => `<li>${formatHolidayRange(h)}</li>`).join('')}
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+        }
+
         const html = `
-            <h1>PROGRAM SEMESTER (PROMES)</h1>
-            <table style="border: none; width: 100%; margin-bottom: 20px;">
-                <tr>
-                    <td style="border: none; width: 150px;">Satuan Pendidikan</td>
-                    <td style="border: none; width: 10px;">:</td>
-                    <td style="border: none;">${userProfile?.school || userProfile?.schoolName || '-'}</td>
-                </tr>
-                <tr>
-                    <td style="border: none;">Mata Pelajaran</td>
-                    <td style="border: none;">:</td>
-                    <td style="border: none;">${subject}</td>
-                </tr>
-                <tr>
-                    <td style="border: none;">Kelas / Semester</td>
-                    <td style="border: none;">:</td>
-                    <td style="border: none;">${grade} / ${semester}</td>
-                </tr>
-                 <tr>
-                    <td style="border: none;">Tahun Ajaran</td>
-                    <td style="border: none;">:</td>
-                    <td style="border: none;">${year}</td>
-                </tr>
-            </table>
+            <div style="font-family: Arial, sans-serif;">
+                <h1 style="text-align: center; ${S.font14} margin-bottom: 20px;">PROGRAM SEMESTER (PROMES)</h1>
+                
+                <table border="0" style="${S.full} ${S.none} margin-bottom: 15px; ${S.font10}">
+                    <tr>
+                        <td style="width: 150px; ${S.none}">Satuan Pendidikan</td>
+                        <td style="width: 10px; ${S.none}">:</td>
+                        <td style="${S.none}">${userProfile?.school || userProfile?.schoolName || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="${S.none}">Mata Pelajaran</td>
+                        <td style="${S.none}">:</td>
+                        <td style="${S.none}">${subject}</td>
+                    </tr>
+                    <tr>
+                        <td style="${S.none}">Kelas / Semester</td>
+                        <td style="${S.none}">:</td>
+                        <td style="${S.none}">${grade} / ${semester}</td>
+                    </tr>
+                    <tr>
+                        <td style="${S.none}">Tahun Ajaran</td>
+                        <td style="${S.none}">:</td>
+                        <td style="${S.none}">${year}</td>
+                    </tr>
+                </table>
 
-            <table style="font-size: 9pt;">
-                <thead>
-                    <tr>
-                        <th rowspan="2" style="width: 30px;">No</th>
-                        <th rowspan="2" style="width: 150px;">Elemen</th>
-                        <th rowspan="2" style="width: 250px;">Lingkup Materi</th>
-                        <th rowspan="2" style="width: 40px;">JP</th>
-                        ${monthHeader}
-                    </tr>
-                    <tr>
-                        ${weekHeader}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
-            </table>
+                <table border="1" cellspacing="0" cellpadding="4" style="${S.full} ${S.font8} ${S.border}">
+                    <thead>
+                        <tr style="background-color: #f2f2f2;">
+                            <th rowspan="2" align="center" style="width: 40px; ${S.border}">No</th>
+                            <th rowspan="2" align="left" style="width: 250px; ${S.border}">Tujuan Pembelajaran</th>
+                            <th rowspan="2" align="left" style="width: 180px; ${S.border}">Lingkup Materi</th>
+                            <th rowspan="2" align="center" style="width: 40px; ${S.border}">JP</th>
+                            ${monthHeader}
+                        </tr>
+                        <tr style="background-color: #f2f2f2;">
+                            ${weekHeader}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
 
-            <div style="margin-top: 20px; font-size: 9pt;">
-                <strong>KETERANGAN WARNA:</strong>
-                <table style="width: auto; border: none; margin-top: 5px;">
+                <div style="margin-top: 15px; ${S.font9}">
+                    <strong>KETERANGAN WARNA:</strong><br>
+                    <table border="0" style="width: auto; margin-top: 5px; margin-bottom: 10px;">
+                        <tr>
+                            <td style="width: 25px; height: 15px; ${S.bgGreen} ${S.border}">&nbsp;</td>
+                            <td style="padding-left: 10px; ${S.none}">Belajar Efektif / Tatap Muka (Angka = Jam Pelajaran)</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 25px; height: 15px; ${S.bgRed} ${S.border} ${S.center}">L</td>
+                            <td style="padding-left: 10px; ${S.none}">Libur Resmi / Agenda Sekolah</td>
+                        </tr>
+                    </table>
+                </div>
+
+                ${holidayHtml}
+
+                <table border="0" style="${S.full} margin-top: 40px; ${S.none} ${S.font10}">
                     <tr>
-                        <td style="width: 30px; background-color: #e8f5e9; border: 1px solid black;">&nbsp;</td>
-                        <td style="border: none; padding-left: 10px;">Belajar Efektif / Tatap Muka</td>
-                    </tr>
-                    <tr>
-                        <td style="width: 30px; background-color: #ffebee; border: 1px solid black;">&nbsp;</td>
-                        <td style="border: none; padding-left: 10px;">Libur Resmi / Agenda Sekolah</td>
+                        <td align="center" style="width: 50%; ${S.none} vertical-align: top;">
+                            Mengetahui,<br>
+                            Kepala Sekolah<br><br><br><br><br>
+                            <strong><u>${userProfile?.principalName || '( ..................................... )'}</u></strong><br>
+                            NIP. ${userProfile?.principalNip || '.....................................'}
+                        </td>
+                        <td align="center" style="width: 50%; ${S.none} vertical-align: top;">
+                            ${signingLocation || userProfile?.school?.split(' ')[1] || 'Indonesia'}, ${moment().format('DD MMMM YYYY')}<br>
+                            Guru Mata Pelajaran<br><br><br><br><br>
+                            <strong><u>${userProfile?.name || '( ..................................... )'}</u></strong><br>
+                            NIP. ${userProfile?.nip || '.....................................'}
+                        </td>
                     </tr>
                 </table>
             </div>
-
-            <table class="signature-table">
-                <tr>
-                    <td>
-                        Mengetahui,<br>
-                        Kepala Sekolah<br>
-                        <div class="signature-name">${userProfile?.principalName || '( ..................................... )'}</div>
-                        <div>NIP. ${userProfile?.principalNip || '.....................................'}</div>
-                    </td>
-                    <td>
-                        ${signingLocation || userProfile?.school?.split(' ')[1] || 'Indonesia'}, ${moment().format('DD MMMM YYYY')}<br>
-                        Guru Mata Pelajaran<br>
-                        <div class="signature-name">${userProfile?.name || '( ..................................... )'}</div>
-                        <div>NIP. ${userProfile?.nip || '.....................................'}</div>
-                    </td>
-                </tr>
-            </table>
         `;
 
         const fileName = `Promes-${subject}-${grade}-${year.replace('/', '-')}.docx`;
         exportToDocx(html, fileName, { orientation: 'landscape' });
     };
 
-    const handleExportExcel = () => {
+    const handleExportExcel = async () => {
         try {
             // 1. Header Section
             const headerInfo = [
@@ -2282,6 +2453,8 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
             });
 
             const finalData = [...headerInfo, headers1, headers2, ...rows];
+            const XLSX = await import('xlsx');
+            const { saveAs } = await import('file-saver');
             const ws = XLSX.utils.aoa_to_sheet(finalData);
 
             // 4. Merge monthly header cells (offset by headerInfo length)
@@ -2321,19 +2494,36 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
         }
     };
 
-    const handleExportPDF = () => {
+    const handleExportPDF = async () => {
         try {
+            const { default: jsPDF } = await import('jspdf');
+            const { default: autoTable } = await import('jspdf-autotable');
             const doc = new jsPDF('l', 'mm', 'a4'); // Landscape
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
-            const margins = { top: 20, right: 10, bottom: 20, left: 15 };
+            const margins = { top: 15, right: 15, bottom: 20, left: 15 };
 
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
+            // Shared Styles for PDF
+            const S = {
+                title: { size: 14, font: 'helvetica', style: 'bold' },
+                normal: { size: 10, font: 'helvetica', style: 'normal' },
+                small: { size: 8, font: 'helvetica', style: 'normal' },
+                vsmall: { size: 6.5, font: 'helvetica', style: 'normal' },
+                tableHead: { fillColor: [37, 99, 235], halign: 'center', lineWidth: 0.1, lineColor: [200, 200, 200] },
+                tableBody: { fontSize: 7, cellPadding: 1, lineWidth: 0.1, lineColor: [200, 200, 200] },
+                holidayRow: { fillColor: [255, 235, 238], textColor: [198, 40, 40], halign: 'center' },
+                activeRow: { fillColor: [232, 245, 233], fontStyle: 'bold', halign: 'center' },
+                center: { halign: 'center' },
+                middle: { valign: 'middle' },
+                left: { halign: 'left' }
+            };
+
+            doc.setFontSize(S.title.size);
+            doc.setFont(S.title.font, S.title.style);
             doc.text('PROGRAM SEMESTER (PROMES)', pageWidth / 2, margins.top, { align: 'center' });
 
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(S.normal.size);
+            doc.setFont(S.normal.font, S.normal.style);
             let yPos = margins.top + 10;
             const lineHeight = 5;
 
@@ -2349,17 +2539,17 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
 
             // Base columns
             const baseHeader = [
-                { content: 'No', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
-                { content: 'Tujuan Pembelajaran', rowSpan: 2, styles: { halign: 'left', valign: 'middle' } },
-                { content: 'Lingkup Materi', rowSpan: 2, styles: { halign: 'left', valign: 'middle' } },
-                { content: 'JP', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } }
+                { content: 'No', rowSpan: 2, styles: { ...S.center, ...S.middle } },
+                { content: 'Tujuan Pembelajaran', rowSpan: 2, styles: { ...S.left, ...S.middle } },
+                { content: 'Lingkup Materi', rowSpan: 2, styles: { ...S.left, ...S.middle } },
+                { content: 'JP', rowSpan: 2, styles: { ...S.center, ...S.middle } }
             ];
 
             // Generated columns
             pekanEfektifSource.forEach(m => {
-                monthHeaders.push({ content: m.name, colSpan: m.totalWeeks || 4, styles: { halign: 'center' } });
+                monthHeaders.push({ content: m.name, colSpan: m.totalWeeks || 4, styles: S.center });
                 for (let w = 1; w <= (m.totalWeeks || 4); w++) {
-                    weekHeaders.push({ content: w.toString(), styles: { halign: 'center', cellWidth: 6 } });
+                    weekHeaders.push({ content: w.toString(), styles: S.center });
                 }
             });
 
@@ -2367,7 +2557,10 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
             const body = protaSource.map((row, index) => {
                 const rowData = [
                     index + 1,
-                    row.kd,
+                    {
+                        content: `${row.elemen ? `[${row.elemen}]\n` : ''}${row.kd}`,
+                        styles: { ...S.left, fontSize: S.vsmall.size }
+                    },
                     row.materi,
                     row.jp
                 ];
@@ -2379,14 +2572,14 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                         const val = promesData[cellKey];
 
                         let cellContent = '';
-                        let cellStyle = { halign: 'center' };
+                        let cellStyle = S.center;
 
                         if (holiday && holiday.isBlocking) {
-                            cellContent = 'L'; // Libur
-                            cellStyle = { fillColor: [255, 235, 238], textColor: [198, 40, 40] };
-                        } else if (val) {
-                            cellContent = 'X'; // Ada Jadwal
-                            cellStyle = { fillColor: [232, 245, 233], fontStyle: 'bold' };
+                            cellContent = 'L';
+                            cellStyle = S.holidayRow;
+                        } else if (val && val !== '0' && val !== '') {
+                            cellContent = val.toString();
+                            cellStyle = S.activeRow;
                         }
 
                         rowData.push({ content: cellContent, styles: cellStyle });
@@ -2403,43 +2596,78 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                 ],
                 body: body,
                 theme: 'grid',
-                headStyles: { fillColor: [37, 99, 235], halign: 'center', lineWidth: 0.1, lineColor: [200, 200, 200] },
-                styles: { fontSize: 7, cellPadding: 1, lineWidth: 0.1, lineColor: [200, 200, 200] },
+                headStyles: S.tableHead,
+                styles: S.tableBody,
                 margin: margins,
+                tableWidth: pageWidth - margins.left - margins.right,
                 columnStyles: {
                     0: { cellWidth: 8 },
-                    1: { cellWidth: 20 }, // KD
-                    2: { cellWidth: 35 }, // Materi
-                    3: { cellWidth: 8 }   // JP
-                    // Dynamic columns for weeks will use default or calculated width
+                    1: { cellWidth: 45 },
+                    2: { cellWidth: 35 },
+                    3: { cellWidth: 8 }
                 }
             });
 
-            // Signature Section
-            let finalY = doc.lastAutoTable.finalY + 20;
-            if (finalY > pageHeight - 50) {
-                doc.addPage();
-                finalY = margins.top;
+            // 1. Agenda & Libur Sekolah (Holidays)
+            let currentY = doc.lastAutoTable.finalY + 10;
+
+            if (semesterHolidays.length > 0) {
+                if (currentY > pageHeight - 40) {
+                    doc.addPage();
+                    currentY = margins.top + 5;
+                }
+
+                doc.setFont(S.normal.font, S.title.style);
+                doc.setFontSize(9);
+                doc.text('AGENDA & LIBUR SEKOLAH:', margins.left, currentY);
+                currentY += 5;
+
+                doc.setFont(S.normal.font, S.normal.style);
+                doc.setFontSize(S.small.size);
+
+                const colWidth = (pageWidth - margins.left - margins.right) / 2;
+                const midIndex = Math.ceil(semesterHolidays.length / 2);
+                let listBottomY = currentY;
+
+                semesterHolidays.forEach((h, idx) => {
+                    const col = idx < midIndex ? 0 : 1;
+                    const row = idx < midIndex ? idx : idx - midIndex;
+                    const x = margins.left + (col * colWidth);
+                    const y = currentY + (row * 4);
+
+                    doc.text(`• ${formatHolidayRange(h)}`, x + 2, y);
+                    if (y + 4 > listBottomY) listBottomY = y + 4;
+                });
+
+                currentY = listBottomY + 15;
+            } else {
+                currentY += 10;
             }
 
-            const leftColX = margins.left + 15;
+            // 2. Signature Section
+            if (currentY > pageHeight - 50) {
+                doc.addPage();
+                currentY = margins.top + 15;
+            }
+
+            const leftColX = margins.left + 50;
             const rightColX = pageWidth - margins.right - 50;
 
-            doc.setFontSize(10);
-            doc.text('Mengetahui,', leftColX, finalY, { align: 'center' });
-            doc.text('Kepala Sekolah', leftColX, finalY + 5, { align: 'center' });
-            doc.setFont('helvetica', 'bold');
-            doc.text(userProfile?.principalName || '( ..................................... )', leftColX, finalY + 30, { align: 'center' });
-            doc.setFont('helvetica', 'normal');
-            doc.text(`NIP. ${userProfile?.principalNip || '.....................................'}`, leftColX, finalY + 35, { align: 'center' });
+            doc.setFontSize(S.normal.size);
+            doc.text('Mengetahui,', leftColX, currentY, S.center);
+            doc.text('Kepala Sekolah', leftColX, currentY + 5, S.center);
+            doc.setFont(S.normal.font, S.title.style);
+            doc.text(userProfile?.principalName || '( ..................................... )', leftColX, currentY + 30, S.center);
+            doc.setFont(S.normal.font, S.normal.style);
+            doc.text(`NIP. ${userProfile?.principalNip || '.....................................'}`, leftColX, currentY + 35, S.center);
 
             const location = signingLocation || userProfile?.school?.split(' ')[1] || 'Jakarta';
-            doc.text(`${location}, ${moment().format('DD MMMM YYYY')}`, rightColX, finalY, { align: 'center' });
-            doc.text('Guru Mata Pelajaran', rightColX, finalY + 5, { align: 'center' });
-            doc.setFont('helvetica', 'bold');
-            doc.text(userProfile?.name || '( ..................................... )', rightColX, finalY + 30, { align: 'center' });
-            doc.setFont('helvetica', 'normal');
-            doc.text(`NIP. ${userProfile?.nip || '.....................................'}`, rightColX, finalY + 35, { align: 'center' });
+            doc.text(`${location}, ${moment().format('DD MMMM YYYY')}`, rightColX, currentY, S.center);
+            doc.text('Guru Mata Pelajaran', rightColX, currentY + 5, S.center);
+            doc.setFont(S.normal.font, S.title.style);
+            doc.text(userProfile?.name || '( ..................................... )', rightColX, currentY + 30, S.center);
+            doc.setFont(S.normal.font, S.normal.style);
+            doc.text(`NIP. ${userProfile?.nip || '.....................................'}`, rightColX, currentY + 35, S.center);
 
 
             const fileName = `Promes-${subject}-${grade}-${year.replace('/', '-')}.pdf`;
@@ -2774,7 +3002,7 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                                                         title={holiday ? holiday.name : isManualNonEffective ? 'Pekan Tidak Efektif (Manual)' : ''}
                                                         className={`border border-gray-200 dark:border-gray-700 p-0 hover:bg-gray-50 group relative ${cellBg}`}
                                                     >
-                                                        {!isBlockingHoliday ? (
+                                                        {(!isBlockingHoliday && !isManualNonEffective) ? (
                                                             <input
                                                                 id={`promes-input-${index}-${mIndex}-${wIndex}`}
                                                                 type="text"
@@ -2799,28 +3027,28 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                 </div>
             </div>
 
-            {/* Keterangan Kode Warna Pekan Tidak Efektif */}
-            <div className="mt-4 mb-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 text-xs">
-                <h4 className="font-bold mb-2 text-gray-700 dark:text-gray-300">Keterangan Kode Warna Pekan Tidak Efektif:</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-red-50 dark:bg-red-900/40 border border-gray-300 rounded opacity-80"></div>
-                        <span className="text-gray-600 dark:text-gray-400">Libur Semester</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-purple-50 dark:bg-purple-900/40 border border-gray-300 rounded opacity-80"></div>
-                        <span className="text-gray-600 dark:text-gray-400">Penilaian Tengah Semester (PTS)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-orange-100 dark:bg-orange-900/40 border border-gray-300 rounded opacity-80"></div>
-                        <span className="text-gray-600 dark:text-gray-400">Penilaian Akhir Semester (PAS/PAT)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-blue-50 dark:bg-blue-900/30 border border-gray-300 rounded opacity-80"></div>
-                        <span className="text-gray-600 dark:text-gray-400">Kegiatan Sekolah Lainnya</span>
-                    </div>
+            {/* Daftar Agenda/Libur Semester */}
+            {semesterHolidays.length > 0 && (
+                <div className="mt-6 mb-8 p-5 bg-white dark:bg-gray-800 rounded-xl border-2 border-blue-100 dark:border-blue-900/50 shadow-sm print:shadow-none print:border-gray-300">
+                    <h4 className="text-sm font-bold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+                        <Calendar size={18} className="text-blue-600" />
+                        Agenda & Libur Sekolah Semester {semester} TA {year}
+                    </h4>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                        {semesterHolidays.map((h, i) => (
+                            <li key={i} className="text-xs text-gray-700 dark:text-gray-300 flex items-start gap-2 border-b border-gray-50 dark:border-gray-700/50 pb-1">
+                                <span className="font-bold whitespace-nowrap text-blue-700 dark:text-blue-400">
+                                    {moment(h.startDate || h.date).isSame(moment(h.endDate || h.date), 'day')
+                                        ? moment(h.startDate || h.date).format('D MMMM YYYY')
+                                        : `${moment(h.startDate || h.date).format('D')}-${moment(h.endDate || h.date).format('D MMMM YYYY')}`
+                                    }:
+                                </span>
+                                <span>{h.name}</span>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-            </div>
+            )}
 
             <SignatureSection userProfile={userProfile} signingLocation={signingLocation} />
 
@@ -2864,7 +3092,7 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
                     {loading ? 'Menyimpan...' : 'Simpan Promes'}
                 </button>
             </div>
-        </div>
+        </div >
     );
 };
 
@@ -3027,8 +3255,10 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
     };
 
     // Export PDF Logic for ATP
-    const handleExportPDFATP = () => {
+    const handleExportPDFATP = async () => {
         try {
+            const { default: jsPDF } = await import('jspdf');
+            const { default: autoTable } = await import('jspdf-autotable');
             const doc = new jsPDF({ orientation: 'landscape' });
 
             doc.setFontSize(14);

@@ -1,5 +1,4 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -12,104 +11,76 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Defensive ownership check (prevents error if userId field is missing)
     function isDocOwner() {
-      return isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid);
+      return isAuthenticated() && (
+        resource == null || 
+        resource.data.get('userId', '') == request.auth.uid
+      );
     }
 
+    // Defensive writing check for data being sent
     function isWritingOwner() {
-      return isAuthenticated() && (request.resource == null || request.resource.data.userId == request.auth.uid);
+      return isAuthenticated() && (
+        request.resource == null || 
+        request.resource.data.get('userId', '') == request.auth.uid
+      );
     }
 
-    // --- Specific Collections ---
-
-    // Users can only read and write their own document
+    // --- 1. Identity & Communication ---
     match /users/{userId} {
       allow read, write: if isOwner(userId);
     }
-
     match /chats/{userId} {
       allow read, write: if isOwner(userId);
     }
 
+    // --- 2. Academic Programs (Complex Access) ---
     match /teachingPrograms/{docId} {
-      // Support both docId based match and userId field based query
-      allow read: if isAuthenticated() && (docId.matches(request.auth.uid + '_.*') || resource.data.userId == request.auth.uid);
-      allow write: if isAuthenticated() && (docId.matches(request.auth.uid + '_.*') || request.resource.data.userId == request.auth.uid);
+      allow read: if isAuthenticated() && (
+        docId.matches(request.auth.uid + '_.*') || 
+        resource.data.get('userId', '') == request.auth.uid
+      );
+      allow write: if isAuthenticated() && (
+        docId.matches(request.auth.uid + '_.*') || 
+        request.resource.data.get('userId', '') == request.auth.uid
+      );
     }
 
-    match /classes/{docId} {
-      allow read, write: if isDocOwner() && isWritingOwner();
-    }
+    // --- 3. Master Data & Journals ---
+    match /classes/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /subjects/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /holidays/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /teachingSchedules/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /schedules/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /teachingJournals/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
 
-    match /teachingJournals/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
+    // --- 4. Students & Performance ---
+    match /students/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /legendStudents/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /attendance/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /absensi/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /grades/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /studentTasks/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /studentNotes/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /kktpAssessments/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
 
-    match /teachingSchedules/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
+    // --- 5. Content & Conduct ---
+    match /lessonPlans/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /quizzes/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /handouts/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /lkpd_history/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /infractions/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /infraction_types/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /class_agreements/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /studentAppreciations/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
 
-    match /students/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
-
-    match /legendStudents/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
-
-    match /lessonPlans/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
-
-    match /grades/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
-
-    match /attendance/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
-
-    match /infractions/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
-
-    match /holidays/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
-
-    match /subjects/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
-
-    // Supporting both old and new collection names if any
-    match /absensi/{docId} {
-      allow read: if isDocOwner();
-      allow write: if isWritingOwner();
-    }
-
-    match /studentNotes/{docId} {
-      allow read, write: if isDocOwner() && isWritingOwner();
-    }
-
-    match /kktpAssessments/{docId} {
-      allow read, write: if isDocOwner() && isWritingOwner();
-    }
-
-    // --- Catch-all Catch for other collections secured by userId ---
+    // --- 6. Safety Catch-all ---
     match /{collection}/{docId} {
-      allow read: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid);
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read: if isDocOwner();
+      allow create: if isWritingOwner();
+      allow update, delete: if isAuthenticated() && 
+        resource.data.get('userId', '') == request.auth.uid;
     }
   }
 }

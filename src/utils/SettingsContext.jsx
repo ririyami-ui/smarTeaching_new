@@ -7,14 +7,17 @@ const SettingsContext = createContext();
 export const useSettings = () => useContext(SettingsContext);
 
 export const SettingsProvider = ({ children }) => {
-    const [activeSemester, setActiveSemester] = useState('Ganjil');
-    const [academicYear, setAcademicYear] = useState('');
-    const [geminiModel, setGeminiModel] = useState('gemini-3-flash-preview'); // Default fallback
-    const [userProfile, setUserProfile] = useState(null); // Full user profile
-    const [academicWeight, setAcademicWeight] = useState(50);
-    const [attitudeWeight, setAttitudeWeight] = useState(50);
-    const [scheduleNotificationsEnabled, setScheduleNotificationsEnabled] = useState(true);
-    const [loadingSettings, setLoadingSettings] = useState(true);
+    const [settings, setSettings] = useState({
+        activeSemester: 'Ganjil',
+        academicYear: '',
+        geminiModel: 'gemini-3-flash-preview',
+        academicWeight: 50,
+        attitudeWeight: 50,
+        scheduleNotificationsEnabled: true,
+        schoolDays: 6, // 5 or 6 school days per week
+        userProfile: null,
+        loadingSettings: true
+    });
 
     useEffect(() => {
         let unsubscribeSnapshot = null;
@@ -31,28 +34,36 @@ export const SettingsProvider = ({ children }) => {
 
                 // Use onSnapshot for real-time updates when user changes settings in Profile
                 unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        if (data.activeSemester) setActiveSemester(data.activeSemester);
-                        if (data.academicYear) setAcademicYear(data.academicYear);
-                        if (data.geminiModel) setGeminiModel(data.geminiModel);
-                        if (data.academicWeight !== undefined) setAcademicWeight(data.academicWeight);
-                        if (data.attitudeWeight !== undefined) setAttitudeWeight(data.attitudeWeight);
-                        if (data.scheduleNotificationsEnabled !== undefined) setScheduleNotificationsEnabled(data.scheduleNotificationsEnabled);
-                        setUserProfile(data); // Store full profile
+                    const data = docSnap.exists() ? docSnap.data() : {};
+
+                    // Sync with localStorage for non-React utilities (gemini.js)
+                    if (data.geminiModel) {
+                        localStorage.setItem('GEMINI_MODEL', data.geminiModel);
                     }
-                    setLoadingSettings(false);
+
+                    setSettings(prev => ({
+                        ...prev,
+                        activeSemester: data.activeSemester || prev.activeSemester,
+                        academicYear: data.academicYear || prev.academicYear,
+                        geminiModel: data.geminiModel || prev.geminiModel,
+                        academicWeight: data.academicWeight !== undefined ? data.academicWeight : prev.academicWeight,
+                        attitudeWeight: data.attitudeWeight !== undefined ? data.attitudeWeight : prev.attitudeWeight,
+                        scheduleNotificationsEnabled: data.scheduleNotificationsEnabled !== undefined ? data.scheduleNotificationsEnabled : prev.scheduleNotificationsEnabled,
+                        schoolDays: data.schoolDays !== undefined ? data.schoolDays : prev.schoolDays,
+                        userProfile: docSnap.exists() ? data : prev.userProfile,
+                        loadingSettings: false
+                    }));
                 }, (error) => {
                     console.error("Settings snapshot error:", error);
-                    setLoadingSettings(false);
+                    setSettings(prev => ({ ...prev, loadingSettings: false }));
                 });
             } else {
-                // IMPORTANT: Unsubscribe when user logs out to prevent permission-denied errors
+                // IMPORTANT: Unsubscribe when user logs out
                 if (unsubscribeSnapshot) {
                     unsubscribeSnapshot();
                     unsubscribeSnapshot = null;
                 }
-                setLoadingSettings(false);
+                setSettings(prev => ({ ...prev, userProfile: null, loadingSettings: false }));
             }
         });
 
@@ -62,16 +73,20 @@ export const SettingsProvider = ({ children }) => {
         };
     }, []);
 
-    const value = {
-        activeSemester,
-        academicYear,
-        geminiModel,
-        academicWeight,
-        attitudeWeight,
-        scheduleNotificationsEnabled,
-        userProfile: { activeSemester, academicYear, geminiModel, academicWeight, attitudeWeight, scheduleNotificationsEnabled, ...userProfile }, // Expose full profile
-        loadingSettings
-    };
+    const value = React.useMemo(() => ({
+        ...settings,
+        // userProfile construction remains compatible with previous spread
+        userProfile: settings.userProfile ? {
+            activeSemester: settings.activeSemester,
+            academicYear: settings.academicYear,
+            geminiModel: settings.geminiModel,
+            academicWeight: settings.academicWeight,
+            attitudeWeight: settings.attitudeWeight,
+            schoolDays: settings.schoolDays,
+            scheduleNotificationsEnabled: settings.scheduleNotificationsEnabled,
+            ...settings.userProfile
+        } : null
+    }), [settings]);
 
     return (
         <SettingsContext.Provider value={value}>

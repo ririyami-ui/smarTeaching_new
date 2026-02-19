@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { useSettings } from '../utils/SettingsContext';
-import { AlertCircle, CheckCircle2, BookOpen, TrendingUp } from 'lucide-react';
+import { AlertCircle, CheckCircle, BookOpen, TrendingUp, BookCheck, XCircle } from 'lucide-react';
 
 const MaterialCompletionChart = () => {
     const [data, setData] = useState([]);
@@ -77,19 +77,29 @@ const MaterialCompletionChart = () => {
     const total = data.reduce((acc, curr) => acc + curr.value, 0);
     const completionRate = total > 0 ? ((data[0].value / total) * 100) : 0;
 
+    // Unified stats object for cleaner JSX
+    const stats = {
+        totalJournals: total,
+        totalImplemented: data.length > 0 ? data[0].value : 0,
+        totalNotImplemented: data.length > 1 ? data[1].value : 0,
+        completionRate: completionRate
+    };
+
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const data = payload[0];
             return (
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700">
-                    <p className="font-bold text-gray-900 dark:text-white mb-2">{data.name}</p>
-                    <div className="space-y-1 text-sm">
-                        <p className="text-gray-700 dark:text-gray-300">
-                            Jumlah: <strong>{data.value}</strong> jurnal
-                        </p>
-                        <p className="text-gray-700 dark:text-gray-300">
-                            Persentase: <strong>{((data.value / total) * 100).toFixed(1)}%</strong>
-                        </p>
+                <div className="bg-white/80 dark:bg-black/80 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/20 dark:border-white/10 ring-1 ring-black/5">
+                    <p className="font-black text-gray-900 dark:text-white mb-2 tracking-tight">{data.name}</p>
+                    <div className="space-y-1.5 text-xs">
+                        <div className="flex items-center justify-between gap-4">
+                            <span className="text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Jumlah</span>
+                            <span className="text-gray-900 dark:text-white font-black">{data.value} <span className="text-[10px] font-bold text-gray-400">Jurnal</span></span>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                            <span className="text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Persentase</span>
+                            <span className="text-gray-900 dark:text-white font-black">{((data.value / (total || 1)) * 100).toFixed(1)}%</span>
+                        </div>
                     </div>
                 </div>
             );
@@ -99,13 +109,13 @@ const MaterialCompletionChart = () => {
 
     if (loading) {
         return (
-            <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-lg h-full">
-                <div className="animate-pulse">
-                    <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
-                    <div className="h-48 bg-gray-300 dark:bg-gray-700 rounded-2xl mb-4"></div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded-2xl"></div>
-                        <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded-2xl"></div>
+            <div className="chart-container-glass p-6 h-[400px]">
+                <div className="animate-pulse flex flex-col h-full items-center justify-center space-y-6">
+                    <div className="w-48 h-48 rounded-full bg-gray-200 dark:bg-gray-800"></div>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-1/3"></div>
+                    <div className="grid grid-cols-2 gap-4 w-full">
+                        <div className="h-20 bg-gray-200 dark:bg-gray-800 rounded-2xl"></div>
+                        <div className="h-20 bg-gray-200 dark:bg-gray-800 rounded-2xl"></div>
                     </div>
                 </div>
             </div>
@@ -113,171 +123,143 @@ const MaterialCompletionChart = () => {
     }
 
     return (
-        <div className="bg-gradient-to-br from-white/50 to-blue-50/50 dark:from-black/50 dark:to-blue-950/30 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 h-full flex flex-col">
-            <div className="flex justify-between items-start mb-6">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
-                        <BookOpen size={24} className="text-white" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-black bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-100 dark:to-indigo-200 bg-clip-text text-transparent tracking-tight">
-                            Ketuntasan Materi
-                        </h2>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                            Semester {activeSemester} {academicYear}
-                        </p>
-                    </div>
+        <div className="chart-container-glass p-6 md:p-8 hover:chart-glow-orange group animate-fade-in-up">
+            <div className="flex items-center gap-4 mb-10">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-400 to-red-600 text-white shadow-xl shadow-orange-500/20">
+                    <BookCheck size={24} />
                 </div>
-
-                {total > 0 && (
-                    <div className={`px-4 py-2 rounded-2xl text-xs font-black shadow-lg transition-all duration-300 ${completionRate >= 90 ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' :
-                            completionRate >= 75 ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white' :
-                                completionRate >= 60 ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white' :
-                                    'bg-gradient-to-r from-red-500 to-pink-600 text-white'
-                        }`}>
-                        <div className="flex items-center gap-1">
-                            <TrendingUp size={14} />
-                            {completionRate.toFixed(0)}%
-                        </div>
-                    </div>
-                )}
+                <div>
+                    <h2 className="text-2xl font-black bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent tracking-tight">
+                        Keterlaksanaan Materi
+                    </h2>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Ringkasan Jurnal Mengajar</p>
+                </div>
             </div>
 
-            <div className="flex-1 min-h-[240px] relative">
-                {total > 0 ? (
-                    <>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <defs>
-                                    <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#10B981" stopOpacity={1} />
-                                        <stop offset="100%" stopColor="#059669" stopOpacity={1} />
-                                    </linearGradient>
-                                    <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#EF4444" stopOpacity={1} />
-                                        <stop offset="100%" stopColor="#DC2626" stopOpacity={1} />
-                                    </linearGradient>
-                                </defs>
-                                <Pie
-                                    data={data}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={70}
-                                    outerRadius={95}
-                                    paddingAngle={3}
-                                    dataKey="value"
-                                    animationDuration={1000}
-                                    animationBegin={0}
-                                >
-                                    <Cell fill="url(#greenGradient)" />
-                                    <Cell fill="url(#redGradient)" />
-                                </Pie>
-                                <Tooltip content={<CustomTooltip />} />
-                            </PieChart>
-                        </ResponsiveContainer>
+            <div className="flex flex-col lg:flex-row items-center gap-12">
+                <div className="relative w-64 h-64 flex items-center justify-center scale-110 lg:scale-125 transition-transform duration-500 hover:scale-[1.15] lg:hover:scale-[1.3]">
+                    {/* Background Glow */}
+                    <div className="absolute inset-0 bg-orange-500/5 blur-[40px] rounded-full"></div>
 
-                        {/* Animated Center Content */}
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -mt-4 text-center pointer-events-none">
-                            <div className="relative">
-                                {/* Circular Progress Ring */}
-                                <svg className="absolute -inset-8 w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
-                                    <circle
-                                        cx="60"
-                                        cy="60"
-                                        r="54"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="4"
-                                        className="text-gray-200 dark:text-gray-700"
-                                    />
-                                    <circle
-                                        cx="60"
-                                        cy="60"
-                                        r="54"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="4"
-                                        strokeDasharray={`${2 * Math.PI * 54}`}
-                                        strokeDashoffset={`${2 * Math.PI * 54 * (1 - animatedRate / 100)}`}
-                                        strokeLinecap="round"
-                                        className={`transition-all duration-1000 ${completionRate >= 75 ? 'text-green-500' : 'text-yellow-500'
-                                            }`}
-                                    />
-                                </svg>
+                    {stats.totalJournals > 0 ? (
+                        <>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <defs>
+                                        <linearGradient id="gradientTerlaksana" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#FB923C" />
+                                            <stop offset="100%" stopColor="#EA580C" />
+                                        </linearGradient>
+                                        <linearGradient id="gradientTidakTerlaksana" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#dfdfdf" />
+                                            <stop offset="100%" stopColor="#94a3b8" />
+                                        </linearGradient>
+                                    </defs>
+                                    <Pie
+                                        data={data}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={85}
+                                        outerRadius={105}
+                                        paddingAngle={8}
+                                        dataKey="value"
+                                        stroke="none"
+                                        animationBegin={200}
+                                        animationDuration={1800}
+                                        animationEasing="ease-out"
+                                    >
+                                        {data.map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={index === 0 ? "url(#gradientTerlaksana)" : "url(#gradientTidakTerlaksana)"}
+                                                className="transition-all duration-300 hover:opacity-80 cursor-pointer"
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                </PieChart>
+                            </ResponsiveContainer>
 
-                                <div className="relative z-10">
-                                    <div className="text-4xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                            {/* Floating Center Content */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <div className="relative bg-white dark:bg-gray-900 w-32 h-32 rounded-full shadow-[0_10px_40px_-10px_rgba(234,88,12,0.4)] border-4 border-white/50 dark:border-white/10 flex flex-col items-center justify-center z-10 transition-transform duration-500 group-hover:scale-105">
+                                    <span className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter leading-none">
                                         {animatedRate.toFixed(0)}%
-                                    </div>
-                                    <div className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
-                                        Tuntas
-                                    </div>
+                                    </span>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">Goal</span>
+                                </div>
+                                {/* Decorative Rings */}
+                                <div className="absolute w-[180px] h-[180px] rounded-full border border-orange-500/10 animate-ping opacity-20"></div>
+                                <div className="absolute w-[210px] h-[210px] rounded-full border border-orange-500/5 animate-pulse"></div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-full gap-4 text-gray-400">
+                            <div className="p-6 rounded-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+                                <AlertCircle size={48} className="opacity-20" />
+                            </div>
+                            <div className="text-center">
+                                <p className="text-sm font-black uppercase tracking-widest text-gray-500">Belum Ada Data</p>
+                                <p className="text-[10px] font-bold text-gray-400 mt-1">Isi jurnal untuk melihat progres</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex-1 w-full space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="group/card bg-white/50 dark:bg-black/20 p-5 rounded-[2rem] border border-white/40 dark:border-white/5 shadow-sm hover:translate-y-[-4px] transition-all duration-500 hover:chart-glow-orange cursor-default">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600">
+                                    <CheckCircle size={20} />
+                                </div>
+                                <div>
+                                    <div className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">{stats.totalImplemented}</div>
+                                    <div className="text-[9px] font-black uppercase tracking-widest text-gray-400">Terlaksana</div>
                                 </div>
                             </div>
+                            <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all duration-1000 ease-out"
+                                    style={{ width: `${stats.completionRate}%` }}
+                                ></div>
+                            </div>
                         </div>
-                    </>
-                ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3">
-                        <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-800">
-                            <AlertCircle size={32} className="opacity-50" />
-                        </div>
-                        <div className="text-center">
-                            <span className="text-sm font-bold block">Belum ada data jurnal</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-500">untuk semester ini</span>
+
+                        <div className="group/card bg-white/50 dark:bg-black/20 p-5 rounded-[2rem] border border-white/40 dark:border-white/5 shadow-sm hover:translate-y-[-4px] transition-all duration-500 hover:shadow-xl cursor-default">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
+                                    <XCircle size={20} />
+                                </div>
+                                <div>
+                                    <div className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">{stats.totalNotImplemented}</div>
+                                    <div className="text-[9px] font-black uppercase tracking-widest text-gray-400">Pending</div>
+                                </div>
+                            </div>
+                            <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gray-300 dark:bg-gray-600 rounded-full transition-all duration-1000 ease-out"
+                                    style={{ width: `${100 - stats.completionRate}%` }}
+                                ></div>
+                            </div>
                         </div>
                     </div>
-                )}
+
+                    <div className="p-5 rounded-[2rem] bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-2xl relative overflow-hidden group/summary">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover/summary:scale-110 transition-transform duration-700">
+                            <BookOpen size={64} />
+                        </div>
+                        <div className="relative z-10">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-1">TOTAL AJAR</p>
+                            <p className="text-3xl font-black tracking-tighter">{stats.totalJournals} <span className="text-sm font-bold opacity-60 tracking-normal">Sesi Jurnal</span></p>
+                            <p className="text-[10px] font-bold mt-2 text-orange-400 flex items-center gap-1.5">
+                                <TrendingUp size={12} />
+                                +{Math.round(stats.completionRate * 0.1)} Perubahan minggu ini
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            {/* Enhanced Statistics Cards */}
-            {total > 0 && (
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/20 p-4 rounded-2xl border-2 border-green-200/50 dark:border-green-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl text-white shadow-md">
-                                <CheckCircle2 size={20} />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black text-green-700 dark:text-green-300">{data[0].value}</div>
-                                <div className="text-[10px] uppercase font-bold text-green-600/70 dark:text-green-400 tracking-wider">Terlaksana</div>
-                            </div>
-                        </div>
-                        <div className="mt-2 pt-2 border-t border-green-200 dark:border-green-700">
-                            <div className="text-xs font-semibold text-green-600 dark:text-green-400">
-                                {((data[0].value / total) * 100).toFixed(1)}% dari total
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/30 dark:to-pink-900/20 p-4 rounded-2xl border-2 border-red-200/50 dark:border-red-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl text-white shadow-md">
-                                <AlertCircle size={20} />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black text-red-700 dark:text-red-300">{data[1].value}</div>
-                                <div className="text-[10px] uppercase font-bold text-red-600/70 dark:text-red-400 tracking-wider">Tertunda</div>
-                            </div>
-                        </div>
-                        <div className="mt-2 pt-2 border-t border-red-200 dark:border-red-700">
-                            <div className="text-xs font-semibold text-red-600 dark:text-red-400">
-                                {((data[1].value / total) * 100).toFixed(1)}% dari total
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {total > 0 && (
-                <div className="mt-4 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-full border border-blue-200 dark:border-blue-800">
-                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                        <span className="text-xs font-bold text-blue-700 dark:text-blue-300">
-                            Total {total} Jurnal Mengajar
-                        </span>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

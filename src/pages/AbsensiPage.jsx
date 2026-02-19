@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import moment from 'moment';
-import { collection, getDocs, query, where, writeBatch, doc, serverTimestamp, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, where, writeBatch, doc, serverTimestamp, orderBy, limit, addDoc } from 'firebase/firestore';
+import { Trophy, Star } from 'lucide-react'; // Added Trophy and Star icons
 import { db, auth } from '../firebase';
 import StyledTable from '../components/StyledTable'; // Assuming you have a StyledTable component
 import ClockDisplay from '../components/ClockDisplay';
@@ -217,6 +218,33 @@ const AbsensiPage = () => {
     setAttendance(prev => ({ ...prev, [studentId]: status }));
   };
 
+  const handleGiveStar = async (student) => {
+    if (!activeSchedule) return;
+
+    const loadingToast = toast.loading(`Memberikan bintang ke ${student.name}...`);
+    try {
+      await addDoc(collection(db, 'studentAppreciations'), {
+        userId: auth.currentUser.uid,
+        studentId: student.id,
+        studentName: student.name,
+        classId: activeSchedule.classId || '',
+        className: activeSchedule.class,
+        subjectId: activeSchedule.subjectId || '',
+        subjectName: activeSchedule.subject,
+        points: 1,
+        category: 'keaktifan',
+        date: moment().format('YYYY-MM-DD'),
+        semester: activeSemester,
+        academicYear: academicYear,
+        timestamp: serverTimestamp()
+      });
+      toast.success(`Bintang berhasil diberikan kepada ${student.name}!`, { id: loadingToast });
+    } catch (error) {
+      console.error('Error giving star:', error);
+      toast.error('Gagal memberikan bintang.', { id: loadingToast });
+    }
+  };
+
   const handleSaveAttendance = useCallback(async (scheduleToSave, studentsToSave, attendanceToSave) => {
     if (!scheduleToSave || !studentsToSave || studentsToSave.length === 0) {
       toast.error('Tidak ada jadwal aktif atau siswa untuk disimpan.');
@@ -336,6 +364,21 @@ const AbsensiPage = () => {
               <span className="text-[10px] hidden sm:block mt-1 font-bold text-gray-500 uppercase">{statusOption.label}</span>
             </label>
           ))}
+        </div>
+      ),
+    },
+    {
+      header: { label: 'Apresiasi', className: 'w-20 text-center' },
+      accessor: row => (
+        <div className="flex justify-center">
+          <button
+            onClick={() => handleGiveStar(row)}
+            className="group relative p-2 rounded-xl bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/40 text-yellow-600 transition-all duration-300 active:scale-90"
+            title="Beri Bintang Keaktifan"
+          >
+            <Star className="w-5 h-5 fill-yellow-500 group-hover:scale-125 transition-transform" />
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping hidden group-hover:block" />
+          </button>
         </div>
       ),
     },

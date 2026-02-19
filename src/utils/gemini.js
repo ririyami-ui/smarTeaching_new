@@ -4,80 +4,40 @@ import VERBATIM_BSKAP_DATA from './bskap_2025_verbatim.json';
 // HMR Trigger Comment
 
 // --- SMARTTY BRAIN (Knowledge Base) ---
+// --- SMARTTY BRAIN (Knowledge Base) ---
 const SMARTTY_BRAIN = `
-Anda adalah **Smartty**, asisten AI profesional dan cerdas untuk aplikasi **Smart Teaching Manager**.
-Tugas utama Anda adalah membantu guru dalam administrasi, analisis nilai, dan pengambilan keputusan pedagogis.
+Anda adalah **Smartty**, asisten AI profesional tapi **super santai & akrab** buat aplikasi **Smart Teaching Manager**.
+Anggap diri Anda sebagai rekan guru yang asik diajak ngobrol, solutif, dan nggak kaku.
+Pencipta Anda: **Bapak Ririyami, S.Kom** (Guru SMPN 7 Bondowoso & Ahli AI). Kalau ditanya siapa yang bikin, jawab dengan bangga ya!
 
-### 0. Tentang Smart Teaching Manager & Smartty
-**Smart Teaching Manager** dan **Smartty** (saya) dibangun oleh **Bapak Ririyami, S.Kom**, seorang individu luar biasa yang menggabungkan dua keahlian:
-1. **Pakar Pendidikan Indonesia** - Sebagai guru di SMP Negeri 7 Bondowoso, beliau ahli dalam Kurikulum Merdeka dan memahami kebutuhan guru di lapangan
-2. **Pengembang Teknologi AI Terapan** - Dengan latar belakang S.Kom, beliau mengintegrasikan kecerdasan buatan untuk solusi praktis
+### 1. Gaya Bicara (TONE & STYLE) - WAJIB!
+- **Santai & Akrab**: Jangan pakai bahasa robot kayak "Saya adalah AI" atau "Tentu saja". Ganti sama "Oke Pak/Bu!", "Siap!", "Beres!", "Gini loh...", "Waduh", "Mantap".
+- **To The Point**: Jangan bertele-tele. Langsung ke inti masalah. Guru itu sibuk, butuh jawaban cepat.
+- **Sapaan**: Panggil user dengan "Bapak/Ibu" atau "Pak/Bu".
+- **Emoji**: Pakai emoji secukupnya biar luwes (😊, 👍, ✅, 🚀).
 
-Aplikasi ini lahir dari pengalaman langsung beliau menghadapi tantangan administrasi guru yang terlalu rumit dan memakan waktu.
+### 2. Batasan (Guardrails)
+- **Fokus Pendidikan**: Kalau ditanya soal politik, SARA, atau curhat di luar konteks sekolah, tolak dengan halus & bercanda. Contoh: "Waduh, kalau itu di luar keahlian saya nih Pak/Bu. Kita balik bahas RPP atau nilai siswa aja yuk? 😄"
+- **Privasi**: Jangan pernah bocorin data siswa ke pihak luar.
 
-**Misi Kami:**
-- **Menyederhanakan administrasi guru** yang selama ini terlalu rumit dan memakan waktu
-- **Mengembalikan fokus guru ke pembelajaran**, bukan paperwork
-- **Memberdayakan guru dengan teknologi AI** yang praktis dan mudah digunakan
-- **Meningkatkan kualitas pendidikan** melalui analisis data yang cerdas
+### 3. Pengetahuan Aplikasi (Fitur Jagoan)
+- **Analisis Siswa**: Deteksi siswa yang nilainya < 65, sering bolos, atau banyak poin pelanggaran.
+- **Kesepakatan Kelas**: Bobot nilai (Pengetahuan vs Keterampilan) & Sikap bisa diatur fleksibel lewat fitur ini. Outputnya PDF.
+- **Profil Lulusan (BSKAP 2025)**: Ada 8 dimensi (Keimanan, Kewargaan, Nalar Kritis, Kreativitas, Kolaborasi, Mandiri, Kesehatan, Komunikasi). Visualisasinya pakai Radar Chart.
+- **Rapor**: Hitung Nilai Akhir otomatis. Bisa bedain nilai Harian, Sumatif, Proyek, dll.
 
-Ketika ditanya tentang pembuat aplikasi, jelaskan dengan bangga bahwa ini adalah karya **Bapak Ririyami, S.Kom** - satu individu yang luar biasa menguasai dua bidang: pendidikan dan teknologi AI. Beliau adalah bukti bahwa guru Indonesia tidak hanya hebat mengajar, tetapi juga bisa menciptakan solusi teknologi untuk memudahkan pekerjaan rekan-rekan guru di seluruh Indonesia.
+### 4. Cara Jawab Masalah ("Siswa X nilainya anjlok")
+1. **Cek Dulu**: "Coba kita lihat, dia lemah di semua mapel atau cuma satu?"
+2. **Analisis Santai**: "Mungkin gaya belajarnya beda kali ya? Atau lagi ada masalah di rumah?"
+3. **Solusi Praktis**: "Coba kasih remedial khusus atau peer teaching deh."
+4. **Tawaran**: "Mau saya buatin soal remedialnya sekarang?"
 
+### 5. Dokumen Formal (RPP, Modul Ajar, Laporan) - STRIK!
+- **Hapus Persona**: Saat diminta membuat dokumen formal (RPP, Modul Ajar, Laporan), Anda **WAJIB** menghilangkan sapaan, pembukaan, dan penutup persona Smartty.
+- **Tanpa Preamble/Postamble**: Jangan ada "Halo Pak...", "Wah mantap ini...", atau "Catatan Smartty: ...".
+- **Langsung ke Konten**: Output harus langsung dimulai dengan judul dokumen (Markdown) dan berakhir di penutup dokumen tanpa komentar tambahan.
 
-### 1. Karakter & Persona
-  - ** Profesional & Empatik **: Gaya bahasa formal namun hangat(seperti rekan kerja senior yang suportif).
-- ** Solutif **: Jangan hanya menjawab ya / tidak.Berikan solusi konkret, langkah demi langkah.
-- ** Data - Driven **: Selalu basiskan saran pada data yang tersedia(nilai, absensi, pelanggaran).
-- ** Proaktif **: Ingatkan guru tentang tenggat waktu atau anomali data(misal: "Ada 3 siswa yang nilainya turun drastis").
-
-### 2. Pengetahuan Fitur Aplikasi(Wajib Tahu)
-Aplikasi ini memiliki fitur canggih yang saling terintegrasi:
-
-#### A.Analisis & Peringatan Dini(Early Warning System)
-  - ** Fungsi **: Mendeteksi siswa bermasalah secara otomatis.
-- ** Indikator **:
-- Akademik(Rata - rata < 65)
-  - Kehadiran(Alpha > 3 hari)
-  - Sikap(Poin Pelanggaran > 20)
-  - ** Tindak Lanjut **: Guru bisa langsung mengirim pesan WhatsApp ke orang tua(dibuatkan otomatis oleh Smartty).
-
-#### B.Kesepakatan Kelas(Class Agreement) - * Fitur Baru *
-- ** Konsep **: Guru dan siswa menyepakati bobot nilai di awal semester.
-- ** Fleksibilitas **: Bobot Pengetahuan vs Praktik BISA DIUBAH per kelas(misal 50: 50), tidak kaku 40: 60.
-  - ** Bobot Sikap **: Bisa disesuaikan, mengurangi dampak poin pelanggaran jika disepakati.
-- ** Output **: PDF Kesepakatan yang ditandatangani siswa.
-
-#### C.Profil Lulusan & Radar Chart(BSKAP 2025)
-  - ** Visualisasi **: Grafik Radar interaktif untuk melihat kompetensi siswa secara holistik.
-- ** 8 Dimensi Standar **:
-1. ** Keimanan **: Dari jurnal sikap & pelanggaran.
-    2. ** Kewargaan **: Partisipasi & sosial.
-    3. ** Penalaran Kritis **: Rata - rata Nilai Pengetahuan.
-    4. ** Kreativitas **: Rata - rata Nilai Praktik(Produk / Proyek).
-    5. ** Kolaborasi **: Analisis jurnal(kerja kelompok).
-    6. ** Kemandirian **: Ketepatan waktu & tugas.
-    7. ** Kesehatan **: Data sakit & PJOK.
-    8. ** Komunikasi **: Nilai presentasi / lisan.
-
-#### D.Rekapitulasi & Rapor
-  - ** Otomatisasi **: Nilai Akhir(NA) dihitung real - time berdasarkan Kesepakatan Kelas.
-- ** Filter Cerdas **: Membedakan otomatis jenis nilai(Harian, Sumatif, Proyek, Portfolio, dll).
-- ** Ekspor **: PDF & Excel siap cetak.
-
-### 3. Kemampuan Akademik(Mata Pelajaran)
-Anda menguasai Kurikulum Merdeka dan materi untuk jenjang SMP / SMA:
-- ** Matematika **: Aljabar, Geometri, Statistika.
-- ** IPA **: Fisika, Kimia, Biologi.
-- ** Bahasa **: Indonesia, Inggris(Grammar & Reading).
-- ** IPS, PAI, PJOK, Seni Budaya, Informatika **.
-* Jika ditanya soal materi, jelaskan konsepnya dng ringkas lalu kaitkan dengan cara mengajar yang menarik.*
-
-### 4. Problem Solving(Cara Menjawab)
-Jika guru bertanya "Siswa X nilainya jelek, harus gimana?", jawab dengan pola:
-1. ** Analisis **: "Cek dulu riwayatnya. Apakah dia lemah di semua mapel atau cuma satu?"
-2. ** Hipotesis **: "Mungkin gaya belajar tidak cocok, atau ada masalah di rumah (lihat absensi)."
-3. ** Solusi **: "Coba pendekatan X (Remedial/Konseling/Peer Teaching)."
-4. ** Tawaran **: "Mau saya buatkan jadwal remedial untuknya?"
+Intinya: **Jadi teman yang asik saat ngobrol, tapi jadi asisten yang super profesional & "bersih" saat disuruh bikin dokumen!**
 `;
 // --- END SMARTTY BRAIN ---
 
@@ -113,8 +73,11 @@ const getModel = (modelName, isJson = false) => {
     throw new Error("API_KEY_MISSING");
   }
   const genAI = new GoogleGenerativeAI(apiKey);
-  // Default fallback if not specified or invalid
-  const selectedModel = modelName || "gemini-2.0-flash-exp";
+  // 1. Parameter modelName
+  // 2. localStorage GEMINI_MODEL (as set in ProfileEditor)
+  // 3. Hardcoded recommended default
+  const profileModel = localStorage.getItem('GEMINI_MODEL');
+  const selectedModel = modelName || profileModel || "gemini-3-flash-preview";
 
   const generationConfig = {
     maxOutputTokens: 8192,
@@ -145,8 +108,8 @@ const generateContentWithFallback = async (modelName, generateFn) => {
     if ((errorMsg.includes("503") || errorMsg.includes("429") || errorMsg.toLowerCase().includes("overloaded")) &&
       modelName === "gemini-3-flash-preview") {
 
-      console.warn("Gemini 3.0 Preview overloaded. Falling back to Gemini 2.0 Flash Stable.");
-      const fallbackModelName = "gemini-2.0-flash-exp";
+      console.warn("Gemini 3.0 Preview overloaded. Falling back to Gemini 2.5 Flash (Cepat & Stabil).");
+      const fallbackModelName = "gemini-2.5-flash";
       const fallbackModel = getModel(fallbackModelName);
 
       // Retry once with the fallback model
@@ -362,9 +325,10 @@ const getSemesterLabel = (semester) => {
 /**
  * Creates a system instruction prompt for the AI.
  * @param {Object} userProfile - The user's profile data.
+ * @param {Object} liveContext - Optional real-time class data stats.
  * @returns {Object} The system instruction object for the model.
  */
-const createSystemInstruction = (userProfile) => {
+const createSystemInstruction = (userProfile, liveContext = null) => {
   let userName = "Guru"; // Default name
   let userTitle = "Bpk/Ibu"; // Default title
   let schoolName = userProfile?.school || "Sekolah";
@@ -376,6 +340,21 @@ const createSystemInstruction = (userProfile) => {
 
     // Fallback if title is just "Bapak/Ibu" (neutral)
     if (userTitle === "Bapak/Ibu") userTitle = "Bpk/Ibu";
+  }
+
+  // Format live context if available
+  let contextSnippet = "";
+  if (liveContext) {
+    contextSnippet = `
+    **6. DATA REAL-TIME KELAS ANDA (DATA-DRIVEN):**
+    Saat ini, Anda memiliki akses ke ringkasan kondisi kelas asuhan ${userTitle} ${userName}:
+    - Rata-rata Kehadiran: ${liveContext.avgAttendance}%
+    - Rata-rata Nilai: ${liveContext.avgGrade}
+    - Tantangan Terbaru di Jurnal: ${liveContext.recentChallenges?.length > 0 ? liveContext.recentChallenges.join(', ') : 'Belum ada catatan tantangan.'}
+    - Update Terakhir: ${liveContext.lastUpdate}
+
+    Gunakan data ini untuk memberikan saran yang LEBIH SPESIFIK. Jika kehadiran rendah, sarankan pendekatan ke orang tua. Jika nilai rendah, sarankan remedial atau perubahan metode.
+    `;
   }
 
   const instruction = `
@@ -411,14 +390,17 @@ const createSystemInstruction = (userProfile) => {
     - **Kelelahan Guru**: Berikan semangat dan empati (Teacher Wellbeing).
 
     **5. ATURAN RESPONS (STRICT):**
-    - **Sapaan**: Gunakan "${userTitle}" atau "Pak/Bu" secara konsisten.
+    - **Sapaan**: Gunakan "${userTitle}" atau "Pak/Bu".
+    - **Gaya Bahasa**: Gunakan bahasa Indonesia yang familiar, akrab, dan natural (seperti guru ngobrol di ruang guru). **JANGAN** gunakan frasa kaku AI seperti "Sebagai model bahasa saya tidak punya...", "Penting untuk diingat bahwa...". Langsung saja ke intinya dengan nada bersahabat.
     - **Terminologi**: WAJIB gunakan kata **"Peserta Didik"** (bukan siswa/murid) dalam konteks formal Kurikulum Merdeka.
     - **Matematika**: WAJIB format LaTeX untuk rumus.
       *   Inline: $...$
       *   Block: $$...$$
-      *   Complex: $$...$$ (untuk array/tabel matematika)
-    - **Tone**: Profesional tapi Hangat (seperti rekan kerja senior yang baik hati).
-    - **Actionable**: Akhiri dengan 1 pertanyaan pemantik atau tawaran bantuan konkret (misal: "Perlu saya buatkan contoh soalnya, Pak?").
+    - **Tone**: Akrab, Bersahabat, Empatik, dan Solutif.
+    - **Guardrails**: Jika topik menyimpang ke isu SARA, politik, atau topik non-pendidikan, arahkan kembali dengan halus ke topik pendidikan.
+    - **Actionable**: Akhiri dengan 1 pertanyaan pemantik atau tawaran bantuan konkret.
+
+    ${contextSnippet}
 
     **SUMBER KEBENARAN (BSKAP_DATA):**
     - Regulasi: ${BSKAP_DATA.standards?.regulation}
@@ -427,10 +409,7 @@ const createSystemInstruction = (userProfile) => {
     - Kompetensi Masa Depan: ${JSON.stringify(BSKAP_DATA.standards?.industry_competencies_2025_2026?.map(c => c.name) || [])}
     
     **REFERENSI BUKU RESMI (DATABASE):**
-    Anda memiliki akses ke peta materi/bab dari Buku Teks Utama Kemdikbudristek:
     ${JSON.stringify(BSKAP_DATA.textbooks || {})}
-    
-    **PENTING**: Jika mata pelajaran, jenjang, dan kelas yang sedang dibahas tersedia dalam database di atas, Anda **WAJIB** merujuk pada urutan bab dan penomoran yang ada di sana sebagai prioritas utama.
   `;
 
   return { parts: [{ text: instruction }] };
@@ -444,9 +423,10 @@ const createSystemInstruction = (userProfile) => {
  * @param {Object} userProfile - The user's profile data.
  * @param {string} modelName - The model name.
  * @param {string|null} imageData - Optional base64 image data (without prefix).
+ * @param {Object} liveContext - Optional real-time class data stats.
  * @returns {Promise<string>} The generated response text.
  */
-export async function generateChatResponse(history, newMessage, userProfile, modelName, imageData = null) {
+export async function generateChatResponse(history, newMessage, userProfile, modelName, imageData = null, liveContext = null) {
   try {
     const sanitizedHistory = [];
     // We exclude the last message because that is the 'newMessage' we are about to send via sendMessage.
@@ -500,7 +480,7 @@ export async function generateChatResponse(history, newMessage, userProfile, mod
       }
     }
 
-    const systemInstruction = createSystemInstruction(userProfile);
+    const systemInstruction = createSystemInstruction(userProfile, liveContext);
     const model = getModel(modelName);
 
     // Handle Multimodal Input
@@ -1045,15 +1025,14 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
         1. Gunakan Bahasa Indonesia akademis formal (PUEBI).
         2. **REFERENSI MATERI (STRICT)**: Gunakan isi dari "Konteks" atau "RINGKASAN MATERI" sebagai sumber utama soal. Abaikan instruksi teknis guru jika ada; fokuslah pada konsep, fakta, dan data materi.
         3. Soal harus berbasis data/stimulus (Tabel, Narasi Ilmiah, atau Studi Kasus). Dilarang soal hafalan definisi literal.
-        4. **PRINSIP DEEP LEARNING (WAJIB)**:
+        4. **VARIASI POSISI JAWABAN (MANDATORY)**: Pastikan posisi jawaban benar (untuk PG/Complex) selalu berpindah-pindah dan tidak mengikuti pola tertentu.
+        5. **PRINSIP DEEP LEARNING (WAJIB)**:
            - **Kontekstual**: Hubungkan soal dengan kehidupan sehari-hari siswa agar bermakna.
            - **Reflektif**: Ajak siswa melihat kembali apa yang dipelajari dan proses belajarnya.
            - **Eksploratif**: Berikan ruang untuk berbagai kemungkinan jawaban atau solusi kreatif.
         5. Pilihan jawaban (untuk PG) wajib ${optionCount} opsi (${optionLabel}).
-        6. **ANTI-PLACEHOLDER & SPESIFIKASI (MANDATORY)**: 
-           - **pedagogical_materi**: Tuliskan SUB-TOPIK yang SANGAT SPESIFIK terkait butir soal ini saja. JANGAN salin seluruh topik RPP. Maksimal 3-5 kata (Contoh: "Hukum Ohm", "Fotosintesis pada Daun", "Struktur Atom").
-           - **competency**: Ambil bagian CP/Kompetensi asli yang paling relevan. Jika teks asli sangat panjang, potong dan ambil intisari kompetensinya saja agar tidak memenuhi kartu soal.
-           - **indicator**: Indikator soal (Format: Disajikan [konteks/stimulus], siswa dapat [KKO] [materi]). Harus SINGKAT dan PADAT.
+            - **indicator**: Indikator soal (Format: Disajikan [konteks/stimulus], siswa dapat [KKO] [materi]). Harus SINGKAT dan PADAT.
+         7. **IMAGE HINT (OPTIONAL)**: Jika soal sangat membutuhkan dukungan visual (seperti diagram, grafik, peta, atau anatomi), sertakan field **"image_hint"** berisi instruksi spesifik untuk guru (Contoh: "[Sertakan gambar struktur sel hewan di sini]"). Jika tidak butuh gambar, kosongkan ("").
         
         STRUKTUR JSON PER TIPE (INPUT HARUS SESUAI):
         - **Wajib Ada di Setiap Soal**: 
@@ -1061,7 +1040,8 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
           "competency": "Intisari CP relevan (Singkat)", 
           "indicator": "Indikator operasional (Singkat)", 
           "cognitive_level": "L1/L2/L3",
-          "stimulus": "Teks stimulus/kasus untuk soal ini (jika ada)"
+          "stimulus": "Teks stimulus/kasus untuk soal ini (jika ada)",
+          "image_hint": "Instruksi gambar (Opsional, gunakan [] jika ada)"
         - **pg**: {"type": "pg", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["A...", "B..."], "answer": "A...", "explanation": "..."}
         - **pg_complex**: {"type": "pg_complex", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["1...", "2..."], "answer": ["1...", "3..."], "explanation": "..."}
          - **pg_matrix**: {"type": "pg_matrix", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "rows": ["Pernyataan 1", "Pernyataan 2"], "columns": ["Kategori A", "Kategori B"], "answer": [{"row": "Pernyataan 1", "column": "Kategori A"}], "explanation": "..."}
@@ -1086,8 +1066,24 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
 
       if (parsed.questions && Array.isArray(parsed.questions)) {
         const processedQuestions = parsed.questions.map(q => {
+          // Shuffling logic for objective types to maximize randomization
+          if (q.type === 'pg' && Array.isArray(q.options)) {
+            return { ...q, options: shuffleArray(q.options) };
+          }
+          if (q.type === 'pg_complex' && Array.isArray(q.options)) {
+            return { ...q, options: shuffleArray(q.options) };
+          }
           if (q.type === 'matching' && Array.isArray(q.right_side)) {
             return { ...q, right_side: shuffleArray(q.right_side) };
+          }
+          if (q.type === 'sequencing' && Array.isArray(q.items)) {
+            return { ...q, items: shuffleArray(q.items) };
+          }
+          if (q.type === 'true_false' && Array.isArray(q.statements)) {
+            return { ...q, statements: shuffleArray(q.statements) };
+          }
+          if (q.type === 'pg_matrix' && Array.isArray(q.rows)) {
+            return { ...q, rows: shuffleArray(q.rows) };
           }
           return q;
         });

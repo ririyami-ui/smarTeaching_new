@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { Trophy, Medal, Star, Award, User, Search } from 'lucide-react';
 import StyledSelect from '../components/StyledSelect';
@@ -11,7 +11,7 @@ const LeaderboardPage = () => {
     const [studentsRank, setStudentsRank] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const { activeSemester, academicYear } = useSettings();
+    const { activeSemester, academicYear, academicWeight: profileAcademicWeight, attitudeWeight: profileAttitudeWeight } = useSettings();
 
     useEffect(() => {
         const fetchClasses = async () => {
@@ -57,28 +57,64 @@ const LeaderboardPage = () => {
                 const gradesSnapshot = await getDocs(gradesQuery);
                 const gradesData = gradesSnapshot.docs.map(doc => doc.data());
 
+                // Fetch student appreciations (Stars)
+                const appreciationsQuery = query(
+                    collection(db, 'studentAppreciations'),
+                    where('userId', '==', auth.currentUser.uid),
+                    where('semester', '==', activeSemester),
+                    where('academicYear', '==', academicYear)
+                );
+                const appreciationsSnapshot = await getDocs(appreciationsQuery);
+                const appreciationsData = appreciationsSnapshot.docs.map(doc => doc.data());
+
+                // Determine Weights: Hierarchy (Class Agreement > Profile)
+                let currentAcademicWeight = profileAcademicWeight;
+                let currentAttitudeWeight = profileAttitudeWeight;
+
+                if (selectedClass !== 'all' && classes.length > 0) {
+                    const classObj = classes.find(c => c.rombel === selectedClass);
+                    if (classObj) {
+                        try {
+                            const agreementRef = doc(db, 'class_agreements', `${auth.currentUser.uid}_${classObj.id}`);
+                            const agreementSnap = await getDoc(agreementRef);
+                            if (agreementSnap.exists()) {
+                                const agreementData = agreementSnap.data();
+                                currentAcademicWeight = agreementData.academicWeight ?? currentAcademicWeight;
+                                currentAttitudeWeight = agreementData.attitudeWeight ?? currentAttitudeWeight;
+                            }
+                        } catch (err) {
+                            console.warn("Failed to fetch class agreement:", err);
+                        }
+                    }
+                }
+
+                const academicW = (currentAcademicWeight || 50) / 100;
+                const attitudeW = (currentAttitudeWeight || 50) / 100;
+
                 // Calculate scores
                 const rankedStudents = studentsData.map(student => {
-                    // Discipline Score
+                    // 1. Discipline Score
                     const studentInfractions = infractionsData.filter(inf => inf.studentId === student.id);
-                    const totalPointsDeducted = studentInfractions.reduce((acc, curr) => acc + curr.points, 0);
+                    const totalPointsDeducted = studentInfractions.reduce((acc, curr) => acc + (curr.points || 0), 0);
                     const disciplineScore = 100 - totalPointsDeducted;
 
-                    // Academic Score
+                    // 2. Academic Score
                     const studentGrades = gradesData.filter(g => g.studentId === student.id);
                     let academicScore = 0;
                     if (studentGrades.length > 0) {
                         const totalGrades = studentGrades.reduce((sum, g) => sum + (parseFloat(g.score) || 0), 0);
                         academicScore = totalGrades / studentGrades.length;
-                    } else {
-                        // If no grades, maybe default to 0 or neutral? Let's use 0 but handle display carefully
-                        academicScore = 0;
                     }
 
-                    // Final Weighted Score (50% Discipline + 50% Academic)
-                    // If no grades yet, maybe we shouldn't punish them? 
-                    // Let's stick to the user request: 50/50.
-                    let finalScore = (disciplineScore * 0.5) + (academicScore * 0.5);
+                    // 3. Participation Bonus (Stars)
+                    const studentAppreciations = appreciationsData.filter(app => app.studentId === student.id);
+                    const totalStars = studentAppreciations.reduce((acc, curr) => acc + (curr.points || 0), 0);
+
+                    // Final Attitude Score = Discipline + Stars (Bonus 2 pts per star)
+                    let finalAttitudeScore = disciplineScore + (totalStars * 2);
+
+                    // 4. Final Weighted Score
+                    let finalScore = (academicScore * academicW) + (finalAttitudeScore * attitudeW);
 
                     // Round to 2 decimals
                     finalScore = parseFloat(finalScore.toFixed(2));
@@ -96,7 +132,14 @@ const LeaderboardPage = () => {
                         badgeColor = "bg-blue-100 text-blue-700 border-blue-200";
                     }
 
-                    return { ...student, score: finalScore, disciplineScore, academicScore: academicScore.toFixed(2), badge, badgeColor };
+                    return {
+                        ...student,
+                        score: finalScore,
+                        disciplineScore,
+                        academicScore: academicScore.toFixed(2),
+                        participationScore: totalStars,
+                        badge, badgeColor
+                    };
                 });
 
                 // Sort by score (desc) and name (asc)
@@ -137,9 +180,9 @@ const LeaderboardPage = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        <Trophy className="text-yellow-500" /> Leaderboard Akademik & Kedisiplinan
+                        <Trophy className="text-yellow-500" /> Leaderboard Prestasi & Keaktifan
                     </h2>
-                    <p className="text-gray-500 dark:text-gray-400">Peringkat berdasarkan kombinasi nilai akademik (50%) dan kedisiplinan (50%).</p>
+                    <p className="text-gray-500 dark:text-gray-400">Peringkat berdasarkan Bobot Kesepakatan (Akademik vs Sikap).</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -199,8 +242,11 @@ const LeaderboardPage = () => {
                                             {student.badge}
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-xs text-gray-400 uppercase font-semibold">Total Poin</p>
+                                            <p className="text-xs text-gray-400 uppercase font-semibold">Total Skor</p>
                                             <p className="text-2xl font-black text-gray-800 dark:text-white">{student.score}</p>
+                                            <div className="flex items-center justify-end gap-1 text-yellow-600 font-bold text-sm">
+                                                <Star size={14} className="fill-yellow-500" /> {student.participationScore}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -225,6 +271,7 @@ const LeaderboardPage = () => {
                                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Kelas</th>
                                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Akademik</th>
                                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Disiplin</th>
+                                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Keaktifan</th>
                                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
                                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                                         </tr>
@@ -246,6 +293,11 @@ const LeaderboardPage = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className="text-gray-600 dark:text-gray-300 font-medium">{student.disciplineScore}</span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-1 text-yellow-600 font-bold">
+                                                        <Star size={14} className="fill-yellow-500" /> {student.participationScore}
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`font-bold ${student.score >= 90 ? 'text-green-500' : student.score >= 75 ? 'text-blue-500' : 'text-orange-500'}`}>

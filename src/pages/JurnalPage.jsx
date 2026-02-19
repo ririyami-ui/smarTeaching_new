@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { BookOpen, Calendar, List, Clock, Save, ChevronDown, Check, Trash, Upload, Download, FileSpreadsheet, Plus, Zap, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { BookOpen, Calendar, List, Clock, Save, ChevronDown, Check, Trash, Upload, Download, FileSpreadsheet, Plus, Zap, RefreshCw, CalendarOff } from 'lucide-react';
 import { collection, getDocs, query, where, writeBatch, doc, serverTimestamp, orderBy, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import moment from 'moment';
 import { analyzeTeachingJournals } from '../utils/gemini';
-import { generateDataHash } from '../utils/cacheUtils'; // Caching logic
+import { generateDataHash } from '../utils/cacheUtils';
 import toast from 'react-hot-toast';
 import StyledInput from '../components/StyledInput';
 import StyledSelect from '../components/StyledSelect';
@@ -14,6 +14,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useSettings } from '../utils/SettingsContext';
 import { getTopicForSchedule } from '../utils/topicUtils';
 import { toHanacaraka, getRegionFromSubject } from '../utils/carakan';
+import { indonesianHolidays } from '../utils/holidayData';
 
 export default function JurnalPage() {
   const [currentDate, setCurrentDate] = useState('');
@@ -36,8 +37,9 @@ export default function JurnalPage() {
   const [aiSentimentExplanation, setAiSentimentExplanation] = useState('');
   const [isAnalyzingAI, setIsAnalyzingAI] = useState(false); // New state for AI analysis loading
   const [programs, setPrograms] = useState([]);
-  const [carryOverSuggestion, setCarryOverSuggestion] = useState(null); // New state for carry-over
-  const [similarJournalSuggestion, setSimilarJournalSuggestion] = useState(null); // New state for cloning
+  const [carryOverSuggestion, setCarryOverSuggestion] = useState(null);
+  const [similarJournalSuggestion, setSimilarJournalSuggestion] = useState(null);
+  const [firestoreHolidays, setFirestoreHolidays] = useState([]);
   const { activeSemester, academicYear, geminiModel } = useSettings();
 
   const isJavanese = React.useMemo(() => {
@@ -69,6 +71,44 @@ export default function JurnalPage() {
     const dd = String(today.getDate()).padStart(2, '0');
     setCurrentDate(`${yyyy}-${mm}-${dd}`);
   }, []);
+
+  // Fetch Firestore holidays on mount
+  useEffect(() => {
+    const fetchHolidays = async () => {
+      if (!auth.currentUser) return;
+      try {
+        const q = query(collection(db, 'holidays'), where('userId', '==', auth.currentUser.uid));
+        const snapshot = await getDocs(q);
+        setFirestoreHolidays(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (err) {
+        console.warn('Could not fetch Firestore holidays for JurnalPage:', err);
+      }
+    };
+    const unsubscribe = auth.onAuthStateChanged(user => { if (user) fetchHolidays(); });
+    return () => unsubscribe();
+  }, []);
+
+  // Detect if selected date is a holiday
+  const currentDateHoliday = useMemo(() => {
+    if (!currentDate) return null;
+    const selectedMoment = moment(currentDate).startOf('day');
+
+    // Check static national holidays
+    const staticMatch = indonesianHolidays.find(h => h.date === currentDate);
+    if (staticMatch) return staticMatch;
+
+    // Check Firestore holidays
+    const firestoreMatch = firestoreHolidays.find(h => {
+      if (h.startDate && h.endDate) {
+        const start = moment(h.startDate).startOf('day');
+        const end = moment(h.endDate).endOf('day');
+        return selectedMoment.isBetween(start, end, null, '[]');
+      }
+      return moment(h.date).isSame(selectedMoment, 'day');
+    });
+
+    return firestoreMatch || null;
+  }, [currentDate, firestoreHolidays]);
 
   // Fetch classes and subjects
   useEffect(() => {
@@ -395,6 +435,18 @@ export default function JurnalPage() {
               value={currentDate}
               onChange={(e) => setCurrentDate(e.target.value)}
             />
+
+            {/* Holiday Warning Banner */}
+            {currentDateHoliday && (
+              <div className="flex items-start gap-3 px-4 py-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm animate-in slide-in-from-top-2 duration-300">
+                <CalendarOff size={18} className="text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-purple-800 dark:text-purple-300 uppercase tracking-wider mb-0.5">Hari Libur / Agenda Khusus</p>
+                  <p className="text-sm font-semibold text-purple-700 dark:text-purple-200">{currentDateHoliday.name}</p>
+                  <p className="text-[11px] text-purple-600 dark:text-purple-400 mt-1 italic">Tanggal ini termasuk hari libur. Jika tetap mengisi jurnal, pertimbangkan untuk menandai sebagai "Tidak Terlaksana".</p>
+                </div>
+              </div>
+            )}
 
             <StyledSelect
               label="Kelas"

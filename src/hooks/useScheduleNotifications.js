@@ -53,6 +53,9 @@ const useScheduleNotifications = () => {
         return;
       }
 
+      // Clear all old delivered notifications to avoid "clutter" when app opens
+      await LocalNotifications.removeAllDeliveredNotifications();
+
       // Request notification permissions
       let permStatus = await LocalNotifications.checkPermissions();
       if (permStatus.display !== 'granted') {

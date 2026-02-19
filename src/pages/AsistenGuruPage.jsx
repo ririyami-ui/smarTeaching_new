@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, Loader, Mic, MicOff, Image as ImageIcon, X, Trash2, Volume2, VolumeX, StopCircle } from 'lucide-react';
+import { Send, Bot, User, Loader, Mic, MicOff, Image as ImageIcon, X, Trash2, Volume2, VolumeX, StopCircle, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import 'katex/dist/katex.min.css'; // Import KaTeX CSS
 import { generateChatResponse } from '../utils/gemini';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import toast from 'react-hot-toast';
 import { useChat } from '../utils/ChatContext.jsx';
@@ -16,7 +16,7 @@ import './MarkdownStyles.css'; // Import the CSS for markdown styles
 import Modal from '../components/Modal';
 
 const AsistenGuruPage = () => {
-  const { geminiModel } = useSettings();
+  const { geminiModel, activeSemester, academicYear } = useSettings();
   const { chatHistory, loadingHistory, addMessageToHistory, setChatHistory, clearChat } = useChat();
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,6 +25,9 @@ const AsistenGuruPage = () => {
   const [selectedImage, setSelectedImage] = useState(null); // State for image upload
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
+  const [liveContext, setLiveContext] = useState(null);
+  const [fetchingContext, setFetchingContext] = useState(false);
+
   const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null); // Ref for SpeechRecognition instance
@@ -32,225 +35,151 @@ const AsistenGuruPage = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
 
+  const fetchLiveContext = async (user) => {
+    if (!user) return null;
+    setFetchingContext(true);
+    try {
+      const userId = user.uid;
+
+      // Fetch recent attendance
+      const attQuery = query(
+        collection(db, 'attendance'),
+        where('userId', '==', userId),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear)
+      );
+      const attSnap = await getDocs(attQuery);
+      const attendance = attSnap.docs.map(doc => doc.data());
+
+      // Fetch recent grades
+      const gradesQuery = query(
+        collection(db, 'grades'),
+        where('userId', '==', userId),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear)
+      );
+      const gradesSnap = await getDocs(gradesQuery);
+      const grades = gradesSnap.docs.map(doc => doc.data());
+
+      // Fetch recent journal reflections/hambatan
+      const journalsQuery = query(
+        collection(db, 'teachingJournals'),
+        where('userId', '==', userId),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear)
+      );
+      const journalsSnap = await getDocs(journalsQuery);
+      const journals = journalsSnap.docs.map(doc => ({
+        date: doc.data().date,
+        material: doc.data().material,
+        challenges: doc.data().challenges,
+        reflection: doc.data().reflection
+      })).slice(-5); // Get last 5 journals
+
+      // Summarize
+      const stats = {
+        totalStudents: 0, // We could fetch this too if needed
+        avgAttendance: attendance.length > 0 ? (attendance.filter(a => a.status === 'Hadir').length / attendance.length * 100).toFixed(1) : '?',
+        avgGrade: grades.length > 0 ? (grades.reduce((a, b) => a + parseFloat(b.score || 0), 0) / grades.length).toFixed(1) : '?',
+        recentChallenges: journals.filter(j => j.challenges).map(j => j.challenges),
+        lastUpdate: new Date().toLocaleString('id-ID')
+      };
+
+      setLiveContext(stats);
+      return stats;
+    } catch (error) {
+      console.error("Error fetching live context:", error);
+      return null;
+    } finally {
+      setFetchingContext(false);
+    }
+  };
+
   // Enhanced text-to-speech pre-processing for mathematical notation
   const preprocessMathText = (text) => {
     let processed = text;
-
-    // Step 1: Remove LaTeX delimiters FIRST (before any other processing)
-    processed = processed.replace(/\$\$/g, ' '); // Display math $$...$$
-    processed = processed.replace(/\$/g, ' '); // Inline math $...$
-    processed = processed.replace(/\\\[/g, ' '); // Display math \[...\]
-    processed = processed.replace(/\\\]/g, ' ');
-    processed = processed.replace(/\\\(/g, ' '); // Inline math \(...\)
-    processed = processed.replace(/\\\)/g, ' ');
-
-    // Step 2: Remove markdown formatting
-    processed = processed.replace(/\*\*/g, ''); // Bold
-    processed = processed.replace(/\*/g, ''); // Italic
-    processed = processed.replace(/`/g, ''); // Code
-    processed = processed.replace(/#{1,6}\s/g, ''); // Headers
-    processed = processed.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'); // Links
-    processed = processed.replace(/^[-*+]\s/gm, ''); // List bullets
-    processed = processed.replace(/_{2,}/g, ''); // Underscores (horizontal rule)
-
-    // Step 3: Handle LaTeX square root \sqrt{...} before other processing
-    // \sqrt{16} → akar 16
-    processed = processed.replace(/\\sqrt\{([^}]+)\}/g, 'akar dari $1');
-    // \sqrt[3]{27} → akar pangkat 3 dari 27
-    processed = processed.replace(/\\sqrt\[(\d)\]\{([^}]+)\}/g, 'akar pangkat $1 dari $2');
-
-    // Step 4: Handle LaTeX superscript with braces ^{...}
-    // x^{2} → x kuadrat, x^{3} → x kubik, x^{n} → x pangkat n
-    processed = processed.replace(/([a-zA-Z0-9]+)\^\{2\}/g, '$1 kuadrat');
-    processed = processed.replace(/([a-zA-Z0-9]+)\^\{3\}/g, '$1 kubik');
-    processed = processed.replace(/([a-zA-Z0-9]+)\^\{([^}]+)\}/g, '$1 pangkat $2');
-
-    // Step 5: Handle LaTeX subscript with braces _{...}
-    // x_{1} → x indeks 1
-    processed = processed.replace(/([a-zA-Z])_\{([^}]+)\}/g, '$1 indeks $2');
-
-    // Step 6: Convert Unicode superscripts (pangkat)
-    const superscriptMap = {
-      '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
-      '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
-      'ⁿ': 'n', '⁺': 'plus', '⁻': 'minus'
-    };
-
-    Object.entries(superscriptMap).forEach(([sup, base]) => {
-      const regex = new RegExp(sup, 'g');
-      processed = processed.replace(regex, ` pangkat ${base} `);
-    });
-
-    // Step 7: Convert common mathematical patterns (caret notation without braces)
-    // x^2 → x kuadrat
-    processed = processed.replace(/([a-zA-Z0-9]+)\^2\b/g, '$1 kuadrat');
-    // x^3 → x kubik  
-    processed = processed.replace(/([a-zA-Z0-9]+)\^3\b/g, '$1 kubik');
-    // x^n → x pangkat n (general case)
-    processed = processed.replace(/([a-zA-Z0-9]+)\^(\d+|[a-zA-Z])/g, '$1 pangkat $2');
-    // x^(n+1) → x pangkat (n+1)
-    processed = processed.replace(/([a-zA-Z0-9]+)\^\(([^)]+)\)/g, '$1 pangkat $2');
-
-    // Step 5: Subscripts (indeks bawah)
-    const subscriptMap = {
-      '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4',
-      '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9'
-    };
-
-    Object.entries(subscriptMap).forEach(([sub, base]) => {
-      const regex = new RegExp(sub, 'g');
-      processed = processed.replace(regex, ` indeks ${base} `);
-    });
-
-    // Subscript notation x_1 → x indeks 1
-    processed = processed.replace(/([a-zA-Z])_(\d+)/g, '$1 indeks $2');
-
-    // Step 6: Square root √ → akar
-    processed = processed.replace(/√(\d+)/g, 'akar $1');
-    processed = processed.replace(/√\(([^)]+)\)/g, 'akar dari $1');
-    processed = processed.replace(/\\?sqrt\(([^)]+)\)/g, 'akar dari $1');
-
-    // Step 7: Fractions
-    // LaTeX \frac{a}{b} → a per b (do this before division operator)
+    // Remove Markdown boldness and italics
+    processed = processed.replace(/\*\*([^*]+)\*\*/g, '$1');
+    processed = processed.replace(/\*([^*]+)\*/g, '$1');
+    // Remove Markdown headers (hash symbols)
+    processed = processed.replace(/#+/g, '');
+    // Basic LaTeX replacements
+    processed = processed.replace(/\\\(/g, '').replace(/\\\)/g, '');
+    processed = processed.replace(/\\\[/g, '').replace(/\\\]/g, '');
+    processed = processed.replace(/\$/g, '');
     processed = processed.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1 per $2');
-    // a/b → a per b (only for numbers to avoid breaking words)
-    processed = processed.replace(/(\d+)\s*\/\s*(\d+)/g, '$1 per $2');
-
-    // Step 8: Mathematical operators (CAREFUL - use word boundaries to avoid breaking words)
-    // Replace only when operators are surrounded by spaces or numbers
-    processed = processed.replace(/(\s|^)\+(\s|$)/g, '$1tambah$2');
-    processed = processed.replace(/(\d)\s*\+\s*(\d)/g, '$1 tambah $2');
-
-    // Minus/dash is tricky - only replace when clearly an operator
-    processed = processed.replace(/(\d)\s*-\s*(\d)/g, '$1 kurang $2');
-
-    // Multiplication
-    processed = processed.replace(/(\s|^)×(\s|$)/g, '$1kali$2');
-    processed = processed.replace(/(\s|^)·(\s|$)/g, '$1kali$2');
-    processed = processed.replace(/(\d)\s*×\s*(\d)/g, '$1 kali $2');
-    processed = processed.replace(/(\d)\s*·\s*(\d)/g, '$1 kali $2');
-
-    // Division
-    processed = processed.replace(/(\s|^)÷(\s|$)/g, '$1bagi$2');
-    processed = processed.replace(/(\d)\s*÷\s*(\d)/g, '$1 bagi $2');
-
-    // Equals and comparisons
-    processed = processed.replace(/\s*=\s*/g, ' sama dengan ');
-    processed = processed.replace(/\s*≈\s*/g, ' kira-kira sama dengan ');
-    processed = processed.replace(/\s*≠\s*/g, ' tidak sama dengan ');
-    processed = processed.replace(/\s*≤\s*/g, ' lebih kecil atau sama dengan ');
-    processed = processed.replace(/\s*≥\s*/g, ' lebih besar atau sama dengan ');
-    processed = processed.replace(/(\d)\s*<\s*(\d)/g, '$1 lebih kecil dari $2');
-    processed = processed.replace(/(\d)\s*>\s*(\d)/g, '$1 lebih besar dari $2');
-
-    // Step 9: Greek letters (common in math/science)
-    const greekMap = {
-      'α': 'alpha', 'β': 'beta', 'γ': 'gamma', 'δ': 'delta',
-      'ε': 'epsilon', 'θ': 'theta', 'λ': 'lambda', 'μ': 'mu',
-      'π': 'pi', 'σ': 'sigma', 'τ': 'tau', 'ω': 'omega'
-    };
-
-    Object.entries(greekMap).forEach(([symbol, name]) => {
-      const regex = new RegExp(symbol, 'g');
-      processed = processed.replace(regex, name);
-    });
-
-    // Step 10: Scientific notation: 1.5×10³ → 1 koma 5 kali 10 pangkat 3
-    processed = processed.replace(/(\d+\.?\d*)\s*[x×]\s*10\^(\d+)/g, '$1 kali 10 pangkat $2');
-    processed = processed.replace(/(\d+\.?\d*)\s*[x×]\s*10([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (match, coef, exp) => {
-      const expNum = exp.split('').map(char => superscriptMap[char] || char).join('');
-      return `${coef} kali 10 pangkat ${expNum}`;
-    });
-
-    // Step 11: Decimal point: use "koma" for Indonesian
-    processed = processed.replace(/(\d+)\.(\d+)/g, '$1 koma $2');
-
-    // Step 12: Percentage
-    processed = processed.replace(/(\d+)\s*%/g, '$1 persen');
-
-    // Step 13: Degree symbol
-    processed = processed.replace(/(\d+)\s*°/g, '$1 derajat');
-
-    // Step 14: Chemistry formulas: H₂O → H 2 O
-    processed = processed.replace(/([A-Z][a-z]?)₂/g, '$1 dua ');
-    processed = processed.replace(/([A-Z][a-z]?)₃/g, '$1 tiga ');
-    processed = processed.replace(/([A-Z][a-z]?)₄/g, '$1 empat ');
-
-    // Step 15: Clean up extra spaces
-    processed = processed.replace(/\s+/g, ' ').trim();
-
+    processed = processed.replace(/\\times/g, 'kali');
+    processed = processed.replace(/\^/g, ' pangkat ');
+    // Remove complex math symbols or simplify
+    processed = processed.replace(/\\begin\{[^}]+\}/g, '');
+    processed = processed.replace(/\\end\{[^}]+\}/g, '');
+    processed = processed.replace(/\\text\{([^}]+)\}/g, '$1');
     return processed;
   };
 
   const speakText = (text) => {
-    if (!window.speechSynthesis) {
-      toast.error('Browser tidak mendukung text-to-speech');
-      return;
-    }
+    if (!window.speechSynthesis) return;
 
-    // Stop listening if speaking to avoid feedback loop
+    // Stop any existing speech
     window.speechSynthesis.cancel();
 
-    // Pre-process text for natural mathematical reading
     const cleanText = preprocessMathText(text);
-
-    // Skip if empty after cleaning
-    if (!cleanText || cleanText.trim().length === 0) {
-      return;
-    }
-
     const utterance = new SpeechSynthesisUtterance(cleanText);
-
-    // Voice settings for natural Indonesian
     utterance.lang = 'id-ID';
-    utterance.rate = 1.0; // Natural speed - balanced and clear
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-
-    // Try to use Indonesian voice if available
-    const voices = window.speechSynthesis.getVoices();
-    const idVoice = voices.find(voice => voice.lang === 'id-ID' || voice.lang.startsWith('id'));
-    if (idVoice) {
-      utterance.voice = idVoice;
-    }
+    utterance.rate = 1.05; // Reduced rate for more natural speed (dialed back from 1.15)
+    utterance.pitch = 1.02; // Slightly more balanced pitch
 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
 
+    // Optimized voice selection for "Smartty" persona across different platforms
+    const getBestIndoVoice = () => {
+      const voices = window.speechSynthesis.getVoices();
+
+      // 1. Prioritize Google/Natural/Premium voices (usually highest quality)
+      const premiumVoice = voices.find(v =>
+        (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Premium')) &&
+        (v.lang.includes('id-ID') || v.lang.includes('id_ID') || v.lang === 'id')
+      );
+      if (premiumVoice) return premiumVoice;
+
+      // 2. Platform-specific high quality fallbacks
+      const platformVoice = voices.find(v =>
+        (v.name.includes('Ardi') || v.name.includes('Gadis') || v.name.includes('Damayanti')) &&
+        v.lang.includes('id')
+      );
+      if (platformVoice) return platformVoice;
+
+      // 3. Generic Indonesian fallback
+      return voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
+    };
+
+    const bestVoice = getBestIndoVoice();
+    if (bestVoice) utterance.voice = bestVoice;
+
     window.speechSynthesis.speak(utterance);
   };
 
   const stopSpeaking = () => {
-    window.speechSynthesis.cancel();
-    setIsSpeaking(false);
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
   };
 
-  // Auto-speak effect
+  // Auto-speak effect for new model messages
   useEffect(() => {
     if (autoSpeak && chatHistory.length > 0) {
       const lastMessage = chatHistory[chatHistory.length - 1];
       if (lastMessage.role === 'model' && !loading) {
-        // Simple heuristic: if message is long, maybe wait or just speak
-        // Ideally we check if it was just added.
-        // For now, let's just speak if it's the latest and we aren't already speaking it
         speakText(lastMessage.parts[0].text);
       }
     }
   }, [chatHistory, autoSpeak, loading]);
 
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  }, [chatHistory, loading, loadingHistory]);
-
-  useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
-      console.log("Auth state changed, user:", user);
       if (user) {
         const fetchProfile = async () => {
           const docRef = doc(db, "users", user.uid);
@@ -260,12 +189,14 @@ const AsistenGuruPage = () => {
           }
         };
         fetchProfile();
+        fetchLiveContext(user);
       } else {
         setUserProfile(null);
+        setLiveContext(null);
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [activeSemester, academicYear]);
 
   useEffect(() => {
     // Check for prompt in query parameters
@@ -279,7 +210,6 @@ const AsistenGuruPage = () => {
 
       // Trigger message send
       setInput(initialPrompt);
-      // We need a small delay or use a separate effect because setInput is async
     }
   }, [userProfile, loading, loadingHistory]);
 
@@ -313,6 +243,19 @@ const AsistenGuruPage = () => {
     }
   }, [userProfile, chatHistory, setChatHistory]);
 
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory, loading]);
+
   const handleInputChange = (e) => {
     setInput(e.target.value);
     autoResizeTextarea();
@@ -320,8 +263,8 @@ const AsistenGuruPage = () => {
 
   const autoResizeTextarea = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+      textareaRef.current.style.height = 'auto'; // Reset height
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`; // Limit max height
     }
   };
 
@@ -475,8 +418,8 @@ const AsistenGuruPage = () => {
     try {
       // Pass the updated history to the generate function
       const updatedHistory = [...chatHistory, userMessageContent];
-      // Pass image explicitly to the service
-      const responseText = await generateChatResponse(updatedHistory, currentInput, userProfile, geminiModel, currentImage);
+      // Pass image and live context explicitly to the service
+      const responseText = await generateChatResponse(updatedHistory, currentInput, userProfile, geminiModel, currentImage, liveContext);
 
       const modelMessage = { role: 'model', parts: [{ text: responseText }] };
       addMessageToHistory(modelMessage);
@@ -492,13 +435,13 @@ const AsistenGuruPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-180px)] sm:h-[calc(100vh-160px)] md:h-[calc(100vh-104px)] bg-gray-50 dark:bg-gray-900 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-144px)] md:h-[calc(100vh-104px)] bg-gray-50 dark:bg-gray-900 overflow-hidden">
 
       {/* Header with Clear Chat */}
       <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-            <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <Bot className={`w-5 h-5 text-blue-600 dark:text-blue-400 transition-all duration-500 ${loading ? 'animate-smartty-think' : 'animate-smartty-float animate-smartty-breathe'}`} />
           </div>
           <div>
             <h2 className="font-bold text-gray-800 dark:text-gray-200 text-sm">Asisten Cerdas</h2>
@@ -561,7 +504,7 @@ const AsistenGuruPage = () => {
           <>
             {chatHistory.map((message, index) => (
               <div key={index} className={`flex items-start gap-2 sm:gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
-                {message.role === 'model' && <Bot className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 flex-shrink-0" />}
+                {message.role === 'model' && <Bot className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 flex-shrink-0 animate-smartty-float" />}
                 <div className={`chat-message p-3 rounded-[1.2rem] max-w-[85%] sm:max-w-lg break-words overflow-x-auto relative group ${message.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white rounded-tl-none'}`}>
                   {message.role === 'model' && (
                     <button
@@ -603,7 +546,7 @@ const AsistenGuruPage = () => {
             ))}
             {loading && (
               <div className="flex items-start gap-3 justify-start">
-                <Bot className="w-8 h-8 text-blue-500 flex-shrink-0 animate-pulse" />
+                <Bot className="w-8 h-8 text-blue-500 flex-shrink-0 animate-smartty-think" />
                 <div className="p-3 rounded-lg bg-gray-200 dark:bg-gray-700">
                   <div className="typing-indicator">
                     <span></span>
@@ -616,7 +559,7 @@ const AsistenGuruPage = () => {
           </>
         )}
       </div>
-      <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      <div className="p-3 sm:p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         {selectedImage && (
           <div className="mb-2 relative inline-block">
             <img src={selectedImage} alt="Preview" className="h-20 w-auto rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm" />

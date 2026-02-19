@@ -248,41 +248,6 @@ export default function DashboardPage() {
 
         setTodaySchedules(filteredTodaySchedules);
 
-        // --- Notifikasi Lokal ---
-
-        // Minta izin notifikasi
-        const permission = await LocalNotifications.requestPermissions();
-        if (permission.display === 'granted') {
-          // Hapus notifikasi yang tertunda sebelumnya untuk menghindari duplikasi
-          await LocalNotifications.cancel({ notifications: filteredTodaySchedules.map(s => ({ id: parseInt(s.id.replace(/\D/g, ''), 10) })) });
-
-          const notificationsToSchedule = [];
-          filteredTodaySchedules.forEach(schedule => {
-            // Use getNextDayOccurrence to ensure the notification is scheduled for a future time
-            const nextOccurrence = getNextDayOccurrence(schedule.day, schedule.startTime);
-            const fiveMinutesBefore = moment(nextOccurrence).subtract(5, 'minutes');
-
-            // Only schedule if the calculated notification time is in the future
-            if (fiveMinutesBefore.isAfter(moment())) {
-              const notificationId = parseInt(schedule.id.replace(/\D/g, ''), 10);
-              notificationsToSchedule.push({
-                id: notificationId, // Pastikan ID unik dan numerik
-                title: 'Pengingat Pembelajaran',
-                body: `Pembelajaran ${schedule.subject} akan dimulai dalam 5 menit pada pukul ${schedule.startTime}.`,
-                schedule: { at: fiveMinutesBefore.toDate() },
-                sound: null, // Gunakan suara default sistem
-                attachments: null,
-                actionTypeId: '',
-                extra: null
-              });
-            }
-          });
-
-          if (notificationsToSchedule.length > 0) {
-            await LocalNotifications.schedule({ notifications: notificationsToSchedule });
-          }
-        }
-
         // Fetch "Tidak Terlaksana" journals for Carry-over alerts
         const missedJournalsQuery = query(
           collection(db, 'teachingJournals'),
@@ -539,6 +504,7 @@ export default function DashboardPage() {
             carryOverMap={carryOverMap}
             activeSemester={activeSemester}
             academicYear={academicYear}
+            userProfile={currentUserProfile}
           />
         </div>
       </div>
@@ -554,6 +520,7 @@ export default function DashboardPage() {
           carryOverMap={carryOverMap}
           activeSemester={activeSemester}
           academicYear={academicYear}
+          userProfile={currentUserProfile}
         />
       </div>
 

@@ -42,6 +42,7 @@ const DatabaseManager = () => {
     { id: 'class_agreements', label: 'Kesepakatan Kelas', icon: <FileText size={20} /> },
     { id: 'handouts', label: 'Bahan Ajar (Handout)', icon: <History size={20} /> },
     { id: 'lkpd_history', label: 'Riwayat LKPD', icon: <FileUp size={20} /> },
+    { id: 'studentAppreciations', label: 'Bintang Keaktifan', icon: <Star size={20} /> },
   ];
 
   // Helper to recursively restore Firestore Timestamps from JSON
@@ -273,7 +274,7 @@ const DatabaseManager = () => {
         const tiers = [
           ['classes', 'subjects', 'holidays', 'teachingPrograms', 'lessonPlans', 'quizzes'],
           ['students', 'teachingSchedules', 'handouts', 'lkpd_history'],
-          ['attendance', 'teachingJournals', 'kktpAssessments', 'infractions', 'studentTasks', 'class_agreements'],
+          ['attendance', 'teachingJournals', 'kktpAssessments', 'infractions', 'studentTasks', 'class_agreements', 'studentAppreciations'],
           ['grades']
         ];
 

@@ -32,7 +32,6 @@
 html,
 body {
   height: 100%;
-  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -388,6 +387,65 @@ body {
   @apply bg-gray-50 dark:bg-gray-800 font-bold;
 }
 
+/* --- Smartty AI Personality Animations --- */
+@keyframes smartty-float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes smartty-breathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.3));
+  }
+
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+  }
+}
+
+@keyframes smartty-think {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform: rotate(5deg) scale(1.1);
+  }
+
+  75% {
+    transform: rotate(-5deg) scale(1.1);
+  }
+
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.animate-smartty-float {
+  animation: smartty-float 3s ease-in-out infinite;
+}
+
+.animate-smartty-breathe {
+  animation: smartty-breathe 4s ease-in-out infinite;
+}
+
+.animate-smartty-think {
+  animation: smartty-think 1s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.5));
+}
+
+/* ------------------------------------------ */
 /* --- RPP Paper-Like Styling System --- */
 .rpp-prose {
   font-family: Arial, Helvetica, sans-serif !important;
@@ -685,27 +743,40 @@ div.rpp-signature td {
 }
 
 /* Welcome Screen Animations */
-@keyframes welcome-zoom-in {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
+/* --- Welcome Screen Overhaul Animations --- */
+@keyframes aurora {
+  0% {
+    transform: translate(0%, 0%) rotate(0deg);
   }
 
-  to {
-    opacity: 1;
-    transform: scale(1);
+  25% {
+    transform: translate(10%, 10%) rotate(5deg);
+  }
+
+  50% {
+    transform: translate(-5%, 15%) rotate(-5deg);
+  }
+
+  75% {
+    transform: translate(-15%, -10%) rotate(10deg);
+  }
+
+  100% {
+    transform: translate(0%, 0%) rotate(0deg);
   }
 }
 
-@keyframes welcome-fade-out {
+@keyframes welcome-zoom-in {
   from {
-    opacity: 1;
-    pointer-events: auto;
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+    filter: blur(10px);
   }
 
   to {
-    opacity: 0;
-    pointer-events: none;
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
   }
 }
 
@@ -713,11 +784,92 @@ div.rpp-signature td {
 
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0) rotate(0);
   }
 
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-15px) rotate(2deg);
+  }
+}
+
+@keyframes progress-line {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-aurora {
+  animation: aurora 20s linear infinite;
+}
+
+.animate-welcome-zoom-in {
+  animation: welcome-zoom-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-welcome-float {
+  animation: welcome-float 6s ease-in-out infinite;
+}
+
+.animate-progress-line {
+  animation: progress-line 2.5s ease-in-out infinite;
+}
+
+.welcome-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.dark .welcome-glass {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* --- End Welcome Screen Overhaul Animations --- */
+
+/* Previous Animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-welcome-fade-out {
+  animation: fadeOut 0.8s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.05);
+    filter: blur(20px);
   }
 }
 
@@ -725,7 +877,7 @@ div.rpp-signature td {
 
   0%,
   100% {
-    opacity: 0.2;
+    opacity: 0.1;
     transform: scale(0.8);
   }
 
@@ -735,23 +887,20 @@ div.rpp-signature td {
   }
 }
 
-.animate-welcome-zoom-in {
-  animation: welcome-zoom-in 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.animate-welcome-fade-out {
-  animation: welcome-fade-out 0.8s ease-in-out forwards;
-}
-
-.animate-welcome-float {
-  animation: welcome-float 3s ease-in-out infinite;
-}
-
 .animate-dots-blink {
-  animation: dots-blink 1.4s infinite;
+  animation: dots-blink 1.4s infinite ease-in-out;
 }
 
-/* Progress Bar Animations */
+/* --- Utility Classes --- */
+.custom-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);
@@ -784,4 +933,38 @@ div.rpp-signature td {
 
 .animate-pulse-glow-head {
   animation: pulse-glow-head 1.5s ease-in-out infinite;
+}
+
+/* --- Premium Chart Utilities --- */
+.chart-container-glass {
+  @apply bg-white/40 dark:bg-black/40 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-2xl transition-all duration-500 rounded-[2rem];
+  isolation: isolate;
+}
+
+.chart-glow-blue {
+  box-shadow: 0 20px 50px -15px rgba(59, 130, 246, 0.3);
+}
+
+.chart-glow-green {
+  box-shadow: 0 20px 50px -15px rgba(16, 185, 129, 0.3);
+}
+
+.chart-glow-purple {
+  box-shadow: 0 20px 50px -15px rgba(139, 92, 246, 0.3);
+}
+
+.chart-glow-red {
+  box-shadow: 0 20px 50px -15px rgba(239, 68, 68, 0.3);
+}
+
+.chart-glow-orange {
+  box-shadow: 0 20px 50px -15px rgba(245, 158, 11, 0.3);
+}
+
+.chart-inner-border {
+  @apply relative after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-white/20 after:pointer-events-none;
+}
+
+.chart-card-gradient {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
 }

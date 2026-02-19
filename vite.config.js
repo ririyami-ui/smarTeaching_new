@@ -91,4 +91,17 @@ export default defineConfig({
       'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-utils': ['moment', 'react-hot-toast'],
+          'vendor-markdown': ['react-markdown', 'remark-gfm', 'remark-math', 'rehype-raw', 'rehype-katex', 'katex'],
+        }
+      }
+    }
+  }
 });

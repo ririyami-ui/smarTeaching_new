@@ -696,6 +696,16 @@ const RekapitulasiPage = () => {
 
       const rawViolations = Array.from(violationMap.values());
 
+      // Fetch student appreciations (Stars)
+      const appreciationsQuery = query(
+        collection(db, 'studentAppreciations'),
+        where('userId', '==', auth.currentUser.uid),
+        where('date', '>=', new Date(violationStartDate).toISOString().split('T')[0]),
+        where('date', '<=', endOfDay.toISOString().split('T')[0])
+      );
+      const appreciationsSnapshot = await getDocs(appreciationsQuery);
+      const appreciationsData = appreciationsSnapshot.docs.map(doc => doc.data());
+
       const studentViolationSummary = {};
       fetchedStudents.forEach(student => {
         studentViolationSummary[student.id] = {
@@ -705,6 +715,7 @@ const RekapitulasiPage = () => {
           gender: student.gender,
           violationCount: 0,
           totalPointsDeducted: 0,
+          totalStars: 0,
           violationsDetail: [],
           nilaiSikap: '',
           deskripsi: '',
@@ -719,10 +730,23 @@ const RekapitulasiPage = () => {
         }
       });
 
+      appreciationsData.forEach(app => {
+        if (studentViolationSummary[app.studentId]) {
+          studentViolationSummary[app.studentId].totalStars += (app.points || 0);
+        }
+      });
+
       const finalViolationData = Object.values(studentViolationSummary).map(studentData => {
-        const currentScore = 100 - studentData.totalPointsDeducted;
+        // Calculate score with bonus from stars: 100 - Violations + (Stars * 2)
+        const currentScore = 100 - studentData.totalPointsDeducted + (studentData.totalStars * 2);
         const nilaiSikap = calculateNilaiSikap(currentScore);
-        const deskripsi = generateDeskripsi(studentData.name, studentData.violationsDetail, currentScore, nilaiSikap);
+
+        // Enhance description with stars info
+        let deskripsi = generateDeskripsi(studentData.name, studentData.violationsDetail, currentScore, nilaiSikap);
+        if (studentData.totalStars > 0) {
+          deskripsi += ` | Keaktifan: ${studentData.totalStars} Bintang (Bonus +${studentData.totalStars * 2})`;
+        }
+
         return {
           ...studentData,
           nilaiSikap,
