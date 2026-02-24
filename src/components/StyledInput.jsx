@@ -60,7 +60,7 @@ const StyledInput = ({ label, type = 'text', voiceEnabled = false, onPolish, ...
     if (!props.value) return;
     setIsPolishing(true);
     try {
-      const polished = await polishJournalText(props.value, geminiModel);
+      const polished = await polishJournalText(props.value, geminiModel, label);
       if (props.onChange) {
         props.onChange({
           target: {
