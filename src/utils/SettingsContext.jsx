@@ -15,6 +15,8 @@ export const SettingsProvider = ({ children }) => {
         attitudeWeight: 50,
         scheduleNotificationsEnabled: true,
         schoolDays: 6, // 5 or 6 school days per week
+        activeTemplateId: null,
+        activeTemplateName: 'Jadwal Normal',
         userProfile: null,
         loadingSettings: true
     });
@@ -40,12 +42,17 @@ export const SettingsProvider = ({ children }) => {
                     if (data.geminiModel) {
                         localStorage.setItem('GEMINI_MODEL', data.geminiModel);
                     }
+                    if (data.activeTemplateId) {
+                        localStorage.setItem('ACTIVE_TEMPLATE_ID', data.activeTemplateId);
+                    }
 
                     setSettings(prev => ({
                         ...prev,
                         activeSemester: data.activeSemester || prev.activeSemester,
                         academicYear: data.academicYear || prev.academicYear,
                         geminiModel: data.geminiModel || prev.geminiModel,
+                        activeTemplateId: data.activeTemplateId || null,
+                        activeTemplateName: data.activeTemplateName || 'Jadwal Normal',
                         academicWeight: data.academicWeight !== undefined ? data.academicWeight : prev.academicWeight,
                         attitudeWeight: data.attitudeWeight !== undefined ? data.attitudeWeight : prev.attitudeWeight,
                         scheduleNotificationsEnabled: data.scheduleNotificationsEnabled !== undefined ? data.scheduleNotificationsEnabled : prev.scheduleNotificationsEnabled,

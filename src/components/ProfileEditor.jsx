@@ -18,6 +18,7 @@ export default function ProfileEditor() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [connectionStatus, setConnectionStatus] = useState({ type: '', message: '' }); // New local state
   const [academicYear, setAcademicYear] = useState('');
   const [activeSemester, setActiveSemester] = useState('Ganjil');
   const [testingKey, setTestingKey] = useState(false);
@@ -125,6 +126,7 @@ export default function ProfileEditor() {
     }
 
     setTestingKey(true);
+    setConnectionStatus({ type: '', message: '' });
     setError('');
     setSuccess('');
 
@@ -133,16 +135,20 @@ export default function ProfileEditor() {
       const model = genAI.getGenerativeModel({ model: geminiModel });
       const result = await model.generateContent("test");
       await result.response;
-      setSuccess('Koneksi berhasil! API Key Anda valid.');
+      setConnectionStatus({ type: 'success', message: 'Koneksi berhasil! API Key Anda valid.' });
     } catch (err) {
       console.error("Test connection failed:", err);
-      if (err.message.includes("429") || err.message.toLowerCase().includes("quota")) {
-        setError("API Key valid, namun kuota Anda saat ini sedang habis.");
+      let msg = "";
+      if (err.message.includes("503") || err.message.toLowerCase().includes("high demand")) {
+        msg = "Server Google sedang sibuk (Antri). Silakan coba lagi dlm 1-2 menit atau ganti ke model Gemini lainnya.";
+      } else if (err.message.includes("429") || err.message.toLowerCase().includes("quota")) {
+        msg = "API Key valid, namun kuota harian sedang habis.";
       } else if (err.message.includes("API_KEY_INVALID") || err.message.toLowerCase().includes("invalid")) {
-        setError("API Key tidak valid. Silakan periksa kembali.");
+        msg = "API Key tidak valid. Silakan periksa kembali.";
       } else {
-        setError("Gagal tes koneksi: " + err.message);
+        msg = "Gagal tes koneksi: " + err.message;
       }
+      setConnectionStatus({ type: 'error', message: msg });
     } finally {
       setTestingKey(false);
     }
@@ -292,17 +298,33 @@ export default function ProfileEditor() {
               {testingKey ? 'Mencoba...' : 'Tes Koneksi'}
             </button>
           </div>
+
+          {/* Local Connection Feedback */}
+          {connectionStatus.message && (
+            <div className={`text-xs p-2.5 rounded-xl border animate-in fade-in slide-in-from-top-2 duration-300 ${connectionStatus.type === 'success'
+              ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800/40 dark:text-green-400'
+              : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800/40 dark:text-red-400'
+              }`}>
+              <div className="flex items-center gap-2">
+                {connectionStatus.type === 'success' ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                )}
+                <span className="font-semibold">{connectionStatus.message}</span>
+              </div>
+            </div>
+          )}
           <div className="space-y-1 mt-4">
             <label className="text-xs font-semibold text-gray-500 ml-1">Model AI (Flash)</label>
             <StyledSelect
               value={geminiModel}
               onChange={(e) => setGeminiModel(e.target.value)}
             >
-              <option value="gemini-3-flash-preview">Gemini 3.0 Flash (Terbaru & Tercepat) - REKOMENDASI</option>
-              <option value="gemini-3-pro-preview">Gemini 3.0 Pro (Paling Cerdas - Preview)</option>
-              <option value="gemini-2.5-pro">Gemini 2.5 Pro (Sangat Cerdas - Stabil)</option>
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Cepat & Stabil)</option>
-              <option value="gemini-2.0-flash">Gemini 2.0 Flash (Sangat Cepat)</option>
+              <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash-Lite (Paling Baru & Efisien)</option>
+              <option value="gemini-3-flash-preview">Gemini 3.0 Flash (Tercepat & Rekomendasi)</option>
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Keseimbangan Kecepatan & Kecerdasan)</option>
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash (Legacy)</option>
             </StyledSelect>
             <p className="text-[10px] text-gray-400 mt-1 italic">
               *Jika model terbaru sedang sibuk, sistem akan otomatis menggunakan model stabil sebagai cadangan.

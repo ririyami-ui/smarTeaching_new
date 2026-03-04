@@ -106,72 +106,85 @@ export default function StudentEditor({ studentData, onSave, onClose, rombels, c
   };
 
   return (
-    <form onSubmit={handleUpdateStudent} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <StyledInput
-        type="text"
-        placeholder="Kode Siswa"
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        required
-      />
-      <StyledInput
-        type="number"
-        placeholder="No. Absen"
-        value={absen}
-        onChange={(e) => setAbsen(e.target.value)}
-        required
-      />
-      <StyledInput
-        type="text"
-        placeholder="NIS"
-        value={nis}
-        onChange={(e) => setNis(e.target.value)}
-        required
-      />
-      <StyledInput
-        type="text"
-        placeholder="NISN"
-        value={nisn}
-        onChange={(e) => setNisn(e.target.value)}
-        required
-      />
-      <div className="md:col-span-2">
+    <form onSubmit={handleUpdateStudent} className="space-y-6 p-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="space-y-1">
+          <StyledInput
+            type="text"
+            label="Kode Siswa"
+            placeholder="Kode unik siswa"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            required
+          />
+        </div>
+        <StyledInput
+          type="number"
+          label="No. Absen"
+          placeholder="Nomor urut"
+          value={absen}
+          onChange={(e) => setAbsen(e.target.value)}
+          required
+        />
+        <div className="md:col-span-2">
+          <StyledInput
+            type="text"
+            label="Nama Lengkap Siswa"
+            placeholder="Nama lengkap"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <StyledSelect label="Jenis Kelamin" value={gender} onChange={(e) => setGender(e.target.value)} required>
+          <option value="">Pilih Jenis Kelamin</option>
+          <option value="Laki-laki">Laki-laki</option>
+          <option value="Perempuan">Perempuan</option>
+        </StyledSelect>
+        <StyledSelect label="Rombel (Kelas)" value={classId} onChange={(e) => setClassId(e.target.value)} required>
+          <option value="">Pilih Rombel (Kelas)</option>
+          {classes.map((c) => (
+            <option key={c.id} value={c.id}>{c.rombel}</option>
+          ))}
+        </StyledSelect>
         <StyledInput
           type="text"
-          placeholder="Nama Siswa"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          label="NIS"
+          placeholder="Nomor Induk Siswa"
+          value={nis}
+          onChange={(e) => setNis(e.target.value)}
+          required
+        />
+        <StyledInput
+          type="text"
+          label="NISN"
+          placeholder="Nomor Induk Siswa Nasional"
+          value={nisn}
+          onChange={(e) => setNisn(e.target.value)}
+          required
+        />
+        <StyledInput
+          type="text"
+          label="Tempat Lahir"
+          placeholder="Kota/Kabupaten"
+          value={birthPlace}
+          onChange={(e) => setBirthPlace(e.target.value)}
+          required
+        />
+        <StyledInput
+          type="date"
+          label="Tanggal Lahir"
+          value={birthDate}
+          onChange={(e) => setBirthDate(e.target.value)}
           required
         />
       </div>
-      <StyledSelect value={gender} onChange={(e) => setGender(e.target.value)} required>
-        <option value="">Pilih Jenis Kelamin</option>
-        <option value="Laki-laki">Laki-laki</option>
-        <option value="Perempuan">Perempuan</option>
-      </StyledSelect>
-      <StyledInput
-        type="text"
-        placeholder="Tempat Lahir"
-        value={birthPlace}
-        onChange={(e) => setBirthPlace(e.target.value)}
-        required
-      />
-      <StyledInput
-        type="date"
-        placeholder="Tanggal Lahir"
-        value={birthDate}
-        onChange={(e) => setBirthDate(e.target.value)}
-        required
-      />
-      <StyledSelect value={classId} onChange={(e) => setClassId(e.target.value)} required>
-        <option value="">Pilih Rombel (Kelas)</option>
-        {classes.map((c) => (
-          <option key={c.id} value={c.id}>{c.rombel}</option>
-        ))}
-      </StyledSelect>
-      <div className="md:col-span-2 flex justify-end space-x-2">
-        <StyledButton type="button" variant="outline" onClick={onClose}>Batal</StyledButton>
-        <StyledButton type="submit" disabled={saving}>
+
+      <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
+        <StyledButton type="button" variant="outline" onClick={onClose} className="px-6 rounded-xl">
+          Batal
+        </StyledButton>
+        <StyledButton type="submit" disabled={saving} className="px-8 rounded-xl bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200 dark:shadow-none transition-all">
           {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
         </StyledButton>
       </div>

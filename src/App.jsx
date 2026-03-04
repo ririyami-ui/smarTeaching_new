@@ -34,6 +34,7 @@ const RekapIndividuPage = lazy(() => import('./pages/RekapIndividuPage.jsx'));
 const HandoutGeneratorPage = lazy(() => import('./pages/HandoutGeneratorPage.jsx'));
 const AssessmentKktpPage = lazy(() => import('./pages/PenilaianKktpPage.jsx'));
 const DatabaseCleanupPage = lazy(() => import('./pages/DatabaseCleanupPage.jsx'));
+const PortfolioPage = lazy(() => import('./pages/PortfolioPage.jsx'));
 
 // Loading component for Suspense
 const PageLoader = () => (
@@ -152,41 +153,46 @@ function App() {
           <div className="min-h-screen bg-background-light dark:bg-background-dark font-sans transition-colors duration-200">
             {user ? (
               <DashboardLayout user={user}>
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/" element={<DashboardPage />} />
-                    <Route path="/jadwal" element={<JadwalPage />} />
-                    <Route path="/absensi" element={<AbsensiPage />} />
-                    <Route path="/nilai" element={<NilaiPage />} />
-                    <Route path="/jurnal" element={<JurnalPage />} />
-                    <Route path="/rekapitulasi" element={<RekapitulasiPage />} />
-                    <Route path="/rekap-individu" element={<RekapIndividuPage />} />
-                    <Route path="/master-data" element={<MasterDataPage />} />
-                    <Route path="/about" element={<AboutPage installPrompt={installPrompt} onInstall={handleInstall} isPwaInstalled={isPwaInstalled} />} />
-                    <Route path="/analisis-kelas" element={<AnalisisKelasPage />} />
-                    <Route path="/sistem-peringatan" element={<EarlyWarningPage />} />
-                    <Route path="/asisten-guru" element={<AsistenGuruPage />} />
-                    <Route path="/analisis-rombel/:rombel" element={<AnalisisKelasPage />} />
-                    <Route path="/pelanggaran" element={<PelanggaranPage />} />
-                    <Route path="/leaderboard" element={<LeaderboardPage />} />
-                    <Route path="/program-mengajar" element={<ProgramMengajarPage />} />
-                    <Route path="/rpp" element={<LessonPlanPage />} />
-                    <Route path="/lkpd-generator" element={<LkpdGeneratorPage />} />
-                    <Route path="/handout-generator" element={<HandoutGeneratorPage />} />
-                    <Route path="/quiz-generator" element={<QuizGeneratorPage />} />
-                    <Route path="/penugasan" element={<PenugasanPage />} />
-                    <Route path="/penilaian-kktp" element={<AssessmentKktpPage />} />
-                    <Route path="/database-cleanup" element={<DatabaseCleanupPage />} />
-                  </Routes>
-                </Suspense>
+                <div className="animate-in fade-in zoom-in-95 duration-700 ease-out">
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      <Route path="/" element={<DashboardPage />} />
+                      <Route path="/jadwal" element={<JadwalPage />} />
+                      <Route path="/absensi" element={<AbsensiPage />} />
+                      <Route path="/nilai" element={<NilaiPage />} />
+                      <Route path="/jurnal" element={<JurnalPage />} />
+                      <Route path="/rekapitulasi" element={<RekapitulasiPage />} />
+                      <Route path="/rekap-individu" element={<RekapIndividuPage />} />
+                      <Route path="/master-data" element={<MasterDataPage />} />
+                      <Route path="/about" element={<AboutPage installPrompt={installPrompt} onInstall={handleInstall} isPwaInstalled={isPwaInstalled} />} />
+                      <Route path="/analisis-kelas" element={<AnalisisKelasPage />} />
+                      <Route path="/sistem-peringatan" element={<EarlyWarningPage />} />
+                      <Route path="/asisten-guru" element={<AsistenGuruPage />} />
+                      <Route path="/analisis-rombel/:rombel" element={<AnalisisKelasPage />} />
+                      <Route path="/pelanggaran" element={<PelanggaranPage />} />
+                      <Route path="/leaderboard" element={<LeaderboardPage />} />
+                      <Route path="/program-mengajar" element={<ProgramMengajarPage />} />
+                      <Route path="/rpp" element={<LessonPlanPage />} />
+                      <Route path="/lkpd-generator" element={<LkpdGeneratorPage />} />
+                      <Route path="/handout-generator" element={<HandoutGeneratorPage />} />
+                      <Route path="/quiz-generator" element={<QuizGeneratorPage />} />
+                      <Route path="/penugasan" element={<PenugasanPage />} />
+                      <Route path="/penilaian-kktp" element={<AssessmentKktpPage />} />
+                      <Route path="/portfolio" element={<PortfolioPage />} />
+                      <Route path="/database-cleanup" element={<DatabaseCleanupPage />} />
+                    </Routes>
+                  </Suspense>
+                </div>
               </DashboardLayout>
             ) : (
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="*" element={<Navigate to="/login" replace />} />
-                </Routes>
-              </Suspense>
+              <div className="animate-in fade-in duration-1000">
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="*" element={<Navigate to="/login" replace />} />
+                  </Routes>
+                </Suspense>
+              </div>
             )}
           </div>
         </ChatProvider>

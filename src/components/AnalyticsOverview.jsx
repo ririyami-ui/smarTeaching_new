@@ -5,6 +5,14 @@ import { useSettings } from '../utils/SettingsContext';
 import { TrendingUp, TrendingDown, Minus, Calendar, BookOpen, ClipboardCheck } from 'lucide-react';
 import moment from 'moment';
 
+// Glass Icon Wrapper Component
+const GlassIcon = ({ icon: Icon, colorClass = "glass-glow-blue", size = 20 }) => (
+    <div className={`glass-icon-container ${colorClass} w-10 h-10 sm:w-12 sm:h-12 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
+        <Icon size={size} className="text-gray-800 dark:text-white opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none"></div>
+    </div>
+);
+
 const TrendIndicator = ({ current, previous, suffix = '%', isInverted = false }) => {
     if (previous === 0 && current === 0) {
         return <span className="text-gray-400 text-xs flex items-center gap-1"><Minus size={14} /> Tidak ada data</span>;
@@ -25,15 +33,13 @@ const TrendIndicator = ({ current, previous, suffix = '%', isInverted = false })
     );
 };
 
-const StatCard = ({ icon: Icon, title, value, suffix = '', trend, color, glowClass, index }) => (
+const StatCard = ({ icon: Icon, title, value, suffix = '', trend, colorClass, glowClass, index }) => (
     <div
-        className={`chart-container-glass p-5 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1 ${glowClass} animate-fade-in-up`}
+        className={`chart-container-glass p-4 sm:p-5 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1 ${glowClass} animate-fade-in-up group`}
         style={{ animationDelay: `${index * 150}ms` }}
     >
         <div className="flex items-start justify-between mb-3">
-            <div className={`p-3 rounded-2xl bg-gradient-to-br ${color} shadow-lg ring-4 ring-white/10`}>
-                <Icon size={24} className="text-white" />
-            </div>
+            <GlassIcon icon={Icon} colorClass={colorClass} size={24} />
             <div className="flex items-center gap-1">
                 {trend}
             </div>
@@ -182,15 +188,15 @@ const AnalyticsOverview = () => {
     }
 
     return (
-        <div className="chart-container-glass p-6 md:p-8 relative overflow-hidden group">
+        <div className="chart-container-glass p-4 sm:p-6 md:p-8 relative overflow-hidden group">
             <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full group-hover:bg-blue-500/20 transition-colors duration-700"></div>
 
-            <div className="flex items-center gap-4 mb-8 relative z-10">
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-xl shadow-blue-500/20 ring-4 ring-white/10">
-                    <Calendar size={24} />
+            <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8 relative z-10">
+                <div className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-xl shadow-blue-500/20 ring-4 ring-white/10">
+                    <Calendar size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-black bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent tracking-tight">
+                    <h2 className="text-xl sm:text-2xl font-black bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent tracking-tight">
                         Ringkasan Performa
                     </h2>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -214,7 +220,7 @@ const AnalyticsOverview = () => {
                     value={weeklyStats.thisWeek.attendance.toFixed(1)}
                     suffix="%"
                     trend={<TrendIndicator current={weeklyStats.thisWeek.attendance} previous={weeklyStats.lastWeek.attendance} suffix="%" />}
-                    color="from-emerald-400 to-green-600"
+                    colorClass="glass-glow-green"
                     glowClass="hover:chart-glow-green"
                 />
 
@@ -225,7 +231,7 @@ const AnalyticsOverview = () => {
                     value={weeklyStats.thisWeek.avgGrade.toFixed(1)}
                     suffix="poin"
                     trend={<TrendIndicator current={weeklyStats.thisWeek.avgGrade} previous={weeklyStats.lastWeek.avgGrade} suffix="" />}
-                    color="from-blue-400 to-indigo-600"
+                    colorClass="glass-glow-blue"
                     glowClass="hover:chart-glow-blue"
                 />
 
@@ -236,7 +242,7 @@ const AnalyticsOverview = () => {
                     value={weeklyStats.thisWeek.journals}
                     suffix="sesi"
                     trend={<TrendIndicator current={weeklyStats.thisWeek.journals} previous={weeklyStats.lastWeek.journals} suffix="" />}
-                    color="from-purple-400 to-pink-600"
+                    colorClass="glass-glow-purple"
                     glowClass="hover:chart-glow-purple"
                 />
             </div>

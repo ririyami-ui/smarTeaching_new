@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { collection, getDocs, addDoc, deleteDoc, doc, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, query, where, orderBy, limit } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import toast from 'react-hot-toast';
 
@@ -24,6 +24,7 @@ export default function StudentMasterData() {
   const [newBirthDate, setNewBirthDate] = useState('');
   const [newClassId, setNewClassId] = useState('');
   const [newAbsen, setNewAbsen] = useState('');
+  const [lastUsedCode, setLastUsedCode] = useState('');
   const [file, setFile] = useState(null);
   const [rombels, setRombels] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -31,6 +32,45 @@ export default function StudentMasterData() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+
+  // Find last used code overall for hint
+  useEffect(() => {
+    if (students.length > 0) {
+      // Sort locally to find the "highest" code
+      const sortedByCode = [...students].sort((a, b) => String(b.code).localeCompare(String(a.code), undefined, { numeric: true }));
+      if (sortedByCode[0]?.code) {
+        setLastUsedCode(sortedByCode[0].code);
+      }
+    }
+  }, [students]);
+
+  // Auto-calculate next attendance number locally
+  useEffect(() => {
+    // If no class selected, we can't calculate.
+    if (!newClassId) {
+      setNewAbsen('');
+      return;
+    }
+
+    const selectedClassObj = classes.find(c => c.id === newClassId);
+
+    // Filter students belonging to this class (by ID or Rombel name)
+    // Use trimmed and case-insensitive matching for Rombel names to be safe
+    const classStudents = students.filter(s => {
+      const matchId = s.classId && s.classId === newClassId;
+      const matchRombel = selectedClassObj &&
+        s.rombel &&
+        s.rombel.trim().toLowerCase() === selectedClassObj.rombel.trim().toLowerCase();
+      return matchId || matchRombel;
+    });
+
+    const existingAbsen = classStudents
+      .map(s => parseInt(s.absen))
+      .filter(n => !isNaN(n));
+
+    const maxAbsen = existingAbsen.length > 0 ? Math.max(...existingAbsen) : 0;
+    setNewAbsen(String(maxAbsen + 1));
+  }, [newClassId, students, classes]);
 
   const handleEditStudent = (student) => {
     setSelectedStudent(student);
@@ -56,19 +96,20 @@ export default function StudentMasterData() {
       return;
     }
     try {
-      let q;
-      if (selectedRombelFilter) {
-        q = query(studentsCollectionRef, where('userId', '==', auth.currentUser.uid), where('rombel', '==', selectedRombelFilter), orderBy('code'));
-      } else {
-        q = query(studentsCollectionRef, where('userId', '==', auth.currentUser.uid), orderBy('code'));
-      }
+      // Remove orderBy('code') to avoid index requirements that might cause query failure
+      const q = query(studentsCollectionRef, where('userId', '==', auth.currentUser.uid));
       const data = await getDocs(q);
       setStudents(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     } catch (error) {
       console.error("Error getting students: ", error);
       toast.error('Gagal memuat data siswa.');
     }
-  }, [selectedRombelFilter]);
+  }, []);
+
+  // Derived state for the table
+  const filteredStudents = selectedRombelFilter
+    ? students.filter(s => s.rombel === selectedRombelFilter)
+    : students;
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -138,6 +179,7 @@ export default function StudentMasterData() {
         setNewBirthDate('');
         setNewClassId('');
         setNewAbsen('');
+        setLastUsedCode(newStudentCode); // Update hint with what was just saved
         getStudents();
         return 'Siswa berhasil ditambahkan!';
       },
@@ -353,39 +395,94 @@ export default function StudentMasterData() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl shadow-lg">
-        <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Tambah Data Siswa Baru</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StyledInput type="text" placeholder="Kode Siswa" value={newStudentCode} onChange={(e) => setNewStudentCode(e.target.value)} />
-          <StyledInput type="number" placeholder="No. Absen" value={newAbsen} onChange={(e) => setNewAbsen(e.target.value)} />
-          <StyledInput type="text" placeholder="NIS" value={newNIS} onChange={(e) => setNewNIS(e.target.value)} />
-          <StyledInput type="text" placeholder="NISN" value={newNISN} onChange={(e) => setNewNISN(e.target.value)} />
-          <StyledInput type="text" placeholder="Nama Siswa" value={newStudentName} onChange={(e) => setNewStudentName(e.target.value)} />
-          <StyledSelect value={newGender} onChange={(e) => setNewGender(e.target.value)}>
-            <option value="">Pilih Jenis Kelamin</option>
-            <option value="Laki-laki">Laki-laki</option>
-            <option value="Perempuan">Perempuan</option>
-          </StyledSelect>
-          <StyledInput type="text" placeholder="Tempat Lahir" value={newBirthPlace} onChange={(e) => setNewBirthPlace(e.target.value)} />
-          <StyledInput type="date" placeholder="Tanggal Lahir" value={newBirthDate} onChange={(e) => setNewBirthDate(e.target.value)} />
-          <StyledSelect value={newClassId} onChange={(e) => setNewClassId(e.target.value)}>
+      <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-gray-800/40 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 group">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2.5 rounded-xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform duration-500">
+            <Plus size={20} />
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 dark:text-white tracking-tight">Tambah Data Siswa Baru</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-1.5">
+            <StyledInput
+              type="text"
+              label="Kode Siswa"
+              placeholder="Contoh: S001"
+              value={newStudentCode}
+              onChange={(e) => setNewStudentCode(e.target.value)}
+            />
+            {lastUsedCode && (
+              <p className="text-[10px] font-bold text-purple-500 dark:text-purple-400 uppercase tracking-widest ml-1 animate-pulse">
+                Saran: Kode terakhir adalah "{lastUsedCode}"
+              </p>
+            )}
+          </div>
+
+          <StyledSelect
+            label="Rombel (Kelas)"
+            value={newClassId}
+            onChange={(e) => setNewClassId(e.target.value)}
+          >
             <option value="">Pilih Rombel (Kelas)</option>
             {classes.map((c) => (
               <option key={c.id} value={c.id}>{c.rombel}</option>
             ))}
           </StyledSelect>
+
+          <StyledInput
+            type="number"
+            label="No. Absen"
+            placeholder="Otomatis terisi"
+            value={newAbsen}
+            className="bg-purple-50/50 dark:bg-purple-900/10 border-purple-100 dark:border-purple-800/50 font-bold text-purple-700 dark:text-purple-300"
+            onChange={(e) => setNewAbsen(e.target.value)}
+          />
+
+          <div className="lg:col-span-2">
+            <StyledInput type="text" label="Nama Lengkap Siswa" placeholder="Nama lengkap sesuai ijazah" value={newStudentName} onChange={(e) => setNewStudentName(e.target.value)} />
+          </div>
+
+          <StyledSelect label="Jenis Kelamin" value={newGender} onChange={(e) => setNewGender(e.target.value)}>
+            <option value="">Pilih Jenis Kelamin</option>
+            <option value="Laki-laki">Laki-laki</option>
+            <option value="Perempuan">Perempuan</option>
+          </StyledSelect>
+
+          <StyledInput type="text" label="NIS (Opsional)" placeholder="Nomor Induk Siswa" value={newNIS} onChange={(e) => setNewNIS(e.target.value)} />
+          <StyledInput type="text" label="NISN (Opsional)" placeholder="Nomor Induk Siswa Nasional" value={newNISN} onChange={(e) => setNewNISN(e.target.value)} />
+
+          <StyledInput type="text" label="Tempat Lahir" placeholder="Kota/Kabupaten" value={newBirthPlace} onChange={(e) => setNewBirthPlace(e.target.value)} />
+          <StyledInput type="date" label="Tanggal Lahir" value={newBirthDate} onChange={(e) => setNewBirthDate(e.target.value)} />
         </div>
-        <div className="mt-4 flex justify-end">
-          <StyledButton onClick={addStudent}><Plus className="mr-2" size={16} />Tambah</StyledButton>
+
+        <div className="mt-8 flex justify-end">
+          <StyledButton onClick={addStudent} className="px-8 py-3 rounded-2xl shadow-lg shadow-purple-200 dark:shadow-none bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700">
+            <Plus className="mr-2" size={18} />
+            Simpan Data Siswa
+          </StyledButton>
         </div>
       </div>
 
-      <div className="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl shadow-lg">
-        <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Impor/Ekspor Data</h3>
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <StyledInput type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
-          <StyledButton onClick={importStudents} variant="secondary"><Upload className="mr-2" size={16} />Impor</StyledButton>
-          <StyledButton onClick={downloadTemplate} variant="outline"><Download className="mr-2" size={16} />Unduh Template</StyledButton>
+      <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-gray-800/40 p-8 rounded-3xl shadow-xl">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2.5 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+            <Upload size={20} />
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 dark:text-white tracking-tight">Impor/Ekspor Data Pasif</h3>
+        </div>
+        <div className="flex flex-col md:flex-row items-end gap-6">
+          <div className="flex-1 w-full">
+            <StyledInput type="file" label="Pilih File Excel" accept=".xlsx, .xls" onChange={handleFileUpload} />
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <StyledButton onClick={importStudents} variant="secondary" className="px-6 rounded-xl">
+              <Upload className="mr-2" size={16} />Impor Data
+            </StyledButton>
+            <StyledButton onClick={downloadTemplate} variant="outline" className="px-6 rounded-xl">
+              <Download className="mr-2" size={16} />Unduh Template
+            </StyledButton>
+          </div>
         </div>
       </div>
 
@@ -404,24 +501,41 @@ export default function StudentMasterData() {
             ))}
           </StyledSelect>
         </div>
-        {students.length === 0 ? (
-          <p className="text-text-muted-light dark:text-text-muted-dark">Tidak ada data siswa yang tersedia.</p>
+        {filteredStudents.length === 0 ? (
+          <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-gray-800/40 p-12 rounded-3xl text-center">
+            <p className="text-text-muted-light dark:text-text-muted-dark font-medium italic">Tidak ada data siswa yang tersedia untuk rombel ini.</p>
+          </div>
         ) : (
-          <div className="h-[600px] overflow-y-auto">
-            <StyledTable headers={['Kode Siswa', 'NIS', 'NISN', 'Nama Siswa', 'Tempat Tgl. Lahir', 'Kelas', 'Aksi']}>
-              {students.map((student) => (
-                <tr key={student.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-light dark:text-text-dark">{student.code}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted-light dark:text-text-muted-dark">{student.nis}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted-light dark:text-text-muted-dark">{student.nisn}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted-light dark:text-text-muted-dark">{student.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted-light dark:text-text-muted-dark">
+          <div className="h-[650px] overflow-y-auto custom-scrollbar bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-gray-800/40 rounded-3xl shadow-xl overflow-hidden">
+            <StyledTable headers={['Abs', 'Kode', 'NIS/N', 'Nama Siswa', 'Tgl. Lahir', 'Kelas', 'Aksi']}>
+              {filteredStudents.map((student) => (
+                <tr key={student.id} className="hover:bg-purple-50/50 dark:hover:bg-purple-900/10 transition-colors duration-300 group">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-purple-600 dark:text-purple-400">
+                    {String(student.absen).padStart(2, '0')}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-text-light dark:text-text-dark tracking-tight">
+                    {student.code}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-xs text-text-muted-light dark:text-text-muted-dark leading-tight">
+                    <p>{student.nis || '-'}</p>
+                    <p className="opacity-50">{student.nisn || '-'}</p>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-text-light dark:text-text-dark group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                    {student.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-xs text-text-muted-light dark:text-text-muted-dark font-medium italic opacity-70">
                     {`${student.birthPlace}, ${formatDisplayDate(student.birthDate)}`}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted-light dark:text-text-muted-dark">{student.rombel}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-xs">
+                    <span className="px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter">
+                      {student.rombel}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <StyledButton onClick={() => handleEditStudent(student)} variant="primary" size="sm" className="mr-2"><Edit size={16} /></StyledButton>
-                    <StyledButton onClick={() => deleteStudent(student.id)} variant="danger" size="sm"><Trash2 size={16} /></StyledButton>
+                    <div className="flex gap-2">
+                      <StyledButton onClick={() => handleEditStudent(student)} variant="primary" size="sm" className="bg-blue-500/10 hover:bg-blue-500 text-blue-600 hover:text-white border-transparent shadow-none"><Edit size={16} /></StyledButton>
+                      <StyledButton onClick={() => deleteStudent(student.id)} variant="danger" size="sm" className="bg-red-500/10 hover:bg-red-500 text-red-600 hover:text-white border-transparent shadow-none"><Trash2 size={16} /></StyledButton>
+                    </div>
                   </td>
                 </tr>
               ))}

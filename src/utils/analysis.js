@@ -113,12 +113,18 @@ export const runEarlyWarningAnalysis = async (userId, activeSemester, academicYe
 
   try {
     // 1. Fetch all necessary data in parallel
-    const [students, grades, attendance, journals, infractions] = await Promise.all([
+    const [students, grades, attendance, journals, infractions, appreciations] = await Promise.all([
       getAllStudents(userId),
       getAllGrades(userId, null, activeSemester, academicYear),
       getAllAttendance(userId, null, activeSemester, academicYear),
       getAllJournals(userId, activeSemester, academicYear),
       getAllInfractions(userId, null, activeSemester, academicYear),
+      getDocs(query(
+        collection(db, 'studentAppreciations'),
+        where('userId', '==', userId),
+        where('semester', '==', activeSemester),
+        where('academicYear', '==', academicYear)
+      )).then(snap => snap.docs.map(doc => doc.data()))
     ]);
 
     const flaggedStudents = {};
@@ -136,6 +142,15 @@ export const runEarlyWarningAnalysis = async (userId, activeSemester, academicYe
       studentInfractions[infraction.studentId].records.push(infraction);
     });
 
+    // Map appreciations (stars) to students
+    const studentStars = {};
+    appreciations.forEach(app => {
+      if (!studentStars[app.studentId]) {
+        studentStars[app.studentId] = 0;
+      }
+      studentStars[app.studentId] += (app.points || 0);
+    });
+
     // Helper to add a warning and associate data with a student
     const addWarning = (studentId, reason, subject = null) => {
       if (!flaggedStudents[studentId]) {
@@ -147,6 +162,7 @@ export const runEarlyWarningAnalysis = async (userId, activeSemester, academicYe
             subjectsWithWarnings: [],
             infractions: studentInfractions[studentId]?.records || [], // Always attach infractions if they exist
             totalPointsDeducted: studentInfractions[studentId]?.totalPointsDeducted || 0,
+            totalStars: studentStars[studentId] || 0,
           };
         }
       }
@@ -226,7 +242,10 @@ export const runEarlyWarningAnalysis = async (userId, activeSemester, academicYe
     // 4. Analyze Infractions
     for (const studentId in studentInfractions) {
       const infractionData = studentInfractions[studentId];
-      const currentScore = 100 - infractionData.totalPointsDeducted;
+      const stars = studentStars[studentId] || 0;
+      const rawScore = 100 - infractionData.totalPointsDeducted + (stars * 2);
+      const currentScore = Math.min(100, Math.max(0, rawScore));
+
       if (currentScore < INFRACTION_SCORE_THRESHOLD) {
         addWarning(
           studentId,

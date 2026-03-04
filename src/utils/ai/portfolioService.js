@@ -8,23 +8,29 @@ import { BSKAP_DATA } from '../bskapData';
  * @param {Object} teacherProfile - Profile info (name, school, etc.).
  * @returns {Promise<string>} The generated chapter content in Markdown.
  */
-export const generatePortfolioChapter = async (chapterId, contextData, teacherProfile, selectedSubject) => {
+export const generatePortfolioChapter = async (chapterId, contextData, teacherProfile, selectedSubject, previousChapters = {}) => {
     try {
         const model = getModel();
 
         const mapelHeader = selectedSubject ? `\nFOKUS MATA PELAJARAN: ${selectedSubject}\n` : '';
 
+        const syncContext = Object.entries(previousChapters)
+            .filter(([id]) => id != chapterId) // Don't include self
+            .map(([id, data]) => `BAB ${id}: ${data.content.substring(0, 500)}...`)
+            .join('\n\n');
+
         const STRICT_DATA_RULES = `
-            ATURAN KETAT DATA-DRIVEN (ANTI-HALLUCINATION):
-            1. DILARANG KERAS mengarang data, nilai, atau aktivitas yang tidak ada dalam 'contextData'.
-            2. Jika data kosong, narasikan secara positif tentang potensi perbaikan, JANGAN mengarang kejadian.
-            3. Fokus pada ANALISIS DATA AKTUAL, bukan sekadar basa-basi administratif.
-            4. TONE NARASI: Gunakan gaya bahasa akademik yang objektif dan berwibawa.
-            5. PENYEBUTAN DIRI: Selalu gunakan istilah "Penulis" untuk merujuk pada diri guru dalam narasi laporan. JANGAN menyebutkan nama guru di dalam kalimat naratif agar kesan laporan lebih mendalam dan formal.
-            6. VISUALISASI TEKSTUAL: Gunakan TABEL MARKDOWN untuk menyajikan data statistik (nilai, daftar kelas, jumlah siswa, pelanggaran). Gunakan BULLET POINTS untuk daftar sistematis atau poin-poin kesimpulan.
-            7. PENYAJIAN DATA: Setiap poin penjelasan penting HARUS dipertegas dengan penyajian data dalam bentuk tabel di tengah-tengah penjelasan jika relevan.
-            8. ETIKA DATA KOSONG: DILARANG KERAS menggunakan istilah "Data Kosong", "null", atau "undefined" jika suatu nilai tidak ditemukan. Gunakan kalimat profesional seperti: "Informasi sedang diperbarui", "Data dalam tahap sinkronisasi", atau "Belum tersedia catatan khusus untuk periode ini".
+            ATURAN KETAT DATA-DRIVEN:
+            1. DILARANG KERAS mengarang data yang tidak ada dalam 'contextData'.
+            2. Jika data kosong, gunakan kalimat profesional seperti "Data dalam tahap sinkronisasi" atau "Belum tersedia catatan khusus". JANGAN gunakan kata "Kosong" atau "null".
+            3. PENYEBUTAN DIRI: Gunakan istilah "Penulis" untuk merujuk pada guru.
+            4. VISUALISASI DATA: Gunakan Tabel Markdown untuk data statistik.
+            5. INTEGRASI GRAFIK: KHUSUS untuk BAB 2, 3, 4, 5, dan 6, Anda WAJIB menyertakan placeholder [VISUAL_CHART] di posisi yang paling strategis sebagai dasar analisis atau pendukung narasi Anda. AI akan merender grafik aktual di posisi tersebut.
+            6. TONE: Senior Professional Educator (Formal, Objektif, Visioner).
+            7. SINKRONISASI ANTAR BAB: Pastikan narasi Bab ${chapterId} ini selaras dengan bab-bab sebelumnya yang sudah ditulis (jika ada). Jangan ada kontradiksi dalam penggunaan istilah atau angka.
         `;
+
+        const PREVIOUS_CHAPTERS_PROMPT = syncContext ? `\nKONTEKS BAB SEBELUMNYA (UNTUK SINKRONISASI):\n${syncContext}\n` : '';
 
         const prompts = {
             1: `
@@ -32,6 +38,7 @@ export const generatePortfolioChapter = async (chapterId, contextData, teacherPr
                 Tugas: Tulis narasi pembuka portofolio semester yang elegan dan profesional.
                 
                 ${STRICT_DATA_RULES}
+                ${PREVIOUS_CHAPTERS_PROMPT}
 
                 STRUKTUR WAJIB (HARUS ADA):
                 1.1. Latar Belakang
@@ -60,26 +67,30 @@ export const generatePortfolioChapter = async (chapterId, contextData, teacherPr
                 - Gunakan data dari contextData untuk mengisi bagian yang relevan.
             `,
             2: `
-                BAB II: PEMETAAN KURIKULUM & TARGET PEMBELAJARAN
+                BAB II: PEMETAAN KURIKULUM & TARGET PENCAPAIAN
                 ${STRICT_DATA_RULES}
-                ${mapelHeader}
+                ${PREVIOUS_CHAPTERS_PROMPT}
                 Tugas: Tulis narasi profesional untuk Bab II berdasarkan data kurikulum aktual dari sistem.
                 
+                ${mapelHeader}
                 STRUKTUR WAJIB (HARUS ADA):
                 2.1. Analisis Capaian Pembelajaran (CP) dan Alur Tujuan Pembelajaran (ATP).
                 2.2. Target Ketuntasan Minimal/Kriteria Ketercapaian Tujuan Pembelajaran (KKTP).
                 2.3. Relevansi Materi dengan Kebutuhan Siswa Abad 21 (4C) dan Profil Lulusan / Karakter.
                 
                 INSTRUKSI KHUSUS:
-                - Output HARUS diawali dengan judul: BAB II: PEMETAAN KURIKULUM & TARGET PEMBELAJARAN.
-                - Fokus pada bagaimana kurikulum diturunkan menjadi tujuan pembelajaran yang konkret.
+                - Output HARUS diawali dengan judul: BAB II: PEMETAAN KURIKULUM & TARGET PENCAPAIAN.
+                - Sertakan placeholder [VISUAL_CHART] untuk menampilkan visualisasi distribusi materi/kurikulum.
+                - Narasikan bagaimana target materi semester ini disusun untuk memastikan kedalaman pemahaman siswa.
+                - Interpretasikan data kurikulum secara profesional.
                 
                 Data: ${JSON.stringify(contextData)}
                 Profil Guru: ${JSON.stringify(teacherProfile)}
             `,
             3: `
-                BAB III: STRATEGI PEMBELAJARAN & IMPLEMENTASI (THE PEDAGOGY)
+                BAB III: STRATEGI PEMBELAJARAN (PEDAGOGI)
                 ${STRICT_DATA_RULES}
+                ${PREVIOUS_CHAPTERS_PROMPT}
                 Tugas: Tulis narasi profesional untuk Bab III berdasarkan log jurnal mengajar.
                 
                 ${mapelHeader}
@@ -90,15 +101,17 @@ export const generatePortfolioChapter = async (chapterId, contextData, teacherPr
                 3.4. Adaptasi Pembelajaran untuk Berbagai Tingkat Kemampuan (Diferensiasi).
                 
                 INSTRUKSI KHUSUS:
-                - Output HARUS diawali dengan judul: BAB III: STRATEGI PEMBELAJARAN & IMPLEMENTASI (THE PEDAGOGY).
-                - Gunakan data jurnal untuk membuktikan penerapan metode tersebut.
+                - Output HARUS diawali dengan judul: BAB III: STRATEGI PEMBELAJARAN (PEDAGOGI).
+                - Sertakan placeholder [VISUAL_CHART] untuk menampilkan grafik frekuensi pelaksanaan pembelajaran.
                 - ANALISIS REFLEKSI: Perhatikan bagian 'reflection' dan 'followUp' dalam data jurnal untuk menggambarkan bagaimana Penulis mengevaluasi dan memperbaiki kualitas pengajaran secara berkelanjutan.
+                - Tekankan pada efektivitas metode yang digunakan (misal: diskusi, praktik, atau metode lainnya).
                 
                 Data Jurnal: ${JSON.stringify(contextData)}
             `,
             4: `
-                BAB IV: ANALISIS KOMPREHENSIF HASIL BELAJAR (MAPEL)
+                BAB IV: ANALISIS HASIL BELAJAR & PENILAIAN MATA PELAJARAN
                 ${STRICT_DATA_RULES}
+                ${PREVIOUS_CHAPTERS_PROMPT}
                 Tugas: Tulis narasi profesional untuk Bab IV berdasarkan statistik nilai absolut dari sistem.
                 
                 ${mapelHeader}
@@ -110,14 +123,17 @@ export const generatePortfolioChapter = async (chapterId, contextData, teacherPr
                 4.5. Rekomendasi Strategis dan Keberhasilan Program Remedial/Pengayaan.
                 
                 INSTRUKSI KHUSUS:
-                - Output HARUS diawali dengan judul: BAB IV: ANALISIS KOMPREHENSIF HASIL BELAJAR (MAPEL).
+                - Output HARUS diawali dengan judul: BAB IV: ANALISIS HASIL BELAJAR & PENILAIAN MATA PELAJARAN.
+                - Sertakan placeholder [VISUAL_CHART] untuk menampilkan grafik capaian nilai.
+                - Fokus pada keberhasilan ketuntasan dan area remedi yang diperlukan.
                 - Interpretasikan data tabel secara naratif, jangan hanya menyajikan angka.
                 
                 Data Nilai: ${JSON.stringify(contextData)}
             `,
             5: `
-                BAB V: DISIPLIN AKADEMIK & ETIKA BELAJAR
+                BAB V: DISIPLIN AKADEMIK & ETIKA BELAJAR SISWA
                 ${STRICT_DATA_RULES}
+                ${PREVIOUS_CHAPTERS_PROMPT}
                 Tugas: Tulis narasi profesional untuk Bab V berdasarkan log perilaku dan kedisiplinan.
                 
                 ${mapelHeader}
@@ -128,7 +144,9 @@ export const generatePortfolioChapter = async (chapterId, contextData, teacherPr
                 5.4. Identifikasi Area Perbaikan Karakter Siswa.
                 
                 INSTRUKSI KHUSUS:
-                - Output HARUS diawali dengan judul: BAB V: DISIPLIN AKADEMIK & ETIKA BELAJAR.
+                - Output HARUS diawali dengan judul: BAB V: DISIPLIN AKADEMIK & ETIKA BELAJAR SISWA.
+                - Sertakan placeholder [VISUAL_CHART] untuk menampilkan grafik tren kedisiplinan/pelanggaran.
+                - Hubungkan data pelanggaran dengan iklim belajar di kelas.
                 - Jika data 'infractions' kosong, narasikan sebagai hal positif (kelas tertib).
                 
                 Data: ${JSON.stringify(contextData)}
@@ -136,6 +154,7 @@ export const generatePortfolioChapter = async (chapterId, contextData, teacherPr
             6: `
                 BAB VI: EVALUASI PERIODE & ANALISIS SWOT
                 ${STRICT_DATA_RULES}
+                ${PREVIOUS_CHAPTERS_PROMPT}
                 Tugas: Lakukan analisis SWOT mendalam tentang kinerja pengajaran semester ini.
                 
                 ${mapelHeader}
@@ -153,6 +172,7 @@ export const generatePortfolioChapter = async (chapterId, contextData, teacherPr
             7: `
                 BAB VII: PENUTUP & REKOMENDASI KEBIJAKAN MAPEL
                 ${STRICT_DATA_RULES}
+                ${PREVIOUS_CHAPTERS_PROMPT}
                 Tugas: Tulis kesimpulan dan rekomendasi untuk sekolah berdasarkan keseluruhan data.
                 
                 ${mapelHeader}
@@ -182,7 +202,7 @@ PANDUAN KETAT(SYSTEM INSTRUCTION):
 2. STRUKTUR PARAGRAF DINAMIS & EKSPANSIF: Setiap poin wajib diuraikan menjadi esai mini(4 - 6 paragraf panjang) yang komprehensif.Paragraf harus dinamis: Anda SANGAT DIPERBOLEHKAN menggunakan BULLET POINTS atau NUMBERING DENGAN WAJAR jika memang efektif untuk merinci suatu teori, hasil observasi, atau langkah konkret.Jangan sampai tulisan menjadi kaku.
 3. INTEGRASI TABEL DAN VISUALISASI: WAJIB menyisipkan TABEL MARKDOWN TEPAT DI SELA - SELA PARAGRAF analisis untuk memvisualisasikan data kuantitatif, daftar nilai, atau rekapitulasi numerik.Jangan menaruh semua tabel di akhir judul, melainkan integrasikan langsung sebagai landasan pembahasan di tengah argumen.
 4. KEPATUHAN FAKTA & SUMBER RUJUKAN(ANTI - HALUSINASI): DILARANG KERAS MENGARANG BEBAS.Setiap argumen atau analisis harus memiliki rujukan yang jelas dan logis(baik merujuk pada data JSON yang dilampirkan, Standar Kurikulum BSKAP, maupun teori pedagogi / psikologi pendidikan yang diakui).
-5. KUTIPAN TEORI LOKAL DIBANGUN BERTATAP: Saat membahas metode / teori(misal: discovery learning, psikologi kognitif), Anda WAJIB menyebutkan tokoh / teorinya sebagai kutipan sebut nama di dalam teks.JANGAN MEMBUAT DAFTAR PUSTAKA DI SETIAP BAB.Format Daftar Pustaka HANYA diizinkan muncul pada Bab Kesimpulan(BAB VI).
+5. KUTIPAN TEORI LOKAL DIBANGUN BERTATAP: Saat membahas metode / teori (misal: discovery learning, psikologi kognitif), Anda WAJIB menyebutkan tokoh / teorinya sebagai kutipan sebut nama di dalam teks. JANGAN MEMBUAT DAFTAR PUSTAKA DI SETIAP BAB. Format Daftar Pustaka HANYA diizinkan muncul pada Bab Kesimpulan (BAB VII).
 6. TERMINOLOGI TEPAT: JANGAN menggunakan istilah eksternal secara asumsional.Gunakan terminologi persis sesuai tabel / data yang diberikan(misal: ikuti apa yang ada di data Kurikulum).
 7. PENANGANAN DATA KOSONG: Jika data kosong, secara eksplisit nyatakan bahwa "Berdasarkan penarikan data sistem..." dengan kalimat akademik profesional, JANGAN MENGARANG ISI BARU.
 

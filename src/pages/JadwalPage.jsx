@@ -4,12 +4,12 @@ import { createPortal } from 'react-dom';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import moment from 'moment';
-import { Book, Users, Clock, Zap, X, ExternalLink } from 'lucide-react';
+import { Book, Users, Clock, Zap, X, ExternalLink, Calendar } from 'lucide-react';
 import { useSettings } from '../utils/SettingsContext';
 import { getTopicForSchedule } from '../utils/topicUtils';
 
 export default function JadwalPage() {
-  const { activeSemester, academicYear } = useSettings();
+  const { activeSemester, academicYear, activeTemplateId } = useSettings();
   const [schedules, setSchedules] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -21,9 +21,12 @@ export default function JadwalPage() {
   // Fetch schedules, programs, and classes from Firestore
   useEffect(() => {
     const fetchData = async (user) => {
-      if (user) {
+      if (user && activeTemplateId) {
         const [qSchedules, qPrograms, qClasses] = await Promise.all([
-          getDocs(query(teachingSchedulesCollectionRef, where('userId', '==', user.uid))),
+          getDocs(query(teachingSchedulesCollectionRef,
+            where('userId', '==', user.uid),
+            where('templateId', '==', activeTemplateId)
+          )),
           getDocs(query(teachingProgramsCollectionRef, where('userId', '==', user.uid))),
           getDocs(query(classesCollectionRef, where('userId', '==', user.uid)))
         ]);
@@ -40,7 +43,7 @@ export default function JadwalPage() {
 
     const unsubscribe = auth.onAuthStateChanged(fetchData);
     return () => unsubscribe();
-  }, []);
+  }, [activeTemplateId]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -88,7 +91,13 @@ export default function JadwalPage() {
 
   return (
     <div className="rounded-2xl bg-white p-4 sm:p-6 shadow-lg dark:bg-gray-800">
-      <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Jadwal Mengajar</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-3 group">
+        <div className="glass-icon-container glass-glow-blue w-10 h-10 sm:w-12 sm:h-12 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+          <Calendar size={24} className="opacity-80 text-gray-800 dark:text-white" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none"></div>
+        </div>
+        <span>Jadwal Mengajar</span>
+      </h2>
       <p className="text-sm sm:text-lg font-medium text-gray-700 dark:text-gray-200 mb-6">
         Semester: {activeSemester} (Tahun Ajaran {academicYear})
       </p>

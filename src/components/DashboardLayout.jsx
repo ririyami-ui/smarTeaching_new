@@ -22,6 +22,7 @@ import {
   Info,
   BarChart,
   Bot,
+  Book,
   ShieldAlert,
   ShieldX,
   Trophy,
@@ -44,9 +45,11 @@ import OfflineIndicator from './OfflineIndicator'; // Import OfflineIndicator co
 import { LocalNotifications } from '@capacitor/local-notifications';
 import useTaskNotifications from '../hooks/useTaskNotifications';
 import useScheduleNotifications from '../hooks/useScheduleNotifications';
+import useJournalNotifications from '../hooks/useJournalNotifications';
 import { useSettings } from '../utils/SettingsContext';
 
 const NAV_CATEGORIES = [
+  // ... (rest of Nav categories omitted for brevity in view)
   {
     title: 'Utama',
     icon: <Zap size={14} />,
@@ -94,6 +97,7 @@ const NAV_CATEGORIES = [
       { name: 'Rekap Individu', icon: <User size={20} />, path: '/rekap-individu' },
       { name: 'Analisis Kelas', icon: <ClipboardCheck size={20} />, path: '/analisis-kelas' },
       { name: 'Sistem Peringatan Dini', icon: <ShieldAlert size={20} />, path: '/sistem-peringatan' },
+      { name: 'Portofolio & Audit', icon: <Book size={20} />, path: '/portfolio' },
     ]
   },
   {
@@ -140,6 +144,30 @@ export default function DashboardLayout({ children, user }) {
 
   useTaskNotifications(activeSemester, academicYear);
   useScheduleNotifications();
+  useJournalNotifications();
+
+  // Notification Click Listener
+  useEffect(() => {
+    const setupNotificationListener = async () => {
+      const listener = await LocalNotifications.addListener('localNotificationActionPerformed', (notification) => {
+        const extra = notification.notification.extra;
+        if (extra && extra.type === 'journal_reminder') {
+          const { date, classId, subjectId } = extra;
+          navigate(`/jurnal?date=${date}&classId=${classId}&subjectId=${subjectId}`);
+        } else if (extra && extra.type === 'schedule') {
+          navigate('/jadwal');
+        } else if (extra && extra.type === 'task') {
+          navigate('/penugasan');
+        }
+      });
+      return listener;
+    };
+
+    const listenerPromise = setupNotificationListener();
+    return () => {
+      listenerPromise.then(l => l.remove());
+    };
+  }, [navigate]);
 
   // State for expanded categories
   const [expandedCategories, setExpandedCategories] = useState(() => {
@@ -216,22 +244,22 @@ export default function DashboardLayout({ children, user }) {
         onClick={() => {
           if (isMobile) setIsSidebarOpen(false);
         }}
-        className={`flex items-center w-full gap-3 px-4 py-2.5 rounded-xl transition-all duration-300 group relative ${isActive
-          ? 'bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20'
-          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
+        className={`flex items-center w-full gap-3 px-4 py-2.5 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group relative active:scale-95 ${isActive
+          ? 'bg-primary/10 text-primary shadow-lg ring-1 ring-primary/20 scale-[1.02]'
+          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white hover:scale-[1.02]'
           } ${!showLabel ? 'justify-center px-0' : ''}`}
         title={!showLabel ? item.name : ''}
       >
-        <span className={`transition-all duration-300 ${isActive ? 'scale-110 rotate-3' : 'group-hover:scale-110 opacity-70 group-hover:opacity-100'}`}>
+        <span className={`transition-all duration-500 ${isActive ? 'scale-125 rotate-6' : 'group-hover:scale-110 opacity-70 group-hover:opacity-100'}`}>
           {React.cloneElement(item.icon, { size: 18, strokeWidth: isActive ? 2.5 : 2 })}
         </span>
         {showLabel && (
-          <span className={`text-[13px] font-semibold tracking-tight transition-all duration-300 animate-in fade-in slide-in-from-left-2 ${isActive ? 'font-bold' : ''}`}>
+          <span className={`text-[13px] font-semibold tracking-tight transition-all duration-500 animate-in fade-in slide-in-from-left-2 ${isActive ? 'font-bold' : ''}`}>
             {item.name}
           </span>
         )}
         {isActive && showLabel && (
-          <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+          <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse" />
         )}
       </Link>
     );
@@ -261,12 +289,13 @@ export default function DashboardLayout({ children, user }) {
     <div className="h-screen flex flex-col bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans">
       {/* Desktop Sidebar - Premium Glassmorphic Refresh */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white/80 dark:bg-black/80 backdrop-blur-2xl border-r border-gray-100 dark:border-gray-800/50 shadow-2xl transition-all duration-300 ease-in-out hidden md:flex ${isSidebarOpen ? 'w-72' : 'w-24'}`}
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white/80 dark:bg-black/80 backdrop-blur-2xl border-r border-gray-100 dark:border-gray-800/50 shadow-2xl transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) hidden md:flex ${isSidebarOpen ? 'w-72' : 'w-24'}`}
       >
         <div className={`flex items-center justify-between gap-3 px-4 py-2 h-24 border-b border-gray-100 dark:border-gray-800/50 transition-all duration-300 ${isSidebarOpen ? '' : 'flex-col justify-center'}`}>
           <div className="flex items-center gap-3">
-            <div className="shrink-0 p-2 bg-primary/10 rounded-xl">
-              <img src="/Logo Smart Teaching Baru_.png" alt="Logo" className="h-8 w-auto mix-blend-multiply dark:mix-blend-normal" />
+            <div className="shrink-0 glass-icon-container glass-glow-blue w-12 h-12 p-1 relative overflow-visible">
+              <img src="/Logo Smart Teaching 3D.png" alt="Logo" className="h-full w-auto object-contain drop-shadow-xl" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent pointer-events-none rounded-2xl"></div>
             </div>
             {isSidebarOpen && (
               <div className="flex flex-col animate-in fade-in duration-500">
@@ -368,7 +397,7 @@ export default function DashboardLayout({ children, user }) {
           </div>
           {isSidebarOpen && (
             <div className="mt-4 text-center animate-in fade-in slide-in-from-bottom-2 duration-700">
-              <p className="text-[10px] font-black text-gray-400 dark:text-gray-600 tracking-[0.3em] uppercase">Smart School v2.0</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-600 tracking-[0.3em] uppercase">Smartty v2.0.3</p>
             </div>
           )}
         </div>
@@ -380,10 +409,13 @@ export default function DashboardLayout({ children, user }) {
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 flex-shrink-0">
             <Menu size={24} />
           </button>
-          <div className="flex flex-col md:flex-row md:items-baseline md:gap-2 min-w-0 flex-1">
+          <div className="flex flex-col md:flex-row md:items-center md:gap-3 min-w-0 flex-1">
             <h1 className="text-base sm:text-lg md:text-2xl font-bold text-text-primary-light dark:text-text-primary-dark line-clamp-2 md:line-clamp-none leading-tight md:leading-normal">
               {NAV_CATEGORIES.flatMap(c => c.items).find((item) => item.path === location.pathname)?.name || 'Dashboard'}
             </h1>
+            <span className="hidden sm:inline-block px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-[9px] font-black text-gray-400 dark:text-gray-500 rounded-full border border-gray-200/50 dark:border-gray-700/50 whitespace-nowrap">
+              V 2.0.3
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
@@ -502,21 +534,23 @@ export default function DashboardLayout({ children, user }) {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative flex-1 flex flex-col items-center justify-center h-full transition-all duration-300 ${isActive ? 'text-primary' : 'text-gray-400 dark:text-gray-500'}`}
+                className={`relative flex-1 flex flex-col items-center justify-center h-full transition-all duration-500 ${isActive ? 'text-primary' : 'text-gray-400 dark:text-gray-500'}`}
               >
                 {/* Active Indicator Glow */}
                 {isActive && (
-                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] animate-in fade-in zoom-in duration-500"></div>
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-10 h-1 bg-primary rounded-full shadow-[0_0_20px_rgba(59,130,246,0.8)] animate-in fade-in zoom-in duration-700"></div>
                 )}
 
-                <div className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 ${isActive ? 'scale-110' : 'active:scale-90'}`}>
-                  <div className={`p-2 rounded-xl transition-all duration-300 ${isActive ? 'bg-primary/10 dark:bg-primary/20' : ''}`}>
+                <div className={`flex flex-col items-center justify-center gap-1 transition-all duration-500 ${isActive ? 'scale-110' : 'active:scale-90 hover:scale-105'}`}>
+                  <div className={`p-2 rounded-xl transition-all duration-500 relative ${isActive ? 'glass-icon-container glass-glow-blue scale-110 shadow-lg' : ''}`}>
                     {React.cloneElement(item.icon, {
-                      size: 20,
+                      size: 22,
                       strokeWidth: isActive ? 2.5 : 2,
+                      className: isActive ? 'opacity-90' : 'opacity-60'
                     })}
+                    {isActive && <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent pointer-events-none rounded-xl"></div>}
                   </div>
-                  <span className={`text-[10px] font-bold tracking-tight text-center transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+                  <span className={`text-[10px] font-extrabold tracking-tight text-center transition-all duration-500 ${isActive ? 'opacity-100 translate-y-0.5' : 'opacity-60'}`}>
                     {item.shortName || item.name}
                   </span>
                 </div>
@@ -539,7 +573,10 @@ export default function DashboardLayout({ children, user }) {
       >
         <div className="mb-6 flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800/50">
           <div className="flex items-center gap-3">
-            <img src="/Logo Smart Teaching Baru_.png" alt="Logo" className="h-8 w-auto" />
+            <div className="glass-icon-container glass-glow-blue w-10 h-10 p-1 relative">
+              <img src="/Logo Smart Teaching 3D.png" alt="Logo" className="h-full w-auto object-contain" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none rounded-xl"></div>
+            </div>
             <h1 className="font-sans text-lg font-extrabold text-blue-600 dark:text-blue-500 tracking-tight">Smart Teaching</h1>
           </div>
           <button onClick={() => setIsSidebarOpen(false)}>

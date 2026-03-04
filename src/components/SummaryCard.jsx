@@ -1,6 +1,6 @@
 import React from 'react';
 
-const SummaryCard = ({ title, value, icon, color = 'blue', trend, subtitle }) => {
+const SummaryCard = ({ title, value, icon, color = 'blue', trend, subtitle, colorClass }) => {
     const colorClasses = {
         blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-800',
         green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-100 dark:border-green-800',
@@ -11,8 +11,8 @@ const SummaryCard = ({ title, value, icon, color = 'blue', trend, subtitle }) =>
     };
 
     return (
-        <div className={`${colorClasses[color]} rounded-xl border p-5 transition-all duration-300 hover:shadow-lg hover:scale-105`}>
-            <div className="flex items-start justify-between">
+        <div className={`${colorClasses[color]} rounded-xl border p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:scale-105 group overflow-hidden relative`}>
+            <div className="flex items-start justify-between relative z-10">
                 <div className="flex-1">
                     <p className="text-sm font-bold opacity-100 mb-1">{title}</p>
                     <div className="flex items-baseline gap-2">
@@ -28,8 +28,9 @@ const SummaryCard = ({ title, value, icon, color = 'blue', trend, subtitle }) =>
                     )}
                 </div>
                 {icon && (
-                    <div className="flex-shrink-0 ml-3 opacity-60">
-                        {icon}
+                    <div className={`glass-icon-container ${colorClass} w-10 h-10 group-hover:scale-110 transition-all duration-500`}>
+                        {React.cloneElement(icon, { size: 20, className: "opacity-80 dark:text-white text-gray-800" })}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none"></div>
                     </div>
                 )}
             </div>

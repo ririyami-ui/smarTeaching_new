@@ -143,46 +143,8 @@ const TeachingScheduleCard = ({ schedules, currentTime, holiday, programs, class
     };
   };
 
-  useEffect(() => {
-    const triggerNotifications = async () => {
-      let permStatus = await LocalNotifications.checkPermissions();
-      if (permStatus.display !== 'granted') {
-        permStatus = await LocalNotifications.requestPermissions();
-        if (permStatus.display !== 'granted') {
-          console.warn('Notification permissions not granted.');
-          return;
-        }
-      }
-
-      schedules.forEach(async (schedule) => {
-        const { status } = getScheduleStatus(schedule);
-        if (status === 'upcoming-soon' && !notifiedSchedules.has(schedule.id)) {
-          const title = schedule.type === 'non-teaching' ? "Jadwal Non-KBM Segera Dimulai!" : "Jadwal Mengajar Segera Dimulai!";
-          const body = schedule.type === 'non-teaching'
-            ? `${schedule.activityName} akan dimulai dalam 5 menit.`
-            : `${schedule.subject} di kelas ${schedule.class} akan dimulai dalam 5 menit.`;
-
-          await LocalNotifications.schedule({
-            notifications: [
-              {
-                title: title,
-                body: body,
-                id: new Date().getTime(),
-                schedule: { at: new Date(Date.now() + 1000) },
-                sound: null,
-                attachments: null,
-                actionTypeId: '',
-                extra: null
-              },
-            ],
-          });
-          setNotifiedSchedules(prev => new Set(prev.add(schedule.id)));
-        }
-      });
-    };
-
-    triggerNotifications();
-  }, [schedules, currentTime, notifiedSchedules]);
+  // Immediate notifications are removed from here as they are managed by useScheduleNotifications hook
+  // to prevent duplicate and un-cancellable notifications.
 
   // Helper to determine if holiday blocks routine schedule
   const isBlockingHoliday = (h) => {
@@ -220,14 +182,17 @@ const TeachingScheduleCard = ({ schedules, currentTime, holiday, programs, class
   });
 
   return (
-    <div className="w-full p-5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/30 overflow-hidden relative">
+    <div className="w-full p-4 sm:p-5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/30 overflow-hidden relative">
       <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="relative z-10">
-        <h2 className="text-xl font-bold mb-5 text-gray-800 dark:text-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Calendar size={20} className="text-primary" />
+        <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-5 text-gray-800 dark:text-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-2 group">
+            <div className="glass-icon-container glass-glow-blue w-10 h-10 group-hover:scale-110 transition-all duration-500">
+              <Calendar size={18} className="opacity-80 text-gray-800 dark:text-white" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none"></div>
+            </div>
             <span>Jadwal Hari Ini</span>
           </div>
         </h2>
@@ -294,42 +259,42 @@ const TeachingScheduleCard = ({ schedules, currentTime, holiday, programs, class
                   </div>
                   <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                  <div className="relative z-10 flex flex-col items-center text-center gap-4 py-2">
+                  <div className="relative z-10 flex flex-col items-center text-center gap-3 sm:gap-4 py-1 sm:py-2">
                     {/* Header Info */}
                     <div className="flex flex-col items-center gap-1">
-                      <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-80 mb-0.5">Agenda Hari Ini</span>
-                      <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight drop-shadow-md uppercase italic">
+                      <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] opacity-80 mb-0.5">Agenda Hari Ini</span>
+                      <h3 className="text-lg md:text-2xl font-black tracking-tight leading-tight drop-shadow-md uppercase italic">
                         {holiday.name}
                       </h3>
                     </div>
 
                     {/* Main Icon */}
-                    <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-md shadow-xl border border-white/30 transform group-hover:scale-105 transition-transform duration-500">
-                      {React.cloneElement(card.icon, { size: 40 })}
+                    <div className="bg-white/20 p-3 sm:p-4 rounded-2xl backdrop-blur-md shadow-xl border border-white/30 transform group-hover:scale-105 transition-transform duration-500">
+                      {React.cloneElement(card.icon, { size: 32, className: 'sm:w-10 sm:h-10' })}
                     </div>
 
                     {/* Message Box */}
                     <div className="max-w-md">
-                      <p className="text-base md:text-lg font-bold italic opacity-100 leading-snug mb-3 drop-shadow-sm">
+                      <p className="text-sm sm:text-lg font-bold italic opacity-100 leading-snug mb-2 sm:mb-3 drop-shadow-sm">
                         "{card.message}"
                       </p>
 
                       {/* Divider */}
-                      <div className="w-12 h-1 bg-white/30 mx-auto rounded-full mb-3"></div>
+                      <div className="w-10 h-0.5 bg-white/30 mx-auto rounded-full mb-2 sm:mb-3"></div>
 
                       <div className="flex flex-col items-center gap-1">
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-white/80">{card.sub}</span>
+                        <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/80">{card.sub}</span>
                       </div>
                     </div>
 
                     {/* Footer / Signature for Status */}
-                    <div className="w-full mt-2 pt-4 border-t border-white/20 flex flex-col items-center gap-1.5">
+                    <div className="w-full mt-1 pt-3 border-t border-white/20 flex flex-col items-center gap-1">
                       <div className="flex items-center gap-2">
-                        <div className="h-px w-8 bg-white/30"></div>
-                        <p className="text-[11px] font-bold tracking-wider">{teacherName}</p>
-                        <div className="h-px w-8 bg-white/30"></div>
+                        <div className="h-px w-6 bg-white/30"></div>
+                        <p className="text-[10px] font-bold tracking-wider">{teacherName}</p>
+                        <div className="h-px w-6 bg-white/30"></div>
                       </div>
-                      <p className="text-[9px] font-black uppercase opacity-60 tracking-tighter">{schoolName}</p>
+                      <p className="text-[8px] font-black uppercase opacity-60 tracking-tighter">{schoolName}</p>
                     </div>
 
                     {/* Instructions hint - hidden on desktop hover maybe? */}
@@ -392,7 +357,7 @@ const TeachingScheduleCard = ({ schedules, currentTime, holiday, programs, class
               return (
                 <div
                   key={schedule.id}
-                  className={`relative overflow-hidden ${isNonTeaching ? 'p-3 px-4' : 'p-4'} rounded-xl border transition-all duration-300 group ${currentVariant.bg} ${currentVariant.border} ${status === 'ongoing' ? 'shadow-lg ring-1 ring-inset ring-black/5 md:scale-[1.01]' : 'hover:bg-opacity-80'} ${status === 'upcoming-soon' ? 'animate-pulse-subtle' : ''}`}
+                  className={`relative overflow-hidden ${isNonTeaching ? 'p-2.5 px-3.5 sm:p-3 sm:px-4' : 'p-3.5 sm:p-4'} rounded-xl border transition-all duration-300 group ${currentVariant.bg} ${currentVariant.border} ${status === 'ongoing' ? 'shadow-lg ring-1 ring-inset ring-black/5 md:scale-[1.01]' : 'hover:bg-opacity-80'} ${status === 'upcoming-soon' ? 'animate-pulse-subtle' : ''}`}
                 >
                   <div className={`absolute top-0 left-0 w-1.5 h-full ${currentVariant.accent}`}></div>
 

@@ -6,13 +6,13 @@ import { Link } from 'react-router-dom';
 import moment from 'moment';
 import { indonesianHolidays } from '../utils/holidayData';
 
-const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCount }) => {
+const JournalReminder = ({ user, activeSemester, academicYear, activeTemplateId, onUpdateMissingCount }) => {
     const [missingJournals, setMissingJournals] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const checkMissingJournals = async () => {
-            if (!user) return;
+            if (!user || !activeTemplateId) return;
 
             setIsLoading(true);
             try {
@@ -46,7 +46,11 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
                 indonesianHolidays.forEach(h => holidayDates.add(h.date));
 
                 // 1. Get Teaching Schedule (Routine)
-                const scheduleQuery = query(collection(db, 'teachingSchedules'), where('userId', '==', user.uid));
+                const scheduleQuery = query(
+                    collection(db, 'teachingSchedules'),
+                    where('userId', '==', user.uid),
+                    where('templateId', '==', activeTemplateId)
+                );
                 const scheduleSnap = await getDocs(scheduleQuery);
                 const schedules = scheduleSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -154,7 +158,7 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
         };
 
         checkMissingJournals();
-    }, [user, activeSemester, academicYear]);
+    }, [user, activeSemester, academicYear, activeTemplateId]);
 
     // If no missing journals, show nothing or a small success badge? 
     // User requested "Reminder if NOT filled". So if empty, maybe hidden or success state.
@@ -179,15 +183,27 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
                             Yuk lengkapi administrasi mengajar Anda agar rekapitulasi akhir semester aman.
                         </p>
 
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {missingJournals.slice(0, 3).map((item, idx) => (
-                                <div key={idx} className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200 bg-white/50 dark:bg-black/20 px-3 py-2 rounded-lg border border-amber-100 dark:border-amber-900/30">
-                                    <BookX size={14} className="shrink-0" />
-                                    <span>{item.formattedDate}</span>
-                                    <span className="opacity-50 md:inline hidden">•</span>
-                                    <span className="bg-amber-200/50 dark:bg-amber-900/50 px-1.5 py-0.5 rounded textxs uppercase tracking-wider">{item.className}</span>
-                                    <span>{item.subject}</span>
-                                </div>
+                                <Link
+                                    key={idx}
+                                    to={`/jurnal?date=${item.date}&classId=${item.className}&subjectId=${item.subject}`}
+                                    className="flex items-center justify-between group/item bg-white/50 dark:bg-black/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 p-3 rounded-xl border border-amber-100 dark:border-amber-900/30 transition-all duration-300 shadow-sm md:hover:scale-[1.02]"
+                                >
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="p-2 bg-amber-200/50 dark:bg-amber-800/30 rounded-lg text-amber-700 dark:text-amber-300">
+                                            <BookX size={16} />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <span className="text-xs font-bold text-amber-900 dark:text-amber-100">{item.formattedDate}</span>
+                                                <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-md font-black uppercase tracking-wider">{item.className}</span>
+                                            </div>
+                                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 truncate">{item.subject}</p>
+                                        </div>
+                                    </div>
+                                    <ChevronRight size={18} className="text-amber-400 group-hover/item:text-amber-600 group-hover/item:translate-x-1 transition-all" />
+                                </Link>
                             ))}
                             {missingJournals.length > 3 && (
                                 <p className="text-xs font-bold text-amber-600 dark:text-amber-500 pl-1">
@@ -198,14 +214,14 @@ const JournalReminder = ({ user, activeSemester, academicYear, onUpdateMissingCo
                     </div>
                 </div>
                 <Link
-                    to="/jurnal"
+                    to={missingJournals.length > 0 ? `/jurnal?date=${missingJournals[0].date}&classId=${missingJournals[0].className}&subjectId=${missingJournals[0].subject}` : '/jurnal'}
                     className="hidden sm:flex items-center gap-1 text-sm font-bold text-amber-700 hover:text-amber-800 hover:underline mt-1"
                 >
                     Lengkapi Sekarang <ChevronRight size={16} />
                 </Link>
             </div>
             <Link
-                to="/jurnal"
+                to={missingJournals.length > 0 ? `/jurnal?date=${missingJournals[0].date}&classId=${missingJournals[0].className}&subjectId=${missingJournals[0].subject}` : '/jurnal'}
                 className="sm:hidden flex w-full justify-center items-center gap-2 mt-4 bg-amber-500 text-white py-2 rounded-lg font-bold text-sm shadow-md active:scale-95 transition-transform"
             >
                 Lengkapi Jurnal <ChevronRight size={16} />

@@ -1,7 +1,6 @@
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import moment from 'moment'; // Need to import moment for formatting dates
-import 'moment/locale/id'; // Import Indonesian locale
+import moment from 'moment';
+import 'moment/locale/id';
+import { fmtDate, getSignatureCity } from './generalUtils';
 
 // Helper to group grades by Topic/Material (Mirrors TopicMasteryHeatmap logic)
 const groupGradesByTopic = (grades = []) => {
@@ -27,30 +26,9 @@ const groupGradesByTopic = (grades = []) => {
   })).sort((a, b) => a.avg - b.avg); // Critical first (lowest avg)
 };
 
-// Helper for consistent Indonesian date formatting
-const fmtDate = (date) => {
-  if (!date) return '-';
-  return moment(date).locale('id').format('DD MMMM YYYY');
-};
 
-// Helper to get city/location for signature
-const getCity = (userProfile) => {
-  // 1. Try localStorage (shared with other pages)
-  const saved = localStorage.getItem('QUIZ_SIGNING_LOCATION');
-  if (saved && saved !== 'Jakarta') return saved;
 
-  // 2. Heuristic from school name
-  if (userProfile?.school) {
-    const parts = userProfile.school.trim().split(' ');
-    const last = parts[parts.length - 1];
-    if (isNaN(last) && last.length > 2) return last;
-  }
-
-  // 3. Fallback to saved even if it is Jakarta or default
-  return saved || 'Jakarta';
-};
-
-export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate, teacherName, selectedClass, userProfile) => {
+export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate, teacherName, selectedClass, userProfile, selectedSubject) => {
   const doc = new jsPDF();
 
   // Set font and size for headers
@@ -60,14 +38,15 @@ export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate,
   doc.setFontSize(12);
   doc.text(`Dari tanggal: ${fmtDate(startDate)} sampai tanggal ${fmtDate(endDate)}`, 14, 30);
   doc.text(`Kelas: ${selectedClass}`, 14, 40);
+  if (selectedSubject) {
+    doc.text(`Mata Pelajaran: ${selectedSubject}`, 14, 46);
+  }
 
   // Prepare table data
   const tableColumn = ["No. Absen", "NIS", "Nama Siswa", "L/P", "Hadir", "Sakit", "Ijin", "Alpa"];
   const tableRows = [];
 
-  console.log("PDF Data (absen check):");
   data.forEach(item => {
-    console.log("Item absen:", item.absen);
     const rowData = [
       item.absen,
       item.nis,
@@ -85,7 +64,7 @@ export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate,
   doc.autoTable({
     head: [tableColumn],
     body: tableRows,
-    startY: 50, // Adjusted startY to accommodate new header line
+    startY: selectedSubject ? 55 : 50, // Adjusted startY to accommodate new header line
   });
 
   // Footer - Two Column Signature
@@ -105,9 +84,9 @@ export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate,
 
   // doc.text(`${fmtDate(startDate)} - ${fmtDate(endDate)}`, rightColX, finalY + 20); // Date Range as proxy for date? No, use current date.
   const dateStr = fmtDate(new Date());
-  const city = getCity(userProfile);
+  const city = getSignatureCity(userProfile);
   doc.text(`${city}, ${dateStr}`, rightColX, finalY + 20);
-  doc.text("Guru Kelas", rightColX, finalY + 30);
+  doc.text("Guru Mata Pelajaran", rightColX, finalY + 30);
   doc.setFont('helvetica', 'bold');
   doc.text(teacherName, rightColX, finalY + 50);
   doc.setFont('helvetica', 'normal');
@@ -117,7 +96,7 @@ export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate,
   doc.save(`Rekap_Kehadiran_${startDate}_${endDate}.pdf`);
 };
 
-export const generateDetailedAttendanceRecapPDF = (data, dates, schoolName, startDate, endDate, teacherName, selectedClass, userProfile) => {
+export const generateDetailedAttendanceRecapPDF = (data, dates, schoolName, startDate, endDate, teacherName, selectedClass, userProfile, selectedSubject) => {
   const doc = new jsPDF('landscape');
   const pageWidth = doc.internal.pageSize.width;
 
@@ -132,6 +111,9 @@ export const generateDetailedAttendanceRecapPDF = (data, dates, schoolName, star
   doc.setFontSize(10);
   doc.text(`Kelas: ${selectedClass}`, 14, 40);
   doc.text(`Periode: ${fmtDate(startDate)} s.d ${fmtDate(endDate)}`, 14, 46);
+  if (selectedSubject) {
+    doc.text(`Mata Pelajaran: ${selectedSubject}`, 14, 52);
+  }
   doc.text(`Tahun Pelajaran: ${userProfile?.academicYear || '-'}`, pageWidth - 14, 40, { align: "right" });
   doc.text(`Semester: ${userProfile?.activeSemester || '-'}`, pageWidth - 14, 46, { align: "right" });
 
@@ -193,7 +175,7 @@ export const generateDetailedAttendanceRecapPDF = (data, dates, schoolName, star
   doc.autoTable({
     columns: tableColumn,
     body: tableRows,
-    startY: 55,
+    startY: selectedSubject ? 60 : 55,
     theme: 'striped', // Changed from grid to striped
     styles: {
       fontSize: 8,
@@ -222,7 +204,7 @@ export const generateDetailedAttendanceRecapPDF = (data, dates, schoolName, star
 
   // Footer - Signature
   const finalY = doc.autoTable.previous.finalY + 10;
-  const city = getCity(userProfile);
+  const city = getSignatureCity(userProfile);
   const dateStr = fmtDate(new Date());
 
   // Calculate footer position (if near end of page, add page)
@@ -235,7 +217,7 @@ export const generateDetailedAttendanceRecapPDF = (data, dates, schoolName, star
   const rightColX = pageWidth - 60;
   doc.setFontSize(10);
   doc.text(`${city}, ${dateStr}`, rightColX, footerY);
-  doc.text('Guru Kelas / Wali Kelas', rightColX, footerY + 5);
+  doc.text('Guru Mata Pelajaran', rightColX, footerY + 5);
   doc.setFont('helvetica', 'bold');
   doc.text(teacherName, rightColX, footerY + 25);
   doc.setFont('helvetica', 'normal');
@@ -346,7 +328,7 @@ export const generateJurnalRecapPDF = (jurnalData, startDate, endDate, teacherNa
 
   // Right Column (Teacher)
   const dateStr = fmtDate(new Date());
-  const city = getCity(userProfile);
+  const city = getSignatureCity(userProfile);
 
   doc.text(`${city}, ${dateStr}`, rightColX, finalY + 20);
   // Determine subject for "Guru Mapel"
@@ -398,7 +380,9 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
       tableRows.push(rowData);
     });
   } else {
-    tableColumn = ["No. Absen", "NIS", "Nama Siswa", "Rata NH", "Formatif", "Sumatif", "Praktik (60%)", "Nilai Akhir (NA)"];
+    const firstItem = nilaiData[0] || {};
+    const practiceW = firstItem.practiceW || 60;
+    tableColumn = ["No. Absen", "NIS", "Nama Siswa", "Rata NH", "Formatif", "Sumatif", `Praktik (${practiceW}%)`, "Akademik", "Sikap", "Nilai Akhir (NA)"];
     nilaiData.forEach(item => {
       const rowData = [
         item.absen,
@@ -408,6 +392,8 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
         item.Formatif_avg,
         item.Sumatif_avg,
         item.Praktik_avg,
+        item.academicAvg,
+        item.nilaiSikap,
         item.NA,
       ];
       tableRows.push(rowData);
@@ -435,7 +421,14 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
   const noteY = doc.autoTable.previous.finalY + 10;
   doc.setFontSize(9);
   doc.setFont('helvetica', 'italic');
-  doc.text("Keterangan: Nilai Akhir (NA) dihitung dari Bobot Pengetahuan (40%) dan Bobot Praktik (60%).", 14, noteY);
+
+  const firstItem = nilaiData[0] || {};
+  const acadW = firstItem.academicWeight ?? 50;
+  const attW = firstItem.attitudeWeight ?? 50;
+  const knW = firstItem.knowledgeW ?? 40;
+  const prW = firstItem.practiceW ?? 60;
+
+  doc.text(`Keterangan: Akademik (${knW}% Pengetahuan, ${prW}% Praktik). Nilai Akhir = (${acadW}% Akademik + ${attW}% Sikap).`, 14, noteY);
   doc.setFont('helvetica', 'normal');
 
   // Footer - Two Column Signature
@@ -456,7 +449,7 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
 
   // Right Column (Teacher)
   const dateStr = fmtDate(new Date());
-  const city = getCity(userProfile);
+  const city = getSignatureCity(userProfile);
 
   doc.text(`${city}, ${dateStr}`, rightColX, finalY + 20);
   doc.text(`Guru Mata Pelajaran`, rightColX, finalY + 30);
@@ -512,9 +505,9 @@ export const generateClassAgreementPDF = ({ classData, agreementData, userProfil
   doc.text(`${classData.level} / ${classData.rombel}`, mL + 31, yPos);
 
   doc.setFont('helvetica', 'bold');
-  doc.text("Wali / Guru :", pageWidth - mR - 71, yPos); // Adjusted from 85 to 71 (85-14)
+  doc.text("Guru Mapel :", pageWidth - mR - 71, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${teacherName}`, pageWidth - mR - 40, yPos); // Adjusted from 60 to 40 (60-14)
+  doc.text(`${teacherName}`, pageWidth - mR - 40, yPos);
 
   // 1. Aturan & Kesepakatan
   yPos += 15;
@@ -575,7 +568,7 @@ export const generateClassAgreementPDF = ({ classData, agreementData, userProfil
   if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
 
   const dateStr = fmtDate(new Date());
-  const city = getCity(userProfile);
+  const city = getSignatureCity(userProfile);
   const signX = pageWidth - mR - 60; // Adjusted from 75 to 60 (75-14)
 
   doc.setFont('helvetica', 'normal');
@@ -649,7 +642,7 @@ export const generateClassAgreementPDF = ({ classData, agreementData, userProfil
     doc.text(`NIP. ${userProfile?.principalNip || '....................'}`, mL, yPos + 34);
 
     doc.text(`${city}, ${dateStr}`, signX, yPos);
-    doc.text('Guru Pengajar,', signX, yPos + 6);
+    doc.text('Guru Mata Pelajaran,', signX, yPos + 6);
     doc.setFont('helvetica', 'bold');
     doc.text(teacherName, signX, yPos + 28);
     doc.setFont('helvetica', 'normal');
@@ -731,7 +724,7 @@ export const generateViolationRecapPDF = (data, schoolName, startDate, endDate, 
 
   // Right Column (Teacher)
   const dateStr = fmtDate(new Date());
-  const city = getCity(userProfile);
+  const city = getSignatureCity(userProfile);
 
   doc.text(`${city}, ${dateStr}`, rightColX, finalY + 20);
   doc.text(`Guru Mata Pelajaran`, rightColX, finalY + 30);
@@ -745,24 +738,43 @@ export const generateViolationRecapPDF = (data, schoolName, startDate, endDate, 
   doc.save(`Rekap_Pelanggaran_${selectedClass}_${startDate}_${endDate}.pdf`);
 };
 
+// Helper to clean up text for standard PDF fonts (Helvetica doesn't like emojis/various symbols)
+const sanitizeForPdf = (str) => {
+  if (!str) return "";
+  return str
+    .replace(/[•●]/g, '-') // Normalize bullets
+    .replace(/[“”]/g, '"') // Normalize quotes
+    .replace(/[‘’]/g, "'")
+    .replace(/[–—]/g, '-') // Normalize dashes
+    // Remove emojis and other surrogates that cause PDF corruption in standard fonts
+    .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '')
+    // Filter out most non-ASCII/Extended Latin characters that show as Mojibake
+    .replace(/[^\x00-\x7F\xA0-\xFF]/g, (char) => {
+      // Keep some useful symbols if needed, otherwise replace with space or ?
+      return "";
+    });
+};
+
 // Helper to add auto-paging text with basic Markdown support (Bold, Headers & Bullets)
 const addWrappedText = (doc, text, x, y, maxWidth, lineHeight) => {
   const pageHeight = doc.internal.pageSize.height;
   const bottomMargin = 25;
   let currentY = y;
 
+  const sanitizedText = sanitizeForPdf(text);
   // Split text into paragraphs
-  const paragraphs = text.split('\n');
+  const paragraphs = sanitizedText.split('\n');
 
   paragraphs.forEach(paragraph => {
     const trimmed = paragraph.trim();
     if (!trimmed) {
-      currentY += lineHeight / 1.5;
+      currentY += lineHeight * 0.8;
       return;
     }
 
     let isHeader = false;
     let isBullet = false;
+    let isNumbered = false;
     let content = paragraph;
     let currentX = x;
     let fontSize = doc.internal.getFontSize();
@@ -771,25 +783,36 @@ const addWrappedText = (doc, text, x, y, maxWidth, lineHeight) => {
     if (trimmed.startsWith('### ')) {
       isHeader = true;
       content = trimmed.substring(4);
-      doc.setFontSize(fontSize + 2);
+      doc.setFontSize(fontSize + 1);
       doc.setFont('helvetica', 'bold');
-      currentY += 2; // Extra spacing before header
+      currentY += 4;
     }
-    // 2. Detect Bullet Points
-    else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+    // 2. Detect Bullet Points (incl standard and •)
+    else if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('• ')) {
       isBullet = true;
       content = trimmed.substring(2);
       doc.setFont('helvetica', 'bold');
-      doc.text('•', x, currentY);
+      doc.text('-', x + 2, currentY); // Use dash for safety
       doc.setFont('helvetica', 'normal');
-      currentX = x + 5; // Indent
+      currentX = x + 8;
+    }
+    // 3. Detect Numbered Lists (e.g. 1. )
+    else if (/^\d+\.\s/.test(trimmed)) {
+      isNumbered = true;
+      const match = trimmed.match(/^(\d+\.)\s(.*)/);
+      if (match) {
+        doc.setFont('helvetica', 'bold');
+        doc.text(match[1], x, currentY);
+        doc.setFont('helvetica', 'normal');
+        content = match[2];
+        currentX = x + 8;
+      }
     }
 
-    // Check for page break before starting a paragraph/header
+    // Check for page break
     if (currentY > pageHeight - bottomMargin) {
       doc.addPage();
       currentY = 25;
-      if (isBullet) doc.text('•', x, currentY); // Re-draw bullet on new page if it was at the very start
     }
 
     const words = content.split(' ');
@@ -799,10 +822,10 @@ const addWrappedText = (doc, text, x, y, maxWidth, lineHeight) => {
       const testLine = line + word + ' ';
       const testWidth = calculateSegmentWidth(doc, testLine);
 
-      // If line exceeds maxWidth, draw it and start a new line
-      if (testWidth > (maxWidth - (isBullet ? 5 : 0)) && idx > 0) {
-        drawColoredLine(doc, line, currentX, currentY);
-        currentY += lineHeight;
+      // Improved wrapping margin control
+      if (testWidth > (maxWidth - (isBullet || isNumbered ? 12 : 4)) && idx > 0) {
+        drawColoredLine(doc, line.trim(), currentX, currentY);
+        currentY += lineHeight + 1;
 
         if (currentY > pageHeight - bottomMargin) {
           doc.addPage();
@@ -815,14 +838,13 @@ const addWrappedText = (doc, text, x, y, maxWidth, lineHeight) => {
     });
 
     // Draw last line
-    drawColoredLine(doc, line, currentX, currentY);
-    currentY += lineHeight;
+    drawColoredLine(doc, line.trim(), currentX, currentY);
+    currentY += lineHeight + 1.5;
 
     // Reset font for next paragraph
     if (isHeader) {
       doc.setFontSize(fontSize);
       doc.setFont('helvetica', 'normal');
-      currentY += 2;
     }
 
     if (currentY > pageHeight - bottomMargin) {
@@ -875,22 +897,32 @@ const drawColoredLine = (doc, line, x, y) => {
 const drawStatCard = (doc, x, y, width, height, title, value, subtitle, colorRGB) => {
   const safeWidth = Number(width || 0);
   const safeHeight = Number(height || 0);
-  doc.setFillColor(...(colorRGB || [240, 240, 240]));
-  doc.roundedRect(x, y, safeWidth, safeHeight, 3, 3, 'F');
 
-  doc.setTextColor(50, 50, 50);
-  doc.setFontSize(8);
+  // Background with subtle border
+  doc.setFillColor(...(colorRGB || [249, 250, 251])); // Default Gray-50
+  doc.roundedRect(x, y, safeWidth, safeHeight, 4, 4, 'F');
+  doc.setDrawColor(229, 231, 235); // Gray-200
+  doc.setLineWidth(0.2);
+  doc.roundedRect(x, y, safeWidth, safeHeight, 4, 4, 'S');
+
+  // Decorative side accent
+  doc.setFillColor(...(colorRGB ? colorRGB.map(c => Math.max(0, c - 40)) : [59, 130, 246]));
+  doc.rect(x, y + 5, 2, safeHeight - 10, 'F');
+
+  doc.setTextColor(107, 114, 128); // Gray-500
+  doc.setFontSize(7);
   doc.setFont('helvetica', 'bold');
-  doc.text(title, x + 4, y + 10);
+  doc.text(title.toUpperCase(), x + 6, y + 10);
 
+  doc.setTextColor(31, 41, 55); // Gray-800
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text(String(value || 0), x + 4, y + 22);
+  doc.text(String(value || 0), x + 6, y + 22);
 
   doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text(String(subtitle || ''), x + 4, y + 32);
+  doc.setTextColor(75, 85, 99); // Gray-600
+  doc.text(String(subtitle || ''), x + 6, y + 32);
 };
 
 const drawRadarChart = (doc, x, y, size, data, labels) => {
@@ -1070,24 +1102,23 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
   const midPage = pageWidth / 2;
 
   // Clean up AI intro fluff if present
-  const cleanedReportText = reportText.replace(/^Halo,.*?(Saya Smartty|asisten AI).*?analisis.*?:[\s\n]*/is, '');
+  const cleanedReportText = reportText
+    .replace(/^Halo,.*?(Saya Smartty|asisten AI|Smartty).*?analisis.*?:[\s\n]*/is, '')
+    .replace(/Smartty/g, 'Sistem');
 
-  // Professional Header Banner
-  doc.setFillColor(37, 99, 235); // Blue-600
-  doc.rect(0, 0, pageWidth, 45, 'F');
+  // Professional Header Design
+  doc.setFillColor(30, 58, 138); // Deep Navy
+  doc.rect(0, 0, pageWidth, 40, 'F');
 
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
+  doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text("LAPORAN ANALISIS KELAS", pageWidth / 2, 22, { align: "center" });
+  doc.text("LAPORAN ANALISIS KELAS", pageWidth / 2, 18, { align: "center" });
 
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text((userProfile?.school || 'Smart Teaching Academy').toUpperCase(), pageWidth / 2, 32, { align: "center" });
-
-  // Header Info Line
-  doc.setFontSize(9);
-  doc.text(`Tahun Pelajaran: ${userProfile?.academicYear || '-'} | Semester: ${userProfile?.activeSemester || '-'}`, pageWidth / 2, 38, { align: "center" });
+  doc.text((userProfile?.school || 'Smart Teaching Academy').toUpperCase(), pageWidth / 2, 26, { align: "center" });
+  doc.text(`Tahun Pelajaran: ${userProfile?.academicYear || '-'} | Semester: ${userProfile?.activeSemester || '-'}`, pageWidth / 2, 32, { align: "center" });
 
   // White Card for Header Info
   doc.setFillColor(255, 255, 255);
@@ -1103,7 +1134,7 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.text(`Nama Kelas : ${classData.className}`, 20, 65);
-  doc.text(`Wali Kelas : ${teacherName}`, 20, 70);
+  doc.text(`Guru Mapel : ${teacherName}`, 20, 70);
   doc.text(`Total Siswa : ${classData.students?.length || 0} Siswa`, midPage + 10, 65);
   doc.text(`Tanggal Cetak: ${fmtDate(new Date())}`, midPage + 10, 70);
 
@@ -1117,17 +1148,24 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
   drawStatCard(doc, 14 + (cardW + 5) * 2, yPos, cardW, cardH, "PELANGGARAN", classData.stats?.infractions.total || 0, `Poin: ${classData.stats?.infractions.totalPoints}`, [254, 226, 226]);
   drawStatCard(doc, 14 + (cardW + 5) * 3, yPos, cardW, cardH, "TERTINGGI", classData.stats?.academic.highest || 0, "Skor Maksimal", [254, 243, 199]);
 
-  yPos += cardH + 15;
+  yPos += cardH + 20;
 
   // 2. SISWA PRESTASI & PERHATIAN (Side by Side Tables)
+  if (yPos + 50 > pageHeight - 20) { doc.addPage(); yPos = 25; }
+
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(31, 41, 55);
 
-  doc.text("Top 5 Siswa Berprestasi", 14, yPos);
-  doc.text("Siswa Butuh Perhatian", midPage + 2, yPos);
+  // Section Header with Accent
+  doc.setFillColor(30, 58, 138); // Navy
+  doc.rect(14, yPos - 4, 3, 6, 'F');
+  doc.text("Top 5 Siswa Berprestasi", 20, yPos);
 
-  yPos += 3;
+  doc.rect(midPage + 2, yPos - 4, 3, 6, 'F');
+  doc.text("Siswa Butuh Perhatian", midPage + 8, yPos);
+
+  yPos += 5;
 
   const topStudents = classData.stats?.academic.topPerformers || [];
   const bottomStudents = classData.stats?.academic.bottomPerformers || [];
@@ -1156,24 +1194,51 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
     tableWidth: (pageWidth - 28) / 2 - 2
   });
 
-  yPos = Math.max(finalY1, doc.autoTable.previous.finalY) + 15;
+  yPos = Math.max(finalY1, doc.autoTable.previous.finalY) + 20;
 
-  // 3. RADAR & PIE CHARTS SECTION
-  if (yPos + 80 > pageHeight) { doc.addPage(); yPos = 20; }
+  // 3. ANALYSIS CHARTS (Radar, Attendance, & Infractions)
+  if (yPos + 130 > pageHeight - 30) { doc.addPage(); yPos = 30; }
+
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text("Visualisasi Kondisi Kelas", 14, yPos);
+  yPos += 10;
 
   const chartY = yPos;
+
+  // Radar Section
   const radarLabels = ["Keimanan", "Kewargaan", "Kritis", "Kreatif", "Kolaborasi", "Mandiri", "Kesehatan", "Komunikasi"];
   const radarData = [
-    85, // Keimanan
-    classData.stats?.attendance.pct || 80, // Kewargaan
-    classData.stats?.academic.avg || 75, // Kritis
-    classData.stats?.academic.avg || 75, // Kreatif
-    82, // Kolaborasi
-    classData.stats?.attendance.pct || 80, // Mandiri
-    90, // Kesehatan
-    80  // Komunikasi
+    85,
+    classData.stats?.attendance.pct || 80,
+    classData.stats?.academic.avg || 75,
+    classData.stats?.academic.avg || 75,
+    82,
+    classData.stats?.attendance.pct || 80,
+    90,
+    80
   ];
-  drawRadarChart(doc, 14, chartY, 75, radarData, radarLabels);
+  drawRadarChart(doc, 14, chartY, 70, radarData, radarLabels);
+
+  // Grouped Infractions for the New Chart
+  const infractionStats = {};
+  (classData.infractions || []).forEach(inf => {
+    infractionStats[inf.infractionType] = (infractionStats[inf.infractionType] || 0) + 1;
+  });
+
+  const violationData = Object.entries(infractionStats).map(([label, value], idx) => ({
+    label,
+    value,
+    color: [[239, 68, 68], [249, 115, 22], [245, 158, 11], [220, 38, 38]][idx % 4]
+  }));
+
+  // Attendance & Infraction Pies Side by Side
+  const pieSize = 38;
+  const pieX = 100;
+
+  doc.text("Komposisi Presensi", pieX + 6, chartY + 5);
+  doc.setFillColor(34, 197, 94); // Green accent for attendance
+  doc.rect(pieX, chartY + 1, 3, 6, 'F');
 
   const attendanceData = [
     { label: 'Hadir', value: classData.stats?.attendance.Hadir || 0, color: [34, 197, 94] },
@@ -1181,12 +1246,25 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
     { label: 'Izin', value: classData.stats?.attendance.Ijin || 0, color: [59, 130, 246] },
     { label: 'Alpa', value: classData.stats?.attendance.Alpha || 0, color: [239, 68, 68] }
   ];
-  drawPieChart(doc, midPage + 5, chartY + 15, 45, attendanceData);
+  drawPieChart(doc, pieX, chartY + 10, pieSize, attendanceData);
 
-  yPos += 95;
+  doc.text("Sebaran Pelanggaran", pieX + 6, chartY + 62);
+  doc.setFillColor(239, 68, 68); // Red accent for infractions
+  doc.rect(pieX, chartY + 58, 3, 6, 'F');
+  if (violationData.length > 0) {
+    drawPieChart(doc, pieX, chartY + 68, pieSize, violationData);
+  } else {
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(150);
+    doc.text("(Belum ada data pelanggaran)", pieX, chartY + 75);
+    doc.setTextColor(31, 41, 55);
+    doc.setFont('helvetica', 'normal');
+  }
+
+  yPos += 130;
 
   // 4. TOPIC MASTERY (The Overhaul)
-  if (yPos + 40 > pageHeight - 25) { doc.addPage(); yPos = 25; }
+  if (yPos + 80 > pageHeight - 25) { doc.addPage(); yPos = 25; }
 
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
@@ -1196,10 +1274,10 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
   const topicChartData = groupGradesByTopic(classData.grades);
   yPos = drawHorizontalBarChart(doc, 14, yPos, pageWidth - 28, topicChartData);
 
-  yPos += 15;
+  yPos += 18;
 
   // 5. AI REPORT SECTION
-  if (yPos + 50 > pageHeight - 25) { doc.addPage(); yPos = 25; }
+  if (yPos + 80 > pageHeight - 25) { doc.addPage(); yPos = 25; }
 
   doc.setFillColor(30, 58, 138); // Navy Blue
   doc.rect(14, yPos, pageWidth - 28, 10, 'F');
@@ -1228,13 +1306,13 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
   doc.line(14, yPos - 5, pageWidth - 14, yPos - 5);
 
   const dateStr = fmtDate(new Date());
-  const city = getCity(userProfile);
+  const city = getSignatureCity(userProfile);
   const signX = pageWidth - 70;
 
   doc.setFontSize(9);
   doc.setTextColor(107, 114, 128);
   doc.text(`${city}, ${dateStr}`, signX, yPos);
-  doc.text(`Guru Kelas / Wali Kelas`, signX, yPos + 6);
+  doc.text(`Guru Mata Pelajaran`, signX, yPos + 6);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
@@ -1251,7 +1329,7 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(150);
-    doc.text(`Halaman ${i} dari ${totalPages} - Smart Teaching Digital Report`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+    doc.text(`Halaman ${i} dari ${totalPages} - Digital Academic Report`, pageWidth / 2, pageHeight - 10, { align: 'center' });
   }
 
   doc.save(`Analisis_Kelas_${classData.className}_${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -1263,7 +1341,9 @@ export const generateStudentAnalysisPDF = (studentName, className, reportText, s
   const pageWidth = doc.internal.pageSize.width;
 
   // Clean up AI intro fluff if present
-  const cleanedReportText = reportText.replace(/^Halo,.*?(Saya Smartty|asisten AI).*?analisis.*?:[\s\n]*/is, '');
+  const cleanedReportText = reportText
+    .replace(/^Halo,.*?(Saya Smartty|asisten AI|Smartty).*?analisis.*?:[\s\n]*/is, '')
+    .replace(/Smartty/g, 'Sistem');
 
   // Header
   doc.setFontSize(14);
@@ -1302,7 +1382,9 @@ export const generateStudentAnalysisPDF = (studentName, className, reportText, s
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   if (yPos + 10 > pageHeight - 20) { doc.addPage(); yPos = 20; }
-  doc.text("Analisis & Umpan Balik Guru", 14, yPos);
+  doc.setFillColor(30, 58, 138);
+  doc.rect(14, yPos - 4, 3, 6, 'F');
+  doc.text("Analisis & Umpan Balik Guru", 20, yPos);
   yPos += 8;
 
   doc.setFontSize(10);
@@ -1329,7 +1411,7 @@ export const generateStudentAnalysisPDF = (studentName, className, reportText, s
 
   const signX = pageWidth - 60;
   doc.text(`${city}, ${dateStr} `, signX, yPos);
-  doc.text(`Guru / Wali Kelas`, signX, yPos + 6);
+  doc.text(`Guru Mata Pelajaran`, signX, yPos + 6);
   doc.setFont('helvetica', 'bold');
   doc.text(teacherName, signX, yPos + 26);
   doc.setFont('helvetica', 'normal');
@@ -1383,9 +1465,8 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   const attitudeWeight = userProfile?.attitudeWeight || 50;
 
   const statsTable = [
-    [selectedSubject ? `Rata - rata ${selectedSubject} ` : "Rata-rata Akademik", "Nilai Sikap (Predikat)", `Nilai Akhir(${academicWeight} / ${attitudeWeight})`, "Persentase Kehadiran"],
-    [stats.academicAvg, `${stats.attitudeScore} (${stats.attitudePredicate})`, stats.finalScore,
-    `${((stats.attendance.Hadir / (Object.values(stats.attendance).reduce((a, b) => a + b, 0) || 1)) * 100).toFixed(1)}% `]
+    [selectedSubject ? `Rata - rata ${selectedSubject} ` : "Rata-rata Akademik", "Nilai Sikap (Predikat)", `Nilai Akhir(${academicWeight} / ${attitudeWeight})`, "Poin Keaktifan (+)", "Poin Pelanggaran (-)"],
+    [stats.academicAvg, `${stats.attitudeScore} (${stats.attitudePredicate})`, stats.finalScore, stats.totalStars, stats.totalInfractionPoints]
   ];
 
   doc.autoTable({
@@ -1484,7 +1565,8 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
 
   // Clean up AI intro fluff from narrative if present
   const cleanedNarrative = (narrative || "Belum ada catatan narasi untuk periode ini.")
-    .replace(/^Halo,.*?(Saya Smartty|asisten AI).*?analisis.*?:[\s\n]*/is, '');
+    .replace(/^Halo,.*?(Saya Smartty|asisten AI|Smartty).*?analisis.*?:[\s\n]*/is, '')
+    .replace(/Smartty/g, 'Sistem');
 
   if (narrativeImage) {
     try {
@@ -1596,7 +1678,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
 
   const signX = pageWidth - 70;
   const dateStr = fmtDate(new Date());
-  const city = getCity(userProfile);
+  const city = getSignatureCity(userProfile);
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
@@ -1736,7 +1818,7 @@ export const generateKktpAssessmentPDF = ({
   const finalY = doc.autoTable.previous.finalY + 15;
   const signX = pageWidth - 70;
   const dateStr = fmtDate(new Date());
-  const city = getCity(userProfile);
+  const city = getSignatureCity(userProfile);
 
   doc.setFontSize(10);
   doc.text(`${city}, ${dateStr} `, signX, finalY);

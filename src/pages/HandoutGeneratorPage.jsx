@@ -5,7 +5,7 @@ import { doc, getDoc, collection, addDoc, deleteDoc, serverTimestamp, query, whe
 import { onAuthStateChanged } from 'firebase/auth'; // Use native listener
 import { generateHandout } from '../utils/gemini';
 import BSKAP_DATA from '../utils/bskap_2025_intel.json';
-import { BookOpen, Save, Download, Printer, Wand2, ArrowLeft, Search, History, Trash2, Clock, X, Eye, Sparkles } from 'lucide-react';
+import { BookOpen, Save, Download, Printer, Wand2, ArrowLeft, Search, History, Trash2, Clock, X, Eye, Sparkles, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -18,6 +18,7 @@ import { getRegionFromSubject } from '../utils/carakan';
 import { saveAs } from 'file-saver';
 import { asBlob } from 'html-docx-js-typescript';
 import Modal from '../components/Modal';
+import ProgressBar from '../components/ProgressBar';
 
 const HandoutGeneratorPage = () => {
     const [user, setUser] = useState(auth.currentUser);
@@ -139,6 +140,7 @@ const HandoutGeneratorPage = () => {
     const [selectedAtpItem, setSelectedAtpItem] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedContent, setGeneratedContent] = useState('');
+    const [generationProgress, setGenerationProgress] = useState({ stage: '', message: '', percentage: 0 });
 
     // History & Saving States
     const [savedHandouts, setSavedHandouts] = useState([]);
@@ -289,6 +291,28 @@ const HandoutGeneratorPage = () => {
         }
 
         setIsGenerating(true);
+        setGenerationProgress({ stage: 'starting', message: 'Mempersiapkan referensi...', percentage: 5 });
+
+        // Simulasi Progres Bar
+        let currentProgress = 5;
+        const progressInterval = setInterval(() => {
+            currentProgress += Math.floor(Math.random() * 8) + 2;
+            if (currentProgress > 95) currentProgress = 95; // Stop di 95%
+
+            let stage = 'preparing';
+            let message = 'Menyiapkan pedoman penyusunan materi...';
+
+            if (currentProgress > 30 && currentProgress <= 70) {
+                stage = 'generating';
+                message = 'AI sedang merangkai narasi bahan ajar...';
+            } else if (currentProgress > 70) {
+                stage = 'parsing';
+                message = 'Memformat materi dan mencari referensi visual...';
+            }
+
+            setGenerationProgress({ stage, message, percentage: currentProgress });
+        }, 1200);
+
         try {
             const subjectObj = subjects.find(s => s.id === selectedSubject);
             const subjectName = subjectObj?.name || selectedSubject;
@@ -309,11 +333,15 @@ const HandoutGeneratorPage = () => {
             });
             setGeneratedContent(result);
             toast.success("Bahan Ajar berhasil dibuat!");
+            clearInterval(progressInterval);
+            setGenerationProgress({ stage: 'complete', message: 'Bahan Ajar siap digunakan!', percentage: 100 });
         } catch (error) {
             console.error(error);
             toast.error("Gagal membuat bahan ajar: " + error.message);
+            clearInterval(progressInterval);
+            setGenerationProgress({ stage: 'error', message: 'Gagal membuat bahan ajar.', percentage: 0 });
         } finally {
-            setIsGenerating(false);
+            setTimeout(() => setIsGenerating(false), 1000); // Tunda sedikit
         }
     };
 
@@ -740,153 +768,164 @@ const HandoutGeneratorPage = () => {
                                     </div>
                                 )}
 
-                                {/* Bottom Row: Trigger Button */}
-                                <div>
+                            </div>
 
-                                    <button
-                                        onClick={handleGenerate}
-                                        disabled={isGenerating || !topic}
-                                        className="w-full flex justify-center items-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg transition-all disabled:opacity-50 font-bold text-lg"
-                                    >
-                                        {isGenerating ? (
-                                            <>
-                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                                Sedang Menulis Modul...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Wand2 className="w-5 h-5" />
-                                                Buat Modul Bahan Ajar
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
+                            {/* Generate Button Container */}
+                            <div className="pt-6 border-t border-gray-100 dark:border-gray-700 mt-6">
+                                <button
+                                    onClick={handleGenerate}
+                                    disabled={isGenerating || !selectedSubject || !selectedGrade || (!selectedRPPId && !topic && !selectedAtpItem)}
+                                    className="group relative w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 mx-auto"
+                                >
+                                    {isGenerating ? (
+                                        <>
+                                            <Loader2 className="animate-spin w-5 h-5" />
+                                            Memproses...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-5 h-5" />
+                                            Generate Bahan Ajar
+                                        </>
+                                    )}
+                                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-[10px] text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl border border-white/10">
+                                        ⚡ Menggunakan Quota AI
+                                    </span>
+                                </button>
+
+                                <ProgressBar
+                                    isGenerating={isGenerating}
+                                    stage={generationProgress.stage}
+                                    message={generationProgress.message}
+                                    percentage={generationProgress.percentage}
+                                />
                             </div>
                         </div>
-
-                        {/* Result Section */}
-                        {generatedContent && (
-                            <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg p-6 border border-border-light dark:border-border-dark animate-fade-in-up">
-                                <div className="flex justify-between items-center mb-6 border-b border-border-light dark:border-border-dark pb-4">
-                                    <h2 className="text-xl font-bold text-text-primary-light dark:text-text-primary-dark">
-                                        Preview Bahan Ajar
-                                    </h2>
-                                    <div className="flex gap-3">
-                                        {/* Save Button */}
-                                        <button
-                                            onClick={handleSave}
-                                            disabled={isSaving}
-                                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-                                        >
-                                            <Save size={16} />
-                                            {isSaving ? 'Menyimpan...' : 'Simpan'}
-                                        </button>
-                                        <button
-                                            onClick={handleDownloadDocx}
-                                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                                        >
-                                            <Download className="w-4 h-4" />
-                                            Download Word
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className={`prose dark:prose-invert max-w-none bg-white p-8 rounded-lg shadow-sm border border-gray-100 min-h-[500px] ${getRegionFromSubject(selectedSubject) === 'Jawa' ? 'font-carakan' : ''}`} id="handout-preview">
-                                    <ReactMarkdown
-                                        remarkPlugins={[remarkGfm, remarkMath]}
-                                        rehypePlugins={[rehypeRaw, rehypeKatex]}
-                                        components={{
-                                            code({ node, inline, className, children, ...props }) {
-                                                const match = /language-mermaid/.exec(className || '');
-                                                return !inline && match ? (
-                                                    <MermaidRenderer>{children}</MermaidRenderer>
-                                                ) : (
-                                                    <code className={className} {...props}>
-                                                        {children}
-                                                    </code>
-                                                );
-                                            }
-                                        }}
-                                    >
-                                        {generatedContent}
-                                    </ReactMarkdown>
-                                </div>
-                            </div>
-                        )}
-
                     </div>
 
-                    {/* History Modal */}
-                    {showHistory && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
-                                <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-                                    <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                                        <History size={20} className="text-blue-500" />
-                                        Riwayat Bahan Ajar
-                                    </h3>
+                    {/* Result Section (bawah form) */}
+                    {generatedContent && (
+                        <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg p-6 border border-border-light dark:border-border-dark animate-fade-in-up mt-8">
+                            <div className="flex justify-between items-center mb-6 border-b border-border-light dark:border-border-dark pb-4">
+                                <h2 className="text-xl font-bold text-text-primary-light dark:text-text-primary-dark">
+                                    Preview Bahan Ajar
+                                </h2>
+                                <div className="flex gap-3">
+                                    {/* Save Button */}
                                     <button
-                                        onClick={() => setShowHistory(false)}
-                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition"
+                                        onClick={handleSave}
+                                        disabled={isSaving}
+                                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                                     >
-                                        <X size={20} />
+                                        <Save size={16} />
+                                        {isSaving ? 'Menyimpan...' : 'Simpan'}
+                                    </button>
+                                    <button
+                                        onClick={handleDownloadDocx}
+                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                        Download Word
                                     </button>
                                 </div>
+                            </div>
 
-                                <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                                    {savedHandouts.length === 0 ? (
-                                        <div className="text-center py-10 text-gray-500">
-                                            Belum ada riwayat tersimpan.
-                                        </div>
-                                    ) : (
-                                        savedHandouts.map((item) => (
-                                            <div
-                                                key={item.id}
-                                                className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all group"
-                                            >
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <h4 className="font-bold text-gray-800 dark:text-white line-clamp-1">{item.topic}</h4>
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
-                                                            <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold">{item.subject}</span>
-                                                            <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs font-semibold">Kelas {item.gradeLevel}</span>
-                                                            <span className="flex items-center gap-1 text-xs">
-                                                                <Clock size={12} />
-                                                                {item.createdAt?.seconds
-                                                                    ? new Date(item.createdAt.seconds * 1000).toLocaleDateString()
-                                                                    : 'Baru saja'}
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button
-                                                            onClick={() => handleLoad(item)}
-                                                            className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
-                                                            title="Buka kembali"
-                                                        >
-                                                            <Eye size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDelete(item.id)}
-                                                            className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
-                                                            title="Hapus"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                                <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl text-center text-xs text-gray-500">
-                                    Simpan konten terbaik Anda untuk digunakan kembali nanti.
-                                </div>
+                            <div className={`prose dark:prose-invert max-w-none bg-white p-8 rounded-lg shadow-sm border border-gray-100 min-h-[500px] ${getRegionFromSubject(selectedSubject) === 'Jawa' ? 'font-carakan' : ''}`} id="handout-preview">
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm, remarkMath]}
+                                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                    components={{
+                                        code({ node, inline, className, children, ...props }) {
+                                            const match = /language-mermaid/.exec(className || '');
+                                            return !inline && match ? (
+                                                <MermaidRenderer>{children}</MermaidRenderer>
+                                            ) : (
+                                                <code className={className} {...props}>
+                                                    {children}
+                                                </code>
+                                            );
+                                        }
+                                    }}
+                                >
+                                    {generatedContent}
+                                </ReactMarkdown>
                             </div>
                         </div>
                     )}
                 </main>
             </div>
+
+            {/* History Modal */}
+            {showHistory && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+                        <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                <History size={20} className="text-blue-500" />
+                                Riwayat Bahan Ajar
+                            </h3>
+                            <button
+                                onClick={() => setShowHistory(false)}
+                                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                            {savedHandouts.length === 0 ? (
+                                <div className="text-center py-10 text-gray-500">
+                                    Belum ada riwayat tersimpan.
+                                </div>
+                            ) : (
+                                savedHandouts.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all group"
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className="font-bold text-gray-800 dark:text-white line-clamp-1">{item.topic}</h4>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
+                                                    <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold">{item.subject}</span>
+                                                    <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs font-semibold">Kelas {item.gradeLevel}</span>
+                                                    <span className="flex items-center gap-1 text-xs">
+                                                        <Clock size={12} />
+                                                        {item.createdAt?.seconds
+                                                            ? new Date(item.createdAt.seconds * 1000).toLocaleDateString()
+                                                            : 'Baru saja'}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => handleLoad(item)}
+                                                    className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
+                                                    title="Buka kembali"
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(item.id)}
+                                                    className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                                                    title="Hapus"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                        <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl text-center text-xs text-gray-500">
+                            Simpan konten terbaik Anda untuk digunakan kembali nanti.
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Konfirmasi */}
             {confirmModal.isOpen && (
                 <Modal onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
                     <div className="text-center">

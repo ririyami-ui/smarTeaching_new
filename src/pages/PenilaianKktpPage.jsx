@@ -79,7 +79,7 @@ const PenilaianKktpPage = () => {
                 );
                 const rppSnap = await getDocs(rppQuery);
                 const rppData = rppSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                console.log("Fetched RPPs total:", rppData.length);
+
 
                 // Sort in-memory: Newer first, treat missing createdAt as oldest
                 rppData.sort((a, b) => {
@@ -99,7 +99,7 @@ const PenilaianKktpPage = () => {
                 const classSnap = await getDocs(classQuery);
                 const classData = classSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 setClasses(classData);
-                console.log("Fetched Classes total:", classData.length);
+
 
                 // Fetch Subjects (for sync mapping)
                 const subjectQuery = query(
@@ -186,7 +186,7 @@ const PenilaianKktpPage = () => {
             // Sort in memory by name
             studentData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-            console.log(`Fetched ${studentData.length} students for class ${rombelName} (ID: ${selectedClass})`);
+
             setStudents(studentData);
         } catch (error) {
             console.error("Error fetching students:", error);
@@ -217,7 +217,7 @@ const PenilaianKktpPage = () => {
                 if (!snapshot.empty) {
                     // Load the most recent assessment
                     const data = snapshot.docs[0].data();
-                    console.log("Found existing assessment:", data);
+
 
                     setAssessmentScores(data.scores || {});
 
@@ -232,7 +232,7 @@ const PenilaianKktpPage = () => {
                             type: data.kktpType || 'Unknown',
                             criteria: data.criteria
                         });
-                        console.log("Restored KKTP structure from database:", data.kktpType);
+
                     }
                 } else {
                     // No existing data, reset scores

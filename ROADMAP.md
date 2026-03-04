@@ -65,6 +65,14 @@ Dokumen ini merinci rencana pengembangan strategis untuk **Smart Teaching**, men
     - Modul tambahan untuk inventaris kelas dan uang kas kelas.
 4.  **Integrasi Dapodik**
     - (Eksplorasi) Sinkronisasi data siswa dasar dengan format Excel Dapodik untuk memudahkan administrasi sekolah.
+5.  **Manajemen Kenaikan Kelas & Arsip Multi-Semester**
+    - Fitur otomatisasi pindah kelas dan pelulusan siswa masal.
+    - Akses data historis (Time Machine) tanpa mengubah setting global.
+    - *Lihat rincian di [BLUEPRINT_PENGEMBANGAN_DATA.md](./BLUEPRINT_PENGEMBANGAN_DATA.md)*
+6.  **Semester Portfolio & Academic Audit Generator**
+    - Pembuatan laporan rekapitulasi 1 semester dengan desain premium & analisis SWOT berbasis AI.
+    - Otomatisasi 6 Bab laporan untuk pengembangan PKB Guru.
+    - *Lihat rincian di [BLUEPRINT_SEMESTER_PORTFOLIO.md](./BLUEPRINT_SEMESTER_PORTFOLIO.md)*
 
 ---
 

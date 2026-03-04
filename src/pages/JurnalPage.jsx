@@ -65,12 +65,17 @@ export default function JurnalPage() {
 
   // Set current date on component mount
   useEffect(() => {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    setCurrentDate(`${yyyy}-${mm}-${dd}`);
-  }, []);
+    const dateFromUrl = searchParams.get('date');
+    if (dateFromUrl && moment(dateFromUrl, 'YYYY-MM-DD', true).isValid()) {
+      setCurrentDate(dateFromUrl);
+    } else {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      setCurrentDate(`${yyyy}-${mm}-${dd}`);
+    }
+  }, [searchParams]);
 
   // Fetch Firestore holidays on mount
   useEffect(() => {
@@ -204,7 +209,7 @@ export default function JurnalPage() {
         const parsedCache = JSON.parse(cachedData);
         if (parsedCache.hash === currentHash) {
           // Cache HIT - Use saved analysis
-          console.log("Using cached AI Journal Analysis (Token Saver)");
+
           setAiSummary(parsedCache.summary);
           setAiSentimentPercentage(parsedCache.sentiment.percentage);
           setAiSentimentExplanation(parsedCache.sentiment.explanation);
@@ -214,7 +219,7 @@ export default function JurnalPage() {
 
       if (!shouldUseCache) {
         // Cache MISS - Call AI API
-        console.log("Fetching fresh AI Journal Analysis...");
+
         if (fetchedJournals.length > 0) {
           try {
             const aiResults = await analyzeTeachingJournals(fetchedJournals, geminiModel);

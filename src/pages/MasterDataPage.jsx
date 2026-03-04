@@ -52,8 +52,9 @@ export default function MasterDataPage() {
         </div>
       </div>
 
-      {/* Modern Glassmorphic Tab Navigation */}
-      <div className="bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-md p-1.5 rounded-2xl inline-flex flex-wrap gap-1 border border-gray-200/50 dark:border-gray-800/50">
+      {/* Modern Glassmorphic Tab Navigation - Scrollable on mobile */}
+      <div className="bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-md p-1.5 rounded-2xl flex overflow-x-auto gap-1 border border-gray-200/50 dark:border-gray-800/50 no-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -62,7 +63,7 @@ export default function MasterDataPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`
-                flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 relative
+                flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 relative whitespace-nowrap shrink-0
                 ${isActive
                   ? 'bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5 scale-[1.02]'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/30'

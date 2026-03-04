@@ -14,6 +14,7 @@ import { asBlob } from 'html-docx-js-typescript';
 import { saveAs } from 'file-saver';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import html2canvas from 'html2canvas';
 
 const CHAPTERS = [
     { id: 1, title: 'BAB I: PENDAHULUAN', icon: <Book size={20} /> },
@@ -38,6 +39,7 @@ export default function PortfolioPage() {
     const [userProfile, setUserProfile] = useState(null);
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
+    const [fullReportCaptureState, setFullReportCaptureState] = useState(null);
 
     const completedCount = Object.keys(chaptersContent).length;
     const completionPercentage = Math.round((completedCount / CHAPTERS.length) * 100);
@@ -456,7 +458,8 @@ export default function PortfolioPage() {
                         where('semester', '==', activeSemester),
                         where('subjectName', '==', selectedSubject)
                     );
-                    const docs = snap.docs.map(d => ({
+                    const snap_swot = await getDocs(q);
+                    const docs = snap_swot.docs.map(d => ({
                         material: d.data().material,
                         reflection: d.data().reflection,
                         challenges: d.data().challenges,
@@ -497,7 +500,7 @@ export default function PortfolioPage() {
         try {
             // Use live cached context if available, else fetch
             const context = liveContextData[activeChapter] || await gatherContext(activeChapter);
-            const content = await generatePortfolioChapter(activeChapter, context, userProfile, selectedSubject);
+            const content = await generatePortfolioChapter(activeChapter, context, userProfile, selectedSubject, chaptersContent);
             await saveChapter(activeChapter, content, context);
             toast.success(`Bab ${activeChapter} berhasil disusun!`, { id: loadingToast });
         } catch (error) {
@@ -515,27 +518,55 @@ export default function PortfolioPage() {
         const content = chaptersContent[activeChapter]?.content;
         if (!content) return;
 
+        const loadingToast = toast.loading("Menyiapkan dokumen Word...");
         try {
-            const htmlContent = `
-    < !DOCTYPE html >
-        <html>
-            <head><meta charset="utf-8"></head>
-            <body>
-                <h1 style="text-align: center;">${CHAPTERS.find(c => c.id === activeChapter).title}</h1>
-                <p style="text-align: center;"><i>Semester: ${activeSemester} | Tahun Ajaran: ${academicYear}</i></p>
-                <hr>
-                    <div style="font-family: 'Times New Roman', serif;">
-                        ${content.replace(/\n/g, '<br>')}
+            let chartImageHtml = '';
+            const chartElement = document.getElementById('chart-to-export');
+
+            if (chartElement) {
+                // Capture chart using html2canvas
+                const canvas = await html2canvas(chartElement, {
+                    scale: 2, // Higher quality
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+                const imageData = canvas.toDataURL('image/png');
+                chartImageHtml = `
+                    <div style="text-align: center; margin: 20px 0;">
+                        <img src="${imageData}" style="width: 100%; max-width: 650px;" />
+                        <p style="font-size: 9pt; color: #666; font-style: italic; margin-top: 5px;">
+                            Gambar ${activeChapter}.1: Analisis Visual Data Semester Ini
+                        </p>
                     </div>
-            </body>
-        </html>
-`;
+                `;
+            }
+
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                    <head><meta charset="utf-8"></head>
+                    <body>
+                        <h1 style="text-align: center; color: #1e1b4b; font-family: 'Arial', sans-serif;">
+                            ${CHAPTERS.find(c => c.id === activeChapter).title}
+                        </h1>
+                        <p style="text-align: center; color: #4b5563; font-family: 'Arial', sans-serif;">
+                            <i>Semester: ${activeSemester} | Tahun Ajaran: ${academicYear} | Fokus: ${selectedSubject}</i>
+                        </p>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        
+                        <div style="font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.6;">
+                            ${markdownToHtml(content.replace(/\[VISUAL_CHART\]/g, chartImageHtml))}
+                        </div>
+                    </body>
+                </html>
+            `;
+
             const blob = await asBlob(htmlContent);
             saveAs(blob, `Portofolio_Bab_${activeChapter}_${academicYear}_S${activeSemester}.docx`);
-            toast.success("File Word berhasil diunduh.");
+            toast.success("File Word berhasil diunduh.", { id: loadingToast });
         } catch (error) {
             console.error("Export error:", error);
-            toast.error("Gagal mengunduh file Word.");
+            toast.error("Gagal menyusun dokumen Word.", { id: loadingToast });
         }
     };
 
@@ -590,6 +621,7 @@ export default function PortfolioPage() {
 
     const handleExportFullReport = async () => {
         setIsLoading(true);
+        const loadingToast = toast.loading("Menyiapkan Laporan Lengkap... Ini mungkin memakan waktu beberapa saat.");
         try {
             const safeYear = academicYear?.replace(/\//g, '_') || 'unknown';
             const safeSemester = activeSemester?.replace(/\//g, '_') || 'unknown';
@@ -599,29 +631,92 @@ export default function PortfolioPage() {
             const snap = await getDoc(docRef);
 
             if (!snap.exists()) {
-                toast.error("Data portofolio belum tersedia.");
+                toast.error("Data portofolio belum tersedia.", { id: loadingToast });
+                setIsLoading(false);
                 return;
             }
 
             const chapters = snap.data().chapters || {};
+            const chartImages = {};
+
+            // ---- Step 1: Sequential Snapshot Capture for all chapters with charts ----
+            for (const chap of CHAPTERS) {
+                const chapterData = chapters[chap.id];
+                if ([2, 3, 4, 5, 6].includes(chap.id) && chapterData?.context && chapterData?.content?.includes('[VISUAL_CHART]')) {
+                    toast.loading(`Mengambil Visualisasi untuk ${chap.title}...`, { id: loadingToast });
+
+                    // Trigger hidden render
+                    setFullReportCaptureState({ chapterId: chap.id, data: chapterData.context });
+
+                    // Wait for Recharts animation to stabilize (800ms)
+                    await new Promise(resolve => setTimeout(resolve, 800));
+
+                    const chartBuffer = document.getElementById('full-report-chart-buffer');
+                    if (chartBuffer) {
+                        try {
+                            const canvas = await html2canvas(chartBuffer, {
+                                scale: 2,
+                                useCORS: true,
+                                backgroundColor: '#ffffff',
+                                logging: false
+                            });
+                            chartImages[chap.id] = canvas.toDataURL('image/png');
+                        } catch (err) {
+                            console.error(`Failed to capture chart for chapter ${chap.id}`, err);
+                        }
+                    }
+                }
+            }
+
+            setFullReportCaptureState(null); // Clean up
+            toast.loading("Menyusun dokumen final...", { id: loadingToast });
+
             let combinedHtml = `
-    < !DOCTYPE html >
-        <html>
-            <head><meta charset="utf-8"></head>
-            <body>
-                <h1 style="text-align: center; font-size: 24pt;">LAPORAN PORTOFOLIO SEMESTER</h1>
-                <p style="text-align: center;">${academicYear} - Semester ${activeSemester}</p>
-                <br><br>
-                    `;
+                <!DOCTYPE html>
+                <html>
+                    <head><meta charset="utf-8"></head>
+                    <body>
+                        <h1 style="text-align: center; font-size: 24pt; color: #1e1b4b; font-family: 'Arial', sans-serif;">
+                            LAPORAN PORTOFOLIO AKADEMIK
+                        </h1>
+                        <p style="text-align: center; font-size: 14pt; color: #4b5563;">
+                            ${academicYear} - Semester ${activeSemester}
+                        </p>
+                        <p style="text-align: center; font-size: 12pt; color: #6366f1; font-weight: bold;">
+                            Bidang Studi: ${selectedSubject}
+                        </p>
+                        <br><br>
+            `;
 
             CHAPTERS.forEach(chap => {
                 if (chapters[chap.id]) {
+                    let chapterContent = chapters[chap.id].content;
+
+                    // Replace placeholder with captured image if exists
+                    if (chartImages[chap.id]) {
+                        const imgHtml = `
+                            <div style="text-align: center; margin: 25px 0; border: 1px solid #f3f4f6; padding: 15px; border-radius: 8px;">
+                                <img src="${chartImages[chap.id]}" style="width: 100%; max-width: 650px;" />
+                                <p style="font-size: 9pt; color: #6b7280; font-style: italic; margin-top: 10px;">
+                                    Gambar ${chap.id}.1: Analisis Visual Data Semester Ini
+                                </p>
+                            </div>
+                        `;
+                        chapterContent = chapterContent.replace(/\[VISUAL_CHART\]/g, imgHtml);
+                    } else {
+                        // Strip remaining placeholders if no images captured
+                        chapterContent = chapterContent.replace(/\[VISUAL_CHART\]/g, '');
+                    }
+
                     combinedHtml += `
-                        <h2 style="margin-top: 30px;">${chap.title}</h2>
-                        <div style="font-family: 'Times New Roman', serif; margin-bottom: 20px;">
-                            ${markdownToHtml(chapters[chap.id].content)}
+                        <div style="page-break-before: always; margin-top: 30px;">
+                            <h2 style="color: #1e1b4b; border-bottom: 2px solid #6366f1; padding-bottom: 10px; font-family: 'Arial', sans-serif;">
+                                ${chap.title}
+                            </h2>
+                            <div style="font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.6; text-align: justify;">
+                                ${markdownToHtml(chapterContent)}
+                            </div>
                         </div>
-                        <br clear="all" style="page-break-before:always">
                     `;
                 }
             });
@@ -630,10 +725,10 @@ export default function PortfolioPage() {
 
             const blob = await asBlob(combinedHtml);
             saveAs(blob, `Laporan_Lengkap_Portofolio_${academicYear}_S${activeSemester}.docx`);
-            toast.success("Laporan Lengkap berhasil diunduh.");
+            toast.success("Laporan Lengkap berhasil diunduh.", { id: loadingToast });
         } catch (error) {
             console.error("Export error:", error);
-            toast.error("Gagal mengunduh laporan.");
+            toast.error("Gagal mengunduh laporan lengkap.", { id: loadingToast });
         } finally {
             setIsLoading(false);
         }
@@ -653,26 +748,34 @@ export default function PortfolioPage() {
     return (
         <div className="space-y-6">
             {/* Header Section */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-8 text-white shadow-2xl">
+            <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600/90 to-purple-700/90 dark:from-indigo-950/80 dark:to-purple-950/80 backdrop-blur-xl rounded-[2.5rem] p-8 text-white shadow-2xl border border-white/20">
                 <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
                     <Book size={200} />
                 </div>
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="max-w-2xl">
-                        <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-2">Smartty Semester Portfolio</h1>
-                        <p className="text-indigo-100 text-lg font-medium">Buku Audit Akademik & Laporan Kinerja Guru Profesional</p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                            <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider border border-white/20">TA {academicYear} • SMTR {activeSemester?.toUpperCase()}</span>
-                            <span className="px-3 py-1 bg-green-500/30 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider border border-green-500/30 text-green-100">AI-POWERED AUDIT</span>
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="glass-icon-container glass-glow-blue w-14 h-14 p-2 relative">
+                                <Book size={32} className="opacity-90" />
+                                <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent pointer-events-none rounded-2xl"></div>
+                            </div>
+                            <div>
+                                <h1 className="text-3xl md:text-4xl font-black tracking-tight">Smartty Portofolio</h1>
+                                <p className="text-indigo-100 text-lg font-medium opacity-80">Audit Akademik & Laporan Kinerja Professional</p>
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/20">TA {academicYear} • SMTR {activeSemester?.toUpperCase()}</span>
+                            <span className="px-3 py-1 bg-green-500/20 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-wider border border-green-500/30 text-green-200">AI-POWERED AUDIT</span>
                         </div>
                     </div>
                     {/* Subject Selector */}
-                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-4 rounded-2xl flex flex-col gap-2 min-w-[200px]">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-indigo-100">Mata Pelajaran</label>
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-5 rounded-[2rem] flex flex-col gap-2 min-w-[220px] shadow-inner">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-indigo-200 opacity-80">Mata Pelajaran</label>
                         <select
                             value={selectedSubject}
                             onChange={(e) => setSelectedSubject(e.target.value)}
-                            className="bg-transparent border-none text-white font-bold focus:ring-0 cursor-pointer appearance-none"
+                            className="bg-transparent border-none text-white font-bold focus:ring-0 cursor-pointer appearance-none text-lg p-0"
                         >
                             {subjects.map(s => (
                                 <option key={s.id} value={s.name} className="bg-indigo-900 text-white">{s.name}</option>
@@ -815,32 +918,56 @@ export default function PortfolioPage() {
                         {/* Editor / Content */}
                         <div className="flex-1 flex flex-col gap-8">
 
-                            {/* Always visible Visual Chart Section for chapters with data */}
-                            {activeChapter >= 1 && activeChapter <= 5 && (
-                                <div className="bg-gray-50/50 dark:bg-gray-900/30 rounded-3xl p-6 border border-gray-100 dark:border-gray-700">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <BarChart size={16} className="text-indigo-600" />
-                                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
-                                            Visualisasi Data Pendukung Bab {activeChapter}
-                                        </span>
-                                    </div>
-                                    {isLiveContextLoading[activeChapter] ? (
-                                        <div className="flex justify-center p-8"><RefreshCw className="animate-spin text-indigo-400" /></div>
-                                    ) : (
-                                        <VisualAnalytics
-                                            chapterId={activeChapter}
-                                            data={liveContextData[activeChapter] || chaptersContent[activeChapter]?.context || {}}
-                                        />
-                                    )}
-                                </div>
-                            )}
-
                             {currentDraft ? (
                                 <>
                                     <div className="prose dark:prose-invert max-w-none prose-indigo markdown-content">
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                            {currentDraft}
-                                        </ReactMarkdown>
+                                        {[2, 3, 4, 5, 6].includes(activeChapter) && currentDraft.includes('[VISUAL_CHART]') ? (
+                                            (() => {
+                                                const parts = currentDraft.split('[VISUAL_CHART]');
+                                                const firstPart = parts[0];
+                                                const remainingParts = parts.slice(1).join('\n'); // Join the rest without placeholders
+
+                                                return (
+                                                    <>
+                                                        {firstPart && (
+                                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                                {firstPart}
+                                                            </ReactMarkdown>
+                                                        )}
+                                                        <div id="chart-to-export" className="my-10 bg-white dark:bg-gray-800 rounded-3xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm no-print">
+                                                            <div className="flex items-center gap-2 mb-6 border-l-4 border-indigo-600 pl-4">
+                                                                <div>
+                                                                    <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Visualisasi Data Utama</p>
+                                                                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                                                                        {activeChapter === 2 ? 'Pemetaan Kurikulum & Target' :
+                                                                            activeChapter === 3 ? 'Konsistensi Pelaksanaan Pembelajaran' :
+                                                                                activeChapter === 4 ? 'Distribusi Capaian Kurikulum' :
+                                                                                    activeChapter === 5 ? 'Analisis Kedisiplinan & Etika Peserta Didik' :
+                                                                                        'Analisis Kekuatan, Kelemahan & Peluang (SWOT)'}
+                                                                    </h4>
+                                                                </div>
+                                                            </div>
+                                                            <VisualAnalytics
+                                                                chapterId={activeChapter}
+                                                                data={liveContextData[activeChapter] || chaptersContent[activeChapter]?.context || {}}
+                                                            />
+                                                            <p className="text-center text-[10px] text-gray-400 mt-4 italic font-medium uppercase tracking-widest leading-loose">
+                                                                Gambar {activeChapter}.1: Analisis Kuantitatif Semester Ini
+                                                            </p>
+                                                        </div>
+                                                        {remainingParts && (
+                                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                                {remainingParts}
+                                                            </ReactMarkdown>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()
+                                        ) : (
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                {currentDraft}
+                                            </ReactMarkdown>
+                                        )}
                                     </div>
                                 </>
                             ) : (
@@ -933,6 +1060,37 @@ export default function PortfolioPage() {
                         </div>
                     </div>
                 </Modal>
+            )}
+            {/* Hidden Chart Buffer for Full Report Export */}
+            {fullReportCaptureState && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: '-9999px',
+                        left: '-9999px',
+                        width: '800px', // Standard width for capture
+                        zIndex: -1
+                    }}
+                >
+                    <div id="full-report-chart-buffer" className="bg-white p-10 rounded-3xl">
+                        <div className="flex items-center gap-2 mb-6 border-l-4 border-indigo-600 pl-4">
+                            <div>
+                                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Visualisasi Data Utama</p>
+                                <h4 className="text-sm font-bold text-gray-700">
+                                    {fullReportCaptureState.chapterId === 2 ? 'Pemetaan Kurikulum & Target' :
+                                        fullReportCaptureState.chapterId === 3 ? 'Konsistensi Pelaksanaan Pembelajaran' :
+                                            fullReportCaptureState.chapterId === 4 ? 'Distribusi Capaian Kurikulum' :
+                                                fullReportCaptureState.chapterId === 5 ? 'Analisis Kedisiplinan & Etika Peserta Didik' :
+                                                    'Analisis Kekuatan, Kelemahan & Peluang (SWOT)'}
+                                </h4>
+                            </div>
+                        </div>
+                        <VisualAnalytics
+                            chapterId={fullReportCaptureState.chapterId}
+                            data={fullReportCaptureState.data}
+                        />
+                    </div>
+                </div>
             )}
         </div>
     );

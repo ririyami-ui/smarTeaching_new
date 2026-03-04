@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, setDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, setDoc, query, where, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -46,8 +46,9 @@ const getNextDayOccurrence = (dayOfWeek, timeString, startDate = moment()) => {
 };
 
 const ScheduleInputMasterData = () => {
-  const { activeSemester, academicYear, schoolDays: contextSchoolDays } = useSettings();
+  const { activeSemester, academicYear, schoolDays: contextSchoolDays, activeTemplateId, activeTemplateName } = useSettings();
   const [schoolDays, setSchoolDays] = useState(contextSchoolDays || 6);
+  // ... other existing states ...
   const [day, setDay] = useState('');
   const [selectedClass, setSelectedClass] = useState(null);
   const [startPeriod, setStartPeriod] = useState('');
@@ -58,6 +59,13 @@ const ScheduleInputMasterData = () => {
 
   const [subjects, setSubjects] = useState([]);
   const [classes, setClasses] = useState([]);
+
+  // Template States
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState(activeTemplateId || null);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState('');
 
   // New State for Schedule Type
   const [scheduleType, setScheduleType] = useState('teaching'); // 'teaching' | 'non-teaching'
@@ -88,31 +96,96 @@ const ScheduleInputMasterData = () => {
 
   // Semester and Year are handled by useSettings
 
-  // Fetch subjects and classes from Firestore
+  // Fetch subjects, classes, AND templates from Firestore
   useEffect(() => {
     const fetchMasterData = async (user) => {
       if (user) {
-        // Fetch Subjects for the current user
-        const subjectsQuery = query(collection(db, 'subjects'), where('userId', '==', user.uid));
-        const subjectData = await getDocs(subjectsQuery);
-        setSubjects(subjectData.docs.map((doc) => ({ id: doc.id, name: doc.data().name })));
+        setIsLoadingTemplates(true);
+        try {
+          // 1. Fetch Templates first
+          const templatesQuery = query(collection(db, 'scheduleTemplates'), where('userId', '==', user.uid));
+          const templateSnapshot = await getDocs(templatesQuery);
+          let fetchedTemplates = templateSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Fetch Classes (Rombel) for the current user
-        const classesQuery = query(collection(db, 'classes'), where('userId', '==', user.uid));
-        const classData = await getDocs(classesQuery);
-        const fetchedClasses = classData.docs.map((doc) => ({ id: doc.id, rombel: doc.data().rombel }));
-        const sortedClasses = fetchedClasses.sort((a, b) => a.rombel.localeCompare(b.rombel)); // Sort by rombel name
-        setClasses(sortedClasses);
+          // 2. Migration: If no templates, create default and migrate
+          if (fetchedTemplates.length === 0) {
+
+            const defaultTemplate = {
+              userId: user.uid,
+              name: 'Jadwal Normal',
+              isActive: true,
+              createdAt: serverTimestamp()
+            };
+            const tempDoc = await addDoc(collection(db, 'scheduleTemplates'), defaultTemplate);
+            const templateId = tempDoc.id;
+            fetchedTemplates = [{ id: templateId, ...defaultTemplate }];
+
+            // Update user settings to point to this template
+            await setDoc(doc(db, 'users', user.uid), {
+              activeTemplateId: templateId,
+              activeTemplateName: 'Jadwal Normal'
+            }, { merge: true });
+
+            // Migrate existing schedules that don't have a templateId
+            const schedulesQuery = query(collection(db, 'teachingSchedules'), where('userId', '==', user.uid));
+            const schedulesSnapshot = await getDocs(schedulesQuery);
+            const batch = writeBatch(db);
+            let migrationCount = 0;
+            schedulesSnapshot.docs.forEach(schedDoc => {
+              if (!schedDoc.data().templateId) {
+                batch.update(schedDoc.ref, { templateId: templateId });
+                migrationCount++;
+              }
+            });
+            if (migrationCount > 0) {
+              await batch.commit();
+
+            }
+            setSelectedTemplateId(templateId);
+          } else {
+            // If we have templates but activeTemplateId is missing in state, set it
+            if (!selectedTemplateId) {
+              const active = fetchedTemplates.find(t => t.isActive) || fetchedTemplates[0];
+              setSelectedTemplateId(active.id);
+            }
+          }
+          setTemplates(fetchedTemplates);
+
+          // 3. Fetch Subjects
+          const subjectsQuery = query(collection(db, 'subjects'), where('userId', '==', user.uid));
+          const subjectData = await getDocs(subjectsQuery);
+          setSubjects(subjectData.docs.map((doc) => ({ id: doc.id, name: doc.data().name })));
+
+          // 4. Fetch Classes
+          const classesQuery = query(collection(db, 'classes'), where('userId', '==', user.uid));
+          const classData = await getDocs(classesQuery);
+          const fetchedClasses = classData.docs.map((doc) => ({ id: doc.id, rombel: doc.data().rombel }));
+          const sortedClasses = fetchedClasses.sort((a, b) => a.rombel.localeCompare(b.rombel));
+          setClasses(sortedClasses);
+
+        } catch (error) {
+          console.error("Error fetching master data:", error);
+          toast.error("Gagal memuat data master.");
+        } finally {
+          setIsLoadingTemplates(false);
+        }
       } else {
-        // Clear data if user logs out
         setSubjects([]);
         setClasses([]);
+        setTemplates([]);
       }
     };
 
     const unsubscribe = auth.onAuthStateChanged(fetchMasterData);
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
+
+  // Update selectedTemplateId if activeTemplateId changes from context (global setting)
+  useEffect(() => {
+    if (activeTemplateId) {
+      setSelectedTemplateId(activeTemplateId);
+    }
+  }, [activeTemplateId]);
 
   // Sync schoolDays from context
   useEffect(() => {
@@ -448,7 +521,11 @@ const ScheduleInputMasterData = () => {
     const fetchData = async (user) => {
       if (user) {
         // Fetch Schedules
-        const qSchedules = query(teachingSchedulesCollectionRef, where('userId', '==', user.uid));
+        const qSchedules = query(
+          teachingSchedulesCollectionRef,
+          where('userId', '==', user.uid),
+          where('templateId', '==', selectedTemplateId)
+        );
         const scheduleSnapshot = await getDocs(qSchedules);
         const fetchedSchedules = scheduleSnapshot.docs.map((doc) => {
           const scheduleData = doc.data();
@@ -477,7 +554,7 @@ const ScheduleInputMasterData = () => {
 
     const unsubscribe = auth.onAuthStateChanged(fetchData);
     return () => unsubscribe();
-  }, [generateCalendarEvents, activeSemester, fetchHolidays]);
+  }, [generateCalendarEvents, activeSemester, fetchHolidays, selectedTemplateId]);
 
   const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
@@ -526,6 +603,7 @@ const ScheduleInputMasterData = () => {
         endTime,
         semester: activeSemester,
         academicYear: academicYear,
+        templateId: selectedTemplateId,
         type: scheduleType, // Save type
       };
 
@@ -552,7 +630,7 @@ const ScheduleInputMasterData = () => {
         scheduleData.class = rombel?.rombel || 'Umum'; // Legacy support
       }
 
-      console.log('Attempting to add schedule:', scheduleData);
+
 
       const docRef = await addDoc(teachingSchedulesCollectionRef, scheduleData);
       const addedSchedule = { ...scheduleData, id: docRef.id };
@@ -585,7 +663,121 @@ const ScheduleInputMasterData = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [day, selectedClass, startPeriod, endPeriod, startTime, endTime, selectedSubject, generateCalendarEvents, scheduleType, activityName, subjects, classes, activeSemester, academicYear, teachingSchedulesCollectionRef, isSubmitting]);
+  }, [day, selectedClass, startPeriod, endPeriod, startTime, endTime, selectedSubject, generateCalendarEvents, scheduleType, activityName, subjects, classes, activeSemester, academicYear, teachingSchedulesCollectionRef, isSubmitting, selectedTemplateId]);
+
+  // Template Management Handlers
+  const handleCreateTemplate = () => {
+    setNewTemplateName('');
+    setIsTemplateModalOpen(true);
+  };
+
+  const handleConfirmCreateTemplate = async (e) => {
+    e.preventDefault();
+    if (!newTemplateName.trim() || !auth.currentUser) return;
+
+    const templateName = newTemplateName.trim();
+    setIsTemplateModalOpen(false); // Close modal immediately for better UX
+    const toastId = toast.loading(`Membuat template '${templateName}'...`);
+
+    try {
+      const newTemplate = {
+        userId: auth.currentUser.uid,
+        name: templateName,
+        isActive: false,
+        createdAt: serverTimestamp()
+      };
+      const docRef = await addDoc(collection(db, 'scheduleTemplates'), newTemplate);
+      const added = { id: docRef.id, ...newTemplate };
+      setTemplates(prev => [...prev, added]);
+      setSelectedTemplateId(docRef.id);
+      toast.success(`Template '${templateName}' berhasil dibuat.`, { id: toastId });
+    } catch (error) {
+      console.error("Error creating template:", error);
+      toast.error("Gagal membuat template.", { id: toastId });
+    }
+  };
+
+  const handleActivateTemplate = async (templateId) => {
+    if (!auth.currentUser) return;
+    const template = templates.find(t => t.id === templateId);
+    if (!template) return;
+
+    const toastId = toast.loading(`Mengaktifkan template ${template.name}...`);
+    try {
+      const batch = writeBatch(db);
+
+      // 1. Deactivate old active templates
+      templates.forEach(t => {
+        if (t.isActive) {
+          batch.update(doc(db, 'scheduleTemplates', t.id), { isActive: false });
+        }
+      });
+
+      // 2. Activate new one
+      batch.update(doc(db, 'scheduleTemplates', templateId), { isActive: true });
+
+      // 3. Update user settings
+      batch.update(doc(db, 'users', auth.currentUser.uid), {
+        activeTemplateId: templateId,
+        activeTemplateName: template.name
+      });
+
+      await batch.commit();
+
+      setTemplates(prev => prev.map(t => ({
+        ...t,
+        isActive: t.id === templateId
+      })));
+
+      toast.success(`Template ${template.name} sekarang aktif!`, { id: toastId });
+    } catch (error) {
+      console.error("Error activating template:", error);
+      toast.error("Gagal mengaktifkan template.", { id: toastId });
+    }
+  };
+
+  const handleDeleteTemplate = async (templateId) => {
+    if (!auth.currentUser) return;
+    const template = templates.find(t => t.id === templateId);
+    if (!template) return;
+
+    if (template.isActive) {
+      toast.error("Tidak dapat menghapus template yang sedang aktif.");
+      return;
+    }
+
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Template?',
+      message: `Seluruh jadwal di dalam template '${template.name}' akan ikut terhapus. Tindakan ini tidak dapat dibatalkan.`,
+      onConfirm: async () => {
+        const toastId = toast.loading(`Menghapus template ${template.name}...`);
+        try {
+          // 1. Delete all schedules in this template
+          const q = query(collection(db, 'teachingSchedules'), where('templateId', '==', templateId));
+          const snapshot = await getDocs(q);
+          const batch = writeBatch(db);
+          snapshot.docs.forEach(d => batch.delete(d.ref));
+
+          // 2. Delete template itself
+          batch.delete(doc(db, 'scheduleTemplates', templateId));
+
+          await batch.commit();
+
+          setTemplates(prev => prev.filter(t => t.id !== templateId));
+          if (selectedTemplateId === templateId) {
+            setSelectedTemplateId(templates.find(t => t.isActive)?.id || templates[0]?.id || null);
+          }
+
+          toast.success(`Template ${template.name} berhasil dihapus.`, { id: toastId });
+        } catch (error) {
+          console.error("Error deleting template:", error);
+          toast.error("Gagal menghapus template.", { id: toastId });
+        }
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
 
   const handleDeleteSchedule = (id) => {
     setConfirmModal({
@@ -629,7 +821,11 @@ const ScheduleInputMasterData = () => {
     // Re-fetch schedules to ensure the list is updated after an edit
     const getSchedules = async () => {
       if (auth.currentUser) {
-        const q = query(teachingSchedulesCollectionRef, where('userId', '==', auth.currentUser.uid));
+        const q = query(
+          teachingSchedulesCollectionRef,
+          where('userId', '==', auth.currentUser.uid),
+          where('templateId', '==', selectedTemplateId)
+        );
         const data = await getDocs(q);
         const fetchedSchedules = data.docs.map((doc) => {
           const scheduleData = doc.data();
@@ -640,7 +836,7 @@ const ScheduleInputMasterData = () => {
         });
         setSchedules(fetchedSchedules);
         if (activeSemester) {
-          generateCalendarEvents(fetchedSchedules);
+          generateCalendarEvents(fetchedSchedules, programs, holidays);
         }
       } else {
         setSchedules([]); // Clear schedules if user logs out
@@ -690,42 +886,111 @@ const ScheduleInputMasterData = () => {
   );
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-lg">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div>
-          <h2 className="text-xl font-semibold">Input Jadwal Mengajar</h2>
-          <p className="text-lg font-medium text-gray-700 dark:text-gray-200">
-            Semester: {activeSemester} (Tahun Ajaran {academicYear})
-          </p>
+    <div className="container mx-auto p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-inner min-h-screen">
+      {/* Template Management Section */}
+      <div className="mb-6 p-4 md:p-6 bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-blue-100 dark:border-gray-700 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 md:p-8 opacity-5 pointer-events-none">
+          <CalendarIcon size={80} className="text-blue-500 md:w-[120px] md:h-[120px]" />
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* School Days Toggle */}
-          <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg border border-blue-200 dark:border-blue-800">
-            <span className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase whitespace-nowrap">Hari Sekolah:</span>
-            <div className="flex bg-white dark:bg-gray-800 rounded-md overflow-hidden border border-blue-300 dark:border-blue-700">
+
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <h2 className="text-xl md:text-2xl font-black flex items-center gap-3">
+              <CalendarIcon className="text-blue-500" size={24} md:size={28} />
+              <span className="bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-100 dark:to-indigo-200 bg-clip-text text-transparent italic">Profil Jadwal</span>
+            </h2>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* School Days Toggle */}
+              <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/10 p-2 rounded-xl border border-blue-100 dark:border-gray-700">
+                <span className="text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase tracking-widest ml-2">Hari Sekolah:</span>
+                <div className="flex bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-blue-200 dark:border-gray-700 flex-1 md:flex-none">
+                  <button
+                    type="button"
+                    onClick={() => handleSchoolDaysChange(5)}
+                    className={`flex-1 md:flex-none px-3 py-1.5 text-xs font-bold transition-all ${schoolDays === 5 ? 'bg-blue-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-gray-700'}`}
+                  >
+                    5 Hari
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSchoolDaysChange(6)}
+                    className={`flex-1 md:flex-none px-3 py-1.5 text-xs font-bold transition-all ${schoolDays === 6 ? 'bg-blue-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-gray-700'}`}
+                  >
+                    6 Hari
+                  </button>
+                </div>
+              </div>
+
               <button
-                type="button"
-                onClick={() => handleSchoolDaysChange(5)}
-                className={`px-3 py-1.5 text-sm font-semibold transition-all ${schoolDays === 5 ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50'}`}
+                onClick={() => setIsHolidayModalOpen(true)}
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-rose-500/20 active:scale-95 text-sm"
               >
-                5 Hari
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSchoolDaysChange(6)}
-                className={`px-3 py-1.5 text-sm font-semibold transition-all ${schoolDays === 6 ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50'}`}
-              >
-                6 Hari
+                <CalendarIcon size={18} />
+                Kelola Agenda
               </button>
             </div>
           </div>
-          <button
-            onClick={() => setIsHolidayModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-sm"
-          >
-            <CalendarIcon size={18} />
-            Kelola Agenda Sekolah
-          </button>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 items-end">
+            <div className="md:col-span-1 lg:col-span-2">
+              <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 underline decoration-blue-500/30">Pilih Struktur Jadwal:</label>
+              <div className="flex gap-2">
+                <select
+                  value={selectedTemplateId || ''}
+                  onChange={(e) => setSelectedTemplateId(e.target.value)}
+                  className="flex-1 bg-gray-50 dark:bg-gray-900/50 border-2 border-gray-100 dark:border-gray-700 p-3 rounded-2xl font-bold text-gray-700 dark:text-gray-200 focus:border-blue-500 outline-none transition-all shadow-inner text-sm md:text-base"
+                >
+                  {templates.map(t => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} {t.isActive ? '✓' : ''}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleCreateTemplate}
+                  className="p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 shrink-0"
+                  title="Tambah Template Baru"
+                >
+                  <Plus size={20} md:size={24} />
+                </button>
+              </div>
+            </div>
+
+            <div className="md:col-span-1 lg:col-span-2 flex flex-row gap-2">
+              <button
+                onClick={() => handleActivateTemplate(selectedTemplateId)}
+                disabled={!selectedTemplateId || templates.find(t => t.id === selectedTemplateId)?.isActive}
+                className="flex-1 py-3 px-4 md:py-3.5 md:px-6 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-tighter text-[10px] md:text-xs"
+              >
+                <RefreshCw size={14} md:size={18} className={isLoadingTemplates ? 'animate-spin' : ''} />
+                Terapkan Jadwal
+              </button>
+
+              <button
+                onClick={() => handleDeleteTemplate(selectedTemplateId)}
+                disabled={!selectedTemplateId || templates.find(t => t.id === selectedTemplateId)?.isActive}
+                className="shrink-0 px-4 md:px-6 py-3 md:py-3.5 bg-red-50 hover:bg-red-100 dark:bg-red-900/10 dark:hover:bg-red-900/20 text-red-500 font-bold rounded-2xl transition-all active:scale-95 flex items-center justify-center"
+                title="Hapus Template"
+              >
+                <Trash2 size={18} md:size={20} />
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700/50 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 sm:gap-6 text-[10px] font-bold uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full w-full sm:w-auto">
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+              <span className="truncate">Edit: {templates.find(t => t.id === selectedTemplateId)?.name}</span>
+            </div>
+            <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-full w-full sm:w-auto">
+              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+              <span className="truncate">Aktif: {activeTemplateName || 'Jadwal Normal'}</span>
+            </div>
+            <div className="text-gray-400 sm:ml-auto w-full sm:w-auto text-center sm:text-right">
+              {activeSemester} ({academicYear})
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1170,6 +1435,44 @@ const ScheduleInputMasterData = () => {
           </Modal>
         )
       }
+
+      {/* New Template Modal */}
+      {isTemplateModalOpen && (
+        <Modal title="Buat Profil Jadwal Baru" onClose={() => setIsTemplateModalOpen(false)}>
+          <form onSubmit={handleConfirmCreateTemplate} className="p-6">
+            <div className="mb-6">
+              <label className="block text-sm font-black uppercase tracking-widest text-gray-400 mb-2">Nama Profil Jadwal:</label>
+              <input
+                type="text"
+                autoFocus
+                placeholder="Contoh: Jadwal Ramadan, Sesi Ujian..."
+                value={newTemplateName}
+                onChange={(e) => setNewTemplateName(e.target.value)}
+                className="w-full bg-gray-50 border-2 border-gray-100 p-4 rounded-2xl font-bold text-gray-700 focus:border-blue-500 outline-none transition-all shadow-inner text-lg"
+                required
+              />
+              <p className="mt-3 text-xs text-gray-500 font-medium leading-relaxed">
+                Gunakan nama yang deskriptif untuk memudahkan Anda berpindah antar konfigurasi jadwal nantinya.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setIsTemplateModalOpen(false)}
+                className="flex-1 py-4 bg-gray-100 text-gray-700 font-black rounded-2xl hover:bg-gray-200 transition-all uppercase tracking-widest text-xs"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                className="flex-[2] py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest text-xs"
+              >
+                Buat Template
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
 
       {/* Confirmation Modal */}
       {confirmModal.isOpen && (

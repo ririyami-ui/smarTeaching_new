@@ -77,12 +77,7 @@ export default function ClassMasterData() {
       return;
     }
 
-    console.log("Attempting to add class with data:");
-    console.log("  code:", newCode);
-    console.log("  level:", newLevel);
-    console.log("  rombel:", newRombel);
-    console.log("  description:", newDescription);
-    console.log("  userId:", auth.currentUser.uid);
+
 
     const promise = addDoc(classesCollectionRef, {
       code: newCode,

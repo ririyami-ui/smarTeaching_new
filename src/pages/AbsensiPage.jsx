@@ -17,13 +17,13 @@ const AbsensiPage = () => {
   const [attendance, setAttendance] = useState({}); // { studentId: "Hadir" }
   const [previousMaterial, setPreviousMaterial] = useState(null); // State for previous material
   const [previousLearningActivities, setPreviousLearningActivities] = useState(null); // State for previous learning activities
-  const { activeSemester, academicYear } = useSettings();
+  const { activeSemester, academicYear, activeTemplateId } = useSettings();
 
   const autoSaveTimeout = useRef(null);
 
   useEffect(() => {
     const fetchActiveScheduleAndStudentsAndAttendance = async () => {
-      if (!auth.currentUser) {
+      if (!auth.currentUser || !activeTemplateId) {
         return;
       }
 
@@ -46,7 +46,8 @@ const AbsensiPage = () => {
       const scheduleQuery = query(
         collection(db, 'teachingSchedules'),
         where('userId', '==', userId),
-        where('day', '==', currentDayIndonesian)
+        where('day', '==', currentDayIndonesian),
+        where('templateId', '==', activeTemplateId)
       );
       const scheduleSnapshot = await getDocs(scheduleQuery);
       let foundActiveSchedule = null;
@@ -70,11 +71,11 @@ const AbsensiPage = () => {
       });
 
       setActiveSchedule(foundActiveSchedule);
-      console.log("Active Schedule:", foundActiveSchedule);
+
 
       if (foundActiveSchedule) {
         const rombelName = foundActiveSchedule.class;
-        console.log("Active Schedule Rombel Name:", rombelName);
+
 
         if (rombelName) {
           // Fetch the last teaching journal entry for the active class
@@ -107,23 +108,23 @@ const AbsensiPage = () => {
 
           if (!lastJournalSnapshot.empty) {
             const lastJournalEntry = lastJournalSnapshot.docs[0].data();
-            console.log("Last Journal Entry:", lastJournalEntry);
+
             setPreviousMaterial(lastJournalEntry.material || 'Tidak ada materi sebelumnya');
             setPreviousLearningActivities(lastJournalEntry.learningActivities || 'Tidak ada aktivitas pembelajaran sebelumnya');
           } else {
             setPreviousMaterial('Tidak ada materi sebelumnya');
             setPreviousLearningActivities('Tidak ada aktivitas pembelajaran sebelumnya');
-            console.log("No previous journal found.");
+
           }
         } else {
           setPreviousMaterial(null); // Clear if no relevant active schedule info
           setPreviousLearningActivities(null); // Clear if no relevant active schedule info
-          console.log("No rombelName in active schedule, clearing previous material.");
+
         }
 
         // ... existing code for fetching students and attendance ...
         // Fetch students using both classId and rombel simultaneously
-        console.log("Fetching students for rombel:", rombelName, "and/or classId:", foundActiveSchedule.classId);
+
 
         const studentsByClassIdQuery = query(
           collection(db, 'students'),
@@ -162,8 +163,7 @@ const AbsensiPage = () => {
           return absenA - absenB;
         });
         setStudents(fetchedStudents);
-        console.log("Fetched Students:", fetchedStudents);
-        console.log("Number of students fetched:", fetchedStudents.length);
+
 
 
         const existingAttendanceQuery = query(
@@ -204,7 +204,7 @@ const AbsensiPage = () => {
         setStudents([]);
         setAttendance({});
         setPreviousMaterial(null); // Clear previous material if no active schedule
-        console.log("No active schedule, clearing students, attendance, and previous material.");
+
       }
     };
 
@@ -212,7 +212,7 @@ const AbsensiPage = () => {
     const interval = setInterval(fetchActiveScheduleAndStudentsAndAttendance, 60000); // Check every minute
 
     return () => clearInterval(interval);
-  }, [activeSemester, academicYear]);
+  }, [auth.currentUser, activeSemester, academicYear, activeTemplateId]);
 
   const handleAttendanceChange = (studentId, status) => {
     setAttendance(prev => ({ ...prev, [studentId]: status }));
@@ -267,6 +267,8 @@ const AbsensiPage = () => {
             classId: scheduleToSave.classId || '',
             studentId: student.id,
             status: status,
+            subjectId: scheduleToSave.subjectId || '',
+            subjectName: scheduleToSave.subject || '',
             semester: activeSemester,
             academicYear: academicYear,
             timestamp: serverTimestamp(),

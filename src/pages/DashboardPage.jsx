@@ -19,6 +19,15 @@ import AnalyticsOverview from '../components/AnalyticsOverview';
 import AttendanceTrendChart from '../components/AttendanceTrendChart';
 import GradeDistributionChart from '../components/GradeDistributionChart';
 
+// 3D Icon Paths
+// Glass Icon Wrapper Component
+const GlassIcon = ({ icon: Icon, colorClass = "glass-glow-blue", size = 20 }) => (
+  <div className={`glass-icon-container ${colorClass} w-10 h-10 sm:w-12 sm:h-12 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
+    <Icon size={size} className="text-gray-800 dark:text-white opacity-80" />
+    <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none"></div>
+  </div>
+);
+
 // Helper function to get the next occurrence of a day of the week
 const getNextDayOccurrence = (dayOfWeek, timeString, startDate = moment()) => {
   const daysMap = {
@@ -53,14 +62,12 @@ const getNextDayOccurrence = (dayOfWeek, timeString, startDate = moment()) => {
 
 
 
-const StatCard = ({ icon, label, value, color }) => (
-  <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-xl flex items-center gap-6 transition-all duration-300 md:hover:scale-[1.02] hover:shadow-blue-500/10 dark:hover:shadow-none overflow-hidden">
-    <div className={`p-4 rounded-2xl ${color} shadow-inner`}>
-      {icon}
-    </div>
-    <div>
-      <p className="text-text-muted-light dark:text-text-muted-dark text-xs font-bold uppercase tracking-wider opacity-70 mb-1">{label}</p>
-      <p className="text-3xl font-black text-text-light dark:text-text-dark tracking-tight">{value}</p>
+const StatCard = ({ icon: Icon, label, value, colorClass, delay = "" }) => (
+  <div className={`bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-4 sm:p-5 md:p-6 rounded-3xl shadow-xl flex items-center gap-4 sm:gap-6 transition-all duration-500 md:hover:scale-[1.05] md:hover:rotate-1 hover:shadow-blue-500/20 dark:hover:shadow-none overflow-hidden group stagger-entry ${delay}`}>
+    <GlassIcon icon={Icon} colorClass={colorClass} size={24} />
+    <div className="min-w-0">
+      <p className="text-text-muted-light dark:text-text-muted-dark text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-70 mb-0.5 sm:mb-1">{label}</p>
+      <p className="text-2xl sm:text-3xl font-black text-text-light dark:text-text-dark tracking-tight">{value}</p>
     </div>
   </div>
 );
@@ -86,7 +93,7 @@ export default function DashboardPage() {
   const [classes, setClasses] = useState([]);
   const [missingJournalsCount, setMissingJournalsCount] = useState(0);
   const [carryOverMap, setCarryOverMap] = useState({}); // New state for carry-over map
-  const { activeSemester, academicYear } = useSettings();
+  const { activeSemester, academicYear, activeTemplateId } = useSettings();
   const [currentUserProfile, setCurrentUserProfile] = useState(null);
 
   const [activeSchedule, setActiveSchedule] = useState(null);
@@ -115,19 +122,19 @@ export default function DashboardPage() {
 
     const setupUserListener = async () => {
       if (auth.currentUser) {
-        console.log("Setting up real-time listener for user:", auth.currentUser.uid);
+
         const userDocRef = doc(db, 'users', auth.currentUser.uid);
 
         unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
             const userData = docSnap.data();
-            console.log("Real-time User Data update:", userData);
+
             if (userData.school) {
               setSchoolName(userData.school);
             }
             setCurrentUserProfile(userData);
           } else {
-            console.log("User document does not exist");
+
           }
         }, (error) => {
           console.error("Error listening to user profile:", error);
@@ -206,11 +213,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchTeachingSchedules = async () => {
-      if (auth.currentUser) {
+      if (auth.currentUser && activeTemplateId) {
 
         const q = query(
           collection(db, 'teachingSchedules'),
-          where('userId', '==', auth.currentUser.uid)
+          where('userId', '==', auth.currentUser.uid),
+          where('templateId', '==', activeTemplateId)
         );
         const querySnapshot = await getDocs(q);
         const fetchedSchedules = querySnapshot.docs.map(doc => {
@@ -305,7 +313,7 @@ export default function DashboardPage() {
     fetchTeachingSchedules();
 
     return () => unsubscribe();
-  }, []);
+  }, [activeTemplateId]);
 
   useEffect(() => {
     const fetchStudentStats = async () => {
@@ -339,7 +347,7 @@ export default function DashboardPage() {
           }
         });
         const fetchedStudents = Array.from(uniqueStudentsMap.values());
-        console.log("Fetched Students (de-duplicated):", fetchedStudents);
+
 
         let totalStudents = 0;
         let maleStudents = 0;
@@ -371,13 +379,6 @@ export default function DashboardPage() {
             }
             studentsByRombel[student.rombel].students.push(student);
           }
-        });
-
-        console.log("Student Stats:", {
-          totalStudents,
-          maleStudents,
-          femaleStudents,
-          studentsByRombel,
         });
 
         setStudentStats({
@@ -538,6 +539,7 @@ export default function DashboardPage() {
         user={auth.currentUser}
         activeSemester={activeSemester}
         academicYear={academicYear}
+        activeTemplateId={activeTemplateId}
         onUpdateMissingCount={setMissingJournalsCount}
       />
 
@@ -550,42 +552,49 @@ export default function DashboardPage() {
         </div>
 
         {/* Student Recap Section (2/3) */}
-        <div className="lg:col-span-2 bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-6 rounded-3xl shadow-lg">
-          <h2 className="text-2xl font-black mb-6 tracking-tight flex items-center gap-3">
-            <Users size={24} className="text-primary" />
+        <div className="lg:col-span-2 bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-4 sm:p-6 rounded-3xl shadow-lg">
+          <h2 className="text-xl sm:text-2xl font-black mb-4 sm:mb-6 tracking-tight flex items-center gap-3">
+            <Users size={20} className="text-primary sm:w-6 sm:h-6" />
             <span className="bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-100 dark:to-indigo-200 bg-clip-text text-transparent">Rekap Siswa</span>
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"> {/* Grid for total counts */}
-            <div className="p-4 rounded-2xl border border-green-200/50 dark:border-green-800/50 bg-green-50/50 dark:bg-green-900/20 text-green-800 dark:text-green-200 flex flex-col items-center justify-center shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-widest opacity-70">Total Siswa</p>
-              <p className="text-4xl font-black">{studentStats.totalStudents}</p>
-            </div>
-            <div className="p-4 rounded-2xl border border-blue-200/50 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 flex flex-col items-center justify-center shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-widest opacity-70">Laki-laki</p>
-              <p className="text-4xl font-black">{studentStats.maleStudents}</p>
-            </div>
-            <div className="p-4 rounded-2xl border border-pink-200/50 dark:border-pink-800/50 bg-pink-50/50 dark:bg-pink-900/20 text-pink-800 dark:text-pink-200 flex flex-col items-center justify-center shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-widest opacity-70">Perempuan</p>
-              <p className="text-4xl font-black">{studentStats.femaleStudents}</p>
-            </div>
+          <div className="grid grid-cols-1 xs:grid-cols-3 sm:grid-cols-3 gap-3 sm:gap-4 mb-6"> {/* Grid for total counts */}
+            <StatCard
+              icon={Users}
+              label="Total Siswa"
+              value={studentStats.totalStudents}
+              colorClass="glass-glow-green"
+              delay="delay-[100ms]"
+            />
+            <StatCard
+              icon={Users}
+              label="Laki-laki"
+              value={studentStats.maleStudents}
+              colorClass="glass-glow-blue"
+              delay="delay-[200ms]"
+            />
+            <StatCard
+              icon={Users}
+              label="Perempuan"
+              value={studentStats.femaleStudents}
+              colorClass="glass-glow-red"
+              delay="delay-[300ms]"
+            />
           </div>
 
           {Object.keys(studentStats.studentsByRombel).length > 0 && (
             <div className="mt-6">
-              <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-3 flex items-center gap-2">
-                <Users size={18} className="text-primary" />
+              <h3 className="text-base sm:text-lg font-semibold text-text-light dark:text-text-dark mb-3 flex items-center gap-2">
+                <Users size={16} className="text-primary sm:w-4.5 sm:h-4.5" />
                 <span>Siswa per Rombel:</span>
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"> {/* Adjusted grid layout for 2/3 width */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"> {/* Adjusted grid layout for 2/3 width */}
                 {Object.entries(studentStats.studentsByRombel).sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true })).map(([rombel, data]) => (
-                  <Link to={`/analisis-rombel/${rombel}`} key={rombel} className="block p-4 rounded-[1.5rem] border border-blue-200/30 dark:border-blue-800/30 bg-white/40 dark:bg-black/40 backdrop-blur-sm text-blue-800 dark:text-blue-200 flex items-center space-x-4 hover:bg-blue-500 hover:text-white transition-all duration-500 group shadow-sm hover:shadow-blue-500/20 md:hover:scale-[1.03]">
-                    <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900 group-hover:bg-white/20 transition-colors">
-                      <Users size={20} className="flex-shrink-0" />
-                    </div>
-                    <div>
-                      <p className="text-md font-black tracking-tight">{rombel}</p>
-                      <p className="text-[10px] font-bold uppercase opacity-60">Total: {data.total} (L:{data.male}, P:{data.female})</p>
+                  <Link to={`/analisis-rombel/${rombel}`} key={rombel} className="block p-3 sm:p-4 rounded-[1.5rem] border border-blue-200/30 dark:border-blue-800/30 bg-white/40 dark:bg-black/40 backdrop-blur-sm text-blue-800 dark:text-blue-200 flex items-center space-x-3 sm:space-x-4 hover:bg-blue-500 hover:text-white transition-all duration-500 group shadow-sm hover:shadow-blue-500/20 md:hover:scale-[1.03]">
+                    <GlassIcon icon={Users} colorClass="glass-glow-blue" size={18} />
+                    <div className="min-w-0">
+                      <p className="text-sm sm:text-md font-black tracking-tight truncate">{rombel}</p>
+                      <p className="text-[9px] sm:text-[10px] font-bold uppercase opacity-60">Total: {data.total} (L:{data.male}, P:{data.female})</p>
                     </div>
                   </Link>
                 ))}

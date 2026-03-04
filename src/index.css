@@ -693,18 +693,36 @@ div.rpp-signature td {
   .animate-fade-in-up {
     animation: fade-in-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
+
+  /* Spring Physics for Sidebar */
+  .spring-transition {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .sidebar-item-active {
+    @apply scale-[1.03] shadow-md ring-2 ring-primary/30;
+  }
+
+  /* Staggered Entry Animation */
+  .stagger-entry {
+    animation: stagger-fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
 }
 
-@keyframes fade-in-up {
-  0% {
+@keyframes stagger-fade-in {
+  from {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
+    transform: translateY(10px);
   }
-
-  100% {
+  to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
+}
+
+@keyframes spring-in {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 
@@ -736,6 +754,56 @@ div.rpp-signature td {
   50% {
     transform: translateY(-4px);
   }
+}
+
+/* Glassmorphism 3D Icon Utilities */
+.glass-icon-container {
+  @apply relative flex items-center justify-center rounded-2xl overflow-hidden transition-all duration-500;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07),
+    inset 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.glass-icon-container::before {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-500;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.4), transparent 70%);
+}
+
+.glass-icon-container:hover::before {
+  @apply opacity-100;
+}
+
+.glass-glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), inset 0 0 15px rgba(59, 130, 246, 0.1);
+}
+
+.glass-glow-green {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 15px rgba(16, 185, 129, 0.1);
+}
+
+.glass-glow-purple {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), inset 0 0 15px rgba(168, 85, 247, 0.1);
+}
+
+.glass-glow-red {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2), inset 0 0 15px rgba(239, 68, 68, 0.1);
+}
+
+.glass-glow-yellow {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.2), inset 0 0 15px rgba(245, 158, 11, 0.1);
+}
+
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }
 
 .animate-bounce-short {

@@ -6,49 +6,26 @@ import { db, auth } from '../firebase';
 import toast from 'react-hot-toast';
 import moment from 'moment';
 import 'moment/locale/id';
-import StyledSelect from '../components/StyledSelect';
-import StyledTable from '../components/StyledTable';
-import PieChart from '../components/PieChart';
-import SummaryCard from '../components/SummaryCard';
-import RadarChart from '../components/RadarChart';
 import {
-    User,
-    GraduationCap,
-    FileText,
-    Calendar,
-    ShieldAlert,
     Download,
-    Search,
-    BookOpen,
-    ClipboardList,
-    Trophy,
-    Zap,
-    AlertTriangle,
-    MessageCircle,
-    Copy,
-    Check,
-    X,
-    Share2,
-    Filter,
-    ChevronRight,
-    TrendingUp,
-    Brain,
-    Scale,
-    ArrowLeft,
-    MapPin,
-    RefreshCw,
-    Loader2
+    FileText,
+    MessageCircle
 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
-import rehypeRaw from 'rehype-raw';
-import rehypeKatex from 'rehype-katex';
-import 'katex/dist/katex.min.css';
 import html2canvas from 'html2canvas';
 import { useSettings } from '../utils/SettingsContext';
 import { generateStudentIndividualRecapPDF } from '../utils/pdfGenerator';
 import { generateStudentNarrative, generateParentMessage } from '../utils/gemini';
+import { getSignatureCity } from '../utils/generalUtils';
+
+// Import Modular Components
+import StudentSelectionHeader from '../components/StudentSelectionHeader';
+import StudentEmptyState from '../components/StudentEmptyState';
+import StudentStatsOverview from '../components/StudentStatsOverview';
+import StudentRadarProfile from '../components/StudentRadarProfile';
+import StudentAcademicDetail from '../components/StudentAcademicDetail';
+import StudentAttendanceDetail from '../components/StudentAttendanceDetail';
+import StudentInfractionDetail from '../components/StudentInfractionDetail';
+import StudentNarrativeSection from '../components/StudentNarrativeSection';
 
 // Set global locale for moment
 moment.locale('id');
@@ -74,6 +51,7 @@ const RekapIndividuPage = () => {
     const [grades, setGrades] = useState([]);
     const [attendance, setAttendance] = useState([]);
     const [infractions, setInfractions] = useState([]);
+    const [appreciations, setAppreciations] = useState([]);
     const [narrativeNote, setNarrativeNote] = useState('');
     const [parentMessage, setParentMessage] = useState(''); // New state for parent message
 
@@ -105,10 +83,10 @@ const RekapIndividuPage = () => {
         attitudeWeight: 0,
         knowledgeWeight: 0,
         practiceWeight: 0,
-        studentName: '',
         subjectFilter: '',
         warnings: [],
         numDays: 0,
+        totalStars: 0,
         radarData: {
             "Keimanan": 85,
             "Kewargaan": 85,
@@ -137,9 +115,8 @@ const RekapIndividuPage = () => {
         };
         fetchFlagged();
 
-        // Load signing location
-        const savedLoc = localStorage.getItem('QUIZ_SIGNING_LOCATION');
-        if (savedLoc) setSigningLocation(savedLoc);
+        // Load signing location using centralized logic
+        setSigningLocation(getSignatureCity(userProfile));
     }, [activeSemester, academicYear, geminiModel]);
 
     const handleDetectLocation = async () => {
@@ -283,6 +260,7 @@ const RekapIndividuPage = () => {
                 setGrades([]);
                 setAttendance([]);
                 setInfractions([]);
+                setAppreciations([]);
                 setParentMessage(''); // Clear parent message
                 return;
             }
@@ -314,11 +292,18 @@ const RekapIndividuPage = () => {
                     where('studentId', '==', selectedStudentId)
                 );
 
+                const appreciationsQuery = query(
+                    collection(db, 'studentAppreciations'),
+                    where('userId', '==', uid),
+                    where('studentId', '==', selectedStudentId)
+                );
+
                 // 2. Academic Data Fetch
-                const [gradesSnap, attendanceSnap, infractionsSnap] = await Promise.all([
+                const [gradesSnap, attendanceSnap, infractionsSnap, appreciationsSnap] = await Promise.all([
                     getDocs(gradesQuery),
                     getDocs(attendanceQuery),
-                    getDocs(infractionsQuery)
+                    getDocs(infractionsQuery),
+                    getDocs(appreciationsQuery)
                 ]);
 
                 const filterByPeriod = (docs) => docs
@@ -329,6 +314,7 @@ const RekapIndividuPage = () => {
                 setGrades(filterByPeriod(gradesSnap.docs));
                 setAttendance(filterByPeriod(attendanceSnap.docs));
                 setInfractions(filterByPeriod(infractionsSnap.docs));
+                setAppreciations(filterByPeriod(appreciationsSnap.docs));
 
                 // 6. Narrative Note - Fetch gracefully to avoid blocking the whole page
                 let existingNote = '';
@@ -356,9 +342,14 @@ const RekapIndividuPage = () => {
         fetchAllData();
     }, [selectedStudentId, activeSemester, academicYear, students]);
 
-    // List of unique subjects from grades
+    // List of unique subjects from grades — filter out raw Firestore IDs stored in legacy data
     const availableSubjects = useMemo(() => {
-        const subjects = new Set(grades.map(g => g.subjectName));
+        const isLikelyId = (str) => str && str.length > 15 && /^[a-zA-Z0-9]+$/.test(str);
+        const subjects = new Set(
+            grades
+                .map(g => g.subjectName)
+                .filter(name => name && !isLikelyId(name))
+        );
         return Array.from(subjects).sort();
     }, [grades]);
 
@@ -423,7 +414,9 @@ const RekapIndividuPage = () => {
         const academicAvg = academicAvgResult.toFixed(2);
 
         const totalInfractionPoints = infractions.reduce((sum, i) => sum + (i.points || 0), 0);
-        const attitudeScore = Math.max(0, 100 - totalInfractionPoints);
+        const totalStars = appreciations.reduce((sum, a) => sum + (a.points || 0), 0);
+        const rawAttitudeScore = 100 - totalInfractionPoints + (totalStars * 2);
+        const attitudeScore = Math.min(100, Math.max(0, rawAttitudeScore));
 
         const uniqueDates = new Set(attendance.map(a => a.date));
         const numDays = uniqueDates.size;
@@ -446,7 +439,7 @@ const RekapIndividuPage = () => {
             warnings.push(`${attendanceCounts.Alpha} kali Alpha(Tanpa Keterangan)`);
         }
         if (attitudeScore < 95) {
-            warnings.push(`Skor sikap di bawah standar(${attitudeScore})`);
+            warnings.push(`Skor sikap di bawah standar (${attitudeScore})`);
         }
 
         const finalScore = ((parseFloat(academicAvg) * ((classAgreement?.academicWeight ?? academicWeight) / 100)) + (attitudeScore * ((classAgreement?.attitudeWeight ?? attitudeWeight) / 100))).toFixed(2);
@@ -474,6 +467,7 @@ const RekapIndividuPage = () => {
             attitudeScore,
             attitudePredicate: getAttitudePredicate(attitudeScore),
             totalInfractionPoints,
+            totalStars,
             attendance: attendanceCounts,
             finalScore,
             academicWeight: classAgreement?.academicWeight ?? academicWeight,
@@ -486,7 +480,7 @@ const RekapIndividuPage = () => {
             numDays: attendance.length,
             radarData: radialMapping
         });
-    }, [filteredGrades, infractions, attendance, selectedStudent, academicWeight, attitudeWeight, selectedSubject, classAgreement]);
+    }, [filteredGrades, infractions, appreciations, attendance, selectedStudent, academicWeight, attitudeWeight, selectedSubject, classAgreement]);
 
     const handleExportPDF = async () => {
         if (!selectedStudent) return;
@@ -570,13 +564,18 @@ const RekapIndividuPage = () => {
         if (!selectedStudentId) return;
         setIsGenerating(true);
         try {
+            const infractionsText = infractions.length > 0
+                ? infractions.map(i => `- ${i.date}: ${i.type} (${i.points} poin)${i.note ? ` - ${i.note}` : ''}`).join('\n')
+                : "Tidak ada catatan pelanggaran.";
+
             const result = await generateStudentNarrative({
                 studentName: selectedStudent.name,
                 grades: grades,
                 attendance: attendance,
                 infractions: infractions,
+                infractionsText: infractionsText,
                 stats: stats
-            }, userProfile, geminiModel);
+            }, geminiModel);
             setNarrativeNote(result);
 
             if (isAutoSave) {
@@ -599,12 +598,6 @@ const RekapIndividuPage = () => {
         }
     }, [selectedStudentId, selectedStudent, grades, attendance, infractions, stats, userProfile, geminiModel, activeSemester, academicYear]);
 
-    // Auto-generate narrative if empty after fetching
-    useEffect(() => {
-        if (!isLoading && selectedStudentId && !narrativeNote && !isGenerating && stats.studentName && stats.academicAvg !== 0) {
-            handleGenerateNarrative(true);
-        }
-    }, [isLoading, selectedStudentId, narrativeNote, isGenerating, stats, handleGenerateNarrative]);
 
     const handleGenerateParentMessage = async () => {
         if (!selectedStudentId || !narrativeNote) return;
@@ -642,477 +635,70 @@ const RekapIndividuPage = () => {
 
     return (
         <div className="space-y-6">
-            {/* Selection Header */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="p-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-2xl transition-all active:scale-95"
-                        >
-                            <ArrowLeft className="text-gray-600 dark:text-gray-300" size={24} />
-                        </button>
-                        <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-2xl">
-                            <User className="text-blue-600 dark:text-blue-400" size={24} />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-black text-gray-800 dark:text-white">Rekap Individu Siswa</h1>
-                            <div className="flex items-center gap-2 mt-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded-lg w-fit">
-                                <MapPin size={12} className="text-blue-500" />
-                                <span>Lokasi TTD:</span>
-                                <input
-                                    type="text"
-                                    className="bg-transparent focus:outline-none min-w-[80px] normal-case"
-                                    value={signingLocation}
-                                    onChange={(e) => {
-                                        setSigningLocation(e.target.value);
-                                        localStorage.setItem('QUIZ_SIGNING_LOCATION', e.target.value);
-                                    }}
-                                    placeholder="Kota..."
-                                />
-                                <button
-                                    onClick={handleDetectLocation}
-                                    disabled={isDetectingLocation}
-                                    className="hover:text-blue-500 transition-colors"
-                                >
-                                    {isDetectingLocation ? <Loader2 size={10} className="animate-spin" /> : <RefreshCw size={10} />}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-3 min-w-[300px]">
-                        <StyledSelect value={selectedClass} onChange={(e) => {
-                            const val = e.target.value;
-                            setSelectedClass(val);
-                            setFlaggedClassFilter(val);
-                            setSelectedStudentId('');
-                        }}>
-                            <option value="">Pilih Kelas</option>
-                            {classes.map(c => <option key={c.id} value={c.rombel}>{c.rombel}</option>)}
-                        </StyledSelect>
-                        <StyledSelect
-                            value={selectedStudentId}
-                            onChange={(e) => setSelectedStudentId(e.target.value)}
-                            disabled={!selectedClass || isFetchingStudents}
-                        >
-                            <option value="">{isFetchingStudents ? 'Memuat siswa...' : 'Pilih Siswa'}</option>
-                            {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                        </StyledSelect>
-                    </div>
-                </div>
-            </div>
+            <StudentSelectionHeader
+                navigate={navigate}
+                signingLocation={signingLocation}
+                setSigningLocation={setSigningLocation}
+                handleDetectLocation={handleDetectLocation}
+                isDetectingLocation={isDetectingLocation}
+                selectedClass={selectedClass}
+                setSelectedClass={setSelectedClass}
+                setFlaggedClassFilter={setFlaggedClassFilter}
+                setSelectedStudentId={setSelectedStudentId}
+                classes={classes}
+                selectedStudentId={selectedStudentId}
+                isFetchingStudents={isFetchingStudents}
+                students={students}
+            />
 
             {!selectedStudentId ? (
-                <div className="space-y-8 animate-fade-in-up">
-                    <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-12 rounded-[3rem] text-center shadow-xl">
-                        <Search size={64} className="text-blue-500/20 mx-auto mb-6" />
-                        <h2 className="text-2xl font-black text-gray-800 dark:text-white mb-2">
-                            {selectedClass ? `Siswa Kelas ${selectedClass}` : 'Pilih Siswa untuk Rekap'}
-                        </h2>
-                        <p className="text-gray-500 dark:text-gray-400">
-                            {selectedClass ? 'Klik pada nama siswa di bawah untuk melihat rekap detail' : 'Pilih kelas dan nama siswa di atas untuk melihat rekap lengkap'}
-                        </p>
-                    </div>
-
-                    {/* All Students Grid (shown when class selected) */}
-                    {selectedClass && (
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3 px-2">
-                                <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl text-blue-600">
-                                    <GraduationCap size={20} />
-                                </div>
-                                <h2 className="text-xl font-black text-gray-800 dark:text-white">
-                                    {isFetchingStudents ? 'Memuat daftar siswa...' : `Daftar Siswa (${students.length})`}
-                                </h2>
-                            </div>
-
-                            {isFetchingStudents ? (
-                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 animate-pulse">
-                                    {[...Array(6)].map((_, i) => (
-                                        <div key={i} className="h-24 bg-gray-100 dark:bg-gray-800 rounded-2xl" />
-                                    ))}
-                                </div>
-                            ) : students.length > 0 ? (
-                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                                    {students.map(s => (
-                                        <button
-                                            key={s.id}
-                                            onClick={() => setSelectedStudentId(s.id)}
-                                            className="bg-white/60 dark:bg-gray-800/60 p-4 rounded-2xl border border-transparent hover:border-blue-500 hover:scale-105 transition-all text-center shadow-md group"
-                                        >
-                                            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-2 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                                <User size={20} />
-                                            </div>
-                                            <p className="text-xs font-bold text-gray-800 dark:text-white truncate">{s.name}</p>
-                                            <p className="text-[10px] text-gray-500">{s.nis || 'No NIS'}</p>
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="p-10 bg-gray-50 dark:bg-gray-900/30 rounded-3xl text-center border-2 border-dashed border-gray-200 dark:border-gray-800">
-                                    <p className="text-gray-500 font-medium">Tidak ada siswa yang ditemukan di kelas {selectedClass}.</p>
-                                    <p className="text-xs text-gray-400 mt-1">Pastikan data rombel siswa di Master Data sudah sesuai.</p>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Flagged Students Section */}
-                    {flaggedStudents.length > 0 && (
-                        <div className="space-y-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-xl text-red-600">
-                                        <AlertTriangle size={20} />
-                                    </div>
-                                    <h2 className="text-xl font-black text-gray-800 dark:text-white">
-                                        {selectedClass ? `Siswa Perlu Perhatian (Kelas ${selectedClass})` : 'Siswa Perlu Perhatian Segera'}
-                                    </h2>
-                                </div>
-                                {!selectedClass && (
-                                    <div className="w-full sm:w-48">
-                                        <StyledSelect
-                                            value={flaggedClassFilter}
-                                            onChange={(e) => setFlaggedClassFilter(e.target.value)}
-                                            className="!py-2 !text-xs"
-                                        >
-                                            <option value="">Semua Kelas</option>
-                                            {classes.map(c => <option key={c.id} value={c.rombel}>{c.rombel}</option>)}
-                                        </StyledSelect>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {flaggedStudents
-                                    .filter(s => !flaggedClassFilter || s.rombel === flaggedClassFilter)
-                                    .map(student => (
-                                        <button
-                                            key={student.id}
-                                            onClick={() => {
-                                                setSelectedClass(student.rombel);
-                                                setSelectedStudentId(student.id);
-                                            }}
-                                            className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-5 rounded-3xl border-l-4 border-red-500 text-left hover:scale-[1.02] transition-all shadow-lg group"
-                                        >
-                                            <div className="flex justify-between items-start mb-3">
-                                                <h3 className="font-black text-gray-800 dark:text-white group-hover:text-red-500 transition-colors uppercase truncate mr-2">{student.name}</h3>
-                                                <span className="text-[10px] font-bold px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-500 uppercase">{student.rombel}</span>
-                                            </div>
-                                            <div className="space-y-1">
-                                                {student.warnings.map((w, idx) => (
-                                                    <p key={idx} className="text-[10px] text-red-500/80 font-medium flex items-center gap-1">
-                                                        <span className="w-1 h-1 bg-red-400 rounded-full" /> {w}
-                                                    </p>
-                                                ))}
-                                            </div>
-                                            <div className="mt-4 flex items-center justify-between">
-                                                <span className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Detail Rekap →</span>
-                                                {student.totalPointsDeducted > 0 && (
-                                                    <span className="text-[10px] font-bold text-gray-400">-{student.totalPointsDeducted} Poin Pelanggaran</span>
-                                                )}
-                                            </div>
-                                        </button>
-                                    ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                <StudentEmptyState
+                    selectedClass={selectedClass}
+                    isFetchingStudents={isFetchingStudents}
+                    students={students}
+                    setSelectedStudentId={setSelectedStudentId}
+                    flaggedStudents={flaggedStudents}
+                    flaggedClassFilter={flaggedClassFilter}
+                    setFlaggedClassFilter={setFlaggedClassFilter}
+                    setSelectedClass={setSelectedClass}
+                    classes={classes}
+                />
             ) : (
                 <div className="space-y-6 animate-fade-in-up">
-                    {/* Filter Bar */}
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 px-2">
-                        {stats.warnings.length > 0 ? (
-                            <div className="flex-1 w-full bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 p-4 rounded-2xl flex items-center gap-4 animate-pulse">
-                                <div className="p-2 bg-red-100 dark:bg-red-800 rounded-xl text-red-600 dark:text-red-400">
-                                    <AlertTriangle size={20} />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Peringatan Siswa Bermasalah</p>
-                                    <p className="text-xs text-red-500 dark:text-red-400 opacity-80">{stats.warnings.join(' • ')}</p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex-1 hidden md:block" />
-                        )}
-                        <div className="w-full md:w-64">
-                            <StyledSelect
-                                value={selectedSubject}
-                                onChange={(e) => setSelectedSubject(e.target.value)}
-                            >
-                                <option value="">Semua Mata Pelajaran</option>
-                                {availableSubjects.map(sub => (
-                                    <option key={sub} value={sub}>{sub}</option>
-                                ))}
-                            </StyledSelect>
-                        </div>
-                    </div>
+                    <StudentStatsOverview
+                        stats={stats}
+                        selectedSubject={selectedSubject}
+                        setSelectedSubject={setSelectedSubject}
+                        availableSubjects={availableSubjects}
+                        filteredGrades={filteredGrades}
+                        classAgreement={classAgreement}
+                        selectedClass={selectedClass}
+                        academicWeight={stats.academicWeight}
+                        attitudeWeight={stats.attitudeWeight}
+                    />
 
-                    {/* Class Agreement Display */}
-                    {classAgreement?.agreements && (
-                        <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800/20 p-5 rounded-3xl flex items-start gap-4 animate-in fade-in duration-700">
-                            <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-xl text-purple-600">
-                                <Scale size={20} />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-1">Kesepakatan Kelas {selectedClass}</p>
-                                <div className="text-xs text-purple-800 dark:text-purple-300 whitespace-pre-line leading-relaxed font-medium">
-                                    {classAgreement.agreements}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <SummaryCard
-                            title={selectedSubject ? `Rata-rata ${selectedSubject}` : "Rata-rata Akademik"}
-                            value={stats.academicAvg}
-                            icon={<GraduationCap className="w-8 h-8 text-blue-500" />}
-                            color="blue"
-                            subtitle={`Berdasarkan ${filteredGrades.length} penilaian`}
-                        />
-                        <SummaryCard
-                            title={`Nilai Sikap (${stats.attitudePredicate})`}
-                            value={stats.attitudeScore}
-                            icon={<ShieldAlert className="w-8 h-8 text-emerald-500" />}
-                            color="green"
-                            subtitle={`Poin Pelanggaran: ${stats.totalInfractionPoints}`}
-                        />
-                        <SummaryCard
-                            title={`Nilai Akhir (${academicWeight}/${attitudeWeight})`}
-                            value={stats.finalScore}
-                            icon={<Trophy className="w-8 h-8 text-purple-500" />}
-                            color="purple"
-                            subtitle={`(${academicWeight}% Akad + ${attitudeWeight}% Sikap)`}
-                        />
-                        <SummaryCard
-                            title="Kehadiran"
-                            value={stats.attendance.Hadir}
-                            icon={<Calendar className="w-8 h-8 text-amber-500" />}
-                            color="yellow"
-                            subtitle={`S: ${stats.attendance.Sakit} | I: ${stats.attendance.Ijin} | A: ${stats.attendance.Alpha}`}
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
-                        {/* Radar Chart Profil Lulusan */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 overflow-hidden relative">
-                            <div className="absolute top-0 right-0 p-4 opacity-10">
-                                <Brain size={80} />
-                            </div>
-                            <div className="flex items-center gap-3 mb-6 relative z-10">
-                                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl text-indigo-600">
-                                    <Brain size={20} />
-                                </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-gray-800 dark:text-white leading-tight">Profil Lulusan 2025</h2>
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Holistic Competency Radar</p>
-                                </div>
-                            </div>
-
-                            <div id="radar-chart-container" className="h-[400px] flex items-center justify-center p-8 mt-4">
-                                <RadarChart
-                                    data={stats.radarData}
-                                    size={340}
-                                    descriptions={{
-                                        "Keimanan": "Log Pelanggaran & Catatan Wali Kelas",
-                                        "Kewargaan": "Persentase Kehadiran & Kedisiplinan",
-                                        "Penalaran Kritis": "Rata-rata Nilai Pengetahuan",
-                                        "Kreativitas": "Rata-rata Nilai Keterampilan",
-                                        "Kolaborasi": "Integrasi Nilai Keterampilan & Proyek",
-                                        "Kemandirian": "Kemandirian Belajar & Absensi",
-                                        "Kesehatan": "Data Sakit & Kebugaran Terlacak",
-                                        "Komunikasi": "Presentasi & Kualitas Tugas Praktik"
-                                    }}
-                                />
-                            </div>
-
-                            <div className="mt-4 p-3 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/30">
-                                <p className="text-[10px] text-indigo-800 dark:text-indigo-400 font-medium italic text-center leading-relaxed">
-                                    *Data dihasilkan secara cerdas melalui konvergensi capaian akademik, rekam kehadiran, dan profil perilaku selama satu semester.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6">
-                            {/* Attendance Detail */}
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
-                                <div className="flex items-center justify-between mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl text-amber-600">
-                                            <Calendar size={20} />
-                                        </div>
-                                        <h2 className="text-lg font-bold text-gray-800 dark:text-white">Detail Kehadiran</h2>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                                    <div className="w-full">
-                                        <PieChart data={stats.attendance} numDays={stats.numDays} />
-                                    </div>
-                                    <div className="max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
-                                        <table className="w-full text-left">
-                                            <tbody className="text-xs divide-y dark:divide-gray-700">
-                                                {attendance.length > 0 ? attendance.map((att, i) => (
-                                                    <tr key={i}>
-                                                        <td className="py-2 text-gray-500 text-[10px] font-medium">{moment(att.date).format('DD/MM/YY')}</td>
-                                                        <td className="py-2 font-bold text-gray-800 dark:text-gray-200">
-                                                            {new Intl.DateTimeFormat('id-ID', { weekday: 'long' }).format(new Date(att.date))}
-                                                        </td>
-                                                        <td className="py-2 text-right">
-                                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${att.status === 'Hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30' :
-                                                                att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30' :
-                                                                    'bg-amber-100 text-amber-700 dark:bg-amber-900/30'
-                                                                }`}>
-                                                                {att.status.toUpperCase()}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                )) : (
-                                                    <tr><td colSpan="3" className="py-10 text-center text-gray-400">Belum ada data absensi</td></tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Infraction Detail */}
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
-                                <div className="flex items-center justify-between mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-xl text-red-600">
-                                            <ShieldAlert size={20} />
-                                        </div>
-                                        <h2 className="text-lg font-bold text-gray-800 dark:text-white">Catatan Kedisiplinan</h2>
-                                    </div>
-                                </div>
-
-                                <div className="max-h-[220px] overflow-y-auto custom-scrollbar">
-                                    <div className="space-y-4">
-                                        {infractions.length > 0 ? infractions.map((inf, i) => (
-                                            <div key={i} className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <span className="text-[10px] font-bold text-gray-400 uppercase">
-                                                        {new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(inf.date))}
-                                                    </span>
-                                                    <span className="px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 text-[10px] font-black rounded-md">+{inf.points} POIN</span>
-                                                </div>
-                                                <p className="font-bold text-gray-800 dark:text-gray-200">{inf.infractionType}</p>
-                                                {inf.description && <p className="text-xs text-gray-500 mt-1 italic">{inf.description}</p>}
-                                            </div>
-                                        )) : (
-                                            <div className="py-10 text-center text-gray-400">Tidak ada catatan pelanggaran</div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <StudentRadarProfile stats={stats} />
+                        <div className="lg:col-span-2 space-y-6">
+                            <StudentAttendanceDetail stats={stats} attendance={attendance} />
+                            <StudentInfractionDetail infractions={infractions} />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Academic Detail */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl text-blue-600">
-                                        <BookOpen size={20} />
-                                    </div>
-                                    <h2 className="text-lg font-bold text-gray-800 dark:text-white">Detail Akademik</h2>
-                                </div>
-                            </div>
-
-                            <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-                                <table className="w-full text-left">
-                                    <thead className="sticky top-0 bg-white dark:bg-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        <tr>
-                                            <th className="pb-4">Tanggal</th>
-                                            <th className="pb-4">Materi / Subjek</th>
-                                            <th className="pb-4 text-right">Nilai</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="text-sm divide-y dark:divide-gray-700">
-                                        {filteredGrades.length > 0 ? filteredGrades.map((g, i) => (
-                                            <tr key={i} className="group">
-                                                <td className="py-3 text-gray-500">{moment(g.date).format('DD/MM/YYYY')}</td>
-                                                <td className="py-3">
-                                                    <p className="font-bold text-gray-800 dark:text-gray-200">{g.material}</p>
-                                                    <p className="text-[10px] text-gray-400 uppercase">{g.subjectName} • {g.assessmentType}</p>
-                                                </td>
-                                                <td className="py-3 text-right">
-                                                    <span className={`px-2.5 py-1 rounded-lg font-bold ${parseFloat(g.score) >= 75 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : 'bg-red-100 text-red-700 dark:bg-red-900/30'}`}>
-                                                        {g.score}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        )) : (
-                                            <tr><td colSpan="3" className="py-10 text-center text-gray-400">Belum ada data nilai</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        {/* Narrative Note */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl text-amber-600">
-                                        <FileText size={20} />
-                                    </div>
-                                    <h2 className="text-lg font-bold text-gray-800 dark:text-white">Catatan Guru Mapel</h2>
-                                </div>
-                                <button
-                                    onClick={handleGenerateNarrative}
-                                    disabled={isGenerating}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded-xl text-[10px] font-black hover:bg-purple-200 transition-all disabled:opacity-50"
-                                >
-                                    <Zap size={12} fill="currentColor" />
-                                    {isGenerating ? 'AI Menganalisis...' : 'SMARTY AI'}
-                                </button>
-                            </div>
-
-                            <textarea
-                                value={narrativeNote}
-                                onChange={(e) => setNarrativeNote(e.target.value)}
-                                placeholder="Tuliskan catatan kemajuan belajar, saran, dan motivasi untuk siswa..."
-                                className="w-full h-48 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm text-gray-700 dark:text-gray-300 custom-scrollbar resize-none mb-4"
-                            />
-
-                            {/* Narrative Preview Area */}
-                            {narrativeNote && (
-                                <div className="mb-6 animate-fade-in">
-                                    <div className="flex items-center gap-2 mb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
-                                        <Zap size={10} className="text-purple-500" />
-                                        Pratinjau Tampilan (Rendered)
-                                    </div>
-                                    <div id="narrative-preview-content" className="p-6 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100/50 dark:border-blue-800/20 prose dark:prose-invert max-w-none text-sm">
-                                        <ReactMarkdown
-                                            remarkPlugins={[remarkGfm, remarkMath]}
-                                            rehypePlugins={[rehypeRaw, rehypeKatex]}
-                                        >
-                                            {narrativeNote}
-                                        </ReactMarkdown>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex justify-end">
-                                <button
-                                    onClick={handleSaveNarrative}
-                                    disabled={isSaving}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 uppercase tracking-widest"
-                                >
-                                    {isSaving ? 'Menyimpan...' : 'Simpan Note'}
-                                </button>
-                            </div>
-                        </div>
+                        <StudentAcademicDetail filteredGrades={filteredGrades} />
+                        <StudentNarrativeSection
+                            narrativeNote={narrativeNote}
+                            setNarrativeNote={setNarrativeNote}
+                            handleGenerateNarrative={handleGenerateNarrative}
+                            isGenerating={isGenerating}
+                            handleSaveNarrative={handleSaveNarrative}
+                            isSaving={isSaving}
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 gap-6">
-                        {/* Export Section - Refactored to full width since narrative moved */}
+                        {/* Export Section */}
                         <div className="bg-gradient-to-br from-gray-800 to-black p-8 rounded-[2.5rem] text-white shadow-2xl flex flex-col md:flex-row justify-between items-center gap-8 border border-white/10">
                             <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
                                 <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 shrink-0">

@@ -43,27 +43,12 @@ const AIBriefing = ({ user, schedules, tasks, missingJournalsCount }) => {
                 model: geminiModel
             };
 
-            // Generate hash of context to detect meaningful changes
             const dataHash = generateDataHash(contextData);
             const briefingCacheKey = `briefing-${userIdentifier}-${dateStr}-${dataHash}`;
 
             const cached = localStorage.getItem(briefingCacheKey);
             if (cached) {
-                console.log("Using cached briefing for:", userIdentifier);
                 setBriefingText(cached);
-                return;
-            }
-
-            setIsLoading(true);
-            try {
-                const text = await generateDailyBriefing(contextData, geminiModel);
-                setBriefingText(text);
-                localStorage.setItem(briefingCacheKey, text);
-            } catch (error) {
-                console.error("Failed to generate briefing:", error);
-                setBriefingText("Maaf, gagal memuat briefing pagi ini.");
-            } finally {
-                setIsLoading(false);
             }
         };
 
@@ -151,9 +136,8 @@ const AIBriefing = ({ user, schedules, tasks, missingJournalsCount }) => {
 
                     if (selectedVoice) {
                         utterance.voice = selectedVoice;
-                        console.log("Smartty optimized voice:", selectedVoice.name);
                     } else {
-                        console.log("No Indonesian voice found for briefing.");
+
                     }
 
                     utterance.onend = () => {
@@ -258,27 +242,43 @@ const AIBriefing = ({ user, schedules, tasks, missingJournalsCount }) => {
                         </div>
                     ) : (
                         <p className="text-sm md:text-base font-medium leading-relaxed opacity-95 italic text-blue-50">
-                            {briefingText ? `"${briefingText}"` : "Menyiapkan catatan briefing pagi Anda..."}
+                            {briefingText ? `"${briefingText}"` : "Halo! Ingin dengar briefing pagi dari Smartty AI?"}
                         </p>
                     )}
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
-                    <button
-                        onClick={handleRegenerate}
-                        className="p-2 rounded-full hover:bg-white/10 transition-colors text-white/70 hover:text-white"
-                        title="Regenerate Briefing"
-                    >
-                        <RefreshCw size={20} />
-                    </button>
-                    <button
-                        onClick={handlePlay}
-                        disabled={isLoading || !briefingText}
-                        className="flex items-center gap-2 bg-white text-purple-700 hover:bg-purple-50 px-5 py-2.5 rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
-                        {isPlaying ? "Jeda" : "Dengarkan"}
-                    </button>
+                    {!briefingText && !isLoading ? (
+                        <button
+                            onClick={generateBriefing}
+                            disabled={isGenerating}
+                            className="group relative flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold shadow-xl shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                        >
+                            <Zap size={18} fill="currentColor" className="animate-pulse" />
+                            <span>{isGenerating ? 'Menyusun Briefing...' : 'Buat Briefing Pagi'}</span>
+                            <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-[9px] text-white rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                Menggunakan Quota AI
+                            </span>
+                        </button>
+                    ) : (
+                        <>
+                            <button
+                                onClick={handleRegenerate}
+                                className="p-2 rounded-full hover:bg-white/10 transition-colors text-white/70 hover:text-white"
+                                title="Regenerate Briefing"
+                            >
+                                <RefreshCw size={20} className={isLoading ? "animate-spin" : ""} />
+                            </button>
+                            <button
+                                onClick={handlePlay}
+                                disabled={isLoading || !briefingText}
+                                className="flex items-center gap-2 bg-white text-purple-700 hover:bg-purple-50 px-5 py-2.5 rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
+                                {isPlaying ? "Jeda" : "Dengarkan"}
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

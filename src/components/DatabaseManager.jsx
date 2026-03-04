@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { collection, getDocs, writeBatch, query, limit, where, doc, Timestamp } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import { Trash2, Upload, Download, AlertTriangle, Database, RefreshCw, Users, BookOpen, Calendar, ClipboardList, FileText, ShieldAlert, BadgeCheck, Sparkles, Zap, History, Layout, FileUp } from 'lucide-react';
+import { Trash2, Upload, Download, AlertTriangle, Database, RefreshCw, Users, BookOpen, Calendar, ClipboardList, FileText, ShieldAlert, BadgeCheck, Sparkles, Zap, History, Layout, FileUp, Star } from 'lucide-react';
 import StyledButton from './StyledButton';
 import Modal from './Modal';
 import { generateCleanupReport, executeAutoCleanup } from '../utils/databaseCleaner';
@@ -43,6 +43,7 @@ const DatabaseManager = () => {
     { id: 'handouts', label: 'Bahan Ajar (Handout)', icon: <History size={20} /> },
     { id: 'lkpd_history', label: 'Riwayat LKPD', icon: <FileUp size={20} /> },
     { id: 'studentAppreciations', label: 'Bintang Keaktifan', icon: <Star size={20} /> },
+    { id: 'scheduleTemplates', label: 'Profil Jadwal (Template)', icon: <Layout size={20} /> },
   ];
 
   // Helper to recursively restore Firestore Timestamps from JSON
@@ -272,7 +273,7 @@ const DatabaseManager = () => {
 
         // Define tiers to respect dependencies
         const tiers = [
-          ['classes', 'subjects', 'holidays', 'teachingPrograms', 'lessonPlans', 'quizzes'],
+          ['classes', 'subjects', 'holidays', 'teachingPrograms', 'lessonPlans', 'quizzes', 'scheduleTemplates'],
           ['students', 'teachingSchedules', 'handouts', 'lkpd_history'],
           ['attendance', 'teachingJournals', 'kktpAssessments', 'infractions', 'studentTasks', 'class_agreements', 'studentAppreciations'],
           ['grades']
@@ -284,7 +285,8 @@ const DatabaseManager = () => {
           studentId: 'students',
           kktpAssessmentId: 'kktpAssessments',
           rppId: 'lessonPlans',
-          teachingProgramId: 'teachingPrograms'
+          teachingProgramId: 'teachingPrograms',
+          templateId: 'scheduleTemplates'
         };
 
         for (const tier of tiers) {
@@ -353,7 +355,7 @@ const DatabaseManager = () => {
               });
 
               try {
-                console.log(`Committing tier batch for ${collectionId} (${i} to ${Math.min(i + 500, collectionData.length)})...`);
+
                 await batch.commit();
                 restoredCount += chunk.length;
                 setRestoreStatus(`Memulihkan ${collectionId}... (${restoredCount} data)`);

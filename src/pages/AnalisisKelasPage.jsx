@@ -18,6 +18,7 @@ import PieChart from '../components/PieChart';
 import RadarChart from '../components/RadarChart';
 import SummaryCard from '../components/SummaryCard';
 import TopicMasteryHeatmap from '../components/TopicMasteryHeatmap';
+import InfractionChart from '../components/InfractionChart';
 import {
   Users,
   GraduationCap,
@@ -362,13 +363,7 @@ const AnalisisKelasPage = () => {
     }
   };
 
-  useEffect(() => {
-    if (selectedClass && rombel && !hasAutoRun.current && userClasses.length > 0) {
-      hasAutoRun.current = true;
-      generateReportForClass(selectedClass);
-    }
-  }, [selectedClass, rombel, userClasses]);
-
+  // Manual trigger only for report generation to save quota
   const handleGenerateReport = () => { generateReportForClass(selectedClass); };
 
   return (
@@ -410,11 +405,23 @@ const AnalisisKelasPage = () => {
 
             <button
               onClick={handleGenerateReport}
-              disabled={!selectedClass || loading}
-              className="p-3 px-6 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 disabled:bg-gray-400 flex items-center justify-center transition-colors shadow-md active:scale-95"
+              disabled={loading || !selectedClass}
+              className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl font-black shadow-xl shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
             >
-              {loading ? <Loader className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5 mr-2" />}
-              {loading ? 'Membuat...' : 'Buat Laporan'}
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Sedang Menganalisis...</span>
+                </>
+              ) : (
+                <>
+                  <Zap size={20} fill="currentColor" className="animate-pulse" />
+                  <span>Generate Analisis Kelas (AI)</span>
+                </>
+              )}
+              <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-[10px] text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl border border-white/10">
+                ⚡ Menggunakan Quota AI
+              </span>
             </button>
           </div>
         )}
@@ -445,10 +452,10 @@ const AnalisisKelasPage = () => {
 
           <div id="class-analysis-infographic" className="space-y-6 p-4 bg-white">
             <div id="pdf-summary" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <SummaryCard title="Rata-rata Kelas" value={analysisData.stats?.academic.avg || 0} icon={<Award className="text-yellow-600" size={24} />} color="bg-yellow-100" subtitle={`${analysisData.stats?.academic.lowest} - ${analysisData.stats?.academic.highest}`} />
-              <SummaryCard title="Presensi Hadir" value={`${analysisData.stats?.attendance.pct || 0}%`} icon={<ClipboardCheck className="text-green-600" size={24} />} color="bg-green-100" subtitle="Kehadiran Siswa" />
-              <SummaryCard title="Total Pelanggaran" value={analysisData.stats?.infractions.total || 0} icon={<ShieldAlert className="text-red-600" size={24} />} color="bg-red-100" subtitle={`Poin: ${analysisData.stats?.infractions.totalPoints}`} />
-              <SummaryCard title="Populasi" value={analysisData.students.length} icon={<Users className="text-blue-600" size={24} />} color="bg-blue-100" subtitle="Siswa Aktif" />
+              <SummaryCard title="Rata-rata Kelas" value={analysisData.stats?.academic.avg || 0} icon={<Award size={24} />} colorClass="glass-glow-yellow" color="bg-yellow-100/10" subtitle={`${analysisData.stats?.academic.lowest} - ${analysisData.stats?.academic.highest}`} />
+              <SummaryCard title="Presensi Hadir" value={`${analysisData.stats?.attendance.pct || 0}%`} icon={<ClipboardCheck size={24} />} colorClass="glass-glow-green" color="bg-green-100/10" subtitle="Kehadiran Siswa" />
+              <SummaryCard title="Total Pelanggaran" value={analysisData.stats?.infractions.total || 0} icon={<ShieldAlert size={24} />} colorClass="glass-glow-red" color="bg-red-100/10" subtitle={`Poin: ${analysisData.stats?.infractions.totalPoints}`} />
+              <SummaryCard title="Populasi" value={analysisData.students.length} icon={<Users size={24} />} colorClass="glass-glow-blue" color="bg-blue-100/10" subtitle="Siswa Aktif" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -529,39 +536,41 @@ const AnalisisKelasPage = () => {
                 <PieChart data={analysisData.stats?.attendance || {}} />
               </div>
 
+              <div id="pdf-infractions" className="h-full">
+                <InfractionChart infractions={analysisData.infractions} />
+              </div>
+
               {analysisData.grades && analysisData.grades.length > 0 && (
                 <div id="pdf-heatmap" className="h-full">
                   <TopicMasteryHeatmap grades={analysisData.grades} />
                 </div>
               )}
+
+              <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden border border-blue-100 dark:border-blue-900/30 flex flex-col h-full">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 text-white flex items-center gap-4">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-md">
+                    <Brain size={20} className="animate-pulse" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black uppercase tracking-widest leading-tight">Rekomendasi AI</h3>
+                    <p className="text-[10px] opacity-80">Analisis cerdas data riil</p>
+                  </div>
+                </div>
+                <div className="p-6 flex-1 overflow-y-auto max-h-[400px] scrollbar-thin">
+                  <div id="ai-analysis-report" className="prose dark:prose-invert max-w-none prose-xs prose-p:leading-relaxed">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath]}
+                      rehypePlugins={[rehypeRaw, rehypeKatex]}
+                    >
+                      {report}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              </div>
             </div>
-
-
 
             <div className="flex justify-center items-center gap-2 opacity-60 pt-4">
               <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Generated by Smart Teaching AI</span>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden border border-blue-100 dark:border-blue-900/30">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 sm:p-6 text-white flex items-center gap-4">
-              <div className="p-2 sm:p-3 bg-white/20 rounded-2xl backdrop-blur-md">
-                <Brain size={24} className="animate-pulse" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black uppercase tracking-widest leading-tight">Rekomendasi AI</h3>
-                <p className="text-xs opacity-80">Analisis cerdas berdasarkan data riil</p>
-              </div>
-            </div>
-            <div className="p-4 sm:p-8">
-              <div id="ai-analysis-report" className="prose dark:prose-invert max-w-none prose-sm prose-p:leading-relaxed">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkMath]}
-                  rehypePlugins={[rehypeRaw, rehypeKatex]}
-                >
-                  {report}
-                </ReactMarkdown>
-              </div>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
-import { collection, query, where, orderBy, onSnapshot, getDocs, doc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, getDocs, doc, getDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { generateLKPDFromRPP } from '../utils/gemini';
 import BSKAP_DATA from '../utils/bskap_2025_intel.json';
 import { toast } from 'react-hot-toast';
@@ -28,6 +28,7 @@ import {
     Clock
 } from 'lucide-react';
 import Modal from '../components/Modal';
+import ProgressBar from '../components/ProgressBar';
 
 // Reusing Styled Components for consistency (Keep it simple with Tailwind)
 const StyledSelect = ({ label, value, onChange, children, disabled }) => (
@@ -63,24 +64,36 @@ const LkpdGeneratorPage = () => {
     // Selection States
     const [selectedRPP, setSelectedRPP] = useState(null);
     const [selectedClass, setSelectedClass] = useState('');
-    const [assessmentModel, setAssessmentModel] = useState('Rubrik'); // New State
+    const [assessmentModel, setAssessmentModel] = useState('Rubrik');
+    const [filterSubject, setFilterSubject] = useState(''); // New State for filtering
 
     // Generation States
     const [isGenerating, setIsGenerating] = useState(false);
     const [lkpdContent, setLkpdContent] = useState('');
+    const [generationProgress, setGenerationProgress] = useState({ stage: '', message: '', percentage: 0 });
 
     // User Context
-    const [userProfile, setUserProfile] = useState({ name: '', school: '', nip: '' });
+    const [userProfile, setUserProfile] = useState({ name: '', school: '', nip: '', principalName: '', principalNip: '' });
+    const [signingLocation, setSigningLocation] = useState(() => localStorage.getItem('QUIZ_SIGNING_LOCATION') || 'Jakarta');
 
     // Load User Profile
     useEffect(() => {
         const fetchUserProfile = async () => {
-            if (auth.currentUser) {
-                const docRef = doc(db, 'users', auth.currentUser.uid);
-                // We might need to import getDoc here if not using snapshot
-                // reusing logic from other pages, assuming basic user data is needed for header? 
-                // Wait, LKPD doesn't utilize userProfile for the header actually, it's mostly in the content.
-                // But for safety let's skip for now if not strictly needed.
+            if (!auth.currentUser) return;
+            try {
+                const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+                if (userDoc.exists()) {
+                    const d = userDoc.data();
+                    setUserProfile({
+                        name: d.name || '',
+                        school: d.school || '',
+                        nip: d.nip || '',
+                        principalName: d.principalName || '',
+                        principalNip: d.principalNip || ''
+                    });
+                }
+            } catch (e) {
+                console.error('Error fetching user profile:', e);
             }
         };
         fetchUserProfile();
@@ -163,6 +176,28 @@ const LkpdGeneratorPage = () => {
         }
 
         setIsGenerating(true);
+        setGenerationProgress({ stage: 'starting', message: 'Mempersiapkan data kelas...', percentage: 5 });
+
+        // Simulasi Progres Bar
+        let currentProgress = 5;
+        const progressInterval = setInterval(() => {
+            currentProgress += Math.floor(Math.random() * 8) + 2;
+            if (currentProgress > 95) currentProgress = 95; // Stop di 95% sampai benar-benar selesai
+
+            let stage = 'preparing';
+            let message = 'Menyiapkan data siswa dan kelas...';
+
+            if (currentProgress > 30 && currentProgress <= 60) {
+                stage = 'generating';
+                message = 'AI sedang menganalisis materi RPP...';
+            } else if (currentProgress > 60) {
+                stage = 'parsing';
+                message = 'Menyusun soal dan format LKPD...';
+            }
+
+            setGenerationProgress({ stage, message, percentage: currentProgress });
+        }, 800);
+
         try {
             // 1. Fetch Students
             const studentsQuery = query(
@@ -193,14 +228,17 @@ const LkpdGeneratorPage = () => {
             const studentNames = students.map(s => s.name);
             const lkpdResult = await generateLKPDFromRPP(selectedRPP.content, assessmentModel, geminiModel, studentNames);
 
+            clearInterval(progressInterval);
+            setGenerationProgress({ stage: 'complete', message: 'LKPD siap digunakan!', percentage: 100 });
             setLkpdContent(lkpdResult);
             toast.success("LKPD Berhasil dibuat!");
 
         } catch (error) {
             console.error(error);
+            clearInterval(progressInterval);
             toast.error("Gagal membuat LKPD: " + error.message);
         } finally {
-            setIsGenerating(false);
+            setTimeout(() => setIsGenerating(false), 1000); // Tunda hilangnya progress bar sebentar
         }
     };
 
@@ -213,6 +251,7 @@ const LkpdGeneratorPage = () => {
         }
 
         const contentHtml = content.innerHTML;
+        const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
         const htmlString = `
             <!DOCTYPE html>
@@ -226,11 +265,27 @@ const LkpdGeneratorPage = () => {
                     th, td { border: 1px solid #000; padding: 8px; text-align: left; }
                     th { background-color: #f2f2f2; }
                     .page-break { page-break-before: always; }
-                    table:last-of-type { page-break-inside: avoid; }
+                    .sig-table, .sig-table td { border: none !important; }
                 </style>
             </head>
             <body>
                 ${contentHtml}
+                <table class="sig-table" style="margin-top: 50px; width: 100%; border: none;">
+                    <tr>
+                        <td align="center" style="border: none; width: 50%;">
+                            Mengetahui,<br/>Kepala Sekolah
+                            <br/><br/><br/><br/>
+                            <strong>${userProfile.principalName || '.....................................'}</strong><br/>
+                            NIP. ${userProfile.principalNip || '...................'}
+                        </td>
+                        <td align="center" style="border: none; width: 50%;">
+                            ${signingLocation || 'Jakarta'}, ${dateStr}<br/>Guru Mata Pelajaran
+                            <br/><br/><br/><br/>
+                            <strong>${userProfile.name || '.....................................'}</strong><br/>
+                            NIP. ${userProfile.nip || '...................'}
+                        </td>
+                    </tr>
+                </table>
             </body>
             </html>
         `;
@@ -330,28 +385,52 @@ const LkpdGeneratorPage = () => {
                         {/* RPP Selection */}
                         <div className="space-y-1.5">
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Pilih RPP Sumber</label>
+
+                            {/* Subject Filter Dropdown */}
+                            {savedRPPs.length > 0 && (
+                                <select
+                                    value={filterSubject}
+                                    onChange={(e) => {
+                                        setFilterSubject(e.target.value);
+                                        setSelectedRPP(null); // Reset selection when filter changes
+                                    }}
+                                    className="w-full mb-3 p-2 text-xs bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-lg text-purple-700 dark:text-purple-300 font-bold focus:ring-1 focus:ring-purple-500 outline-none"
+                                >
+                                    <option value="">-- Semua Mata Pelajaran --</option>
+                                    {[...new Set(savedRPPs.map(r => r.subject))].sort().map(sub => (
+                                        <option key={sub} value={sub}>{sub}</option>
+                                    ))}
+                                </select>
+                            )}
+
                             {loadingHistory ? (
                                 <div className="flex items-center gap-2 text-sm text-gray-500"><Loader2 className="animate-spin" size={14} /> Memuat RPP...</div>
                             ) : (
-                                <div className="max-h-60 overflow-y-auto border dark:border-gray-600 rounded-xl divide-y dark:divide-gray-700">
+                                <div className="max-h-60 overflow-y-auto border dark:border-gray-600 rounded-xl divide-y dark:divide-gray-700 overflow-hidden">
                                     {savedRPPs.length > 0 ? (
-                                        savedRPPs.map((rpp) => (
-                                            <button
-                                                key={rpp.id}
-                                                onClick={() => {
-                                                    setSelectedRPP(rpp);
-                                                    setSelectedClass('');
-                                                    if (rpp.assessmentModel) {
-                                                        setAssessmentModel(rpp.assessmentModel);
-                                                        toast.success(`Model KKTP terdeteksi: ${rpp.assessmentModel}`);
-                                                    }
-                                                }}
-                                                className={`w-full text-left p-3 text-sm transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/20 ${selectedRPP?.id === rpp.id ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-bold' : 'text-gray-600 dark:text-gray-400'}`}
-                                            >
-                                                <div className="font-bold">{rpp.gradeLevel} - {rpp.subject}</div>
-                                                <div className="text-xs font-normal truncate">{rpp.topic}</div>
-                                            </button>
-                                        ))
+                                        savedRPPs
+                                            .filter(r => !filterSubject || r.subject === filterSubject)
+                                            .map((rpp, index) => (
+                                                <button
+                                                    key={rpp.id}
+                                                    onClick={() => {
+                                                        setSelectedRPP(rpp);
+                                                        setSelectedClass('');
+                                                        if (rpp.assessmentModel) {
+                                                            setAssessmentModel(rpp.assessmentModel);
+                                                            toast.success(`Model KKTP terdeteksi: ${rpp.assessmentModel}`);
+                                                        }
+                                                    }}
+                                                    className={`w-full text-left p-3 text-sm transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/20 
+                                                        ${selectedRPP?.id === rpp.id
+                                                            ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-bold'
+                                                            : index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900/20'} 
+                                                        text-gray-600 dark:text-gray-400`}
+                                                >
+                                                    <div className="font-bold">{rpp.gradeLevel} - {rpp.subject}</div>
+                                                    <div className="text-xs font-normal truncate">{rpp.topic}</div>
+                                                </button>
+                                            ))
                                     ) : (
                                         <div className="p-4 text-center text-xs text-gray-400">Belum ada RPP tersimpan. Silakan buat RPP dulu.</div>
                                     )}
@@ -400,6 +479,13 @@ const LkpdGeneratorPage = () => {
                             {isGenerating ? <Loader2 className="animate-spin" size={20} /> : <Sparkles size={20} />}
                             {isGenerating ? 'Memproses...' : 'Buat LKPD'}
                         </button>
+
+                        <ProgressBar
+                            isGenerating={isGenerating}
+                            stage={generationProgress.stage}
+                            message={generationProgress.message}
+                            percentage={generationProgress.percentage}
+                        />
 
                     </div>
 
