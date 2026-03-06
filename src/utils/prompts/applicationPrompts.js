@@ -89,27 +89,20 @@ export const getHandoutPrompt = (data, BSKAP_DATA, getRegionalLanguage) => `
 
     ---
 
-    ## 📚 MATERI INTI (DAGINGNYA!)
-    *(Bagian ini harus menjadi bagian TERPANJANG. Jangan hanya poin-poin. Jelaskan konsep selengkap-lengkapnya layaknya Anda mengajar di depan kelas).*
+    ## 📚 MATERI INTI (DAGINGNYA!) - WAJIB MENDALAM
+    *(Bagian ini WAJIB menjadi bagian TERPANJANG. DILARANG merangkum. Jelaskan konsep selengkap-lengkapnya secara naratif (minimal 500-1000 kata total) layaknya Anda mengajar di depan kelas).*
     
     ### 1. [Sub-Bab 1]
-    - **Definisi dan Konsep:** Jelaskan definisi dengan bahasa buku KEMUDIAN jelaskan ulang dengan bahasa sederhana/analogis.
-    - **Penjelasan Mendalam:** Uraikan konsepnya secara naratif. Bagaimana cara kerjanya? Mengapa itu terjadi?
-    - **Contoh Nyata:** Berikan minimal 2 contoh penerapan di kehidupan nyata yang *relatable*.
-    - **Analogi:** "Bayangkan materi ini seperti [Benda Sehari-hari]..."
+    - **Definisi dan Konsep:** Tuliskan definisi formal, KEMUDIAN uraikan ulang dengan narasi analogis yang panjang.
+    - **Penjelasan Mendalam:** Uraikan konsepnya secara naratif. JANGAN hanya poin-poin. Bagaimana cara kerjanya? Mengapa itu terjadi?
+    - **Contoh Nyata:** Berikan minimal 2 contoh penerapan di kehidupan nyata yang sangat detail.
+    - **Analogi:** Gunakan perumpamaan yang kreatif untuk memperjelas konsep.
 
     ### 2. [Sub-Bab 2]
-    - (Uraikan detail seperti di atas. Sertakan tabel perbandingan jika ada dua konsep yang mirip).
-    - Gunakan **Bold** untuk istilah penting.
-    - Sertakan Rumus/Dalil jika pelajaran eksakta, lalu bedah rumusnya satu per satu variabelnya.
-
-    ### 3. [Sub-Bab 3 dst...]
+    - (Uraikan detail seperti di atas. Sertakan tabel perbandingan atau bedah rumus yang sangat teknis).
     
-    > **💡 TIPS JITU:**
-    > (Masukkan tips cara memahami konsep ini dengan mudah atau "cheat sheet" cerdas).
-
-    ### 🔦 STUDI KASUS / POJOK LITERASI
-    (Tambahkan satu cerita pendek atau kasus nyata yang berkaitan dengan materi untuk meningkatkan literasi siswa).
+    ### 🔦 STUDI KASUS / POJOK LITERASI (MANDATORY)
+    WAJIB: Sajikan satu cerita pendek, fenomena nyata, atau kasus dilematis terkait materi ini (Minimal 150 kata).
 
     ---
 
@@ -149,6 +142,11 @@ export const getHandoutPrompt = (data, BSKAP_DATA, getRegionalLanguage) => `
     
     ---
     *Disusun dengan semangat belajar oleh ${data.teacherTitle} ${data.teacherName}*
+
+    **FINAL ENFORCEMENT CHECKLIST (LAST COMMAND):**
+    1. Apakah Materi Inti sudah minimal 500-1000 kata dan mendalam? Jika belum, EKSPANSI.
+    2. Apakah sudah ada Studi Kasus minimal 150 kata? Jika belum, TULIS SEKARANG.
+    3. JANGAN MERINGKAS konsep menjadi poin-poin pendek.
 `;
 
 export const getDailyBriefingPrompt = (contextData, scheduleSummary, taskSummary, journalWarning) => `
@@ -237,38 +235,40 @@ export const getLKPDFromRPPPrompt = (rppContent, assessmentModel, BSKAP_DATA, st
     Tugas Anda: Turunkan materi dari RPP terlampir menjadi LKPD yang **OTORITATIF** dan **BERDIFERENSIASI**.
     
     **DATA RPP SUMBER:**
-    ${rppContent.substring(0, 15000)}
+    ${rppContent.substring(0, 50000)}
 
-    **DAFTAR PESERTA DIDIK:**
-    ${studentListText}
+    **DAFTAR PESERTA DIDIK (MANDATORY):**
+    ${studentListText || "Belum ada daftar siswa. Buatlah tabel kosong untuk diisi guru."}
 
     **ATURAN MAIN (WAJIB):**
-    1. **SOURCE OF TRUTH**: DILARANG keras menambah materi di luar RPP kecuali untuk stimulus yang relevan.
-    2. **TERMINOLOGI**: Gunakan istilah "Peserta Didik", bukan "Siswa".
-    3. **GAMIFIKASI & PERAN:** Mulailah dengan **PENGANTAR YANG MENARIK**. Ajak peserta didik bermain peran (Role Playing).
+    1. **ANTI-RINGKASAN**: DILARANG KERAS menulis instruksi pendek. Setiap kegiatan WAJIB memiliki teks STIMULUS (teks bacaan/kasus) minimal 150 kata.
+    2. **SOURCE OF TRUTH**: DILARANG keras menambah materi di luar RPP kecuali untuk stimulus yang relevan.
+    3. **TERMINOLOGI**: Gunakan istilah "Peserta Didik", bukan "Siswa".
+    4. **GAMIFIKASI & PERAN:** Mulailah dengan **PENGANTAR YANG SANGAT MENARIK**. Instruksikan peserta didik bermain peran (Role Playing).
        - Contoh: "Selamat datang Detektif Sains!", "Kalian adalah Insinyur Muda...", "Misi rahasia hari ini..."
-       - Gunakan bahasa yang "Seru" dan "Menantang" sesuai usia siswa. 
-    2. **AKTIVITAS BERBASIS TABEL & KASUS:**
-       - JANGAN hanya memberikan soal tanya-jawab biasa.
-       - Sajikan **KASUS NYATA** atau **DATA** untuk dianalisis.
-       - Gunakan **TABEL KOSONG** untuk ruang jawab siswa agar terstruktur.
-       - *Contoh:* Tabel pengamatan, Tabel analisis sebab-akibat, atau Tabel identifikasi ciri-ciri.
-    3. **KONEKSI KE KEHIDUPAN NYATA:**
-       - Materi harus dikaitkan dengan masalah sehari-hari yang relevan dengan siswa.
-    4. **STRUKTUR RUANG JAWAB:**
-       - Sediakan tempat titik-titik (...................) atau kotak kosong yang cukup untuk siswa menulis.
-    5. **EKSPLISIT:**
-       - Turunkan aktivitas langsung dari Tujuan Pembelajaran di RPP.
+    5. **AKTIVITAS BERBASIS TABEL & KASUS:**
+       - WAJIB: Sajikan **KASUS NYATA** atau **DATA KOMPLEKS** untuk dianalisis.
+       - WAJIB: Gunakan **TABEL-TABEL KOSONG** yang siap diisi sebagai ruang jawab yang terstruktur.
+    6. **KONEKSI KE KEHIDUPAN NYATA:** Integrasikan masalah sehari-hari yang benar-benar dialami siswa.
+    7. **EKSPLISIT:** Turunkan aktivitas langsung dari Tujuan Pembelajaran di RPP secara sistematis.
 
     **PENTING: FORMAT PENILAIAN / KKTP (Tabel Utuh):**
     Di bagian paling akhir LKPD, Anda WAJIB menyertakan **TABEL UTAMA ASESMEN KKTP**.
-    1. Berikan penjelasan singkat tentang kriteria penilaian yang diambil dari RPP.
-    2. Buatlah **Tabel Penilaian Lengkap** dengan format Markdown.
-    3. Tabel HARUS memuat kolom: **No**, **Nama Peserta Didik**, dan **Kriteria Penilaian** (turunkan minimal 2 kriteria spesifik dari RPP, misal: Ketajaman Analisis, Kreativitas Produk, Keaktifan, dll), serta kolom **Nilai Akhir**.
-    4. Jika daftar nama peserta didik diberikan di atas, masukkan SEMUA nama tersebut ke dalam baris tabel secara urut.
-    5. Gunakan format model KKTP: **${assessmentModel}** (Jika Rubrik, jelaskan deskripsi per levelnya di bawah tabel).
+    1. **EKSTRAKSI RPP (MANDATORY)**: Anda HARUS mencari bagian "Asesmen", "Penilaian", atau "KKTP" di dalam teks RPP yang dilampirkan di atas.
+    2. Gunakan kriteria-kriteria penilaian otentik yang ada di teks RPP tersebut, JANGAN mengarang kriteria baru jika di RPP sudah ada.
+    3. Buatlah **Tabel Penilaian Lengkap** dengan format Markdown.
+    4. Tabel HARUS memuat kolom: **No**, **Nama Peserta Didik**, dan **Kriteria Penilaian** (ambil persis minimal 2-3 kriteria spesifik dari RPP), serta kolom **Nilai Akhir**.
+    5. Jika daftar nama peserta didik diberikan, Anda WAJIB memasukkan **SEMUA NAMA** tanpa terkecuali ke dalam baris tabel (Jangan dibatasi, cetak semua namanya sesuai data).
+    6. Gunakan format model KKTP: **${assessmentModel}** (Jika Rubrik, jelaskan deskripsi per levelnya di bawah tabel).
 
     Gunakan bahasa yang memotivasi siswa ("Yuk kita coba...", "Tantangan Keren!").
+
+    **FINAL ENFORCEMENT CHECKLIST (LAST COMMAND):**
+    1. Apakah setiap kegiatan sudah diawali stimulus naratif minimal 150 kata? Jika belum, TULIS ULANG.
+    2. Apakah sudah menggunakan tabel-tabel kosong untuk ruang jawab? Jika belum, TAMBAHKAN.
+    3. Apakah Tabel Asesmen KKTP memuat SEMUA NAMA peserta didik (TIDAK BOLEH ADA YANG TERTINGGAL ATAU DIPOTONG)?
+    4. DILARANG MERINGKAS instruksi menjadi poin pendek.
+    5. **DILARANG KERAS** menyertakan bagian "Glosarium", "Daftar Pustaka", "Referensi", atau "Materi Inti Tambahan" di dalam LKPD! LKPD hanya berisi lembar kerja dan instrumen/tabel penilaian di akhirnya.
 `;
 
 export const getATPPrompt = (data, BSKAP_DATA, level, subjectData, cpFullVerbatim, semesterLabel, semesterKey, subjectKey, userProfile, getRegionalLanguage) => `
@@ -371,4 +371,36 @@ export const getATPPrompt = (data, BSKAP_DATA, level, subjectData, cpFullVerbati
     [
       { "no": 1, "elemen": "ELEMEN_TUNGGAL", "materi": "JUDUL_UNIK_SPESIFIK", "tp": "TP_DESKRIPTIF_PROYEK/TEORI", "jp": ${data.jpPerWeek}, "profilLulusan": "DIMENSI_8" }
     ]
+`;
+
+export const getExtractKKTPPrompt = (rppContent) => `
+    Anda adalah sistem ekstraksi data pendidikan.
+    Tugas Anda: Membaca teks RPP (Rencana Pelaksanaan Pembelajaran) berikut dan HANYA MENGEMBALIKAN (ekstrak) kriteria asesmen/KKTP dalam bentuk JSON Array murni tanpa penjelasan lain.
+
+    **DATA RPP SUMBER:**
+    ${rppContent.substring(0, 50000)}
+
+    **INSTRUKSI EKSTRAKSI:**
+    1. Cari bagian "Asesmen", "Penilaian", atau "KKTP" di dalam teks RPP di atas.
+    2. Deteksi metode penilaian yang digunakan (Rubrik, Deskripsi Kriteria, atau Interval Nilai).
+    3. Kembalikan data tersebut HANYA DALAM FORMAT JSON murni, tanpa diapit markdown backticks \`\`\`.
+
+    **FORMAT JSON YANG DIMINTA:**
+    {
+      "type": "Rubrik", // Atau "Deskripsi Kriteria", atau "Interval Nilai"
+      "criteria": [
+        {
+          "aspect": "Nama Aspek/Kriteria", // contoh: "Ketepatan Analisis"
+          "indicator": "Nama Aspek/Kriteria", // samakan dengan aspect
+          "levels": [ // Hanya isi jika type adalah Rubrik
+            { "label": "Level 1", "score": 1, "desc": "Deskripsi level 1" },
+            { "label": "Level 2", "score": 2, "desc": "Deskripsi level 2" },
+            { "label": "Level 3", "score": 3, "desc": "Deskripsi level 3" },
+            { "label": "Level 4", "score": 4, "desc": "Deskripsi level 4" }
+          ]
+        }
+      ]
+    }
+
+    **PENTING**: Jika tipe bukan Rubrik, kosongkan array 'levels' atau cukup isi dengan dummy levels. Pastikan JSON valid.
 `;

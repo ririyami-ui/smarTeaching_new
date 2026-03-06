@@ -37,9 +37,13 @@ export const parseKKTP = (markdown) => {
         result.type = 'Interval Nilai';
     } else {
         // Fallback detection
-        const methodMatch = markdown.match(/Pendekatan yang digunakan: (.*)/);
-        if (methodMatch) result.type = methodMatch[1].trim();
-        if (markdown.includes('|') && markdown.includes('---')) result.type = 'Rubrik';
+        const methodMatch = markdown.match(/Pendekatan yang digunakan:\s*\**([^*_]+)\**_*/i);
+        if (methodMatch) {
+            result.type = cleanText(methodMatch[1]).trim();
+        }
+        if (markdown.includes('|') && markdown.includes('---') && result.type === 'Unknown') {
+            result.type = 'Rubrik';
+        }
     }
 
     // 2. Extract Tables as Blocks

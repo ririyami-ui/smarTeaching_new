@@ -21,6 +21,7 @@ import StyledTable from '../components/StyledTable';
 import StyledInput from '../components/StyledInput';
 import toast from 'react-hot-toast';
 import { generateKktpAssessmentPDF } from '../utils/pdfGenerator';
+import { extractKKTPFromRPP } from '../utils/ai/academicService';
 import {
     ClipboardCheck,
     FileText,
@@ -32,7 +33,8 @@ import {
     CheckCircle2,
     Calendar,
     BookOpen,
-    Download
+    Download,
+    Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -60,6 +62,7 @@ const PenilaianKktpPage = () => {
     // UI States
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isExtractingAi, setIsExtractingAi] = useState(false);
     const [assessmentDate, setAssessmentDate] = useState(new Date().toISOString().split('T')[0]);
 
     // Sync Prompt State
@@ -247,6 +250,35 @@ const PenilaianKktpPage = () => {
 
         fetchExistingAssessment();
     }, [selectedRpp, selectedClass, activeSemester, academicYear]);
+
+    // AI Extraction Logic
+    const handleExtractWithAI = async () => {
+        if (!selectedRpp) return;
+        const rpp = rpps.find(r => r.id === selectedRpp);
+        if (!rpp || !rpp.content) {
+            toast.error("Konten RPP tidak ditemukan.");
+            return;
+        }
+
+        setIsExtractingAi(true);
+        const loadingToast = toast.loading("AI sedang menganalisis dan mengekstrak KKTP dari RPP...");
+        try {
+            const aiKktpData = await extractKKTPFromRPP(rpp.content, userProfile?.preferredModel);
+            if (aiKktpData && aiKktpData.criteria && aiKktpData.criteria.length > 0) {
+                setKktpData(aiKktpData);
+                setIsManualMode(false);
+                setManualCriteria([]);
+                toast.success("Berhasil mengekstrak KKTP secara cerdas!", { id: loadingToast });
+            } else {
+                toast.error("AI tidak menemukan format KKTP yang valid.", { id: loadingToast });
+            }
+        } catch (error) {
+            console.error("AI Extraction Error:", error);
+            toast.error("Gagal mengekstrak KKTP dengan AI.", { id: loadingToast });
+        } finally {
+            setIsExtractingAi(false);
+        }
+    };
 
     // Scoring Logic
     const handleScoreChange = (studentId, aspectIndex, score) => {
@@ -609,17 +641,28 @@ const PenilaianKktpPage = () => {
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-center">
                             <p className="text-xs text-gray-400 mb-3">Tidak terdeteksi KKTP otomatis.</p>
-                            <StyledButton
-                                size="sm"
-                                variant="outline"
-                                className="text-[10px]"
-                                onClick={() => {
-                                    setIsManualMode(true);
-                                    setManualCriteria([{ name: 'Kualitas Hasil' }, { name: 'Kerapihan' }]);
-                                }}
-                            >
-                                Gunakan Mode Manual
-                            </StyledButton>
+                            <div className="flex flex-col gap-2 w-full max-w-[200px]">
+                                <StyledButton
+                                    size="sm"
+                                    onClick={handleExtractWithAI}
+                                    disabled={isExtractingAi}
+                                    className="flex items-center justify-center gap-2 text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white"
+                                >
+                                    {isExtractingAi ? <RefreshCw className="animate-spin" size={12} /> : <Sparkles size={12} />}
+                                    Ekstrak dengan AI
+                                </StyledButton>
+                                <StyledButton
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-[10px]"
+                                    onClick={() => {
+                                        setIsManualMode(true);
+                                        setManualCriteria([{ name: 'Kualitas Hasil' }, { name: 'Kerapihan' }]);
+                                    }}
+                                >
+                                    Gunakan Mode Manual
+                                </StyledButton>
+                            </div>
                         </div>
                     )}
                 </div>
