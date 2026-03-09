@@ -26,16 +26,22 @@ const RekapitulasiNilai = ({ classes, subjects }) => {
       const studentsQuery = query(
         collection(db, 'students'),
         where('userId', '==', auth.currentUser.uid),
-        where('rombel', '==', selectedClass)
+        where('classId', '==', selectedClass)
       );
       const studentsSnapshot = await getDocs(studentsQuery);
-      const allStudentsInClass = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const allStudentsInClass = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => {
+          const absenA = parseInt(a.absen) || 0;
+          const absenB = parseInt(b.absen) || 0;
+          if (absenA !== absenB) return absenA - absenB;
+          return a.name.localeCompare(b.name);
+        });
 
       const gradesQuery = query(
         collection(db, 'grades'),
         where('userId', '==', auth.currentUser.uid),
-        where('className', '==', selectedClass),
-        where('subjectName', '==', selectedSubject),
+        where('classId', '==', selectedClass),
+        where('subjectId', '==', selectedSubject),
         where('date', '>=', startDate),
         where('date', '<=', endDate)
       );
@@ -46,6 +52,7 @@ const RekapitulasiNilai = ({ classes, subjects }) => {
       allStudentsInClass.forEach(student => {
         studentScores[student.id] = {
           name: student.name,
+          absen: student.absen,
           scores: [],
           lowScores: 0,
         };
@@ -55,20 +62,22 @@ const RekapitulasiNilai = ({ classes, subjects }) => {
         if (studentScores[grade.studentId]) {
           const score = parseFloat(grade.score);
           studentScores[grade.studentId].scores.push(score);
-          if (score < 70) { // Anggap KKM 70
+          if (score < 75) { // Adjusted to a more common default KKM
             studentScores[grade.studentId].lowScores++;
           }
         }
       });
 
-      const summary = Object.values(studentScores).map(student => {
-        const totalScore = student.scores.reduce((acc, score) => acc + score, 0);
-        const averageScore = student.scores.length > 0 ? (totalScore / student.scores.length).toFixed(2) : 'N/A';
+      const summary = allStudentsInClass.map(student => {
+        const data = studentScores[student.id];
+        const totalScore = data.scores.reduce((acc, score) => acc + score, 0);
+        const averageScore = data.scores.length > 0 ? (totalScore / data.scores.length).toFixed(1) : '-';
         return {
+          absen: student.absen,
           name: student.name,
           average: averageScore,
-          lowScoreCount: student.lowScores,
-          testCount: student.scores.length,
+          lowScoreCount: data.lowScores,
+          testCount: data.scores.length,
         };
       });
       setSummaryData(summary);
@@ -81,10 +90,11 @@ const RekapitulasiNilai = ({ classes, subjects }) => {
   };
 
   const summaryColumns = [
+    { header: { label: 'No' } },
     { header: { label: 'Nama Siswa' } },
-    { header: { label: 'Rata-rata Nilai' } },
-    { header: { label: 'Jumlah Nilai di Bawah KKM' } },
-    { header: { label: 'Jumlah Penilaian' } },
+    { header: { label: 'Rata-rata' } },
+    { header: { label: 'Dibawah KKM' } },
+    { header: { label: 'Total Penilaian' } },
   ];
 
   return (
@@ -94,11 +104,11 @@ const RekapitulasiNilai = ({ classes, subjects }) => {
         <StyledInput type="date" label="Tanggal Akhir" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
         <StyledSelect label="Kelas" value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
           <option value="">Pilih Kelas</option>
-          {classes.map(c => <option key={c.id} value={c.rombel}>{c.rombel}</option>)}
+          {classes.map(c => <option key={c.id} value={c.id}>{c.rombel}</option>)}
         </StyledSelect>
         <StyledSelect label="Mata Pelajaran" value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}>
           <option value="">Pilih Mata Pelajaran</option>
-          {subjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+          {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
         </StyledSelect>
         <StyledButton onClick={handleShowSummary} disabled={isFetching}>
           {isFetching ? 'Mencari...' : 'Tampilkan Rekapitulasi'}
@@ -111,10 +121,11 @@ const RekapitulasiNilai = ({ classes, subjects }) => {
             <StyledTable headers={summaryColumns.map(c => c.header)}>
               {summaryData.map((student, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-700'}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200 font-bold">{student.absen}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{student.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{student.average}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{student.lowScoreCount}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{student.testCount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-purple-600 dark:text-purple-400">{student.average}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-red-500 font-medium">{student.lowScoreCount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">{student.testCount}</td>
                 </tr>
               ))}
             </StyledTable>

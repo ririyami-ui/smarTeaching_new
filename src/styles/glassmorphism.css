@@ -1,0 +1,126 @@
+/* ============================================
+   glassmorphism.css
+   Glass UI components, icon containers,
+   and premium chart utilities.
+   Note: No @apply used — plain CSS only for
+   PostCSS @import compatibility.
+   ============================================ */
+
+/* --- Glassmorphism 3D Icon Utilities --- */
+.glass-icon-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    /* rounded-2xl */
+    overflow: hidden;
+    transition: all 500ms;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.glass-icon-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 500ms;
+    background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.4), transparent 70%);
+}
+
+.glass-icon-container:hover::before {
+    opacity: 1;
+}
+
+/* Glass glow color variants */
+.glass-glow-blue {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), inset 0 0 15px rgba(59, 130, 246, 0.1);
+}
+
+.glass-glow-green {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 15px rgba(16, 185, 129, 0.1);
+}
+
+.glass-glow-purple {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), inset 0 0 15px rgba(168, 85, 247, 0.1);
+}
+
+.glass-glow-red {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.2), inset 0 0 15px rgba(239, 68, 68, 0.1);
+}
+
+.glass-glow-yellow {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2), inset 0 0 15px rgba(245, 158, 11, 0.1);
+}
+
+/* --- Premium Chart Utilities --- */
+.chart-container-glass {
+    /* bg-white/40 dark:bg-black/40 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-2xl transition-all duration-500 rounded-[2rem] */
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transition: all 500ms;
+    border-radius: 2rem;
+    isolation: isolate;
+}
+
+@media (prefers-color-scheme: dark) {
+    .chart-container-glass {
+        background-color: rgba(0, 0, 0, 0.4);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.dark .chart-container-glass {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.chart-glow-blue {
+    box-shadow: 0 20px 50px -15px rgba(59, 130, 246, 0.3);
+}
+
+.chart-glow-green {
+    box-shadow: 0 20px 50px -15px rgba(16, 185, 129, 0.3);
+}
+
+.chart-glow-purple {
+    box-shadow: 0 20px 50px -15px rgba(139, 92, 246, 0.3);
+}
+
+.chart-glow-red {
+    box-shadow: 0 20px 50px -15px rgba(239, 68, 68, 0.3);
+}
+
+.chart-glow-orange {
+    box-shadow: 0 20px 50px -15px rgba(245, 158, 11, 0.3);
+}
+
+.chart-inner-border {
+    position: relative;
+}
+
+.chart-inner-border::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+}
+
+.chart-card-gradient {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+}
+
+/* --- Misc UI --- */
+.shadow-cekung {
+    box-shadow: inset 0px 4px 10px rgba(0, 0, 0, 0.5);
+}

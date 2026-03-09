@@ -12,8 +12,8 @@ import StyledButton from './StyledButton';
 import StyledTable from './StyledTable';
 import SummaryCard from './SummaryCard';
 import EmptyState from './EmptyState';
+import QuickDateFilter from './QuickDateFilter';
 import LoadingSpinner from './LoadingSpinner';
-import BarChart from './BarChart';
 import { generateViolationRecapPDF } from '../utils/pdfGenerator';
 import { calculateNilaiSikap, generateDeskripsi } from '../utils/generalUtils';
 
@@ -37,39 +37,21 @@ const RekapViolationTab = ({
     useEffect(() => {
         const fetchStudents = async () => {
             if (selectedClass && auth.currentUser) {
-                const classObj = classes.find(c => c.id === selectedClass);
-                const rombelName = classObj?.rombel || selectedClass;
-
-                const studentsByClassIdQuery = query(
+                const q = query(
                     collection(db, 'students'),
                     where('userId', '==', auth.currentUser.uid),
                     where('classId', '==', selectedClass)
                 );
-                const studentsByRombelQuery = query(
-                    collection(db, 'students'),
-                    where('userId', '==', auth.currentUser.uid),
-                    where('rombel', '==', rombelName)
-                );
-
-                const [snapId, snapRombel] = await Promise.all([
-                    getDocs(studentsByClassIdQuery),
-                    getDocs(studentsByRombelQuery)
-                ]);
-
-                const studentMap = new Map();
-                snapId.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
-                snapRombel.docs.forEach(doc => {
-                    if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
-                });
-
-                const fetchedStudents = Array.from(studentMap.values());
-                setStudents(fetchedStudents.sort((a, b) => a.name.localeCompare(b.name)));
+                const snapshot = await getDocs(q);
+                const fetchedStudents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (parseInt(a.absen) || 0) - (parseInt(b.absen) || 0));
+                setStudents(fetchedStudents);
             } else {
                 setStudents([]);
             }
         };
         fetchStudents();
-    }, [selectedClass, classes]);
+    }, [selectedClass]);
 
     const handleApplyFilter = async () => {
         if (!startDate || !endDate || !selectedClass) {
@@ -78,9 +60,6 @@ const RekapViolationTab = ({
         }
         setIsLoading(true);
         try {
-            const classObj = classes.find(c => c.id === selectedClass);
-            const rombelName = classObj?.rombel || selectedClass;
-
             const endDay = new Date(endDate);
             endDay.setHours(23, 59, 59, 999);
 
@@ -188,37 +167,40 @@ const RekapViolationTab = ({
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Mulai</label>
-                        <StyledInput type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Akhir</label>
-                        <StyledInput type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                    </div>
-                    <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+                    <div className="lg:col-span-3">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Kelas</label>
                         <StyledSelect value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
                             <option value="">-- Pilih Kelas --</option>
                             {classes.map(c => <option key={c.id} value={c.id}>{c.rombel}</option>)}
                         </StyledSelect>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="md:col-span-2 lg:col-span-5">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Rentang Tanggal</label>
+                        <div className="flex items-center gap-2">
+                            <StyledInput type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                            <span className="text-gray-400">-</span>
+                            <StyledInput type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                        </div>
+                    </div>
+                    <div className="md:col-span-2 lg:col-span-4 flex gap-2">
                         <StyledButton onClick={handleApplyFilter} className="flex-1">
                             Terapkan Filter
                         </StyledButton>
                         {recapData.length > 0 && (
                             <div className="flex gap-2">
-                                <StyledButton onClick={handlePDFExport} className="bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20">
+                                <StyledButton onClick={handlePDFExport} className="bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 border-red-100 dark:border-red-900/30">
                                     <FileDown className="w-5 h-5" />
                                 </StyledButton>
-                                <StyledButton onClick={handleExcelExport} className="bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20">
+                                <StyledButton onClick={handleExcelExport} className="bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 border-green-100 dark:border-green-900/30">
                                     <FileDown className="w-5 h-5" />
                                 </StyledButton>
                             </div>
                         )}
                     </div>
+                </div>
+                <div className="mt-4">
+                    <QuickDateFilter onSelect={(start, end) => { setStartDate(start); setEndDate(end); }} />
                 </div>
             </div>
 
@@ -247,39 +229,30 @@ const RekapViolationTab = ({
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                        <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Distribusi Jenis Pelanggaran</h3>
-                            <div className="h-80">
-                                <BarChart data={violationStats} />
-                            </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 overflow-hidden">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Catatan Kedisiplinan Siswa</h3>
-                            <div className="overflow-x-auto">
-                                <StyledTable headers={pelanggaranColumns.map(c => c.header)}>
-                                    {recapData.map((row, index) => (
-                                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                            {pelanggaranColumns.map(col => (
-                                                <td key={col.accessor} className="px-6 py-4 whitespace-normal text-sm text-gray-600 dark:text-gray-300 border-b border-gray-50 dark:border-gray-800">
-                                                    {col.accessor === 'name' ? (
-                                                        <div className="font-semibold text-gray-900 dark:text-white">{row[col.accessor]}</div>
-                                                    ) : col.accessor === 'violationCount' ? (
-                                                        <span className={row[col.accessor] > 0 ? 'text-red-600 font-bold' : ''}>
-                                                            {row[col.accessor]}
-                                                        </span>
-                                                    ) : col.accessor === 'deskripsi' ? (
-                                                        <div className="max-w-xs truncate" title={row[col.accessor]}>{row[col.accessor]}</div>
-                                                    ) : (
-                                                        row[col.accessor]
-                                                    )}
-                                                </td>
-                                            ))}
-                                        </tr>
-                                    ))}
-                                </StyledTable>
-                            </div>
+                    <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 overflow-hidden">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Catatan Kedisiplinan Siswa</h3>
+                        <div className="overflow-x-auto">
+                            <StyledTable headers={pelanggaranColumns.map(c => c.header)}>
+                                {recapData.map((row, index) => (
+                                    <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                        {pelanggaranColumns.map(col => (
+                                            <td key={col.accessor} className="px-6 py-4 whitespace-normal text-sm text-gray-600 dark:text-gray-300 border-b border-gray-50 dark:border-gray-800">
+                                                {col.accessor === 'name' ? (
+                                                    <div className="font-semibold text-gray-900 dark:text-white">{row[col.accessor]}</div>
+                                                ) : col.accessor === 'violationCount' ? (
+                                                    <span className={row[col.accessor] > 0 ? 'text-red-600 font-bold' : ''}>
+                                                        {row[col.accessor]}
+                                                    </span>
+                                                ) : col.accessor === 'deskripsi' ? (
+                                                    <div className="min-w-[200px] whitespace-pre-wrap text-xs md:text-sm" title={row[col.accessor]}>{row[col.accessor]}</div>
+                                                ) : (
+                                                    row[col.accessor]
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </StyledTable>
                         </div>
                     </div>
                 </>

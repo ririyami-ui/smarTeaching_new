@@ -383,6 +383,101 @@ export const executeAutoCleanup = async (userId, options = {}) => {
     }
 };
 
+// 8. Migrasi data legacy ke sistem ID (classId, subjectId) secara menyeluruh
+export const migrateToModernIds = async (userId) => {
+    const results = {
+        students: 0,
+        grades: 0,
+        schedules: 0,
+        attendance: 0,
+        journals: 0,
+        infractions: 0,
+        appreciations: 0,
+        tasks: 0,
+        kktp: 0,
+        total: 0
+    };
+
+    try {
+        // 1. Ambil data master untuk mapping
+        const classesSnap = await getDocs(query(collection(db, 'classes'), where('userId', '==', userId)));
+        const subjectsSnap = await getDocs(query(collection(db, 'subjects'), where('userId', '==', userId)));
+
+        const classMap = {}; // { rombel: id }
+        classesSnap.forEach(doc => {
+            const data = doc.data();
+            if (data.rombel) classMap[data.rombel.trim()] = doc.id;
+        });
+
+        const subjectMap = {}; // { name: id }
+        subjectsSnap.forEach(doc => {
+            const data = doc.data();
+            if (data.name) subjectMap[data.name.trim()] = doc.id;
+        });
+
+        // Helper function for batch updates
+        const migrateCollection = async (colName, classField, subjectField, resultKey) => {
+            const snap = await getDocs(query(collection(db, colName), where('userId', '==', userId)));
+            if (snap.empty) return 0;
+
+            const batch = writeBatch(db);
+            let count = 0;
+
+            snap.forEach(document => {
+                const data = document.data();
+                const updates = {};
+
+                // Migrasi Class ID
+                if (!data.classId && data[classField]) {
+                    const rombelName = typeof data[classField] === 'string' ? data[classField].trim() : '';
+                    if (classMap[rombelName]) {
+                        updates.classId = classMap[rombelName];
+                        // Backup old field to className if it doesn't exist
+                        if (!data.className) updates.className = rombelName;
+                    }
+                }
+
+                // Migrasi Subject ID
+                if (subjectField && !data.subjectId && data[subjectField]) {
+                    const subName = typeof data[subjectField] === 'string' ? data[subjectField].trim() : '';
+                    if (subjectMap[subName]) {
+                        updates.subjectId = subjectMap[subName];
+                        if (!data.subjectName) updates.subjectName = subName;
+                    }
+                }
+
+                if (Object.keys(updates).length > 0) {
+                    batch.update(document.ref, updates);
+                    count++;
+                }
+            });
+
+            if (count > 0) {
+                await batch.commit();
+                results[resultKey] = count;
+                results.total += count;
+            }
+            return count;
+        };
+
+        // 2. Eksekusi Migrasi untuk semua koleksi
+        await migrateCollection('students', 'rombel', null, 'students');
+        await migrateCollection('grades', 'className', 'subjectName', 'grades');
+        await migrateCollection('teachingSchedules', 'className', 'subjectName', 'schedules');
+        await migrateCollection('attendance', 'rombel', 'subjectName', 'attendance');
+        await migrateCollection('teachingJournals', 'className', 'subjectName', 'journals');
+        await migrateCollection('infractions', 'rombel', null, 'infractions');
+        await migrateCollection('studentAppreciations', 'className', 'subjectName', 'appreciations');
+        await migrateCollection('studentTasks', 'className', 'subjectId', 'tasks'); // subjectId might exist but classId not
+        await migrateCollection('kktpAssessments', 'className', 'subjectName', 'kktp');
+
+        return results;
+    } catch (error) {
+        console.error('Migration error:', error);
+        throw error;
+    }
+};
+
 export default {
     cleanOrphanedDocuments,
     removeDuplicates,
@@ -390,5 +485,6 @@ export default {
     deleteBatch,
     findBrokenReferences,
     generateCleanupReport,
-    executeAutoCleanup
+    executeAutoCleanup,
+    migrateToModernIds
 };

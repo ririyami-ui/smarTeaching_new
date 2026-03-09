@@ -268,9 +268,7 @@ export default function JurnalPage() {
       // Find the latest "Tidak Terlaksana" entry before current date for this class/subject
       const carryOver = journals
         .filter(j => {
-          const classMatch = j.classId === selectedClass || j.className === selectedClass || (classes.find(c => c.id === selectedClass)?.rombel === j.className);
-          const subjectMatch = j.subjectId === selectedSubject || j.subjectName === selectedSubject || (subjects.find(s => s.id === selectedSubject)?.name === j.subjectName);
-          return classMatch && subjectMatch &&
+          return j.classId === selectedClass && j.subjectId === selectedSubject &&
             j.isImplemented === false &&
             moment(j.date).isBefore(currentDate);
         })
@@ -379,12 +377,8 @@ export default function JurnalPage() {
     setEditingJournalId(journal.id);
     setCurrentDate(journal.date);
 
-    // Resolve IDs from names if IDs are missing (legacy support)
-    const resolvedClassId = journal.classId || classes.find(c => c.rombel === journal.className)?.id || journal.className;
-    const resolvedSubjectId = journal.subjectId || subjects.find(s => s.name === journal.subjectName)?.id || journal.subjectName;
-
-    setSelectedClass(resolvedClassId);
-    setSelectedSubject(resolvedSubjectId);
+    setSelectedClass(journal.classId);
+    setSelectedSubject(journal.subjectId);
 
     setMaterial(journal.material);
     setLearningObjectives(journal.learningObjectives);

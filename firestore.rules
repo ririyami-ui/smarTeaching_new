@@ -37,14 +37,7 @@ service cloud.firestore {
 
     // --- 2. Academic Programs (Complex Access) ---
     match /teachingPrograms/{docId} {
-      allow read: if isAuthenticated() && (
-        docId.matches(request.auth.uid + '_.*') || 
-        resource.data.get('userId', '') == request.auth.uid
-      );
-      allow write: if isAuthenticated() && (
-        docId.matches(request.auth.uid + '_.*') || 
-        request.resource.data.get('userId', '') == request.auth.uid
-      );
+      allow read, write: if isDocOwner() && isWritingOwner();
     }
 
     // --- 3. Master Data & Journals ---

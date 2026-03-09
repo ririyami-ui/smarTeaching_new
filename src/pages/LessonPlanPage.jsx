@@ -40,6 +40,7 @@ import 'katex/dist/katex.min.css';
 import { asBlob } from 'html-docx-js-typescript';
 import { saveAs } from 'file-saver';
 import { generateLessonPlan } from '../utils/gemini';
+import { useAI } from '../utils/AIContext';
 import BSKAP_DATA from '../utils/bskap_2025_intel.json';
 import StyledSelect from '../components/StyledSelect';
 import StyledButton from '../components/StyledButton';
@@ -48,6 +49,7 @@ import Modal from '../components/Modal';
 
 const LessonPlanPage = () => {
     const { activeSemester, academicYear, geminiModel } = useSettings();
+    const { tasks, startGeneration, clearTask } = useAI();
     const navigate = useNavigate();
     const [levels, setLevels] = useState([]);
     const [subjects, setSubjects] = useState([]);
@@ -59,6 +61,10 @@ const LessonPlanPage = () => {
     const [atpMaterials, setAtpMaterials] = useState([]);
     const [teachingModel, setTeachingModel] = useState('Otomatis');
     const [assessmentModel, setAssessmentModel] = useState('Otomatis'); // New State: Model KKTP
+
+    // AI Context Sync
+    const aiTask = tasks.lessonPlan;
+    const isGenerating = aiTask.status === 'loading';
 
     // Prepopulate from URL if coming from Schedule
     useEffect(() => {
@@ -75,14 +81,14 @@ const LessonPlanPage = () => {
         }
     }, [levels, subjects]); // Re-run when masters load if needed
 
-    const [generatedRPP, setGeneratedRPP] = useState('');
-    const [isGenerating, setIsGenerating] = useState(false);
+    const [generatedRPP, setGeneratedRPP] = useState(aiTask.result || '');
     const [savedRPPs, setSavedRPPs] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [viewingRPP, setViewingRPP] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
-    const [generationProgress, setGenerationProgress] = useState('');
+
+    const [generationProgress, setGenerationProgress] = useState(aiTask.progress || '');
     const [generationStep, setGenerationStep] = useState(0);
     const progressSteps = [
         "Menganalisis Kurikulum BSKP 046/2025...",
@@ -104,7 +110,7 @@ const LessonPlanPage = () => {
 
     // Load saved location
     useEffect(() => {
-        const saved = localStorage.getItem('QUIZ_SIGNING_LOCATION');
+        const saved = localStorage.getItem('SIGNING_LOCATION');
         if (saved) setSigningLocation(saved);
     }, []);
 
@@ -139,7 +145,7 @@ const LessonPlanPage = () => {
 
                     const city = data.address.city || data.address.town || data.address.regency || data.address.county || 'Lokasi Terdeteksi';
                     setSigningLocation(city);
-                    localStorage.setItem('QUIZ_SIGNING_LOCATION', city); // Share key with Quiz
+                    localStorage.setItem('SIGNING_LOCATION', city); // Share key with Quiz
                     toast.success(`Lokasi terdeteksi: ${city}`);
                 } catch (error) {
                     console.error("Error detecting location:", error);
@@ -218,12 +224,13 @@ const LessonPlanPage = () => {
         const fetchMaterials = async () => {
             if (!auth.currentUser || !selectedGrade || !selectedSubject) return;
 
-            // Reset selection when source/filter changes
-            setSelectedMaterial(null);
-            setGeneratedRPP('');
+            // Reset selection when source/filter changes - ONLY if it doesn't match current AI task
+            if (aiTask.status === 'idle') {
+                setSelectedMaterial(null);
+                setGeneratedRPP('');
+            }
 
             if (sourceType === 'promes') {
-                setPromesMaterials([]);
                 try {
                     const subjectData = subjects.find(s => s.id === selectedSubject);
                     const subjectName = subjectData?.name || selectedSubject;
@@ -232,11 +239,12 @@ const LessonPlanPage = () => {
                     const docRef = doc(db, 'teachingPrograms', docId);
                     const docSnap = await getDoc(docRef);
 
+                    let protaData = [];
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         const prota = data.prota || [];
                         const promes = data.promes || {};
-                        const enhancedProta = prota.map(item => {
+                        protaData = prota.map(item => {
                             const distributions = [];
                             Object.keys(promes).forEach(key => {
                                 if (key.startsWith(`${item.id}_`)) {
@@ -246,7 +254,6 @@ const LessonPlanPage = () => {
                             });
                             return { ...item, distribution: distributions };
                         });
-                        setPromesMaterials(enhancedProta);
                     } else {
                         const q = query(
                             collection(db, 'teachingPrograms'),
@@ -262,7 +269,7 @@ const LessonPlanPage = () => {
                             const data = qSnap.docs[0].data();
                             const prota = data.prota || [];
                             const promes = data.promes || {};
-                            const enhancedProta = prota.map(item => {
+                            protaData = prota.map(item => {
                                 const distributions = [];
                                 Object.keys(promes).forEach(key => {
                                     if (key.startsWith(`${item.id}_`)) {
@@ -272,15 +279,22 @@ const LessonPlanPage = () => {
                                 });
                                 return { ...item, distribution: distributions };
                             });
-                            setPromesMaterials(enhancedProta);
                         }
                     }
+
+                    setPromesMaterials(protaData);
+
+                    // Restoration logic for Promes
+                    if (aiTask.params?.topic && protaData.length > 0) {
+                        const match = protaData.find(m => m.materi === aiTask.params.topic);
+                        if (match) setSelectedMaterial(match);
+                    }
+
                 } catch (error) {
                     console.error("Error fetching promes:", error);
                 }
             } else {
                 // ATP Mode
-                setAtpMaterials([]);
                 try {
                     const subjectData = subjects.find(s => s.id === selectedSubject);
                     const subjectName = subjectData?.name || selectedSubject;
@@ -313,6 +327,12 @@ const LessonPlanPage = () => {
                         });
 
                         setAtpMaterials(enhancedAtp);
+
+                        // Restoration logic for ATP
+                        if (aiTask.params?.topic) {
+                            const match = enhancedAtp.find(m => m.materi === aiTask.params.topic);
+                            if (match) setSelectedMaterial(match);
+                        }
                     }
                 } catch (error) {
                     console.error("Error fetching ATP:", error);
@@ -361,59 +381,84 @@ const LessonPlanPage = () => {
             return;
         }
 
-        setIsGenerating(true);
+        const subjectData = subjects.find(s => s.id === selectedSubject);
+        const subjectName = subjectData?.name || selectedSubject;
+
         setGenerationStep(0);
         setGenerationProgress(progressSteps[0]);
         setViewingRPP(null);
 
         // Simulation Interval for smoother UX
-        const stepInterval = setInterval(() => {
-            setGenerationStep(prev => {
-                if (prev < progressSteps.length - 1) return prev + 1;
-                return prev;
-            });
-        }, 3500);
+        let stepInterval;
+        const startSimulation = () => {
+            stepInterval = setInterval(() => {
+                setGenerationStep(prev => {
+                    if (prev < progressSteps.length - 1) return prev + 1;
+                    return prev;
+                });
+            }, 3500);
+        };
 
         try {
-            const subjectData = subjects.find(s => s.id === selectedSubject);
-            const subjectName = subjectData?.name || selectedSubject;
-
-            const result = await generateLessonPlan({
-                kd: manualKd || selectedMaterial.kd || selectedMaterial.tp,
-                materi: manualMateri || selectedMaterial.materi,
-                gradeLevel: selectedGrade,
+            await startGeneration('lessonPlan', async (context) => {
+                startSimulation();
+                return await generateLessonPlan({
+                    kd: manualKd || selectedMaterial.kd || selectedMaterial.tp,
+                    materi: manualMateri || selectedMaterial.materi,
+                    gradeLevel: selectedGrade,
+                    subject: subjectName,
+                    academicYear,
+                    semester: activeSemester,
+                    teacherName: userProfile.name,
+                    teacherNip: userProfile.nip,
+                    schoolName: userProfile.school,
+                    principalName: userProfile.principalName,
+                    principalNip: userProfile.principalNip,
+                    jp: selectedMaterial.jp,
+                    distribution: selectedMaterial.distribution,
+                    teachingModel: teachingModel,
+                    assessmentModel: assessmentModel,
+                    modelName: geminiModel,
+                    sourceType: sourceType,
+                    elemen: selectedMaterial.elemen || '',
+                    profilLulusan: selectedMaterial.profilLulusan || '',
+                    studentCharacteristics: studentCharacteristics,
+                    onProgress: context.onProgress
+                });
+            }, {
+                grade: selectedGrade,
                 subject: subjectName,
-                academicYear,
-                semester: activeSemester,
-                teacherName: userProfile.name,
-                teacherNip: userProfile.nip,
-                schoolName: userProfile.school,
-                principalName: userProfile.principalName,
-                principalNip: userProfile.principalNip,
-                jp: selectedMaterial.jp,
-                distribution: selectedMaterial.distribution,
-                teachingModel: teachingModel,
-                assessmentModel: assessmentModel,
-                modelName: geminiModel,
-                sourceType: sourceType, // Pass sourceType to AI
-                elemen: selectedMaterial.elemen || '',
-                profilLulusan: selectedMaterial.profilLulusan || '', // Pass ATP's Profil Lulusan
-                studentCharacteristics: studentCharacteristics, // Pass manual characteristics
-                onProgress: (msg) => {
-                    // Do not override simulation unless specific
-                    console.log("AI Internal Progress:", msg);
-                }
+                topic: manualMateri || selectedMaterial.materi
             });
-            const cleanResult = result.replace(/\|\|/g, '');
-            setGeneratedRPP(cleanResult);
-            toast.success("RPP berhasil disusun oleh AI!");
         } catch (error) {
-            toast.error(error.message);
+            // Error is handled by context toaster
         } finally {
-            clearInterval(stepInterval);
-            setIsGenerating(false);
+            if (stepInterval) clearInterval(stepInterval);
         }
     };
+
+    // Effect to sync context result to local view
+    useEffect(() => {
+        if (aiTask.status === 'success' && aiTask.result) {
+            setGeneratedRPP(aiTask.result);
+        }
+    }, [aiTask.status, aiTask.result]);
+
+    // Restore simulation if navigating back to a loading task
+    useEffect(() => {
+        let interval;
+        if (isGenerating) {
+            interval = setInterval(() => {
+                setGenerationStep(prev => {
+                    if (prev < progressSteps.length - 1) return prev + 1;
+                    return prev;
+                });
+            }, 3500);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isGenerating]);
 
     // Effect to update labels based on step
     useEffect(() => {
@@ -740,7 +785,7 @@ const LessonPlanPage = () => {
                                     value={signingLocation}
                                     onChange={(e) => {
                                         setSigningLocation(e.target.value);
-                                        localStorage.setItem('QUIZ_SIGNING_LOCATION', e.target.value);
+                                        localStorage.setItem('SIGNING_LOCATION', e.target.value);
                                     }}
                                     placeholder="Contoh: Jakarta"
                                 />
@@ -798,7 +843,10 @@ const LessonPlanPage = () => {
                                         <div className="flex justify-between items-start">
                                             <div className="cursor-pointer flex-1" onClick={() => {
                                                 setViewingRPP(plan);
-                                                setGeneratedRPP('');
+                                                // Only clear generated preview if we are looking at a DIFFERENT saved RPP
+                                                if (!generatedRPP || viewingRPP?.id !== plan.id) {
+                                                    setGeneratedRPP('');
+                                                }
                                             }}>
                                                 <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{plan.gradeLevel} - {plan.subject}</p>
                                                 <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">{plan.topic}</p>

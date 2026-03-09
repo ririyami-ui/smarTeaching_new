@@ -17,6 +17,7 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
     const [atpItems, setAtpItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isExporting, setIsExporting] = useState('');
     const [docId, setDocId] = useState(null);
     const [generationProgress, setGenerationProgress] = useState({ stage: '', message: '', percentage: 0 });
 
@@ -164,14 +165,16 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
     };
 
     const handleExportWordATP = async () => {
-        const S = {
-            border: 'border: 1px solid black;', cell: 'border: 1px solid black; padding: 4px;',
-            header: 'text-align: center; border: 1px solid black; background-color: #f2f2f2;',
-            center: 'text-align: center;', bold: 'font-weight: bold;',
-            full: 'width: 100%; border-collapse: collapse;'
-        };
+        setIsExporting('word');
+        try {
+            const S = {
+                border: 'border: 1px solid black;', cell: 'border: 1px solid black; padding: 4px;',
+                header: 'text-align: center; border: 1px solid black; background-color: #f2f2f2;',
+                center: 'text-align: center;', bold: 'font-weight: bold;',
+                full: 'width: 100%; border-collapse: collapse;'
+            };
 
-        const rows = atpItems.map((item, i) => `
+            const rows = atpItems.map((item, i) => `
             <tr>
                 <td style="${S.cell} ${S.center}">${i + 1}</td>
                 <td style="${S.cell}">${item.elemen || ''}</td>
@@ -182,7 +185,7 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
             </tr>
         `).join('');
 
-        const html = `
+            const html = `
             <h2 style="text-align:center;">ALUR TUJUAN PEMBELAJARAN (ATP)</h2>
             <p>Satuan Pendidikan: ${userProfile?.school || '-'}<br/>Mata Pelajaran: ${subject}<br/>Kelas/Semester: ${grade}/${semester}<br/>Tahun Ajaran: ${year}</p>
             <table style="${S.full}">
@@ -206,10 +209,12 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
                 </tr>
             </table>
         `;
-        exportToDocx(html, `ATP-${subject}-${grade}.docx`);
+            exportToDocx(html, `ATP-${subject}-${grade}.docx`);
+        } finally { setIsExporting(''); }
     };
 
     const handleExportPDFATP = async () => {
+        setIsExporting('pdf');
         try {
             const { default: jsPDF } = await import('jspdf');
             const { default: autoTable } = await import('jspdf-autotable');
@@ -253,7 +258,7 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
         } catch (e) {
             console.error(e);
             toast.error("Gagal export PDF.");
-        }
+        } finally { setIsExporting(''); }
     };
 
     return (
@@ -270,8 +275,8 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
                     onClick={handleGenerate}
                     disabled={isGenerating}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg hover:shadow-lg transition disabled:opacity-70 text-sm font-bold ${isGenerating
-                            ? 'bg-purple-100 text-purple-700 border border-purple-200 cursor-wait'
-                            : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
+                        ? 'bg-purple-100 text-purple-700 border border-purple-200 cursor-wait'
+                        : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
                         }`}
                 >
                     {isGenerating ? <Loader2 className="animate-spin" size={16} /> : <Zap size={16} />}
@@ -372,11 +377,11 @@ const ATPView = ({ grade, subject, semester, year, userProfile, signingLocation,
             </div>
 
             <div className="flex flex-wrap justify-end gap-2 pt-4 border-t dark:border-gray-700">
-                <button onClick={handleExportPDFATP} disabled={atpItems.length === 0} className="flex items-center gap-2 px-3 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition text-sm font-semibold disabled:opacity-50">
-                    <FileText size={16} /> PDF
+                <button onClick={handleExportPDFATP} disabled={atpItems.length === 0 || isExporting !== ''} className="flex items-center gap-2 px-3 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition text-sm font-semibold disabled:opacity-50">
+                    {isExporting === 'pdf' ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />} PDF
                 </button>
-                <button onClick={handleExportWordATP} disabled={atpItems.length === 0} className="flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition text-sm font-semibold disabled:opacity-50">
-                    <FileText size={16} /> Word
+                <button onClick={handleExportWordATP} disabled={atpItems.length === 0 || isExporting !== ''} className="flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition text-sm font-semibold disabled:opacity-50">
+                    {isExporting === 'word' ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />} Word
                 </button>
                 <button onClick={handleSave} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition font-bold shadow disabled:opacity-50">
                     <Save size={16} /> {loading ? 'Menyimpan...' : 'Simpan ATP'}

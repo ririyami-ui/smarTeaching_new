@@ -19,7 +19,7 @@ export const fmtDate = (date) => {
  */
 export const getSignatureCity = (userProfile) => {
     // 1. Try localStorage (shared key across application)
-    const saved = localStorage.getItem('QUIZ_SIGNING_LOCATION');
+    const saved = localStorage.getItem('SIGNING_LOCATION');
     if (saved && saved.trim() !== '' && saved !== 'Jakarta') {
         return saved;
     }
@@ -62,7 +62,7 @@ export const calculateNilaiSikap = (currentScore) => {
  */
 export const generateDeskripsi = (studentName, studentViolations, currentScore, nilaiSikap) => {
     if (studentViolations.length === 0) {
-        return `Tidak ada catatan pelanggaran. Nilai Sikap: \${nilaiSikap} (Skor: \${currentScore})`;
+        return `Tidak ada catatan pelanggaran. Nilai Sikap: ${nilaiSikap} (Skor: ${currentScore})`;
     }
 
     const groupedViolations = studentViolations.reduce((acc, v) => {
@@ -75,8 +75,8 @@ export const generateDeskripsi = (studentName, studentViolations, currentScore, 
     }, {});
 
     const violationDetails = Object.entries(groupedViolations).map(([type, data]) => {
-        return `- \${type} (\${data.count} kali, \${data.totalPoints} poin)`;
+        return `- ${type} (${data.count} kali, ${data.totalPoints} poin)`;
     }).join('\n');
 
-    return `Memiliki catatan pelanggaran:\n\${violationDetails}\nNilai Sikap: \${nilaiSikap} (Skor: \${currentScore})`;
+    return `Memiliki catatan pelanggaran:\n${violationDetails}\nNilai Sikap: ${nilaiSikap} (Skor: ${currentScore})`;
 };

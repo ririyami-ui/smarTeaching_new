@@ -25,9 +25,7 @@ export default function ScheduleEditor({ scheduleData, onSave, onClose, subjects
       setDay(scheduleData.day || '');
       setScheduleType(scheduleData.type || 'teaching');
 
-      // Handle legacy class data structure (string vs object)
-      const classId = typeof scheduleData.class === 'object' ? scheduleData.classId : scheduleData.classId || scheduleData.class;
-      setSelectedClass(classId || '');
+      setSelectedClass(scheduleData.classId || '');
 
       setStartPeriod(scheduleData.startPeriod || '');
       setEndPeriod(scheduleData.endPeriod || '');
@@ -99,11 +97,9 @@ export default function ScheduleEditor({ scheduleData, onSave, onClose, subjects
         const rombel = classes.find(c => c.id === selectedClass);
         updatedData.classId = selectedClass;
         updatedData.className = rombel?.rombel || 'Umum';
-        updatedData.class = rombel?.rombel || 'Umum';
       } else {
         updatedData.classId = null;
         updatedData.className = 'Umum';
-        updatedData.class = 'Umum';
       }
     }
 

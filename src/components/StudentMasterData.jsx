@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { collection, getDocs, addDoc, deleteDoc, doc, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import toast from 'react-hot-toast';
 
@@ -106,10 +106,16 @@ export default function StudentMasterData() {
     }
   }, []);
 
-  // Derived state for the table
-  const filteredStudents = selectedRombelFilter
-    ? students.filter(s => s.rombel === selectedRombelFilter)
-    : students;
+  // Derived state for the table — sorted by absen (numeric)
+  const filteredStudents = (selectedRombelFilter
+    ? students.filter(s => (s.classId === selectedRombelFilter || s.rombel === selectedRombelFilter))
+    : students
+  ).sort((a, b) => {
+    const absA = parseInt(a.absen) || 0;
+    const absB = parseInt(b.absen) || 0;
+    if (absA !== absB) return absA - absB;
+    return (a.name || '').localeCompare(b.name || '');
+  });
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -152,6 +158,7 @@ export default function StudentMasterData() {
     }
 
     const selectedClassObj = classes.find(c => c.id === newClassId);
+    const savedCode = newStudentCode; // Capture before clearing
 
     const promise = addDoc(studentsCollectionRef, {
       code: newStudentCode,
@@ -167,22 +174,26 @@ export default function StudentMasterData() {
       userId: auth.currentUser.uid,
     });
 
-    toast.promise(promise, {
-      loading: 'Menyimpan...',
-      success: () => {
+    // Selalu refresh data setelah selesai (sukses maupun gagal)
+    promise
+      .then(() => {
         setNewStudentCode('');
         setNewNIS('');
         setNewNISN('');
         setNewStudentName('');
         setNewGender('');
-        setBirthPlace('');
+        setNewBirthPlace('');
         setNewBirthDate('');
         setNewClassId('');
         setNewAbsen('');
-        setLastUsedCode(newStudentCode); // Update hint with what was just saved
-        getStudents();
-        return 'Siswa berhasil ditambahkan!';
-      },
+        setLastUsedCode(savedCode);
+        getStudents(); // Refresh list agar semua siswa tampil
+      })
+      .catch(() => { }); // Error sudah ditangani toast.promise
+
+    toast.promise(promise, {
+      loading: 'Menyimpan...',
+      success: 'Siswa berhasil ditambahkan!',
       error: 'Gagal menambah siswa.',
     });
   };
@@ -497,7 +508,7 @@ export default function StudentMasterData() {
           >
             <option value="">Semua Rombel</option>
             {classes.map((c) => (
-              <option key={c.id} value={c.rombel}>{c.rombel}</option>
+              <option key={c.id} value={c.id}>{c.rombel}</option>
             ))}
           </StyledSelect>
         </div>

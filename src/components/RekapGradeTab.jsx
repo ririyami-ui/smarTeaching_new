@@ -42,34 +42,18 @@ const RekapGradeTab = ({
         }
         setIsLoading(true);
         try {
-            const selectedClassObj = classes.find(c => c.id === selectedNilaiClass);
-            const selectedSubjectObj = subjects.find(s => s.id === selectedNilaiSubject);
-
-            const studentsByClassIdQuery = query(
+            // Fetch Students (ID-only)
+            const studentsQuery = query(
                 collection(db, 'students'),
                 where('userId', '==', auth.currentUser.uid),
                 where('classId', '==', selectedNilaiClass)
             );
-            const studentsByRombelQuery = query(
-                collection(db, 'students'),
-                where('userId', '==', auth.currentUser.uid),
-                where('rombel', '==', selectedClassObj.rombel)
-            );
+            const studentSnap = await getDocs(studentsQuery);
+            const fetchedStudents = studentSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                .sort((a, b) => (parseInt(a.absen) || 0) - (parseInt(b.absen) || 0));
 
-            const [snapSId, snapSRombel] = await Promise.all([
-                getDocs(studentsByClassIdQuery),
-                getDocs(studentsByRombelQuery)
-            ]);
-
-            const studentMap = new Map();
-            snapSId.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
-            snapSRombel.docs.forEach(doc => {
-                if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
-            });
-
-            const fetchedStudents = Array.from(studentMap.values());
-
-            const gradesByClassIdQuery = query(
+            // Fetch Grades (ID-only)
+            const gradesQuery = query(
                 collection(db, 'grades'),
                 where('userId', '==', auth.currentUser.uid),
                 where('classId', '==', selectedNilaiClass),
@@ -77,27 +61,8 @@ const RekapGradeTab = ({
                 where('date', '>=', nilaiStartDate),
                 where('date', '<=', nilaiEndDate)
             );
-            const gradesByRombelQuery = query(
-                collection(db, 'grades'),
-                where('userId', '==', auth.currentUser.uid),
-                where('className', '==', selectedClassObj.rombel),
-                where('subjectName', '==', selectedSubjectObj.name),
-                where('date', '>=', nilaiStartDate),
-                where('date', '<=', nilaiEndDate)
-            );
-
-            const [snapGId, snapGRombel] = await Promise.all([
-                getDocs(gradesByClassIdQuery),
-                getDocs(gradesByRombelQuery)
-            ]);
-
-            const gradeMap = new Map();
-            snapGId.docs.forEach(doc => gradeMap.set(doc.id, doc.data()));
-            snapGRombel.docs.forEach(doc => {
-                if (!gradeMap.has(doc.id)) gradeMap.set(doc.id, doc.data());
-            });
-
-            const rawGrades = Array.from(gradeMap.values());
+            const gradesSnap = await getDocs(gradesQuery);
+            const rawGrades = gradesSnap.docs.map(doc => doc.data());
 
             const endOfDay = new Date(nilaiEndDate);
             endOfDay.setHours(23, 59, 59, 999);
@@ -176,7 +141,7 @@ const RekapGradeTab = ({
             let attitudeWeight = globalAttitudeWeight || 50;
 
             try {
-                const agreementRef = doc(db, 'class_agreements', `\${auth.currentUser.uid}_\${selectedNilaiClass}`);
+                const agreementRef = doc(db, 'class_agreements', `${auth.currentUser.uid}_${selectedNilaiClass}`);
                 const agreementSnap = await getDoc(agreementRef);
                 if (agreementSnap.exists()) {
                     const agreementData = agreementSnap.data();
@@ -190,20 +155,40 @@ const RekapGradeTab = ({
             }
 
             const finalNilaiData = Object.values(recapitulation).map(studentData => {
-                const pengetahuanScores = [
+                const dailyScores = [
                     ...studentData.NH,
                     ...studentData.Formatif,
                     ...studentData.Sumatif,
-                    ...studentData.Ulangan,
-                    ...studentData.PTS,
-                    ...studentData.PAS
+                    ...studentData.Ulangan
                 ];
 
+                const dailyAvg = dailyScores.length > 0 ? dailyScores.reduce((a, b) => a + b, 0) / dailyScores.length : 0;
+                const ptsAvg = studentData.PTS.length > 0 ? studentData.PTS.reduce((a, b) => a + b, 0) / studentData.PTS.length : 0;
+                const pasAvg = studentData.PAS.length > 0 ? studentData.PAS.reduce((a, b) => a + b, 0) / studentData.PAS.length : 0;
+
+                // Weighted Knowledge Calculation: (2*DailyAvg + PTS + PAS) / Divisor
+                // Default N=2 (for Daily). Add 1 if PTS exists, Add 1 if PAS exists.
+                let totalWeight = 0;
+                let weightedSum = 0;
+
+                if (dailyScores.length > 0) {
+                    totalWeight += 2;
+                    weightedSum += (dailyAvg * 2);
+                }
+                if (studentData.PTS.length > 0) {
+                    totalWeight += 1;
+                    weightedSum += ptsAvg;
+                }
+                if (studentData.PAS.length > 0) {
+                    totalWeight += 1;
+                    weightedSum += pasAvg;
+                }
+
+                const Pengetahuan_avg = totalWeight > 0 ? weightedSum / totalWeight : 0;
                 const NH_avg = studentData.NH.length > 0 ? studentData.NH.reduce((a, b) => a + b, 0) / studentData.NH.length : 0;
                 const Formatif_avg = studentData.Formatif.length > 0 ? studentData.Formatif.reduce((a, b) => a + b, 0) / studentData.Formatif.length : 0;
                 const Sumatif_avg = studentData.Sumatif.length > 0 ? studentData.Sumatif.reduce((a, b) => a + b, 0) / studentData.Sumatif.length : 0;
                 const Praktik_avg = studentData.Praktik.length > 0 ? studentData.Praktik.reduce((a, b) => a + b, 0) / studentData.Praktik.length : 0;
-                const Pengetahuan_avg = pengetahuanScores.length > 0 ? pengetahuanScores.reduce((a, b) => a + b, 0) / pengetahuanScores.length : 0;
 
                 let academicAvg = 0;
                 if (Pengetahuan_avg > 0 && Praktik_avg > 0) academicAvg = (Pengetahuan_avg * knowledgeW) + (Praktik_avg * practiceW);
@@ -221,6 +206,8 @@ const RekapGradeTab = ({
                     NH_avg: NH_avg.toFixed(1),
                     Formatif_avg: Formatif_avg.toFixed(1),
                     Sumatif_avg: Sumatif_avg.toFixed(1),
+                    PTS_avg: ptsAvg.toFixed(1),
+                    PAS_avg: pasAvg.toFixed(1),
                     Praktik_avg: Praktik_avg.toFixed(1),
                     academicAvg: academicAvg.toFixed(1),
                     nilaiSikap: calculateNilaiSikap(finalAttitudeScore),
@@ -268,7 +255,9 @@ const RekapGradeTab = ({
             'Rata-rata NH': item.NH_avg,
             'Formatif': item.Formatif_avg,
             'Sumatif': item.Sumatif_avg,
-            [`Praktik (\${item.practiceW}%)`]: item.Praktik_avg,
+            'PTS': item.PTS_avg,
+            'PAS': item.PAS_avg,
+            [`Praktik (${item.practiceW}%)`]: item.Praktik_avg,
             'Rata-rata Akademik': item.academicAvg,
             'Bintang Keaktifan (+)': item.totalStars,
             'Poin Pelanggaran (-)': item.totalPointsDeducted,
@@ -281,26 +270,30 @@ const RekapGradeTab = ({
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Nilai');
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        saveAs(data, `Rekapitulasi_Nilai_\${classObj?.rombel || selectedNilaiClass}_\${subjectObj?.name || selectedNilaiSubject}_\${nilaiStartDate}_\${nilaiEndDate}.xlsx`);
+        saveAs(data, `Rekapitulasi_Nilai_${classObj?.rombel || selectedNilaiClass}_${subjectObj?.name || selectedNilaiSubject}_${nilaiStartDate}_${nilaiEndDate}.xlsx`);
     };
 
     const nilaiColumns = [
         { header: { label: 'No. Absen' }, accessor: 'absen' },
         { header: { label: 'NIS' }, accessor: 'nis' },
         { header: { label: 'Nama Siswa' }, accessor: 'name' },
-        { header: { label: 'Rata-rata NH' }, accessor: 'NH_avg' },
+        { header: { label: 'Rata NH' }, accessor: 'NH_avg' },
         { header: { label: 'Formatif' }, accessor: 'Formatif_avg' },
         { header: { label: 'Sumatif' }, accessor: 'Sumatif_avg' },
+        { header: { label: 'PTS' }, accessor: 'PTS_avg' },
+        { header: { label: 'PAS' }, accessor: 'PAS_avg' },
         {
             header: {
                 label: nilaiData.length > 0 && nilaiData[0].practiceW
-                    ? `Praktik (\${nilaiData[0].practiceW}%)`
+                    ? `Praktik (${nilaiData[0].practiceW}%)`
                     : 'Praktik'
             },
             accessor: 'Praktik_avg'
         },
-        { header: { label: 'Rata-rata Akademik' }, accessor: 'academicAvg' },
-        { header: { label: 'Nilai Sikap' }, accessor: 'nilaiSikap' },
+        { header: { label: 'Akademik' }, accessor: 'academicAvg' },
+        { header: { label: 'Bintang (+)' }, accessor: 'totalStars' },
+        { header: { label: 'Pelanggaran (-)' }, accessor: 'totalPointsDeducted' },
+        { header: { label: 'Sikap' }, accessor: 'nilaiSikap' },
         { header: { label: 'Nilai Akhir (NA)' }, accessor: 'NA' },
     ];
 
@@ -376,7 +369,7 @@ const RekapGradeTab = ({
                         />
                         <SummaryCard
                             title="Kelulusan"
-                            value={`\${Math.round((nilaiData.filter(d => parseFloat(d.NA) >= 75).length / nilaiData.length) * 100)}%`}
+                            value={`${Math.round((nilaiData.filter(d => parseFloat(d.NA) >= 75).length / nilaiData.length) * 100)}%`}
                             icon={<CheckCircle className="w-8 h-8 text-blue-500" />}
                             color="blue"
                         />
@@ -398,7 +391,7 @@ const RekapGradeTab = ({
                                                 {col.accessor === 'name' ? (
                                                     <div className="font-semibold text-gray-900 dark:text-white">{row[col.accessor]}</div>
                                                 ) : col.accessor === 'NA' ? (
-                                                    <span className={`font-bold \${parseFloat(row[col.accessor]) >= 75 ? 'text-green-600' : 'text-red-500'}`}>
+                                                    <span className={`font-bold ${parseFloat(row[col.accessor]) >= 75 ? 'text-green-600' : 'text-red-500'}`}>
                                                         {row[col.accessor]}
                                                     </span>
                                                 ) : (

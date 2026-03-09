@@ -82,10 +82,10 @@ const NAV_CATEGORIES = [
     ]
   },
   {
-    title: 'Kedisiplinan',
+    title: 'Poin Karakter',
     icon: <ShieldCheck size={14} />,
     items: [
-      { name: 'Catatan Pelanggaran', icon: <ShieldX size={20} />, path: '/pelanggaran' },
+      { name: 'Poin & Bintang', icon: <ShieldX size={20} />, path: '/pelanggaran' },
       { name: 'Leaderboard', icon: <Trophy size={20} />, path: '/leaderboard' },
     ]
   },

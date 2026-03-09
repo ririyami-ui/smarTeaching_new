@@ -3,6 +3,7 @@ import {
     getStudentNarrativePrompt,
     getParentMessagePrompt
 } from "../prompts/applicationPrompts";
+import { STRICT_DOCUMENT_BRAIN } from "../prompts/smarttyPrompts";
 
 /**
  * Generates an analysis report for a single student (narrative).
@@ -21,7 +22,7 @@ export async function generateStudentNarrative(data, modelName) {
         }
 
         const prompt = getStudentNarrativePrompt(studentName, stats, grades?.length || 0, finalInfractionsText);
-        const model = getModel(modelName);
+        const model = getModel(modelName, false, STRICT_DOCUMENT_BRAIN);
         const result = await retryWithBackoff(() => model.generateContent(prompt));
         return result.response.text();
     } catch (error) {
@@ -36,7 +37,7 @@ export async function generateStudentNarrative(data, modelName) {
  */
 export async function generateStudentAnalysis(prompt, modelName) {
     try {
-        const model = getModel(modelName);
+        const model = getModel(modelName, false, STRICT_DOCUMENT_BRAIN);
         const result = await retryWithBackoff(() => model.generateContent(prompt));
         const response = await result.response;
         return response.text();
@@ -52,7 +53,7 @@ export async function generateParentMessage(data, modelName) {
     try {
         const { studentName, stats, narrativeNote, teacherName } = data;
         const prompt = getParentMessagePrompt(studentName, stats, narrativeNote, teacherName);
-        const model = getModel(modelName);
+        const model = getModel(modelName, false, STRICT_DOCUMENT_BRAIN);
         const result = await retryWithBackoff(() => model.generateContent(prompt));
         return result.response.text();
     } catch (error) {

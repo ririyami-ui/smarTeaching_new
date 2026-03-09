@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
 import { collection, query, where, orderBy, onSnapshot, getDocs, doc, getDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { generateLKPDFromRPP } from '../utils/gemini';
-import BSKAP_DATA from '../utils/bskap_2025_intel.json';
 import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -14,6 +13,7 @@ import 'katex/dist/katex.min.css';
 import { saveAs } from 'file-saver';
 import { asBlob } from 'html-docx-js-typescript';
 import { useSettings } from '../utils/SettingsContext';
+import { useAI } from '../utils/AIContext';
 import {
     Sparkles,
     Loader2,
@@ -50,197 +50,129 @@ const StyledSelect = ({ label, value, onChange, children, disabled }) => (
     </div>
 );
 
+import { useGeneratorHistory, useProgressSimulation } from '../hooks/useGeneratorHistory';
+
 const LkpdGeneratorPage = () => {
-    const { geminiModel } = useSettings();
+    const { geminiModel, activeSemester, academicYear } = useSettings();
+    const { tasks, startGeneration } = useAI();
+
+    // Context Hook
+    const {
+        history: savedLKPDs,
+        loadingHistory,
+        classes,
+        userProfile,
+        deleteHistoryItem
+    } = useGeneratorHistory('lkpd_history');
 
     // Data States
     const [savedRPPs, setSavedRPPs] = useState([]);
-    const [savedLKPDs, setSavedLKPDs] = useState([]); // New state for LKPD history
-    const [classes, setClasses] = useState([]);
-    const [loadingHistory, setLoadingHistory] = useState(true);
-    const [isSaving, setIsSaving] = useState(false); // New state for saving status
+    const [isSaving, setIsSaving] = useState(false);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
     // Selection States
     const [selectedRPP, setSelectedRPP] = useState(null);
     const [selectedClass, setSelectedClass] = useState('');
     const [assessmentModel, setAssessmentModel] = useState('Rubrik');
-    const [filterSubject, setFilterSubject] = useState(''); // New State for filtering
+    const [filterSubject, setFilterSubject] = useState('');
 
     // Generation States
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [lkpdContent, setLkpdContent] = useState('');
-    const [generationProgress, setGenerationProgress] = useState({ stage: '', message: '', percentage: 0 });
+    const aiTask = tasks.lkpd || { status: 'idle' };
+    const isGenerating = aiTask.status === 'loading';
+    const [lkpdContent, setLkpdContent] = useState(aiTask.result || '');
 
-    // User Context
-    const [userProfile, setUserProfile] = useState({ name: '', school: '', nip: '', principalName: '', principalNip: '' });
-    const [signingLocation, setSigningLocation] = useState(() => localStorage.getItem('QUIZ_SIGNING_LOCATION') || 'Jakarta');
+    const { progress: generationProgress, setProgress: setGenerationProgress } = useProgressSimulation(isGenerating);
 
-    // Load User Profile
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-            if (!auth.currentUser) return;
-            try {
-                const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
-                if (userDoc.exists()) {
-                    const d = userDoc.data();
-                    setUserProfile({
-                        name: d.name || '',
-                        school: d.school || '',
-                        nip: d.nip || '',
-                        principalName: d.principalName || '',
-                        principalNip: d.principalNip || ''
-                    });
-                }
-            } catch (e) {
-                console.error('Error fetching user profile:', e);
-            }
-        };
-        fetchUserProfile();
-    }, []);
+    // Signing Location
+    const [signingLocation, setSigningLocation] = useState(() => localStorage.getItem('SIGNING_LOCATION') || 'Jakarta');
 
-    // Load RPP History, LKPD History & Classes
+    // Load RPP History
     useEffect(() => {
         if (!auth.currentUser) return;
 
-        // Fetch Saved RPPs
         const rppQuery = query(
             collection(db, 'lessonPlans'),
-            where('userId', '==', auth.currentUser.uid)
-            // REMOVED orderBy to prevent crash with malformed timestamps
+            where('userId', '==', auth.currentUser.uid),
+            where('academicYear', '==', academicYear)
         );
 
         const unsubRPP = onSnapshot(rppQuery, (snapshot) => {
             const rpps = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Manual sorting with safety check
             const sortedRPPs = rpps.sort((a, b) => {
                 const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
                 const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
                 return bTime - aTime;
             });
             setSavedRPPs(sortedRPPs);
-            setLoadingHistory(false);
-        }, (error) => {
-            console.error("RPP snapshot error:", error);
-            setLoadingHistory(false);
+
+            if (aiTask.params?.rppId) {
+                const match = sortedRPPs.find(r => r.id === aiTask.params.rppId);
+                if (match) setSelectedRPP(match);
+            }
         });
 
-        // Fetch Saved LKPDs
-        const lkpdQuery = query(
-            collection(db, 'lkpd_history'),
-            where('userId', '==', auth.currentUser.uid)
-            // REMOVED orderBy to prevent crash with malformed timestamps
-        );
+        return () => unsubRPP();
+    }, [academicYear]);
 
-        const unsubLKPD = onSnapshot(lkpdQuery, (snapshot) => {
-            const lkpds = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Manual sorting with safety check
-            const sortedLKPDs = lkpds.sort((a, b) => {
-                const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
-                const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
-                return bTime - aTime;
-            });
-            setSavedLKPDs(sortedLKPDs);
-        }, (error) => {
-            console.error("LKPD snapshot error:", error);
-        });
-
-        // Fetch Classes
-        const classesQuery = query(
-            collection(db, 'classes'),
-            where('userId', '==', auth.currentUser.uid),
-            orderBy('rombel')
-        );
-
-        const unsubClasses = onSnapshot(classesQuery, (snapshot) => {
-            setClasses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        }, (error) => {
-            console.error("Classes snapshot error:", error);
-        });
-
-        return () => {
-            unsubRPP();
-            unsubLKPD();
-            unsubClasses();
-        };
-    }, []);
+    // Restore selected class from context
+    useEffect(() => {
+        if (aiTask.params?.classId && classes.length > 0) {
+            const match = classes.find(c => c.id === aiTask.params.classId);
+            if (match) setSelectedClass(match.id);
+        }
+    }, [aiTask.params?.classId, classes]);
 
     const handleGenerateLKPD = async () => {
-        if (!selectedRPP) {
-            toast.error("Pilih RPP terlebih dahulu");
-            return;
-        }
-        if (!selectedClass) {
-            toast.error("Pilih Kelas terlebih dahulu");
-            return;
-        }
-
-        setIsGenerating(true);
-        setGenerationProgress({ stage: 'starting', message: 'Mempersiapkan data kelas...', percentage: 5 });
-
-        // Simulasi Progres Bar
-        let currentProgress = 5;
-        const progressInterval = setInterval(() => {
-            currentProgress += Math.floor(Math.random() * 8) + 2;
-            if (currentProgress > 95) currentProgress = 95; // Stop di 95% sampai benar-benar selesai
-
-            let stage = 'preparing';
-            let message = 'Menyiapkan data siswa dan kelas...';
-
-            if (currentProgress > 30 && currentProgress <= 60) {
-                stage = 'generating';
-                message = 'AI sedang menganalisis materi RPP...';
-            } else if (currentProgress > 60) {
-                stage = 'parsing';
-                message = 'Menyusun soal dan format LKPD...';
-            }
-
-            setGenerationProgress({ stage, message, percentage: currentProgress });
-        }, 800);
+        if (!selectedRPP) return toast.error("Pilih RPP terlebih dahulu");
+        if (!selectedClass) return toast.error("Pilih Kelas terlebih dahulu");
 
         try {
-            // 1. Fetch Students
-            const studentsQuery = query(
-                collection(db, 'students'),
-                where('userId', '==', auth.currentUser.uid),
-                where('classId', '==', selectedClass),
-                orderBy('name')
-            );
-            let snapshot = await getDocs(studentsQuery);
+            await startGeneration('lkpd', async (context) => {
+                // Fetch Students
+                const studentsQuery = query(
+                    collection(db, 'students'),
+                    where('userId', '==', auth.currentUser.uid),
+                    where('classId', '==', selectedClass),
+                    orderBy('name')
+                );
+                let snapshot = await getDocs(studentsQuery);
 
-            // Fallback for legacy students
-            if (snapshot.empty) {
-                const classObj = classes.find(c => c.id === selectedClass);
-                if (classObj) {
-                    const fallbackQ = query(
-                        collection(db, 'students'),
-                        where('userId', '==', auth.currentUser.uid),
-                        where('rombel', '==', classObj.rombel),
-                        orderBy('name')
-                    );
-                    snapshot = await getDocs(fallbackQ);
+                if (snapshot.empty) {
+                    const classObj = classes.find(c => c.id === selectedClass);
+                    if (classObj) {
+                        const fallbackQ = query(
+                            collection(db, 'students'),
+                            where('userId', '==', auth.currentUser.uid),
+                            where('rombel', '==', classObj.rombel),
+                            orderBy('name')
+                        );
+                        snapshot = await getDocs(fallbackQ);
+                    }
                 }
-            }
 
-            const students = snapshot.docs.map(doc => doc.data());
+                const students = snapshot.docs.map(doc => doc.data());
+                const studentNames = students.map(s => s.name).join('\n');
 
-            // 2. Generate LKPD Content
-            const studentNames = students.map(s => s.name);
-            const lkpdResult = await generateLKPDFromRPP(selectedRPP.content, assessmentModel, geminiModel, studentNames);
-
-            clearInterval(progressInterval);
-            setGenerationProgress({ stage: 'complete', message: 'LKPD siap digunakan!', percentage: 100 });
-            setLkpdContent(lkpdResult);
-            toast.success("LKPD Berhasil dibuat!");
+                return await generateLKPDFromRPP(selectedRPP.content, assessmentModel, geminiModel, studentNames);
+            }, {
+                rppId: selectedRPP.id,
+                classId: selectedClass
+            });
 
         } catch (error) {
-            console.error(error);
-            clearInterval(progressInterval);
-            toast.error("Gagal membuat LKPD: " + error.message);
-        } finally {
-            setTimeout(() => setIsGenerating(false), 1000); // Tunda hilangnya progress bar sebentar
+            console.error("Generate error:", error);
         }
     };
+
+    // Sync context result
+    useEffect(() => {
+        if (aiTask.status === 'success' && aiTask.result) {
+            setLkpdContent(aiTask.result);
+        }
+        if (aiTask.progress) {
+            setGenerationProgress(prev => ({ ...prev, message: aiTask.progress }));
+        }
+    }, [aiTask.status, aiTask.result, aiTask.progress]);
 
 
     const handleDownloadDocx = async () => {
@@ -333,13 +265,8 @@ const LkpdGeneratorPage = () => {
             title: 'Hapus Riwayat',
             message: 'Apakah Anda yakin ingin menghapus Riwayat LKPD ini?',
             onConfirm: async () => {
-                try {
-                    await deleteDoc(doc(db, 'lkpd_history', id));
-                    toast.success("Riwayat LKPD dihapus");
-                } catch (error) {
-                    console.error("Error deleting LKPD:", error);
-                    toast.error("Gagal menghapus");
-                } finally {
+                const success = await deleteHistoryItem(id);
+                if (success) {
                     setConfirmModal(prev => ({ ...prev, isOpen: false }));
                 }
             }
@@ -466,9 +393,9 @@ const LkpdGeneratorPage = () => {
                             value={assessmentModel}
                             onChange={(e) => setAssessmentModel(e.target.value)}
                         >
-                            {BSKAP_DATA.kktp_standards.methods.map(m => (
-                                <option key={m.type} value={m.type}>{m.type}</option>
-                            ))}
+                            <option value="Deskripsi Kriteria">Deskripsi Kriteria</option>
+                            <option value="Rubrik">Rubrik</option>
+                            <option value="Interval Nilai">Interval Nilai</option>
                         </StyledSelect>
 
                         <button

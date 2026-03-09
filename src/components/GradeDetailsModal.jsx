@@ -19,32 +19,17 @@ const GradeDetailsModal = ({ date, assessmentType, material, selectedClass, sele
     const fetchGradeDetails = async () => {
       setLoading(true);
       try {
-        const classObj = classes?.find(c => c.id === selectedClass);
-        const subjectObj = subjects?.find(s => s.id === selectedSubject);
-
-        // Fetch all students in the selected class
-        let studentsQuery = query(
+        // 1. Fetch Students (Modern only)
+        const studentsQ = query(
           collection(db, 'students'),
           where('userId', '==', auth.currentUser.uid),
-          where('classId', '==', selectedClass),
-          orderBy('name', 'asc')
+          where('classId', '==', selectedClass)
         );
-        let studentsSnapshot = await getDocs(studentsQuery);
+        const studentsSnap = await getDocs(studentsQ);
+        const fetchedStudents = studentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Fallback for legacy students
-        if (studentsSnapshot.empty && classObj) {
-          studentsQuery = query(
-            collection(db, 'students'),
-            where('userId', '==', auth.currentUser.uid),
-            where('rombel', '==', classObj.rombel),
-            orderBy('name', 'asc')
-          );
-          studentsSnapshot = await getDocs(studentsQuery);
-        }
-        const fetchedStudents = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        // Fetch grades for the specific session (date, type, material)
-        let gradesQuery = query(
+        // 2. Fetch Grades for this session (Modern only)
+        const gradesQ = query(
           collection(db, 'grades'),
           where('userId', '==', auth.currentUser.uid),
           where('date', '==', date),
@@ -55,29 +40,11 @@ const GradeDetailsModal = ({ date, assessmentType, material, selectedClass, sele
           where('semester', '==', activeSemester),
           where('academicYear', '==', academicYear)
         );
-        let gradesSnapshot = await getDocs(gradesQuery);
-
-        // Fallback for legacy grades (using names)
-        if (gradesSnapshot.empty && classObj && subjectObj) {
-          const fallbackGradesQuery = query(
-            collection(db, 'grades'),
-            where('userId', '==', auth.currentUser.uid),
-            where('date', '==', date),
-            where('className', '==', classObj.rombel),
-            where('subjectName', '==', subjectObj.name),
-            where('assessmentType', '==', assessmentType),
-            where('material', '==', material),
-            where('semester', '==', activeSemester),
-            where('academicYear', '==', academicYear)
-          );
-          gradesSnapshot = await getDocs(fallbackGradesQuery);
-        }
-
-        const fetchedGrades = gradesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+        const gradesSnap = await getDocs(gradesQ);
         const gradesMap = new Map();
-        fetchedGrades.forEach(grade => {
-          gradesMap.set(grade.studentId, { score: grade.score, id: grade.id });
+        gradesSnap.forEach(doc => {
+          const data = doc.data();
+          if (data.studentId) gradesMap.set(data.studentId, { score: data.score, id: doc.id });
         });
 
         const combinedData = fetchedStudents.map(student => {
@@ -86,20 +53,28 @@ const GradeDetailsModal = ({ date, assessmentType, material, selectedClass, sele
             id: student.id,
             name: student.name,
             nis: student.nis,
+            absen: student.absen,
             gradeId: gradeData ? gradeData.id : null,
-            score: gradeData ? gradeData.score : '', // Use empty string for input control
+            score: gradeData ? gradeData.score : '',
             originalScore: gradeData ? gradeData.score : '',
           };
+        });
+
+        // 4. Sort in memory (Prefer Absen, then Name)
+        combinedData.sort((a, b) => {
+          const aAbsen = parseInt(a.absen) || 999;
+          const bAbsen = parseInt(b.absen) || 999;
+          if (aAbsen !== bAbsen) return aAbsen - bAbsen;
+          return a.name.localeCompare(b.name);
         });
 
         setStudentGrades(combinedData);
 
         // Determine grade status
-        const allStudentsHaveGrades = combinedData.every(student => student.score !== '' && student.score !== null);
-        if (allStudentsHaveGrades) {
+        const filledCount = combinedData.filter(s => s.score !== '' && s.score !== null).length;
+        if (filledCount === combinedData.length && combinedData.length > 0) {
           setGradeStatus('Nilai terinput semua');
         } else {
-          const filledCount = combinedData.filter(s => s.score !== '' && s.score !== null).length;
           setGradeStatus(`Terisi ${filledCount} dari ${combinedData.length} siswa`);
         }
 

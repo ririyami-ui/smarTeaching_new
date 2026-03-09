@@ -7,7 +7,7 @@ import {
     CircleDot, CheckSquare, ToggleLeft, ArrowRightLeft, AlignLeft, Grid, ListOrdered, Edit3
 } from 'lucide-react';
 import { generateAdvancedQuiz, generateQuizFromImage } from '../utils/gemini';
-import BSKAP_DATA from '../utils/bskap_2025_intel.json';
+import { BSKAP_DATA } from '../utils/bskapData';
 import toast from 'react-hot-toast';
 
 import Modal from '../components/Modal';
@@ -15,14 +15,29 @@ import QuizHistory from '../components/quiz/QuizHistory';
 import QuizForm from '../components/quiz/QuizForm';
 import QuizResults from '../components/quiz/QuizResults';
 import * as QuizExportUtils from '../utils/quizExportUtils';
+import { useAI } from '../utils/AIContext';
+import { useGeneratorHistory, useProgressSimulation } from '../hooks/useGeneratorHistory';
 
 const QuizGeneratorPage = () => {
-    const { activeSemester, academicYear } = useSettings();
-    const [loading, setLoading] = useState(false);
-    const [generating, setGenerating] = useState(false);
-    const [generationProgress, setGenerationProgress] = useState({ stage: '', message: '', percentage: 0 });
+    const { activeSemester, academicYear, userProfile: settingsProfile } = useSettings();
+    const { tasks, startGeneration } = useAI();
 
-    // Context State
+    // Logic Refactoring: Use the new hook
+    const {
+        history: savedQuizzes,
+        loadingHistory,
+        classes,
+        userProfile,
+        deleteHistoryItem
+    } = useGeneratorHistory('quizzes');
+
+    const [loading, setLoading] = useState(false);
+    const aiTask = tasks.quiz || { status: 'idle', progress: '', result: '', params: null };
+    const generating = aiTask.status === 'loading';
+
+    const { progress: generationProgress, setProgress: setGenerationProgress } = useProgressSimulation(generating);
+
+    // Form State
     const [sourceType, setSourceType] = useState('rpp');
     const [sourceData, setSourceData] = useState([]);
     const [selectedContextId, setSelectedContextId] = useState('');
@@ -32,108 +47,41 @@ const QuizGeneratorPage = () => {
     const [subject, setSubject] = useState('');
     const [gradeLevel, setGradeLevel] = useState('');
     const [topic, setTopic] = useState('');
+    const [subjects, setSubjects] = useState([]);
 
     // Configuration State
-    const [difficulty, setDifficulty] = useState(50);
     const [typeCounts, setTypeCounts] = useState({ pg: 10 });
+    const [difficulty, setDifficulty] = useState('Sedang');
 
     // Result State
-    const [quizResult, setQuizResult] = useState(null);
-    const [savedQuizzes, setSavedQuizzes] = useState([]);
-    const [loadingHistory, setLoadingHistory] = useState(false);
+    const [quizResult, setQuizResult] = useState(aiTask.result || null);
     const [isSaving, setIsSaving] = useState(false);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
-    const [userProfile, setUserProfile] = useState({ name: '', school: '', nip: '', principalName: '', principalNip: '' });
     const [signingLocation, setSigningLocation] = useState('Jakarta');
     const [detectingLocation, setDetectingLocation] = useState(false);
     const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '', type: '' });
 
-    const [classes, setClasses] = useState([]);
-    const [subjects, setSubjects] = useState([]);
 
     useEffect(() => {
-        const savedLoc = localStorage.getItem('QUIZ_SIGNING_LOCATION');
-        if (savedLoc) setSigningLocation(savedLoc);
-
         const fetchMasters = async () => {
             if (!auth.currentUser) return;
             try {
-                const cSnap = await getDocs(query(collection(db, 'classes'), where('userId', '==', auth.currentUser.uid)));
                 const sSnap = await getDocs(query(collection(db, 'subjects'), where('userId', '==', auth.currentUser.uid)));
-                setClasses(cSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.rombel.localeCompare(b.rombel)));
                 setSubjects(sSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.name.localeCompare(b.name)));
+
+                // Restore from context
+                if (aiTask.params?.topic) setTopic(aiTask.params.topic);
+                if (aiTask.params?.subject) setSubject(aiTask.params.subject);
             } catch (error) {
                 console.error("Error fetching masters:", error);
             }
         };
         fetchMasters();
-        fetchQuizHistory();
-        fetchProfile();
-    }, [activeSemester]);
 
-    const fetchSources = async () => {
-        if (!auth.currentUser) return;
-        setLoading(true);
-        try {
-            let collectionName = 'lessonPlans';
-            let q;
+        const savedLoc = localStorage.getItem('SIGNING_LOCATION');
+        if (savedLoc) setSigningLocation(savedLoc);
+    }, [aiTask.params]);
 
-            if (sourceType === 'rpp') {
-                collectionName = 'lessonPlans';
-                q = query(
-                    collection(db, collectionName),
-                    where('userId', '==', auth.currentUser.uid),
-                    where('academicYear', '==', academicYear)
-                );
-            } else {
-                // Promes / Program Semester
-                collectionName = 'teachingPrograms';
-                q = query(
-                    collection(db, collectionName),
-                    where('userId', '==', auth.currentUser.uid),
-                    where('academicYear', '==', academicYear),
-                    where('type', '!=', 'atp_document') // Exclude ATP docs
-                );
-            }
-
-            const snap = await getDocs(q);
-            setSourceData(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        } catch (error) {
-            console.error("Error fetching sources:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (sourceType !== 'manual' && sourceType !== 'image') fetchSources();
-    }, [sourceType, academicYear]);
-
-    const fetchQuizHistory = async () => {
-        if (!auth.currentUser) return;
-        setLoadingHistory(true);
-        try {
-            const q = query(
-                collection(db, 'quizzes'),
-                where('userId', '==', auth.currentUser.uid),
-                orderBy('createdAt', 'desc')
-            );
-            const snap = await getDocs(q);
-            setSavedQuizzes(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        } catch (error) {
-            console.error("Error fetching history:", error);
-        } finally {
-            setLoadingHistory(false);
-        }
-    };
-
-    const fetchProfile = async () => {
-        if (!auth.currentUser) return;
-        try {
-            const pDoc = await getDoc(doc(db, 'profiles', auth.currentUser.uid));
-            if (pDoc.exists()) setUserProfile(pDoc.data());
-        } catch (e) { console.error(e); }
-    };
 
     const handleDetectLocation = async () => {
         setDetectingLocation(true);
@@ -142,7 +90,7 @@ const QuizGeneratorPage = () => {
             const data = await res.json();
             if (data.city) {
                 setSigningLocation(data.city);
-                localStorage.setItem('QUIZ_SIGNING_LOCATION', data.city);
+                localStorage.setItem('SIGNING_LOCATION', data.city);
                 toast.success(`Lokasi terdeteksi: ${data.city}`);
             }
         } catch (e) {
@@ -160,11 +108,8 @@ const QuizGeneratorPage = () => {
             setGradeLevel(doc.gradeLevel || doc.grade || '');
             setTopic(doc.materi || doc.topic || '');
 
-            // RPP is stored as a flat HTML string in `content` field.
-            // We parse the "Materi Ajar" section from that HTML.
             const extractSectionFromHtml = (html, sectionHeader) => {
                 if (!html) return null;
-                // Normalize tags: convert li, p, br -> newlines before stripping
                 const normalized = html
                     .replace(/<\/li>/gi, '\n')
                     .replace(/<\/p>/gi, '\n')
@@ -175,7 +120,6 @@ const QuizGeneratorPage = () => {
                 const startIdx = lines.findIndex(l => l.toLowerCase().includes(sectionHeader.toLowerCase()));
                 if (startIdx === -1) return null;
 
-                // Collect lines until the next major section header or signature block
                 const sectionLines = [];
                 const headerPrefixes = [
                     'langkah', 'kegiatan pembelajaran', 'asesmen', 'penilaian', 'penutup',
@@ -185,19 +129,14 @@ const QuizGeneratorPage = () => {
 
                 for (let i = startIdx + 1; i < lines.length; i++) {
                     const lineLower = lines[i].toLowerCase();
-
-                    // Stop conditions:
-                    // 1. Line starts with a header prefix (e.g. "Glosarium", "C. Penilaian")
                     const isHeaderPrefix = headerPrefixes.some(k => lineLower.startsWith(k) || lineLower.match(new RegExp(`^[0-9a-z]\\.\\s*${k}`)));
-                    // 2. Line looks like a markdown header of a stop section: "### 4. GLOSARIUM"
                     const isMarkdownHeader = /^#*\s*\d*\.?\s*(glosarium|daftar pustaka|lampiran|asesmen|penilaian|refleksi|langkah)/.test(lineLower);
-                    // 3. Signature block markers
                     const isSignatureBlock = lineLower.includes('...........') || lineLower.includes('mengetahui') || lineLower.includes('kepala sekolah') || lineLower.startsWith('nip.') || lineLower.includes('| mengetahui,');
 
                     if (isHeaderPrefix || isMarkdownHeader || isSignatureBlock) break;
 
                     sectionLines.push(lines[i]);
-                    if (sectionLines.length >= 60) break; // Limit length to avoid massive prompt
+                    if (sectionLines.length >= 60) break;
                 }
                 return sectionLines.join('\n').trim() || null;
             };
@@ -224,45 +163,91 @@ const QuizGeneratorPage = () => {
         const total = Object.values(typeCounts).reduce((sum, c) => sum + (c || 0), 0);
         if (total === 0) return toast.error("Tentukan jumlah soal!");
 
-        setGenerating(true);
         setQuizResult(null);
         setGenerationProgress({ stage: 'starting', message: 'Memulai proses...', percentage: 5 });
 
         try {
-            let result;
-            if (sourceType === 'image' && imageFile) {
-                result = await generateQuizFromImage(imageFile, total, gradeLevel, subject, topic, setGenerationProgress);
-            } else {
-                result = await generateAdvancedQuiz({
-                    topic,
-                    context: contextContent,
-                    gradeLevel,
-                    subject,
-                    totalSoal: total,
-                    typeCounts,
-                    difficulty,
-                    onProgress: (p) => setGenerationProgress(p)
-                });
-            }
+            await startGeneration('quiz', async (context) => {
+                let result;
+                if (sourceType === 'image' && imageFile) {
+                    // Convert file to base64
+                    const base64 = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(imageFile);
+                    });
 
-            if (result && result.questions) {
-                setQuizResult(result);
-                toast.success("Kuis berhasil dibuat!");
-            }
+                    result = await generateQuizFromImage({
+                        imageBase64: base64,
+                        count: total,
+                        gradeLevel,
+                        subject,
+                        topic,
+                        onProgress: (p) => {
+                            setGenerationProgress(p);
+                            context.onProgress(p.message);
+                        }
+                    });
+                } else {
+                    result = await generateAdvancedQuiz({
+                        topic,
+                        context: contextContent,
+                        gradeLevel,
+                        subject,
+                        totalSoal: total,
+                        typeCounts,
+                        difficulty,
+                        onProgress: (p) => {
+                            setGenerationProgress(p);
+                            context.onProgress(p.message);
+                        }
+                    });
+                }
+                return result;
+            }, { topic, subject });
+
         } catch (error) {
-            console.error("Gen Error:", error);
-            const errType = error.message?.includes('quota') ? 'quota' :
-                error.message?.includes('API key') ? 'apikey' : 'generic';
-            setErrorModal({
-                isOpen: true,
-                title: "Gagal Meracik Soal",
-                message: error.message || "Terjadi kesalahan sistem.",
-                type: errType
-            });
-        } finally {
-            setGenerating(false);
+            console.error("Generate error:", error);
         }
     };
+
+    // Sync context result
+    useEffect(() => {
+        if (aiTask.status === 'success' && aiTask.result) {
+            setQuizResult(aiTask.result);
+        }
+        if (aiTask.progress) {
+            setGenerationProgress(prev => ({ ...prev, message: aiTask.progress }));
+        }
+    }, [aiTask.status, aiTask.result, aiTask.progress]);
+
+    const fetchSources = async () => {
+        if (!auth.currentUser) return;
+        setLoading(true);
+        try {
+            let collectionName = sourceType === 'rpp' ? 'lessonPlans' : 'teachingPrograms';
+            let q = query(
+                collection(db, collectionName),
+                where('userId', '==', auth.currentUser.uid),
+                where('academicYear', '==', academicYear)
+            );
+
+            if (sourceType === 'promes') {
+                q = query(q, where('type', '!=', 'atp_document'));
+            }
+
+            const snap = await getDocs(q);
+            setSourceData(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        } catch (error) {
+            console.error("Error fetching sources:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (sourceType !== 'manual' && sourceType !== 'image') fetchSources();
+    }, [sourceType, academicYear]);
 
     const handleSaveQuiz = async () => {
         if (!quizResult || !auth.currentUser) return;
@@ -278,7 +263,6 @@ const QuizGeneratorPage = () => {
                 createdAt: serverTimestamp()
             });
             toast.success("Kuis disimpan ke riwayat!");
-            fetchQuizHistory();
         } catch (e) {
             toast.error("Gagal menyimpan kuis.");
         } finally {
@@ -293,12 +277,10 @@ const QuizGeneratorPage = () => {
             title: "Hapus Kuis?",
             message: "Riwayat kuis ini akan dihapus permanen.",
             onConfirm: async () => {
-                try {
-                    await deleteDoc(doc(db, 'quizzes', id));
-                    toast.success("Kuis dihapus.");
-                    fetchQuizHistory();
-                } catch (e) { toast.error("Gagal menghapus."); }
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                const success = await deleteHistoryItem(id);
+                if (success) {
+                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                }
             }
         });
     };

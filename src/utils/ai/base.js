@@ -12,9 +12,12 @@ export const getApiKey = () => {
 
 /**
  * Initializes or re-initializes the Generative AI model with the latest API key.
+ * @param {string} modelName
+ * @param {boolean} isJson
+ * @param {string} customSystemInstruction
  * @returns {Object} The initialized model.
  */
-export const getModel = (modelName, isJson = false) => {
+export const getModel = (modelName, isJson = false, customSystemInstruction = null) => {
     const apiKey = getApiKey();
     if (!apiKey) {
         throw new Error("API_KEY_MISSING");
@@ -34,7 +37,7 @@ export const getModel = (modelName, isJson = false) => {
 
     return genAI.getGenerativeModel({
         model: selectedModel,
-        systemInstruction: SMARTTY_BRAIN,
+        systemInstruction: customSystemInstruction || SMARTTY_BRAIN,
         generationConfig
     });
 };

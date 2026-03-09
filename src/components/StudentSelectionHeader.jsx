@@ -41,7 +41,7 @@ const StudentSelectionHeader = ({
                                 value={signingLocation}
                                 onChange={(e) => {
                                     setSigningLocation(e.target.value);
-                                    localStorage.setItem('QUIZ_SIGNING_LOCATION', e.target.value);
+                                    localStorage.setItem('SIGNING_LOCATION', e.target.value);
                                 }}
                                 placeholder="Kota..."
                             />

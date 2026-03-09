@@ -357,7 +357,7 @@ const TeachingScheduleCard = ({ schedules, currentTime, holiday, programs, class
               return (
                 <div
                   key={schedule.id}
-                  className={`relative overflow-hidden ${isNonTeaching ? 'p-2.5 px-3.5 sm:p-3 sm:px-4' : 'p-3.5 sm:p-4'} rounded-xl border transition-all duration-300 group ${currentVariant.bg} ${currentVariant.border} ${status === 'ongoing' ? 'shadow-lg ring-1 ring-inset ring-black/5 md:scale-[1.01]' : 'hover:bg-opacity-80'} ${status === 'upcoming-soon' ? 'animate-pulse-subtle' : ''}`}
+                  className={`relative overflow-hidden ${isNonTeaching ? 'p-2.5 px-3.5 sm:p-3 sm:px-4' : 'p-3.5 sm:p-4'} rounded-xl border transition-all duration-300 group ${currentVariant.bg} ${currentVariant.border} ${status === 'ongoing' ? 'shadow-lg ring-1 ring-inset ring-black/5 md:scale-[1.005]' : 'hover:bg-opacity-80'} hover:z-10 ${status === 'upcoming-soon' ? 'animate-pulse-subtle' : ''}`}
                 >
                   <div className={`absolute top-0 left-0 w-1.5 h-full ${currentVariant.accent}`}></div>
 

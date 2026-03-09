@@ -43,25 +43,15 @@ const RiwayatNilai = ({ classes, subjects }) => {
       const classObj = classes.find(c => c.id === selectedClass);
       const subjectObj = subjects.find(s => s.id === selectedSubject);
 
-      let studentsQuery = query(
+      const studentsQuery = query(
         collection(db, 'students'),
         where('userId', '==', auth.currentUser.uid),
         where('classId', '==', selectedClass)
       );
-      let studentsSnapshot = await getDocs(studentsQuery);
-
-      // Fallback for legacy students
-      if (studentsSnapshot.empty && classObj) {
-        studentsQuery = query(
-          collection(db, 'students'),
-          where('userId', '==', auth.currentUser.uid),
-          where('rombel', '==', classObj.rombel)
-        );
-        studentsSnapshot = await getDocs(studentsQuery);
-      }
+      const studentsSnapshot = await getDocs(studentsQuery);
       const allStudentsInClass = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      let gradesQuery = query(
+      const gradesQuery = query(
         collection(db, 'grades'),
         where('userId', '==', auth.currentUser.uid),
         where('classId', '==', selectedClass),
@@ -72,30 +62,7 @@ const RiwayatNilai = ({ classes, subjects }) => {
         where('academicYear', '==', academicYear)
       );
       const modernSnapshot = await getDocs(gradesQuery);
-      let allDocs = [...modernSnapshot.docs];
-
-      // Always check for legacy grades (using names) to ensure mixed history appears
-      if (classObj && subjectObj) {
-        const legacyQuery = query(
-          collection(db, 'grades'),
-          where('userId', '==', auth.currentUser.uid),
-          where('className', '==', classObj.rombel),
-          where('subjectName', '==', subjectObj.name),
-          where('date', '>=', startDate),
-          where('date', '<=', endDate),
-          where('semester', '==', activeSemester),
-          where('academicYear', '==', academicYear)
-        );
-        const legacySnapshot = await getDocs(legacyQuery);
-
-        // Merge legacy docs, avoiding duplicates if any ID matches (unlikely but safe)
-        const existingIds = new Set(allDocs.map(d => d.id));
-        legacySnapshot.docs.forEach(doc => {
-          if (!existingIds.has(doc.id)) {
-            allDocs.push(doc);
-          }
-        });
-      }
+      const allDocs = [...modernSnapshot.docs];
 
       const submittedGrades = allDocs.map(doc => doc.data());
 

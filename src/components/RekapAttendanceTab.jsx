@@ -41,39 +41,21 @@ const RekapAttendanceTab = ({
     useEffect(() => {
         const fetchStudents = async () => {
             if (selectedClass && auth.currentUser) {
-                const classObj = classes.find(c => c.id === selectedClass);
-                const rombelName = classObj?.rombel || selectedClass;
-
-                const studentsByClassIdQuery = query(
+                const q = query(
                     collection(db, 'students'),
                     where('userId', '==', auth.currentUser.uid),
                     where('classId', '==', selectedClass)
                 );
-                const studentsByRombelQuery = query(
-                    collection(db, 'students'),
-                    where('userId', '==', auth.currentUser.uid),
-                    where('rombel', '==', rombelName)
-                );
-
-                const [snapId, snapRombel] = await Promise.all([
-                    getDocs(studentsByClassIdQuery),
-                    getDocs(studentsByRombelQuery)
-                ]);
-
-                const studentMap = new Map();
-                snapId.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
-                snapRombel.docs.forEach(doc => {
-                    if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
-                });
-
-                const fetchedStudents = Array.from(studentMap.values());
-                setStudents(fetchedStudents.sort((a, b) => a.name.localeCompare(b.name)));
+                const snapshot = await getDocs(q);
+                const fetchedStudents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (parseInt(a.absen) || 0) - (parseInt(b.absen) || 0));
+                setStudents(fetchedStudents);
             } else {
                 setStudents([]);
             }
         };
         fetchStudents();
-    }, [selectedClass, classes]);
+    }, [selectedClass]);
 
     const handleApplyFilter = async () => {
         if (!startDate || !endDate || !selectedClass) {
@@ -88,44 +70,19 @@ const RekapAttendanceTab = ({
             const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
             setNumDays(dayDiff);
 
-            const classObj = classes.find(c => c.id === selectedClass);
-            const rombelName = classObj?.rombel || selectedClass;
-            const subjectObj = subjects.find(s => s.id === selectedAttendanceSubject);
-
-            let attendanceByClassIdQuery = query(
+            let attendanceQuery = query(
                 collection(db, 'attendance'),
                 where('userId', '==', auth.currentUser.uid),
                 where('classId', '==', selectedClass),
                 where('date', '>=', startDate),
                 where('date', '<=', endDate)
             );
-            let attendanceByRombelQuery = query(
-                collection(db, 'attendance'),
-                where('userId', '==', auth.currentUser.uid),
-                where('rombel', '==', rombelName),
-                where('date', '>=', startDate),
-                where('date', '<=', endDate)
-            );
 
-            const [snapAttId, snapAttRombel] = await Promise.all([
-                getDocs(attendanceByClassIdQuery),
-                getDocs(attendanceByRombelQuery)
-            ]);
-
-            const attendanceMap = new Map();
-            snapAttId.docs.forEach(doc => attendanceMap.set(doc.id, doc.data()));
-            snapAttRombel.docs.forEach(doc => {
-                if (!attendanceMap.has(doc.id)) attendanceMap.set(doc.id, doc.data());
-            });
-
-            let rawDocs = Array.from(attendanceMap.values());
+            const snapAtt = await getDocs(attendanceQuery);
+            let rawDocs = snapAtt.docs.map(doc => doc.data());
 
             if (selectedAttendanceSubject) {
-                rawDocs = rawDocs.filter(doc => {
-                    const matchId = doc.subjectId === selectedAttendanceSubject;
-                    const matchName = doc.subjectName === subjectObj?.name;
-                    return matchId || matchName;
-                });
+                rawDocs = rawDocs.filter(doc => doc.subjectId === selectedAttendanceSubject);
             }
 
             let summary = {};

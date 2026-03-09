@@ -171,11 +171,8 @@ const RekapJournalTab = ({
                                         item.className?.toLowerCase().includes(jurnalSearchTerm.toLowerCase()) ||
                                         item.subjectName?.toLowerCase().includes(jurnalSearchTerm.toLowerCase());
 
-                                    const classObj = classes.find(c => c.id === selectedJurnalClass);
-                                    const classMatch = !selectedJurnalClass || item.classId === selectedJurnalClass || item.className === classObj?.rombel;
-
-                                    const subjectObj = subjects.find(s => s.id === selectedJurnalSubject);
-                                    const subjectMatch = !selectedJurnalSubject || item.subjectId === selectedJurnalSubject || item.subjectName === subjectObj?.name;
+                                    const classMatch = !selectedJurnalClass || item.classId === selectedJurnalClass;
+                                    const subjectMatch = !selectedJurnalSubject || item.subjectId === selectedJurnalSubject;
 
                                     return searchTermMatch && classMatch && subjectMatch;
                                 })

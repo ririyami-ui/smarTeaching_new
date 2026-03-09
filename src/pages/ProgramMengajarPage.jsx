@@ -54,7 +54,7 @@ const ProgramMengajarPage = () => {
 
                     // Race condition fix: If auto-detecting (manual=false), check if we already have a high-confidence location set (e.g. from School Name)
                     if (!manual) {
-                        const currentParams = localStorage.getItem('QUIZ_SIGNING_LOCATION');
+                        const currentParams = localStorage.getItem('SIGNING_LOCATION');
                         if (currentParams && currentParams !== 'Jakarta' && currentParams !== 'Lokasi Terdeteksi' && currentParams !== '') {
 
                             setDetectingLocation(false);
@@ -63,7 +63,7 @@ const ProgramMengajarPage = () => {
                     }
 
                     setSigningLocation(city);
-                    localStorage.setItem('QUIZ_SIGNING_LOCATION', city);
+                    localStorage.setItem('SIGNING_LOCATION', city);
                     if (manual) toast.success(`Lokasi terdeteksi: ${city}`);
                 } catch (error) {
                     if (manual) {
@@ -88,7 +88,7 @@ const ProgramMengajarPage = () => {
 
     // Load saved location on mount or detect automatically
     useEffect(() => {
-        const savedLoc = localStorage.getItem('QUIZ_SIGNING_LOCATION');
+        const savedLoc = localStorage.getItem('SIGNING_LOCATION');
         if (savedLoc) {
             setSigningLocation(savedLoc);
         } else {
@@ -143,7 +143,7 @@ const ProgramMengajarPage = () => {
 
                             if (lastWord.length > 2 && !ignoreWords.includes(lastWord.toLowerCase()) && isNaN(lastWord)) {
                                 setSigningLocation(lastWord);
-                                localStorage.setItem('QUIZ_SIGNING_LOCATION', lastWord);
+                                localStorage.setItem('SIGNING_LOCATION', lastWord);
                                 return; // Stop here, don't use the fallback logic below
                             }
                         }
@@ -152,7 +152,7 @@ const ProgramMengajarPage = () => {
                     // Fallback to existing logic if school parsing failed
                     setSigningLocation(prev => {
                         if (prev && prev !== 'Jakarta') return prev;
-                        const stored = localStorage.getItem('QUIZ_SIGNING_LOCATION');
+                        const stored = localStorage.getItem('SIGNING_LOCATION');
                         return stored || 'Jakarta';
                     });
                 }
@@ -306,7 +306,7 @@ const ProgramMengajarPage = () => {
                             value={signingLocation}
                             onChange={(e) => {
                                 setSigningLocation(e.target.value);
-                                localStorage.setItem('QUIZ_SIGNING_LOCATION', e.target.value);
+                                localStorage.setItem('SIGNING_LOCATION', e.target.value);
                             }}
                             placeholder="Kota..."
                         />

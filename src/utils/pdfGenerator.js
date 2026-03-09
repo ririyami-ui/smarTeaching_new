@@ -1,5 +1,7 @@
 import moment from 'moment';
 import 'moment/locale/id';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 import { fmtDate, getSignatureCity } from './generalUtils';
 
 // Helper to group grades by Topic/Material (Mirrors TopicMasteryHeatmap logic)
@@ -382,7 +384,7 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
   } else {
     const firstItem = nilaiData[0] || {};
     const practiceW = firstItem.practiceW || 60;
-    tableColumn = ["No. Absen", "NIS", "Nama Siswa", "Rata NH", "Formatif", "Sumatif", `Praktik (${practiceW}%)`, "Akademik", "Sikap", "Nilai Akhir (NA)"];
+    tableColumn = ["No. Absen", "NIS", "Nama Siswa", "NH", "Fmt", "Sum", "PTS", "PAS", `Pkt (${practiceW}%)`, "Akad", "Sikap", "NA"];
     nilaiData.forEach(item => {
       const rowData = [
         item.absen,
@@ -391,6 +393,8 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
         item.NH_avg,
         item.Formatif_avg,
         item.Sumatif_avg,
+        item.PTS_avg || '-',
+        item.PAS_avg || '-',
         item.Praktik_avg,
         item.academicAvg,
         item.nilaiSikap,
@@ -407,7 +411,7 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
     startY: 60,
     theme: 'grid',
     styles: {
-      fontSize: 8,
+      fontSize: 7.5, // Reduced slightly to accommodate more columns
       cellPadding: 2,
     },
     headStyles: {
@@ -419,7 +423,7 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
 
   // Add Calculation Note
   const noteY = doc.autoTable.previous.finalY + 10;
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'italic');
 
   const firstItem = nilaiData[0] || {};
@@ -428,7 +432,7 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
   const knW = firstItem.knowledgeW ?? 40;
   const prW = firstItem.practiceW ?? 60;
 
-  doc.text(`Keterangan: Akademik (${knW}% Pengetahuan, ${prW}% Praktik). Nilai Akhir = (${acadW}% Akademik + ${attW}% Sikap).`, 14, noteY);
+  doc.text(`Keterangan: Pengetahuan = (2*Harian + PTS + PAS) / N. Akademik = (${knW}% Peng + ${prW}% Pkt). NA = (${acadW}% Akad + ${attW}% Sikap).`, 14, noteY);
   doc.setFont('helvetica', 'normal');
 
   // Footer - Two Column Signature

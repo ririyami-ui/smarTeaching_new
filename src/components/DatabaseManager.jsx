@@ -4,7 +4,7 @@ import { db, auth } from '../firebase';
 import { Trash2, Upload, Download, AlertTriangle, Database, RefreshCw, Users, BookOpen, Calendar, ClipboardList, FileText, ShieldAlert, BadgeCheck, Sparkles, Zap, History, Layout, FileUp, Star } from 'lucide-react';
 import StyledButton from './StyledButton';
 import Modal from './Modal';
-import { generateCleanupReport, executeAutoCleanup } from '../utils/databaseCleaner';
+import { generateCleanupReport, executeAutoCleanup, migrateToModernIds } from '../utils/databaseCleaner';
 import toast from 'react-hot-toast';
 
 const DatabaseManager = () => {
@@ -14,6 +14,8 @@ const DatabaseManager = () => {
   const [cleanupReport, setCleanupReport] = useState(null);
   const [loadingCleanup, setLoadingCleanup] = useState(false);
   const [cleaningUp, setCleaningUp] = useState(false);
+  const [migrating, setMigrating] = useState(false);
+  const [migrationResults, setMigrationResults] = useState(null);
   const restoreInputRef = useRef(null);
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
@@ -379,6 +381,37 @@ const DatabaseManager = () => {
     reader.readAsText(file);
   };
 
+  const handleMigrateData = async () => {
+    setConfirmationText('');
+    setConfirmModal({
+      isOpen: true,
+      title: 'Migrasi Struktur Data',
+      message: 'Sistem akan mengonversi data lama (berdasarkan nama) ke format ID baru untuk meningkatkan akurasi filter dan kestabilan aplikasi. Ketik "MIGRASI" untuk memulai.',
+      requiresInput: true,
+      confirmPhrase: 'MIGRASI',
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        await performMigration();
+      }
+    });
+  };
+
+  const performMigration = async () => {
+    if (!auth.currentUser) return;
+
+    setMigrating(true);
+    try {
+      const results = await migrateToModernIds(auth.currentUser.uid);
+      setMigrationResults(results);
+      toast.success(`Migrasi selesai! Siswa diperbarui: ${results.studentsMigrated}, Nilai diperbarui: ${results.gradesMigrated}`);
+    } catch (error) {
+      console.error('Error during migration:', error);
+      toast.error('Gagal melakukan migrasi: ' + error.message);
+    } finally {
+      setMigrating(false);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-7xl mx-auto pb-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b dark:border-gray-700 pb-8">
@@ -584,6 +617,76 @@ const DatabaseManager = () => {
         {/* Abstract decorations */}
         <div className="absolute top-[-100px] left-[-100px] w-96 h-96 bg-white/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-[-100px] right-[-100px] w-80 h-80 bg-black/10 rounded-full blur-[80px] pointer-events-none" />
+      </div>
+
+      {/* Migration Tool Section */}
+      <div className="mt-12 p-10 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-[3.5rem] shadow-2xl shadow-purple-200 dark:shadow-none text-white relative overflow-hidden group">
+        <div className="relative z-10">
+          <div className="flex items-center gap-5 mb-10">
+            <div className="p-4 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 shadow-xl">
+              <RefreshCw size={28} className="text-white" />
+            </div>
+            <div>
+              <h4 className="text-3xl font-black tracking-tight">Migrasi Struktur Data (Format Baru) 🚀</h4>
+              <p className="text-purple-100/80 text-lg mt-1 font-medium">Satukan data format lama ke sistem ID baru untuk memperbaiki bug filter.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            <button
+              onClick={handleMigrateData}
+              disabled={migrating}
+              className="flex items-center justify-center gap-3 py-6 px-8 bg-white text-purple-700 font-black rounded-2xl shadow-xl hover:bg-purple-50 transition-all active:scale-95 disabled:opacity-50 text-xl"
+            >
+              {migrating ? (
+                <>
+                  <RefreshCw size={28} className="animate-spin" />
+                  Sedang Menyatukan Data...
+                </>
+              ) : (
+                <>
+                  <Zap size={28} />
+                  Mulai Migrasi Data Sekarang
+                </>
+              )}
+            </button>
+          </div>
+
+          {migrationResults && (
+            <div className="mt-8 p-6 bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 animate-in slide-in-from-bottom-2">
+              <div className="flex items-center gap-3 mb-4">
+                <BadgeCheck className="text-green-300 w-6 h-6" />
+                <h5 className="font-bold text-xl">Hasil Migrasi Menyeluruh:</h5>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                {[
+                  { label: 'Siswa', value: migrationResults.students },
+                  { label: 'Nilai', value: migrationResults.grades },
+                  { label: 'Jadwal', value: migrationResults.schedules },
+                  { label: 'Absensi', value: migrationResults.attendance },
+                  { label: 'Jurnal', value: migrationResults.journals },
+                  { label: 'Pelanggaran', value: migrationResults.infractions },
+                  { label: 'Apresiasi', value: migrationResults.appreciations },
+                  { label: 'Tugas', value: migrationResults.tasks },
+                  { label: 'KKTP', value: migrationResults.kktp },
+                  { label: 'Total', value: migrationResults.total, highlight: true }
+                ].map((item, idx) => (
+                  <div key={idx} className={`${item.highlight ? 'bg-white/20 border border-white/30' : 'bg-white/10'} rounded-xl p-3 text-center`}>
+                    <p className="text-[10px] font-bold uppercase tracking-wider opacity-70 mb-1">{item.label}</p>
+                    <p className={`text-2xl font-black ${item.highlight ? 'text-yellow-300' : ''}`}>{item.value || 0}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs mt-4 text-center text-purple-100/60 italic font-medium">
+                Semua data di atas kini telah terhubung secara akurat menggunakan Sistem ID (Format Baru).
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Abstract decorations */}
+        <div className="absolute top-[-100px] left-[-20px] w-96 h-96 bg-white/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[-100px] right-[-20px] w-80 h-80 bg-black/10 rounded-full blur-[80px] pointer-events-none" />
       </div>
 
       {/* Confirmation Modal */}

@@ -28,7 +28,7 @@ const RekapitulasiPage = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // Signing Location State
-  const [signingLocation, setSigningLocation] = useState('Jakarta');
+  const [signingLocation, setSigningLocation] = useState(() => localStorage.getItem('SIGNING_LOCATION') || 'Jakarta');
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
   useEffect(() => {
@@ -85,7 +85,7 @@ const RekapitulasiPage = () => {
           const city = data.address.city || data.address.town || data.address.village || data.address.county || "Jakarta";
           const cleanCity = city.replace(/Kota\s|Regency\s/gi, "");
           setSigningLocation(cleanCity);
-          localStorage.setItem('QUIZ_SIGNING_LOCATION', cleanCity);
+          localStorage.setItem('SIGNING_LOCATION', cleanCity);
           toast.success(`Lokasi terdeteksi: ${cleanCity}`);
         } catch (error) {
           toast.error("Gagal mendeteksi nama kota.");

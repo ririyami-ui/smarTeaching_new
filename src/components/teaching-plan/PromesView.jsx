@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-    Save, FileSpreadsheet, FileText, Printer, Zap, Calendar, RefreshCw
+    Save, FileSpreadsheet, FileText, Printer, Zap, Calendar, RefreshCw, Loader2
 } from 'lucide-react';
 import moment from 'moment';
 import 'moment/locale/id';
@@ -25,6 +25,7 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
     const [userHolidays, setUserHolidays] = useState([]);
     const [loading, setLoading] = useState(false);
     const [programId, setProgramId] = useState(null);
+    const [isExporting, setIsExporting] = useState('');
 
     useEffect(() => {
         if (sharedEfektifData?.pekanEfektif?.length > 0) {
@@ -181,77 +182,81 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
     };
 
     const handleExportWord = async () => {
-        const S = {
-            border: 'border: 1px solid black;', cell: 'border: 1px solid black; padding: 4px;',
-            header: 'text-align: center; border: 1px solid black; background-color: #f2f2f2;',
-            center: 'text-align: center;', bold: 'font-weight: bold;', none: 'border: none;',
-            full: 'width: 100%; border-collapse: collapse;',
-            bgGreen: 'background-color: #e8f5e9;', bgRed: 'background-color: #ffebee; color: #c62828;'
-        };
-        let monthHeader = '', weekHeader = '';
-        pekanEfektifSource.forEach(m => {
-            monthHeader += `<th colspan="${m.totalWeeks || 4}" style="${S.header}">${m.name}</th>`;
-            for (let w = 1; w <= (m.totalWeeks || 4); w++) weekHeader += `<th style="${S.header} width: 25px;">${w}</th>`;
-        });
-        const rows = protaSource.map((row, i) => {
-            let cells = '';
-            pekanEfektifSource.forEach((m, mIndex) => {
-                for (let w = 0; w < (m.totalWeeks || 4); w++) {
-                    const key = `${row.id}_${mIndex}_${w}`;
-                    const holiday = getHolidayForWeek(m.name, w);
-                    const val = promesData[key];
-                    let bg = '', content = '';
-                    if (holiday?.isBlocking) { bg = S.bgRed; content = 'L'; }
-                    else if (val && val !== '0') { bg = S.bgGreen; content = `<strong>${val}</strong>`; }
-                    cells += `<td style="${S.border} ${S.center} ${bg}">${content}</td>`;
-                }
+        setIsExporting('word');
+        try {
+            const S = {
+                border: 'border: 1px solid black;', cell: 'border: 1px solid black; padding: 4px;',
+                header: 'text-align: center; border: 1px solid black; background-color: #f2f2f2;',
+                center: 'text-align: center;', bold: 'font-weight: bold;', none: 'border: none;',
+                full: 'width: 100%; border-collapse: collapse;',
+                bgGreen: 'background-color: #e8f5e9;', bgRed: 'background-color: #ffebee; color: #c62828;'
+            };
+            let monthHeader = '', weekHeader = '';
+            pekanEfektifSource.forEach(m => {
+                monthHeader += `<th colspan="${m.totalWeeks || 4}" style="${S.header}">${m.name}</th>`;
+                for (let w = 1; w <= (m.totalWeeks || 4); w++) weekHeader += `<th style="${S.header} width: 25px;">${w}</th>`;
             });
-            return `<tr>
-                <td style="${S.cell} ${S.center}">${i + 1}</td>
-                <td style="${S.cell}"><div style="font-size:7pt;color:#555;">[${row.elemen || '-'}]</div><div style="${S.bold}">${row.kd || ''}</div></td>
-                <td style="${S.cell}">${row.materi || ''}</td>
-                <td style="${S.cell} ${S.center}">${row.jp}</td>
-                ${cells}
-            </tr>`;
-        }).join('');
+            const rows = protaSource.map((row, i) => {
+                let cells = '';
+                pekanEfektifSource.forEach((m, mIndex) => {
+                    for (let w = 0; w < (m.totalWeeks || 4); w++) {
+                        const key = `${row.id}_${mIndex}_${w}`;
+                        const holiday = getHolidayForWeek(m.name, w);
+                        const val = promesData[key];
+                        let bg = '', content = '';
+                        if (holiday?.isBlocking) { bg = S.bgRed; content = 'L'; }
+                        else if (val && val !== '0') { bg = S.bgGreen; content = `<strong>${val}</strong>`; }
+                        cells += `<td style="${S.border} ${S.center} ${bg}">${content}</td>`;
+                    }
+                });
+                return `<tr>
+                    <td style="${S.cell} ${S.center}">${i + 1}</td>
+                    <td style="${S.cell}"><div style="font-size:7pt;color:#555;">[${row.elemen || '-'}]</div><div style="${S.bold}">${row.kd || ''}</div></td>
+                    <td style="${S.cell}">${row.materi || ''}</td>
+                    <td style="${S.cell} ${S.center}">${row.jp}</td>
+                    ${cells}
+                </tr>`;
+            }).join('');
 
-        let holidayHtml = '';
-        if (semesterHolidays.length > 0) {
-            const mid = Math.ceil(semesterHolidays.length / 2);
-            holidayHtml = `<div style="margin-top:15px;font-size:9pt;"><strong>AGENDA & LIBUR:</strong><br>
-                <table border="0" style="${S.full} ${S.none}"><tr>
-                    <td style="${S.none} width:50%; vertical-align:top; padding:0;"><ul style="margin:0;padding-left:20px;">${semesterHolidays.slice(0, mid).map(h => `<li>${formatHolidayRange(h)}</li>`).join('')}</ul></td>
-                    <td style="${S.none} width:50%; vertical-align:top; padding:0;"><ul style="margin:0;padding-left:20px;">${semesterHolidays.slice(mid).map(h => `<li>${formatHolidayRange(h)}</li>`).join('')}</ul></td>
-                </tr></table></div>`;
-        }
+            let holidayHtml = '';
+            if (semesterHolidays.length > 0) {
+                const mid = Math.ceil(semesterHolidays.length / 2);
+                holidayHtml = `<div style="margin-top:15px;font-size:9pt;"><strong>AGENDA & LIBUR:</strong><br>
+                    <table border="0" style="${S.full} ${S.none}"><tr>
+                        <td style="${S.none} width:50%; vertical-align:top; padding:0;"><ul style="margin:0;padding-left:20px;">${semesterHolidays.slice(0, mid).map(h => `<li>${formatHolidayRange(h)}</li>`).join('')}</ul></td>
+                        <td style="${S.none} width:50%; vertical-align:top; padding:0;"><ul style="margin:0;padding-left:20px;">${semesterHolidays.slice(mid).map(h => `<li>${formatHolidayRange(h)}</li>`).join('')}</ul></td>
+                    </tr></table></div>`;
+            }
 
-        const html = `
-            <h1 style="text-align:center;">PROGRAM SEMESTER (PROMES)</h1>
-            <p>Satuan Pendidikan: ${userProfile?.school || '-'}<br/>Mata Pelajaran: ${subject}<br/>Kelas/Semester: ${grade}/${semester}<br/>Tahun Ajaran: ${year}</p>
-            <table border="1" cellspacing="0" cellpadding="4" style="${S.full}">
-                <thead>
-                    <tr style="background:#f2f2f2;">
-                        <th rowspan="2" style="${S.border} width:40px;">No</th>
-                        <th rowspan="2" style="${S.border}">Tujuan Pembelajaran</th>
-                        <th rowspan="2" style="${S.border}">Lingkup Materi</th>
-                        <th rowspan="2" style="${S.border} width:40px;">JP</th>
-                        ${monthHeader}
+            const html = `
+                <h1 style="text-align:center;">PROGRAM SEMESTER (PROMES)</h1>
+                <p>Satuan Pendidikan: ${userProfile?.school || '-'}<br/>Mata Pelajaran: ${subject}<br/>Kelas/Semester: ${grade}/${semester}<br/>Tahun Ajaran: ${year}</p>
+                <table border="1" cellspacing="0" cellpadding="4" style="${S.full}">
+                    <thead>
+                        <tr style="background:#f2f2f2;">
+                            <th rowspan="2" style="${S.border} width:40px;">No</th>
+                            <th rowspan="2" style="${S.border}">Tujuan Pembelajaran</th>
+                            <th rowspan="2" style="${S.border}">Lingkup Materi</th>
+                            <th rowspan="2" style="${S.border} width:40px;">JP</th>
+                            ${monthHeader}
+                        </tr>
+                        <tr style="background:#f2f2f2;">${weekHeader}</tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                ${holidayHtml}
+                <table border="0" style="${S.full} margin-top:40px; ${S.none}">
+                    <tr>
+                        <td align="center" style="${S.none} width:50%;">Mengetahui,<br/>Kepala Sekolah<br/><br/><br/><br/><br/><strong><u>${userProfile?.principalName || '...'}</u></strong><br/>NIP. ${userProfile?.principalNip || '...'}</td>
+                        <td align="center" style="${S.none} width:50%;">${signingLocation || '-'}, ${moment().format('DD MMMM YYYY')}<br/>Guru Mata Pelajaran<br/><br/><br/><br/><br/><strong><u>${userProfile?.name || '...'}</u></strong><br/>NIP. ${userProfile?.nip || '...'}</td>
                     </tr>
-                    <tr style="background:#f2f2f2;">${weekHeader}</tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>
-            ${holidayHtml}
-            <table border="0" style="${S.full} margin-top:40px; ${S.none}">
-                <tr>
-                    <td align="center" style="${S.none} width:50%;">Mengetahui,<br/>Kepala Sekolah<br/><br/><br/><br/><br/><strong><u>${userProfile?.principalName || '...'}</u></strong><br/>NIP. ${userProfile?.principalNip || '...'}</td>
-                    <td align="center" style="${S.none} width:50%;">${signingLocation || '-'}, ${moment().format('DD MMMM YYYY')}<br/>Guru Mata Pelajaran<br/><br/><br/><br/><br/><strong><u>${userProfile?.name || '...'}</u></strong><br/>NIP. ${userProfile?.nip || '...'}</td>
-                </tr>
-            </table>`;
-        exportToDocx(html, `Promes-${subject}-${grade}.docx`, { orientation: 'landscape' });
+                </table>`;
+            exportToDocx(html, `Promes-${subject}-${grade}.docx`, { orientation: 'landscape' });
+        } finally { setIsExporting(''); }
     };
 
     const handleExportExcel = async () => {
+        setIsExporting('excel');
         try {
             const header1 = ['', '', ''];
             const header2 = ['No', 'Tujuan Pembelajaran / Lingkup Materi', 'Alokasi (JP)'];
@@ -309,9 +314,11 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
             saveAs(new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })]), `Promes-${subject}-${grade}.xlsx`);
             toast.success("Excel Promes berhasil diunduh!");
         } catch (e) { console.error(e); toast.error("Gagal ekspor Excel."); }
+        finally { setIsExporting(''); }
     };
 
     const handleExportPDF = async () => {
+        setIsExporting('pdf');
         try {
             const { default: jsPDF } = await import('jspdf');
             const { default: autoTable } = await import('jspdf-autotable');
@@ -399,6 +406,7 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
             doc.save(`Promes-${subject}-${grade}.pdf`);
             toast.success("PDF Promes berhasil diunduh!");
         } catch (e) { console.error(e); toast.error("Gagal membuat PDF."); }
+        finally { setIsExporting(''); }
     };
 
     const updateCell = (protaId, monthIndex, weekIndex, value) => {
@@ -623,10 +631,18 @@ const PromesView = ({ grade, subject, semester, year, schedules, activeTab, user
 
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center no-print pt-4 border-t dark:border-gray-700 gap-4">
                 <div className="flex flex-wrap gap-2">
-                    <button onClick={handleExportPDF} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"><FileText size={16} />PDF</button>
-                    <button onClick={handleExportWord} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"><FileText size={16} />Word</button>
-                    <button onClick={handleExportExcel} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"><FileSpreadsheet size={16} />Excel</button>
-                    <button onClick={() => window.print()} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm"><Printer size={16} />Cetak</button>
+                    <button onClick={handleExportPDF} disabled={isExporting !== ''} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition text-sm">
+                        {isExporting === 'pdf' ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />} PDF
+                    </button>
+                    <button onClick={handleExportWord} disabled={isExporting !== ''} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition text-sm">
+                        {isExporting === 'word' ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />} Word
+                    </button>
+                    <button onClick={handleExportExcel} disabled={isExporting !== ''} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition text-sm">
+                        {isExporting === 'excel' ? <Loader2 className="animate-spin" size={16} /> : <FileSpreadsheet size={16} />} Excel
+                    </button>
+                    <button onClick={() => window.print()} disabled={isExporting !== ''} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 disabled:opacity-50 transition text-sm">
+                        <Printer size={16} /> Cetak
+                    </button>
                 </div>
                 <button onClick={handleSave} disabled={loading} className="flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300 shadow-lg font-bold">
                     <Save size={18} />{loading ? 'Menyimpan...' : 'Simpan Promes'}

@@ -17,12 +17,14 @@ import { useNavigate } from 'react-router-dom';
 import { getRegionFromSubject } from '../utils/carakan';
 import { saveAs } from 'file-saver';
 import { asBlob } from 'html-docx-js-typescript';
+import { useAI } from '../utils/AIContext';
 import Modal from '../components/Modal';
 import ProgressBar from '../components/ProgressBar';
 
 const HandoutGeneratorPage = () => {
     const [user, setUser] = useState(auth.currentUser);
     const navigate = useNavigate();
+    const { tasks, startGeneration } = useAI();
     const [userProfile, setUserProfile] = useState(null);
 
     // Initialize Mermaid dynamically
@@ -138,9 +140,10 @@ const HandoutGeneratorPage = () => {
     // Generation States
     const [sourceType, setSourceType] = useState('rpp'); // 'rpp', 'atp', or 'manual'
     const [selectedAtpItem, setSelectedAtpItem] = useState(null);
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [generatedContent, setGeneratedContent] = useState('');
-    const [generationProgress, setGenerationProgress] = useState({ stage: '', message: '', percentage: 0 });
+    const aiTask = tasks.handout;
+    const isGenerating = aiTask.status === 'loading';
+    const [generatedContent, setGeneratedContent] = useState(aiTask.result || '');
+    const [generationProgress, setGenerationProgress] = useState({ stage: '', message: aiTask.progress || '', percentage: aiTask.status === 'success' ? 100 : 0 });
 
     // History & Saving States
     const [savedHandouts, setSavedHandouts] = useState([]);
@@ -241,6 +244,15 @@ const HandoutGeneratorPage = () => {
                 });
                 setSavedRPPs(sortedRPPs);
 
+                // Restore from context
+                if (aiTask.params?.topic) {
+                    setTopic(aiTask.params.topic);
+                }
+                if (aiTask.params?.subject) {
+                    const subMatch = fetchedSubjects.find(s => s.name === aiTask.params.subject);
+                    if (subMatch) setSelectedSubject(subMatch.id);
+                }
+
             } catch (error) {
                 console.error("Error fetching data:", error);
                 toast.error("Gagal memuat data aplikasi");
@@ -290,60 +302,83 @@ const HandoutGeneratorPage = () => {
             return;
         }
 
-        setIsGenerating(true);
         setGenerationProgress({ stage: 'starting', message: 'Mempersiapkan referensi...', percentage: 5 });
 
         // Simulasi Progres Bar
-        let currentProgress = 5;
-        const progressInterval = setInterval(() => {
-            currentProgress += Math.floor(Math.random() * 8) + 2;
-            if (currentProgress > 95) currentProgress = 95; // Stop di 95%
+        let progressInterval;
+        const startSimulation = () => {
+            let currentProgress = 5;
+            progressInterval = setInterval(() => {
+                currentProgress += Math.floor(Math.random() * 8) + 2;
+                if (currentProgress > 95) currentProgress = 95;
 
-            let stage = 'preparing';
-            let message = 'Menyiapkan pedoman penyusunan materi...';
+                let stage = 'preparing';
+                let message = 'Menyiapkan pedoman penyusunan materi...';
 
-            if (currentProgress > 30 && currentProgress <= 70) {
-                stage = 'generating';
-                message = 'AI sedang merangkai narasi bahan ajar...';
-            } else if (currentProgress > 70) {
-                stage = 'parsing';
-                message = 'Memformat materi dan mencari referensi visual...';
-            }
+                if (currentProgress > 30 && currentProgress <= 70) {
+                    stage = 'generating';
+                    message = 'AI sedang merangkai narasi bahan ajar...';
+                } else if (currentProgress > 70) {
+                    stage = 'parsing';
+                    message = 'Memformat materi dan mencari referensi visual...';
+                }
 
-            setGenerationProgress({ stage, message, percentage: currentProgress });
-        }, 1200);
+                setGenerationProgress({ stage, message, percentage: currentProgress });
+            }, 1200);
+        };
 
         try {
             const subjectObj = subjects.find(s => s.id === selectedSubject);
             const subjectName = subjectObj?.name || selectedSubject;
-
-            // Find selected RPP for context
             const selectedRPP = savedRPPs.find(rpp => rpp.id === selectedRPPId);
 
-            const result = await generateHandout({
-                subject: subjectName,
-                gradeLevel: selectedGrade,
-                materi: sourceType === 'atp' ? selectedAtpItem.materi : topic,
-                kd: sourceType === 'atp' ? (selectedAtpItem.tp || selectedAtpItem.kd) : selectedRPP?.kd,
-                elemen: sourceType === 'atp' ? selectedAtpItem.elemen : selectedRPP?.elemen,
-                rppContent: sourceType === 'rpp' ? selectedRPP?.content : null,
-                teacherName: userProfile?.name || 'Guru Smart Teaching',
-                teacherTitle: userProfile?.title || 'Bapak/Ibu',
-                modelName: userProfile?.geminiModel // Pass user's preferred model if set
+            await startGeneration('handout', async (context) => {
+                startSimulation();
+                return await generateHandout({
+                    subject: subjectName,
+                    gradeLevel: selectedGrade,
+                    materi: sourceType === 'atp' ? selectedAtpItem.materi : topic,
+                    kd: sourceType === 'atp' ? (selectedAtpItem.tp || selectedAtpItem.kd) : selectedRPP?.kd,
+                    elemen: sourceType === 'atp' ? selectedAtpItem.elemen : selectedRPP?.elemen,
+                    rppContent: sourceType === 'rpp' ? selectedRPP?.content : null,
+                    teacherName: userProfile?.name || 'Guru Smart Teaching',
+                    teacherTitle: userProfile?.title || 'Bapak/Ibu',
+                    modelName: userProfile?.geminiModel,
+                    onProgress: context.onProgress
+                });
+            }, {
+                topic: sourceType === 'atp' ? selectedAtpItem.materi : topic,
+                subject: subjectName
             });
-            setGeneratedContent(result);
-            toast.success("Bahan Ajar berhasil dibuat!");
-            clearInterval(progressInterval);
-            setGenerationProgress({ stage: 'complete', message: 'Bahan Ajar siap digunakan!', percentage: 100 });
         } catch (error) {
-            console.error(error);
-            toast.error("Gagal membuat bahan ajar: " + error.message);
-            clearInterval(progressInterval);
-            setGenerationProgress({ stage: 'error', message: 'Gagal membuat bahan ajar.', percentage: 0 });
+            // Handled by context
         } finally {
-            setTimeout(() => setIsGenerating(false), 1000); // Tunda sedikit
+            if (progressInterval) clearInterval(progressInterval);
         }
     };
+
+    // Sync results
+    useEffect(() => {
+        if (aiTask.status === 'success' && aiTask.result) {
+            setGeneratedContent(aiTask.result);
+        }
+    }, [aiTask.status, aiTask.result]);
+
+    // Restore simulation
+    useEffect(() => {
+        let interval;
+        if (isGenerating) {
+            let current = 5;
+            interval = setInterval(() => {
+                current += 4;
+                if (current > 95) current = 95;
+                setGenerationProgress(prev => ({ ...prev, percentage: current }));
+            }, 1500);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isGenerating]);
 
     const handleDownloadDocx = async () => {
         if (!generatedContent) return;
@@ -726,14 +761,14 @@ const HandoutGeneratorPage = () => {
                                                     if (!subjectData) return <option disabled>Tidak ada data kurikulum</option>;
 
                                                     const ganjilMateri = subjectData.ganjil?.materi_inti?.map(m => ({
-                                                        materi: m,
-                                                        elemen: subjectData.ganjil.elemen?.join(', ') || 'Umum',
+                                                        materi: m.materi || m, // Fallback ke m jika masih ada string tersisa (meski udh di bersihkan)
+                                                        elemen: m.elemen || subjectData.ganjil.elemen?.join(', ') || 'Umum',
                                                         tp: subjectData.ganjil.cp_snippet
                                                     })) || [];
 
                                                     const genapMateri = subjectData.genap?.materi_inti?.map(m => ({
-                                                        materi: m,
-                                                        elemen: subjectData.genap.elemen?.join(', ') || 'Umum',
+                                                        materi: m.materi || m,
+                                                        elemen: m.elemen || subjectData.genap.elemen?.join(', ') || 'Umum',
                                                         tp: subjectData.genap.cp_snippet
                                                     })) || [];
 

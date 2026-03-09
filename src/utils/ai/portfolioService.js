@@ -1,5 +1,6 @@
 import { getModel, handleGeminiError, retryWithBackoff } from './base';
 import { BSKAP_DATA } from '../bskapData';
+import { STRICT_DOCUMENT_BRAIN } from '../prompts/smarttyPrompts';
 /**
  * Generates a specific chapter for the Semester Portfolio.
  * 
@@ -10,7 +11,7 @@ import { BSKAP_DATA } from '../bskapData';
  */
 export const generatePortfolioChapter = async (chapterId, contextData, teacherProfile, selectedSubject, previousChapters = {}) => {
     try {
-        const model = getModel();
+        const model = getModel(null, false, STRICT_DOCUMENT_BRAIN);
 
         const mapelHeader = selectedSubject ? `\nFOKUS MATA PELAJARAN: ${selectedSubject}\n` : '';
 

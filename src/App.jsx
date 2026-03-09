@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import DashboardLayout from './components/DashboardLayout.jsx';
 import { ChatProvider } from './utils/ChatContext.jsx';
 import { SettingsProvider } from './utils/SettingsContext.jsx';
+import { AIProvider } from './utils/AIContext.jsx';
 import InstallPwaCard from './components/InstallPwaCard.jsx';
 import WelcomeScreen from './components/WelcomeScreen.jsx';
 import './index.css';
@@ -75,7 +76,13 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        localStorage.setItem('user', JSON.stringify(currentUser));
+        const safeUser = {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName,
+          photoURL: currentUser.photoURL
+        };
+        localStorage.setItem('user', JSON.stringify(safeUser));
         setUser(currentUser);
       } else {
         localStorage.removeItem('user');
@@ -103,12 +110,14 @@ function App() {
 
       // Store the event for later use
       setInstallPrompt(e);
+      window.deferredPrompt = e; // Global fallback
 
       // Check if user already dismissed it this session using session storage
       const isDismissed = sessionStorage.getItem('pwa_dismissed') === 'true';
       if (!isDismissed) {
         setShowInstallCard(true);
       }
+      console.log('PWA: beforeinstallprompt event captured');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -119,16 +128,21 @@ function App() {
   }, []);
 
   const handleInstall = () => {
-    if (!installPrompt) {
+    const promptEvent = installPrompt || window.deferredPrompt;
+    if (!promptEvent) {
+      toast.error('Gagal memulai instalasi. Silakan cari menu "Install App" di browser Anda.');
       return;
     }
-    installPrompt.prompt();
-    installPrompt.userChoice.then((choiceResult) => {
+
+    promptEvent.prompt();
+    promptEvent.userChoice.then((choiceResult) => {
       if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
+        console.log('PWA: User accepted install');
+        toast.success('Aplikasi berhasil diinstal!');
       }
       setShowInstallCard(false);
       setInstallPrompt(null);
+      window.deferredPrompt = null;
     });
   };
 
@@ -149,53 +163,55 @@ function App() {
     <Router>
       <Toaster position="bottom-center" reverseOrder={false} />
       <SettingsProvider>
-        <ChatProvider>
-          <div className="min-h-screen bg-background-light dark:bg-background-dark font-sans transition-colors duration-200">
-            {user ? (
-              <DashboardLayout user={user}>
-                <div className="animate-in fade-in zoom-in-95 duration-700 ease-out">
+        <AIProvider>
+          <ChatProvider>
+            <div className="min-h-screen bg-background-light dark:bg-background-dark font-sans transition-colors duration-200">
+              {user ? (
+                <DashboardLayout user={user}>
+                  <div className="animate-in fade-in zoom-in-95 duration-700 ease-out">
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route path="/" element={<DashboardPage />} />
+                        <Route path="/jadwal" element={<JadwalPage />} />
+                        <Route path="/absensi" element={<AbsensiPage />} />
+                        <Route path="/nilai" element={<NilaiPage />} />
+                        <Route path="/jurnal" element={<JurnalPage />} />
+                        <Route path="/rekapitulasi" element={<RekapitulasiPage />} />
+                        <Route path="/rekap-individu" element={<RekapIndividuPage />} />
+                        <Route path="/master-data" element={<MasterDataPage />} />
+                        <Route path="/about" element={<AboutPage installPrompt={installPrompt} onInstall={handleInstall} isPwaInstalled={isPwaInstalled} />} />
+                        <Route path="/analisis-kelas" element={<AnalisisKelasPage />} />
+                        <Route path="/sistem-peringatan" element={<EarlyWarningPage />} />
+                        <Route path="/asisten-guru" element={<AsistenGuruPage />} />
+                        <Route path="/analisis-rombel/:rombel" element={<AnalisisKelasPage />} />
+                        <Route path="/pelanggaran" element={<PelanggaranPage />} />
+                        <Route path="/leaderboard" element={<LeaderboardPage />} />
+                        <Route path="/program-mengajar" element={<ProgramMengajarPage />} />
+                        <Route path="/rpp" element={<LessonPlanPage />} />
+                        <Route path="/lkpd-generator" element={<LkpdGeneratorPage />} />
+                        <Route path="/handout-generator" element={<HandoutGeneratorPage />} />
+                        <Route path="/quiz-generator" element={<QuizGeneratorPage />} />
+                        <Route path="/penugasan" element={<PenugasanPage />} />
+                        <Route path="/penilaian-kktp" element={<AssessmentKktpPage />} />
+                        <Route path="/portfolio" element={<PortfolioPage />} />
+                        <Route path="/database-cleanup" element={<DatabaseCleanupPage />} />
+                      </Routes>
+                    </Suspense>
+                  </div>
+                </DashboardLayout>
+              ) : (
+                <div className="animate-in fade-in duration-1000">
                   <Suspense fallback={<PageLoader />}>
                     <Routes>
-                      <Route path="/" element={<DashboardPage />} />
-                      <Route path="/jadwal" element={<JadwalPage />} />
-                      <Route path="/absensi" element={<AbsensiPage />} />
-                      <Route path="/nilai" element={<NilaiPage />} />
-                      <Route path="/jurnal" element={<JurnalPage />} />
-                      <Route path="/rekapitulasi" element={<RekapitulasiPage />} />
-                      <Route path="/rekap-individu" element={<RekapIndividuPage />} />
-                      <Route path="/master-data" element={<MasterDataPage />} />
-                      <Route path="/about" element={<AboutPage installPrompt={installPrompt} onInstall={handleInstall} isPwaInstalled={isPwaInstalled} />} />
-                      <Route path="/analisis-kelas" element={<AnalisisKelasPage />} />
-                      <Route path="/sistem-peringatan" element={<EarlyWarningPage />} />
-                      <Route path="/asisten-guru" element={<AsistenGuruPage />} />
-                      <Route path="/analisis-rombel/:rombel" element={<AnalisisKelasPage />} />
-                      <Route path="/pelanggaran" element={<PelanggaranPage />} />
-                      <Route path="/leaderboard" element={<LeaderboardPage />} />
-                      <Route path="/program-mengajar" element={<ProgramMengajarPage />} />
-                      <Route path="/rpp" element={<LessonPlanPage />} />
-                      <Route path="/lkpd-generator" element={<LkpdGeneratorPage />} />
-                      <Route path="/handout-generator" element={<HandoutGeneratorPage />} />
-                      <Route path="/quiz-generator" element={<QuizGeneratorPage />} />
-                      <Route path="/penugasan" element={<PenugasanPage />} />
-                      <Route path="/penilaian-kktp" element={<AssessmentKktpPage />} />
-                      <Route path="/portfolio" element={<PortfolioPage />} />
-                      <Route path="/database-cleanup" element={<DatabaseCleanupPage />} />
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route path="*" element={<Navigate to="/login" replace />} />
                     </Routes>
                   </Suspense>
                 </div>
-              </DashboardLayout>
-            ) : (
-              <div className="animate-in fade-in duration-1000">
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="*" element={<Navigate to="/login" replace />} />
-                  </Routes>
-                </Suspense>
-              </div>
-            )}
-          </div>
-        </ChatProvider>
+              )}
+            </div>
+          </ChatProvider>
+        </AIProvider>
       </SettingsProvider>
       {showInstallCard && (
         <InstallPwaCard

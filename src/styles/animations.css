@@ -1,0 +1,423 @@
+/* ============================================
+   animations.css
+   All keyframes and animation utility classes
+   ============================================ */
+
+/* --- Wavy Border Animation --- */
+.wavy-border-animation {
+    position: relative;
+    overflow: hidden;
+}
+
+.wavy-border-animation::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 3px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.8) 10%,
+            transparent 20%,
+            transparent 80%,
+            rgba(255, 255, 255, 0.8) 90%,
+            transparent 100%);
+    background-size: 50% 100%;
+    animation: wave-move 2s linear infinite;
+}
+
+@keyframes wave-move {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* --- Gradient Animation --- */
+@keyframes gradient-animation {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animated-background {
+    background: linear-gradient(-45deg, #fb7c00, #ffc700, #fb9500);
+    background-size: 400% 400%;
+    animation: gradient-animation 10s ease infinite;
+}
+
+/* --- Smartty AI Personality Animations --- */
+@keyframes smartty-float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes smartty-breathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.3));
+    }
+
+    50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+    }
+}
+
+@keyframes smartty-think {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    25% {
+        transform: rotate(5deg) scale(1.1);
+    }
+
+    75% {
+        transform: rotate(-5deg) scale(1.1);
+    }
+
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+.animate-smartty-float {
+    animation: smartty-float 3s ease-in-out infinite;
+}
+
+.animate-smartty-breathe {
+    animation: smartty-breathe 4s ease-in-out infinite;
+}
+
+.animate-smartty-think {
+    animation: smartty-think 1s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.5));
+}
+
+/* --- Pulse Animations --- */
+.animate-pulse-subtle {
+    animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-subtle {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.85;
+        transform: scale(0.995);
+    }
+}
+
+.animate-pulse-yellow {
+    animation: pulse-yellow 2s infinite;
+}
+
+@keyframes pulse-yellow {
+
+    0%,
+    100% {
+        background-color: rgba(251, 191, 36, 0.1);
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+    }
+
+    50% {
+        background-color: rgba(251, 191, 36, 0.2);
+        box-shadow: 0 0 0 8px rgba(251, 191, 36, 0);
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.animate-pulse-glow-head {
+    animation: pulse-glow-head 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow-head {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+        box-shadow: 0 0 4px 1px rgba(34, 211, 238, 0.4);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.3);
+        box-shadow: 0 0 12px 3px rgba(34, 211, 238, 0.8);
+    }
+}
+
+/* --- Bounce --- */
+@keyframes bounce-short {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.animate-bounce-short {
+    animation: bounce-short 2s ease-in-out infinite;
+}
+
+/* --- Stagger / Fade Entry --- */
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+}
+
+@keyframes stagger-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stagger-entry {
+    animation: stagger-fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* --- Shimmer (Skeleton Loading) --- */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+/* --- Dots Blink (AI Thinking) --- */
+@keyframes dots-blink {
+
+    0%,
+    100% {
+        opacity: 0.1;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+.animate-dots-blink {
+    animation: dots-blink 1.4s infinite ease-in-out;
+}
+
+/* --- Spring / Scale --- */
+@keyframes spring-in {
+    0% {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* --- Welcome Screen Animations --- */
+@keyframes aurora {
+    0% {
+        transform: translate(0%, 0%) rotate(0deg);
+    }
+
+    25% {
+        transform: translate(10%, 10%) rotate(5deg);
+    }
+
+    50% {
+        transform: translate(-5%, 15%) rotate(-5deg);
+    }
+
+    75% {
+        transform: translate(-15%, -10%) rotate(10deg);
+    }
+
+    100% {
+        transform: translate(0%, 0%) rotate(0deg);
+    }
+}
+
+@keyframes welcome-zoom-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+        filter: blur(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes welcome-float {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0);
+    }
+
+    50% {
+        transform: translateY(-15px) rotate(2deg);
+    }
+}
+
+@keyframes progress-line {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    50% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(1.05);
+        filter: blur(20px);
+    }
+}
+
+.animate-aurora {
+    animation: aurora 20s linear infinite;
+}
+
+.animate-welcome-zoom-in {
+    animation: welcome-zoom-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-welcome-float {
+    animation: welcome-float 6s ease-in-out infinite;
+}
+
+.animate-progress-line {
+    animation: progress-line 2.5s ease-in-out infinite;
+}
+
+.animate-welcome-fade-out {
+    animation: fadeOut 0.8s ease-in-out forwards;
+}
+
+/* --- Welcome Glass Panels --- */
+.welcome-glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.dark .welcome-glass {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* --- Sidebar Spring Transition (Tailwind @layer utilities) --- */
+@layer utilities {
+    .spring-transition {
+        transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .animate-gradient-x {
+        background-size: 200% 200%;
+        animation: gradient-x 15s ease infinite;
+    }
+}
+
+@keyframes gradient-x {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}

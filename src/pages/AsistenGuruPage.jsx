@@ -76,7 +76,8 @@ const AsistenGuruPage = () => {
         recentChallenges: journals.filter(j => j.challenges).map(j => j.challenges),
         totalInfractions: infractions.length,
         totalStars: stars.length,
-        lastUpdate: new Date().toLocaleString('id-ID')
+        lastUpdate: new Date().toLocaleString('id-ID'),
+        activeSemester: activeSemester
       };
 
       setLiveContext(stats);

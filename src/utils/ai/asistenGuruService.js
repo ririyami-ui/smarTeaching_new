@@ -54,14 +54,26 @@ export async function generateChatResponse(history, newMessage, userProfile, mod
 
         // Format live context if available
         let contextSnippet = "";
+        const now = new Date();
+        const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const currentMonth = monthNames[now.getMonth()];
+        const currentDate = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
         if (liveContext) {
             contextSnippet = `
+      INFO SAAT INI:
+      - Tanggal: ${currentDate}
+      - Semester: ${liveContext.activeSemester || 'Aktif'}
+      
       Radar Kondisi Kelas:
       - Rata-rata Nilai: ${liveContext.avgGrade}
       - Rata-rata Kehadiran: ${liveContext.avgAttendance}%
       - Total Pelanggaran: ${liveContext.totalInfractions}
+      - Total Bintang/Apresiasi: ${liveContext.totalStars}
       - Siswa Perlu Perhatian: ${JSON.stringify(liveContext.studentsAtRisk || [])}
       `;
+        } else {
+            contextSnippet = `INFO SAAT INI: Tanggal ${currentDate}.`;
         }
 
         const systemInstruction = { parts: [{ text: getSystemInstruction(userTitle, userName, schoolName, schoolLevel, contextSnippet, BSKAP_DATA) }] };

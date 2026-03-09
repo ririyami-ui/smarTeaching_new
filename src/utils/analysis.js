@@ -198,13 +198,38 @@ export const runEarlyWarningAnalysis = async (userId, activeSemester, academicYe
 
       // Separate knowledge and practice scores for this subject
       const subjectGrades = grades.filter(g => g.studentId === studentId && g.subjectName === subjectName);
-      const knowledgeTypes = ['Harian', 'Formatif', 'Sumatif', 'Ulangan', 'Tengah Semester', 'PTS', 'Akhir Semester', 'PAS'];
+      const dailyTypes = ['Harian', 'Formatif', 'Sumatif', 'Ulangan', 'Tugas', 'Kuis', 'Pengetahuan', 'Homework'];
+      const ptsTypes = ['Tengah Semester', 'PTS'];
+      const pasTypes = ['Akhir Semester', 'PAS'];
 
-      const knowledgeScores = subjectGrades.filter(g => knowledgeTypes.includes(g.assessmentType)).map(g => parseFloat(g.score) || 0);
+      const dailyScores = subjectGrades.filter(g => dailyTypes.includes(g.assessmentType)).map(g => parseFloat(g.score) || 0);
+      const ptsScores = subjectGrades.filter(g => ptsTypes.includes(g.assessmentType)).map(g => parseFloat(g.score) || 0);
+      const pasScores = subjectGrades.filter(g => pasTypes.includes(g.assessmentType)).map(g => parseFloat(g.score) || 0);
       const practiceScores = subjectGrades.filter(g => g.assessmentType === 'Praktik').map(g => parseFloat(g.score) || 0);
 
-      const knowledgeAvg = knowledgeScores.length > 0 ? knowledgeScores.reduce((a, b) => a + b, 0) / knowledgeScores.length : 0;
+      const dailyAvg = dailyScores.length > 0 ? dailyScores.reduce((a, b) => a + b, 0) / dailyScores.length : 0;
+      const ptsAvg = ptsScores.length > 0 ? ptsScores.reduce((a, b) => a + b, 0) / ptsScores.length : 0;
+      const pasAvg = pasScores.length > 0 ? pasScores.reduce((a, b) => a + b, 0) / pasScores.length : 0;
       const practiceAvg = practiceScores.length > 0 ? practiceScores.reduce((a, b) => a + b, 0) / practiceScores.length : 0;
+
+      // Weighted Knowledge Calculation: (2*DailyAvg + PTS + PAS) / Divisor
+      let totalKnowledgeWeight = 0;
+      let weightedKnowledgeSum = 0;
+
+      if (dailyScores.length > 0) {
+        totalKnowledgeWeight += 2;
+        weightedKnowledgeSum += (dailyAvg * 2);
+      }
+      if (ptsScores.length > 0) {
+        totalKnowledgeWeight += 1;
+        weightedKnowledgeSum += ptsAvg;
+      }
+      if (pasScores.length > 0) {
+        totalKnowledgeWeight += 1;
+        weightedKnowledgeSum += pasAvg;
+      }
+
+      const knowledgeAvg = totalKnowledgeWeight > 0 ? weightedKnowledgeSum / totalKnowledgeWeight : 0;
 
       let average = 0;
       if (knowledgeAvg > 0 && practiceAvg > 0) {

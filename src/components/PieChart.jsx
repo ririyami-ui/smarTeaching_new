@@ -21,51 +21,49 @@ const PieChart = ({ data }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 h-full flex flex-col">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600">
-          <PieChartIcon size={24} />
+    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 h-full flex flex-col min-w-[280px]">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 shrink-0">
+          <PieChartIcon size={20} />
         </div>
         <div>
-          <h2 className="text-lg sm:text-xl font-black text-gray-800 dark:text-white uppercase tracking-tight">Komposisi Kehadiran</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Statistik presensi semester ini</p>
+          <h2 className="text-base sm:text-lg font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight">Statistik Kehadiran</h2>
+          <p className="text-[10px] text-gray-400 mt-0.5">Ringkasan presensi semester ini</p>
         </div>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-2xl border border-blue-100 dark:border-blue-800 mb-6">
-        <div className="flex justify-between items-center text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase tracking-widest">
-          <span>Konteks Data</span>
-          <span>{schoolDays || 0} Hari Efektif</span>
+      <div className="bg-blue-50/30 dark:bg-blue-900/15 p-3.5 rounded-2xl border border-blue-100/50 dark:border-blue-800/30 mb-6 font-mono">
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="text-[9px] font-black text-blue-700/50 dark:text-blue-300/50 uppercase tracking-widest">Konteks</span>
+          <span className="text-[10px] font-bold text-blue-600 dark:text-blue-300 px-2 py-0.5 bg-white dark:bg-gray-800 rounded-md border border-blue-100/50">{schoolDays || 0} Hari</span>
         </div>
-        <div className="text-[10px] font-bold text-blue-600/70 dark:text-blue-400 mt-1">
-          *Total Akumulasi = {studentCount || 0} Siswa x {schoolDays || 0} Hari
+        <div className="text-[9px] font-bold text-blue-500/80 dark:text-blue-400">
+          {studentCount || 0} Siswa <span className="opacity-30">×</span> {schoolDays || 0} Hari Efektif
         </div>
       </div>
 
-      <div className="space-y-5 flex-1">
+      <div className="space-y-4 flex-1">
         {categories.map((cat) => {
           const value = data[cat.key] || 0;
           const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-          const avgPerStudent = studentCount > 0 ? (value / studentCount).toFixed(1) : 0;
 
           return (
-            <div key={cat.key} className="space-y-1.5">
-              <div className="flex justify-between items-end">
-                <div className="flex items-center gap-2">
-                  <div className={`w-6 h-6 rounded-lg ${cat.color} shadow-sm flex items-center justify-center`}>
+            <div key={cat.key} className="group">
+              <div className="flex justify-between items-center mb-1.5">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`w-7 h-7 rounded-lg ${cat.color} shadow-sm flex items-center justify-center shrink-0`}>
                     {cat.icon}
                   </div>
-                  <div>
-                    <span className="text-xs font-black text-gray-800 dark:text-gray-200 block leading-none mb-0.5">{cat.label}</span>
-                    <span className="text-[10px] font-bold text-gray-400 block leading-none">Avg: {avgPerStudent} hr</span>
-                  </div>
+                  <span className="text-xs font-bold text-gray-700 dark:text-gray-200 truncate">{cat.label}</span>
                 </div>
-                <div className="text-right">
-                  <span className="text-sm font-black text-gray-900 dark:text-gray-100 mr-2">{value}</span>
-                  <span className={`text-md font-black ${percentage > 10 ? 'text-gray-800 dark:text-white' : 'text-gray-400'}`}>{percentage}%</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs font-black text-gray-900 dark:text-gray-100">{value}</span>
+                  <span className={`text-[10px] font-black min-w-[3.5rem] text-right ${percentage > 0 ? 'text-gray-500' : 'text-gray-300'}`}>
+                    {percentage}%
+                  </span>
                 </div>
               </div>
-              <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
                 <div
                   className={`h-full ${cat.color} rounded-full transition-all duration-1000 ease-out`}
                   style={{ width: `${percentage}%` }}
@@ -76,9 +74,12 @@ const PieChart = ({ data }) => {
         })}
       </div>
 
-      <div className="pt-4 mt-6 border-t border-dashed border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl">
-        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Log</span>
-        <span className="text-lg font-black text-gray-800 dark:text-white">{total} <span className="text-[10px] font-bold text-gray-400">ENTRI</span></span>
+      <div className="pt-4 mt-6 border-t border-dashed border-gray-100 dark:border-gray-700/50 flex justify-between items-center px-1">
+        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Total Record</span>
+        <div className="flex items-baseline gap-1">
+          <span className="text-base font-black text-gray-800 dark:text-white">{total}</span>
+          <span className="text-[9px] font-bold text-gray-400 uppercase">Log</span>
+        </div>
       </div>
     </div>
   );

@@ -9,7 +9,8 @@ import 'moment/locale/id';
 import {
     Download,
     FileText,
-    MessageCircle
+    MessageCircle,
+    X
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { useSettings } from '../utils/SettingsContext';
@@ -25,6 +26,7 @@ import StudentRadarProfile from '../components/StudentRadarProfile';
 import StudentAcademicDetail from '../components/StudentAcademicDetail';
 import StudentAttendanceDetail from '../components/StudentAttendanceDetail';
 import StudentInfractionDetail from '../components/StudentInfractionDetail';
+import StudentAppreciationDetail from '../components/StudentAppreciationDetail';
 import StudentNarrativeSection from '../components/StudentNarrativeSection';
 
 // Set global locale for moment
@@ -47,6 +49,7 @@ const RekapIndividuPage = () => {
     const [selectedStudentId, setSelectedStudentId] = useState('');
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [selectedSubject, setSelectedSubject] = useState(''); // New state for subject filter
+    const [subjects, setSubjects] = useState([]); // All subjects from DB
 
     const [grades, setGrades] = useState([]);
     const [attendance, setAttendance] = useState([]);
@@ -136,7 +139,7 @@ const RekapIndividuPage = () => {
                     const city = data.address.city || data.address.town || data.address.regency || data.address.county || 'Jakarta';
                     const cleanCity = city.replace(/^(Kabupaten|Kota|Kab\.|Kota\s)\s+/i, '');
                     setSigningLocation(cleanCity);
-                    localStorage.setItem('QUIZ_SIGNING_LOCATION', cleanCity);
+                    localStorage.setItem('SIGNING_LOCATION', cleanCity);
                     toast.success(`Lokasi terdeteksi: ${cleanCity}`);
                 } catch (error) {
                     console.error("Error detecting location:", error);
@@ -163,20 +166,27 @@ const RekapIndividuPage = () => {
         return () => unsubscribe();
     }, []);
 
-    // Fetch classes
+    // Fetch classes and subjects
     useEffect(() => {
-        const fetchClasses = async () => {
+        const fetchMasters = async () => {
             if (!currentUser) return;
             try {
-                const q = query(collection(db, 'classes'), where('userId', '==', currentUser.uid), orderBy('rombel'));
-                const querySnapshot = await getDocs(q);
-                setClasses(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                const classQ = query(collection(db, 'classes'), where('userId', '==', currentUser.uid), orderBy('rombel'));
+                const subjectQ = query(collection(db, 'subjects'), where('userId', '==', currentUser.uid), orderBy('name'));
+
+                const [classSnap, subjectSnap] = await Promise.all([
+                    getDocs(classQ),
+                    getDocs(subjectQ)
+                ]);
+
+                setClasses(classSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                setSubjects(subjectSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             } catch (err) {
                 console.error(err);
-                toast.error('Gagal memuat data kelas');
+                toast.error('Gagal memuat data master');
             }
         };
-        fetchClasses();
+        fetchMasters();
     }, [currentUser]);
 
     // Fetch students when class or auth changes
@@ -188,34 +198,26 @@ const RekapIndividuPage = () => {
             }
             setIsFetchingStudents(true);
             try {
-                const targetClass = classes.find(c => c.rombel === selectedClass);
+                // Determine class ID from selectedClass (which might be rombel name or ID)
+                const targetClass = classes.find(c => c.rombel === selectedClass || c.id === selectedClass);
                 const classToFetchId = targetClass?.id || selectedClass;
 
-                const qByRombel = query(
-                    collection(db, 'students'),
-                    where('userId', '==', currentUser.uid),
-                    where('rombel', '==', selectedClass)
-                );
-                const qByClassId = query(
+                const q = query(
                     collection(db, 'students'),
                     where('userId', '==', currentUser.uid),
                     where('classId', '==', classToFetchId)
                 );
 
-                const [snapRombel, snapClassId] = await Promise.all([
-                    getDocs(qByRombel),
-                    getDocs(qByClassId)
-                ]);
+                const snap = await getDocs(q);
+                const studentList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                const studentMap = new Map();
-                snapRombel.docs.forEach(doc => studentMap.set(doc.id, { id: doc.id, ...doc.data() }));
-                snapClassId.docs.forEach(doc => {
-                    if (!studentMap.has(doc.id)) studentMap.set(doc.id, { id: doc.id, ...doc.data() });
-                });
-
-                const studentList = Array.from(studentMap.values());
-                // Sort by name in memory
-                setStudents(studentList.sort((a, b) => a.name.localeCompare(b.name)));
+                // Sort by attendance number (absen) numerically
+                setStudents(studentList.sort((a, b) => {
+                    const absA = parseInt(a.absen) || 0;
+                    const absB = parseInt(b.absen) || 0;
+                    if (absA !== absB) return absA - absB;
+                    return a.name.localeCompare(b.name);
+                }));
             } catch (err) {
                 console.error(err);
                 toast.error('Gagal memuat data siswa');
@@ -224,7 +226,7 @@ const RekapIndividuPage = () => {
             }
         };
         fetchStudents();
-    }, [selectedClass, currentUser]);
+    }, [selectedClass, currentUser, classes]);
 
     // Fetch class agreement when class changes
     useEffect(() => {
@@ -319,7 +321,7 @@ const RekapIndividuPage = () => {
                 // 6. Narrative Note - Fetch gracefully to avoid blocking the whole page
                 let existingNote = '';
                 try {
-                    const noteId = `${uid}_${selectedStudentId}_${activeSemester}_${academicYear.replace(/\//g, '-')} `;
+                    const noteId = `${uid}_${selectedStudentId}_${activeSemester}_${academicYear.replace(/\//g, '-')}`;
                     const noteRef = doc(db, 'studentNotes', noteId);
                     const noteSnap = await getDoc(noteRef);
                     if (noteSnap.exists()) {
@@ -342,16 +344,10 @@ const RekapIndividuPage = () => {
         fetchAllData();
     }, [selectedStudentId, activeSemester, academicYear, students]);
 
-    // List of unique subjects from grades — filter out raw Firestore IDs stored in legacy data
-    const availableSubjects = useMemo(() => {
-        const isLikelyId = (str) => str && str.length > 15 && /^[a-zA-Z0-9]+$/.test(str);
-        const subjects = new Set(
-            grades
-                .map(g => g.subjectName)
-                .filter(name => name && !isLikelyId(name))
-        );
-        return Array.from(subjects).sort();
-    }, [grades]);
+    // Use all available subjects from DB for the filter
+    const availableSubjectsList = useMemo(() => {
+        return subjects.map(s => s.name).sort();
+    }, [subjects]);
 
     // Filtered data for display
     const filteredGrades = useMemo(() => {
@@ -385,15 +381,46 @@ const RekapIndividuPage = () => {
 
     // Calculate stats and radar data whenever dependencies change
     useEffect(() => {
-        const knowledgeTypes = ['Harian', 'Formatif', 'Sumatif', 'Ulangan', 'Tengah Semester', 'PTS', 'Akhir Semester', 'PAS', 'Tugas', 'Kuis', 'Pengetahuan', 'Homework'];
         const practiceTypes = ['Praktik', 'Proyek', 'Produk', 'Portofolio', 'Keterampilan', 'Unjuk Kerja', 'Praktikum', 'Project', 'Skill'];
+        const dailyTypes = ['Harian', 'Formatif', 'Sumatif', 'Ulangan', 'Tugas', 'Kuis', 'Pengetahuan', 'Homework'];
+        const ptsTypes = ['Tengah Semester', 'PTS'];
+        const pasTypes = ['Akhir Semester', 'PAS'];
 
-        const knowledgeGrades = filteredGrades.filter(g => knowledgeTypes.includes(g.assessmentType));
+        const dailyGrades = filteredGrades.filter(g => dailyTypes.includes(g.assessmentType));
+        const ptsGrades = filteredGrades.filter(g => ptsTypes.includes(g.assessmentType));
+        const pasGrades = filteredGrades.filter(g => pasTypes.includes(g.assessmentType));
         const practiceGrades = filteredGrades.filter(g => practiceTypes.includes(g.assessmentType));
 
-        const knowledgeAvg = knowledgeGrades.length > 0
-            ? knowledgeGrades.reduce((sum, g) => sum + parseFloat(g.score), 0) / knowledgeGrades.length
+        const dailyAvg = dailyGrades.length > 0
+            ? dailyGrades.reduce((sum, g) => sum + parseFloat(g.score), 0) / dailyGrades.length
             : 0;
+
+        const ptsAvg = ptsGrades.length > 0
+            ? ptsGrades.reduce((sum, g) => sum + parseFloat(g.score), 0) / ptsGrades.length
+            : 0;
+
+        const pasAvg = pasGrades.length > 0
+            ? pasGrades.reduce((sum, g) => sum + parseFloat(g.score), 0) / pasGrades.length
+            : 0;
+
+        // Weighted Knowledge Calculation: (2*DailyAvg + PTS + PAS) / Divisor
+        let totalKnowledgeWeight = 0;
+        let weightedKnowledgeSum = 0;
+
+        if (dailyGrades.length > 0) {
+            totalKnowledgeWeight += 2;
+            weightedKnowledgeSum += (dailyAvg * 2);
+        }
+        if (ptsGrades.length > 0) {
+            totalKnowledgeWeight += 1;
+            weightedKnowledgeSum += ptsAvg;
+        }
+        if (pasGrades.length > 0) {
+            totalKnowledgeWeight += 1;
+            weightedKnowledgeSum += pasAvg;
+        }
+
+        const knowledgeAvg = totalKnowledgeWeight > 0 ? weightedKnowledgeSum / totalKnowledgeWeight : 0;
 
         const practiceAvg = practiceGrades.length > 0
             ? practiceGrades.reduce((sum, g) => sum + parseFloat(g.score), 0) / practiceGrades.length
@@ -542,7 +569,7 @@ const RekapIndividuPage = () => {
         setIsSaving(true);
         try {
             const uid = auth.currentUser.uid;
-            const noteId = `${uid}_${selectedStudentId}_${activeSemester}_${academicYear.replace(/\//g, '-')} `;
+            const noteId = `${uid}_${selectedStudentId}_${activeSemester}_${academicYear.replace(/\//g, '-')}`;
             await setDoc(doc(db, 'studentNotes', noteId), {
                 studentId: selectedStudentId,
                 semester: activeSemester,
@@ -669,7 +696,7 @@ const RekapIndividuPage = () => {
                         stats={stats}
                         selectedSubject={selectedSubject}
                         setSelectedSubject={setSelectedSubject}
-                        availableSubjects={availableSubjects}
+                        availableSubjects={availableSubjectsList}
                         filteredGrades={filteredGrades}
                         classAgreement={classAgreement}
                         selectedClass={selectedClass}
@@ -679,9 +706,12 @@ const RekapIndividuPage = () => {
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <StudentRadarProfile stats={stats} />
-                        <div className="lg:col-span-2 space-y-6">
+                        <div className="lg:col-span-1 space-y-6">
                             <StudentAttendanceDetail stats={stats} attendance={attendance} />
+                        </div>
+                        <div className="lg:col-span-1 space-y-6">
                             <StudentInfractionDetail infractions={infractions} />
+                            <StudentAppreciationDetail appreciations={appreciations} />
                         </div>
                     </div>
 

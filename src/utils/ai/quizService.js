@@ -2,10 +2,12 @@ import {
     getModel,
     retryWithBackoff,
     extractJSON,
-    shuffleArray
+    shuffleArray,
+    handleGeminiError
 } from "./base";
 import { getAdvancedQuizPrompt, getQuizFromImagePrompt } from "../prompts/quizPrompts";
 import { BSKAP_DATA } from "../bskapData";
+import { STRICT_DOCUMENT_BRAIN } from "../prompts/smarttyPrompts";
 
 const BATCH_SIZE = 3;
 
@@ -43,7 +45,7 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
             const batchInstructions = batches[i].map((type, idx) => `- Soal No ${allQuestions.length + idx + 1}: Tipe **${type}**`).join('\n');
             const prompt = getAdvancedQuizPrompt({ topic, context, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty });
 
-            const model = getModel(modelName, true);
+            const model = getModel(modelName, true, STRICT_DOCUMENT_BRAIN);
             const result = await retryWithBackoff(() => model.generateContent(prompt));
             const parsed = extractJSON(result.response.text());
 

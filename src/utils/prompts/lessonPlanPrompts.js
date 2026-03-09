@@ -61,7 +61,7 @@ export const getLessonPlanPrompt = (data, BSKAP_DATA, level, cpFullVerbatim, sem
       4. **INDIKATOR OPERASIONAL:** Turunkan TP menjadi beberapa IKTP yang spesifik dan terukur.
 
       **PENTING - OPERASIONALISASI TUJUAN (IKTP):**
-      Anda **WAJIB** menurunkan Tujuan Pembelajaran (TP) yang luas menjadi beberapa **Indikator Tujuan Pembelajaran (IKTP)** yang spesifik, operasional, dan terukur untuk kegiatan ini.
+      Anda **WAJIB** menurunkan Tujuan Pembelajaran (TP) yang luas menjadi beberapa **Indikator Tujuan Pembelajaran (IKTP)** yang spesifik, operasional, and terukur untuk kegiatan ini.
       - Cantumkan label **"Indikator Tujuan Pembelajaran"** secara eksplisit di bawah bagian Tujuan Pembelajaran.
       - IKTP harus menunjukkan langkah-langkah pencapaian kompetensi secara bertahap (misal: dari mengidentifikasi -> mengklasifikasi -> mensimulasikan).
 
@@ -69,7 +69,7 @@ export const getLessonPlanPrompt = (data, BSKAP_DATA, level, cpFullVerbatim, sem
       Anda HARUS menyesuaikan seluruh konten RPP dengan jenjang kelas "${data.gradeLevel}". Perhatikan hal-hal berikut:
 
       **Untuk Kelas SD (1-6):**
-      - Gunakan bahasa yang sangat sederhana, konkret, dan mudah dipahami anak usia 6-12 tahun.
+      - Gunakan bahasa yang sangat sederhana, konkret, and mudah dipahami anak usia 6-12 tahun.
       - Fokus pada pembelajaran berbasis permainan, cerita, and pengalaman langsung.
       - Contoh dan ilustrasi harus dari kehidupan sehari-hari anak (keluarga, sekolah, lingkungan sekitar).
       - Kegiatan harus melibatkan gerakan fisik, visual, and hands-on activities.
@@ -199,7 +199,7 @@ ${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map
         - Gunakan referensi umum: "Buku Siswa [Mapel] Kelas [X] Kurikulum Merdeka, Kemendikdasmen"
         - Tambahkan catatan: "Guru dapat menyesuaikan dengan buku teks yang digunakan di sekolah (Kemendikdasmen)"
         - JANGAN membuat referensi fiktif atau tidak resmi
-        - Tetap gunakan materi yang akurat sesuai CP dan standar nasional Kemendikdasmen
+        - Tetap gunakan materi yang akurat sesuai CP and standar nasional Kemendikdasmen
   
         **7. CONTOH PENERAPAN LENGKAP:**
         
@@ -276,7 +276,7 @@ ${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map
       **Pastikan 4 unsur (A, B, C, D) selalu ada dalam kalimat, namun TERSEMBUNYI (implisit).**
 
       **JANGAN GUNAKAN FORMAT INI (SALAH):**
-      *❌ "Menyimpulkan sifat-sifat magnet." (Tidak ada Condition, Audience, dan Degree)*
+      *❌ "Menyimpulkan sifat-sifat magnet." (Tidak ada Condition, Audience, and Degree)*
 
       **3. Kesiapan Peserta Didik:**
       ${data.studentCharacteristics
@@ -360,7 +360,7 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       **INSTRUKSI SANGAT PENTING (NARATIF & MENDALAM):** 
       - Bagian kegiatan inti per pertemuan harus **TEBAL, NARATIF, and MENDETAIL**. 
       - **KERANGKA PROGRESIVITAS (WAJIB UNTUK 2+ PERTEMUAN):**
-        - **Pertemuan 1 (Fondasi)**: Fokus pada pengenalan konsep, pemahaman dasar, dan koneksi awal (Conceptual).
+        - **Pertemuan 1 (Fondasi)**: Fokus pada pengenalan konsep, pemahaman dasar, and koneksi awal (Conceptual).
         - **Pertemuan 2 (Aplikasi/Praktik)**: Fokus pada prosedur, eksperimen, latihan terbimbing, atau pengembangan keterampilan (Procedural).
         - **Pertemuan 3+ (Ekspansi/Evaluasi)**: Fokus pada proyek kompleks, pemecahan masalah nyata, presentasi karya, atau asesmen sumatif (Creative/Evaluation).
       - Anda **WAJIB** memastikan setiap pertemuan memiliki sub-topik yang spesifik dan aktivitas yang **BERBEDA** secara signifikan. Jangan mengulang aktivitas yang sama di pertemuan yang berbeda.
@@ -398,10 +398,10 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       - **CEK KONSISTENSI TP**: Setiap Tujuan Pembelajaran (TP) yang Anda tulis di atas **HARUS** memiliki aktivitas nyata di langkah-langkah ini. Jangan ada TP yang "terlupakan" atau tidak diajarkan.
 
 
-      **CATATAN PENTING TENTANG KEDALAMAN KONTEN (TARGET: 7-12 HALAMAN):**
-      - **TARGET HALAMAN (STRICT - JANGAN IMPROVISASI):**
-        - **1 Pertemuan:** Target ~7-9 Halaman.
-        - **2+ Pertemuan:** Target ~9-12 Halaman (Maksimal).
+      **CATATAN PENTING TENTANG KEDALAMAN KONTEN (TARGET: 7-8 HALAMAN PER PERTEMUAN):**
+      - **TARGET HALAMAN (STRICT - JANGAN MERINGKAS):**
+        - **1 Pertemuan:** WAJIB menghasilkan sekitar 7-8 halaman/lembar konten yang padat.
+        - **2+ Pertemuan:** Menyesuaikan secara proporsional (misal: 2 pertemuan = 10-12 halaman).
       - **TARGET TOTAL DOKUMEN:** Jaga kedalaman materi and langkah pembelajaran agar tetap padat and berisi tanpa berlebihan.
       - **EFISIENSI:** Meskipun jumlah pertemuan bertambah, pastikan narasi tetap fokus, efisien, and tidak bertele-tele. Hindari pengulangan yang tidak perlu.
       - **FOKUS PADA KUALITAS NARASI:**

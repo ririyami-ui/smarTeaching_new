@@ -11,7 +11,7 @@ const SummaryCard = ({ title, value, icon, color = 'blue', trend, subtitle, colo
     };
 
     return (
-        <div className={`${colorClasses[color]} rounded-xl border p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:scale-105 group overflow-hidden relative`}>
+        <div className={`${colorClasses[color]} rounded-xl border p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:z-10 group overflow-hidden relative`}>
             <div className="flex items-start justify-between relative z-10">
                 <div className="flex-1">
                     <p className="text-sm font-bold opacity-100 mb-1">{title}</p>

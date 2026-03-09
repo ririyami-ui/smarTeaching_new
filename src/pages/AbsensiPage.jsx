@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import moment from 'moment';
 import { collection, getDocs, query, where, writeBatch, doc, serverTimestamp, orderBy, limit, addDoc } from 'firebase/firestore';
-import { Trophy, Star } from 'lucide-react'; // Added Trophy and Star icons
+import { Trophy, Star, Cake, Gift } from 'lucide-react'; // Added Cake and Gift icons
 import { db, auth } from '../firebase';
 import StyledTable from '../components/StyledTable'; // Assuming you have a StyledTable component
 import ClockDisplay from '../components/ClockDisplay';
@@ -91,19 +91,10 @@ const AbsensiPage = () => {
           );
           let lastJournalSnapshot = await getDocs(lastJournalQuery);
 
-          // Fallback for journal if first query is empty
           if (lastJournalSnapshot.empty) {
-            lastJournalQuery = query(
-              collection(db, 'teachingJournals'),
-              where('userId', '==', userId),
-              where(foundActiveSchedule.classId ? 'className' : 'classId', '==', rombelName),
-              where(foundActiveSchedule.subjectId ? 'subjectName' : 'subjectId', '==', foundActiveSchedule.subject),
-              where('semester', '==', activeSemester),
-              where('academicYear', '==', academicYear),
-              orderBy('timestamp', 'desc'),
-              limit(1)
-            );
-            lastJournalSnapshot = await getDocs(lastJournalQuery);
+            // Minimal fallback: If by some chance classId/subjectId didn't return anything
+            // but we are absolutely sure the migration ran, we can just keep it simple.
+            // Removing the complex name-based backup query.
           }
 
           if (!lastJournalSnapshot.empty) {
@@ -132,32 +123,11 @@ const AbsensiPage = () => {
           where('classId', '==', foundActiveSchedule.classId || rombelName)
         );
 
-        const studentsByRombelQuery = query(
-          collection(db, 'students'),
-          where('userId', '==', userId),
-          where('rombel', '==', rombelName)
-        );
-
-        const [snapshotByClassId, snapshotByRombel] = await Promise.all([
-          getDocs(studentsByClassIdQuery),
-          getDocs(studentsByRombelQuery)
-        ]);
-
-        // Merge results and remove duplicates based on student ID
-        const studentMap = new Map();
-
-        snapshotByClassId.docs.forEach(doc => {
-          studentMap.set(doc.id, { id: doc.id, ...doc.data() });
-        });
-
-        snapshotByRombel.docs.forEach(doc => {
-          if (!studentMap.has(doc.id)) {
-            studentMap.set(doc.id, { id: doc.id, ...doc.data() });
-          }
-        });
-
-        // Convert back to array and sort by 'absen'
-        const fetchedStudents = Array.from(studentMap.values()).sort((a, b) => {
+        const fetchedStudentsSnap = await getDocs(studentsByClassIdQuery);
+        const fetchedStudents = fetchedStudentsSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })).sort((a, b) => {
           const absenA = parseInt(a.absen) || 0;
           const absenB = parseInt(b.absen) || 0;
           return absenA - absenB;
@@ -214,6 +184,14 @@ const AbsensiPage = () => {
     return () => clearInterval(interval);
   }, [auth.currentUser, activeSemester, academicYear, activeTemplateId]);
 
+  const birthdayStudents = React.useMemo(() => {
+    const today = moment().format('MM-DD');
+    return students.filter(student => {
+      if (!student.birthDate) return false;
+      return moment(student.birthDate).format('MM-DD') === today;
+    });
+  }, [students]);
+
   const handleAttendanceChange = (studentId, status) => {
     setAttendance(prev => ({ ...prev, [studentId]: status }));
   };
@@ -232,6 +210,7 @@ const AbsensiPage = () => {
         subjectId: activeSchedule.subjectId || '',
         subjectName: activeSchedule.subject,
         points: 1,
+        type: 'Keaktifan',
         category: 'keaktifan',
         date: moment().format('YYYY-MM-DD'),
         semester: activeSemester,
@@ -259,7 +238,7 @@ const AbsensiPage = () => {
       for (const student of studentsToSave) {
         const status = attendanceToSave[student.id];
         if (status) { // Only save if a status exists for the student
-          const attendanceRef = doc(db, 'attendance', `${attendanceDate}-${scheduleToSave.classId || rombelName}-${student.id}`);
+          const attendanceRef = doc(db, 'attendance', `${attendanceDate}-${scheduleToSave.classId}-${student.id}`);
           batch.set(attendanceRef, {
             userId: auth.currentUser.uid,
             date: attendanceDate,
@@ -444,6 +423,52 @@ const AbsensiPage = () => {
           </div>
         )}
       </div>
+      {/* Birthday Banner Section */}
+      {birthdayStudents.length > 0 && (
+        <div className="relative overflow-hidden mb-6 group">
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-indigo-500/20 animate-gradient-x" />
+          <div className="relative bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 p-5 rounded-3xl shadow-xl flex flex-col md:flex-row items-center gap-6 overflow-hidden">
+            {/* Animated Decorative Elements */}
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-pink-400/10 rounded-full blur-2xl animate-pulse" />
+            <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-indigo-400/10 rounded-full blur-2xl animate-pulse delay-700" />
+
+            <div className="flex-shrink-0 relative">
+              <div className="w-16 h-16 bg-gradient-to-tr from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 group-hover:rotate-6 transition-transform duration-500">
+                <Cake className="text-white animate-bounce" size={32} />
+              </div>
+              <div className="absolute -top-2 -right-2 transform -rotate-12">
+                <Gift className="text-amber-500 animate-pulse" size={24} />
+              </div>
+            </div>
+
+            <div className="flex-1 text-center md:text-left space-y-1">
+              <h3 className="text-lg font-black text-gray-800 dark:text-white flex items-center justify-center md:justify-start gap-2 tracking-tight">
+                Selamat Ulang Tahun! 🎉
+              </h3>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 leading-relaxed">
+                Hari ini adalah hari istimewa bagi {birthdayStudents.map((s, idx) => (
+                  <span key={s.id} className="font-bold text-pink-600 dark:text-pink-400">
+                    {s.name}{idx < birthdayStudents.length - 1 ? (idx === birthdayStudents.length - 2 ? ' dan ' : ', ') : ''}
+                  </span>
+                ))}. Mari berikan apresiasi terbaik kita!
+              </p>
+            </div>
+
+            <div className="flex-shrink-0 flex gap-2">
+              {birthdayStudents.map(student => (
+                <button
+                  key={student.id}
+                  onClick={() => handleGiveStar(student)}
+                  className="group/btn relative px-4 py-2 bg-white/50 dark:bg-gray-700/50 hover:bg-pink-500 dark:hover:bg-pink-600 rounded-xl text-xs font-bold text-pink-600 dark:text-pink-400 hover:text-white transition-all duration-300 border border-pink-100 dark:border-pink-900/30 flex items-center gap-2 shadow-sm"
+                >
+                  <Star size={14} className="fill-current" />
+                  Apresiasi {student.name.split(' ')[0]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeSchedule ? (
         <>
@@ -474,7 +499,7 @@ const AbsensiPage = () => {
       ) : (
         <RunningText text="Tidak ada jadwal aktif saat ini. Silakan cek jadwal Anda." />
       )}
-    </div>
+    </div >
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Save, FileSpreadsheet, FileText, Printer, Plus, Zap, Lock, Unlock, Trash
+    Save, FileSpreadsheet, FileText, Printer, Plus, Zap, Lock, Unlock, Trash, Loader2
 } from 'lucide-react';
 import moment from 'moment';
 import 'moment/locale/id';
@@ -16,6 +16,7 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
     const [loading, setLoading] = useState(false);
     const [programId, setProgramId] = useState(null);
     const [isLocked, setIsLocked] = useState(true);
+    const [isExporting, setIsExporting] = useState('');
 
     // Live Sync Target JP from Shared State
     useEffect(() => {
@@ -138,7 +139,9 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
     };
 
     const handleExportWord = async () => {
-        const rows = protaData.map((row, i) => `
+        setIsExporting('word');
+        try {
+            const rows = protaData.map((row, i) => `
             <tr>
                 <td class="text-center">${i + 1}</td>
                 <td>${row.elemen || '-'}</td>
@@ -149,7 +152,7 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
             </tr>
         `).join('');
 
-        const html = `
+            const html = `
             <h1>PROGRAM TAHUNAN (PROTA)</h1>
             <p>Satuan Pendidikan: ${userProfile?.school || '-'}<br/>
             Mata Pelajaran: ${subject}<br/>
@@ -173,10 +176,14 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
                 </tr>
             </table>
         `;
-        exportToDocx(html, `Prota-${subject}-${grade}.docx`);
+            exportToDocx(html, `Prota-${subject}-${grade}.docx`);
+        } finally {
+            setIsExporting('');
+        }
     };
 
     const handleExportExcel = async () => {
+        setIsExporting('excel');
         try {
             const XLSX = await import("xlsx");
             const { saveAs } = await import("file-saver");
@@ -205,9 +212,11 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
             saveAs(new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })]), `Prota-${subject}-${grade}.xlsx`);
             toast.success("Excel Prota berhasil diunduh!");
         } catch (e) { toast.error("Gagal ekspor Excel."); }
+        finally { setIsExporting(''); }
     };
 
     const handleExportPDF = async () => {
+        setIsExporting('pdf');
         try {
             const { default: jsPDF } = await import("jspdf");
             const { default: autoTable } = await import("jspdf-autotable");
@@ -252,6 +261,7 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
             doc.save(`Prota-${subject}-${grade}.pdf`);
             toast.success("PDF Prota berhasil diunduh!");
         } catch (e) { console.error(e); toast.error("Gagal ekspor PDF."); }
+        finally { setIsExporting(''); }
     };
 
     const isMatch = totalJP === targetJP;
@@ -327,10 +337,18 @@ const ProtaView = ({ grade, subject, semester, year, activeTab, userProfile, sig
 
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center no-print pt-4 border-t dark:border-gray-700 gap-4">
                 <div className="flex flex-wrap gap-2">
-                    <button onClick={handleExportPDF} className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm flex items-center justify-center gap-2"><FileSpreadsheet size={16} />PDF</button>
-                    <button onClick={handleExportWord} className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm flex items-center justify-center gap-2"><FileText size={16} />Word</button>
-                    <button onClick={handleExportExcel} className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm flex items-center justify-center gap-2"><FileSpreadsheet size={16} />Excel</button>
-                    <button onClick={() => window.print()} className="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm flex items-center justify-center gap-2"><Printer size={16} />Cetak</button>
+                    <button onClick={handleExportPDF} disabled={isExporting !== ''} className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition text-sm flex items-center justify-center gap-2">
+                        {isExporting === 'pdf' ? <Loader2 className="animate-spin" size={16} /> : <FileSpreadsheet size={16} />} PDF
+                    </button>
+                    <button onClick={handleExportWord} disabled={isExporting !== ''} className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition text-sm flex items-center justify-center gap-2">
+                        {isExporting === 'word' ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />} Word
+                    </button>
+                    <button onClick={handleExportExcel} disabled={isExporting !== ''} className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition text-sm flex items-center justify-center gap-2">
+                        {isExporting === 'excel' ? <Loader2 className="animate-spin" size={16} /> : <FileSpreadsheet size={16} />} Excel
+                    </button>
+                    <button onClick={() => window.print()} disabled={isExporting !== ''} className="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 disabled:opacity-50 transition text-sm flex items-center justify-center gap-2">
+                        <Printer size={16} /> Cetak
+                    </button>
                 </div>
                 <button onClick={handleSave} disabled={loading} className="flex items-center justify-center gap-2 px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg transition">
                     <Save size={18} />{loading ? 'Menyimpan...' : 'Simpan Prota'}

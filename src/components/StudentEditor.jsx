@@ -64,7 +64,7 @@ export default function StudentEditor({ studentData, onSave, onClose, rombels, c
         setBirthDate('');
       }
 
-      setClassId(studentData.classId || studentData.rombel || '');
+      setClassId(studentData.classId || '');
       setAbsen(studentData.absen || '');
     }
   }, [studentData]);
