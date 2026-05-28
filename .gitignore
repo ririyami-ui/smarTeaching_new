@@ -58,6 +58,22 @@ Thumbs.db
 # Optional eslint cache
 .eslintcache
 
+# Temp / scratch files
+temp.ts
+temp/
+tsc_output.txt
+errors.txt
+scratch/
+*.py
+*.b64
+
+# Audit / report docs
+AUDIT_REPORT*.md
+audit.md
+CHAT_LOG_*.md
+LAPORAN_AUDIT_*.md
+MIGRASI_*.md
+
 # Output of 'npm pack'
 *.tgz
 
