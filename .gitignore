@@ -58,6 +58,9 @@ Thumbs.db
 # Optional eslint cache
 .eslintcache
 
+# Functions dependencies
+functions/node_modules/
+
 # Temp / scratch files
 temp.ts
 temp/
@@ -66,6 +69,10 @@ errors.txt
 scratch/
 *.py
 *.b64
+
+# Backup / recovery / old version files
+*.recovery
+*.v*
 
 # Audit / report docs
 AUDIT_REPORT*.md
