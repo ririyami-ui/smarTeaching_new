@@ -16,12 +16,12 @@
     /* rounded-2xl */
     overflow: hidden;
     transition: all 500ms;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07),
-        inset 0 0 10px rgba(255, 255, 255, 0.3);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.08));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.1),
+        inset 0 0 15px rgba(255, 255, 255, 0.4);
 }
 
 .glass-icon-container::before {
@@ -30,57 +30,74 @@
     inset: 0;
     opacity: 0;
     transition: opacity 500ms;
-    background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.4), transparent 70%);
+    background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.5), transparent 75%);
+}
+
+.glass-icon-container:hover {
+    transform: translateY(-4px) scale(1.05);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 15px 45px 0 rgba(31, 38, 135, 0.15),
+        inset 0 0 20px rgba(255, 255, 255, 0.5);
 }
 
 .glass-icon-container:hover::before {
     opacity: 1;
 }
 
-/* Glass glow color variants */
+/* Glass glow color variants with more depth */
 .glass-glow-blue {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), inset 0 0 15px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.25), inset 0 0 20px rgba(59, 130, 246, 0.15);
 }
 
 .glass-glow-green {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 15px rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.25), inset 0 0 20px rgba(16, 185, 129, 0.15);
 }
 
 .glass-glow-purple {
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), inset 0 0 15px rgba(168, 85, 247, 0.1);
+    box-shadow: 0 0 25px rgba(168, 85, 247, 0.25), inset 0 0 20px rgba(168, 85, 247, 0.15);
 }
 
 .glass-glow-red {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.2), inset 0 0 15px rgba(239, 68, 68, 0.1);
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.25), inset 0 0 20px rgba(239, 68, 68, 0.15);
 }
 
 .glass-glow-yellow {
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2), inset 0 0 15px rgba(245, 158, 11, 0.1);
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.25), inset 0 0 20px rgba(245, 158, 11, 0.15);
+}
+
+.glass-glow-indigo {
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.25), inset 0 0 20px rgba(99, 102, 241, 0.15);
 }
 
 /* --- Premium Chart Utilities --- */
 .chart-container-glass {
-    /* bg-white/40 dark:bg-black/40 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-2xl transition-all duration-500 rounded-[2rem] */
-    background-color: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    transition: all 500ms;
-    border-radius: 2rem;
+    background-color: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15),
+                0 18px 36px -18px rgba(0, 0, 0, 0.1);
+    transition: all 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-radius: 2.5rem;
     isolation: isolate;
+}
+
+.chart-container-glass:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 40px 80px -12px rgba(0, 0, 0, 0.2),
+                0 25px 45px -18px rgba(0, 0, 0, 0.15);
 }
 
 @media (prefers-color-scheme: dark) {
     .chart-container-glass {
-        background-color: rgba(0, 0, 0, 0.4);
-        border-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: rgba(255, 255, 255, 0.08);
     }
 }
 
 .dark .chart-container-glass {
-    background-color: rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(15, 23, 42, 0.6);
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
 .chart-glow-blue {

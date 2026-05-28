@@ -2,7 +2,6 @@ import { db } from '../firebase';
 import {
     collection,
     getDocs,
-    deleteDoc,
     doc,
     query,
     where,
@@ -47,7 +46,7 @@ export const cleanOrphanedDocuments = async (userId) => {
             };
             results.total += snapshot.size;
 
-            console.log(`[${collectionName}] Found ${snapshot.size} documents`);
+            if (import.meta.env.DEV) console.log(`[${collectionName}] Found ${snapshot.size} documents`);
         } catch (error) {
             results.errors.push({
                 collection: collectionName,
@@ -244,6 +243,37 @@ export const generateCleanupReport = async (userId) => {
             }
         }
 
+        // Cek duplikat untuk nilai (grades) dengan ID non-standar
+        try {
+            const gradesQ = query(collection(db, 'grades'), where('userId', '==', userId));
+            const gradesSnap = await getDocs(gradesQ);
+            let gradesDupes = 0;
+            gradesSnap.forEach(d => {
+                const data = d.data();
+                const sanitizedMaterial = (data.material || '').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+                const sanitizedAssessmentType = (data.assessmentType || '').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+                const cleanDate = data.date ? (data.date.includes('T') ? data.date.split('T')[0] : data.date) : '';
+                const standardId = `${data.studentId}-${data.classId}-${data.subjectId}-${cleanDate}-${sanitizedMaterial}-${sanitizedAssessmentType}`;
+                
+                if (d.id !== standardId) {
+                    gradesDupes++;
+                }
+            });
+            
+            if (gradesDupes > 0) {
+                report.recommendations.push(
+                    `Ditemukan ${gradesDupes} nilai ganda (ID tidak standar) yang perlu digabungkan dan dibersihkan`
+                );
+                report.duplicates['grades'] = {
+                    total: gradesSnap.size,
+                    duplicates: gradesDupes,
+                    duplicateIds: []
+                };
+            }
+        } catch (error) {
+            console.error('Error checking duplicate grades in report:', error);
+        }
+
         // Cek data lama (lebih dari 2 tahun)
         const oldDataChecks = ['lessonPlans', 'assessments', 'handouts'];
         for (const collectionName of oldDataChecks) {
@@ -330,6 +360,53 @@ export const executeAutoCleanup = async (userId, options = {}) => {
                         error: error.message
                     });
                 }
+            }
+
+            // Pembersihan nilai ganda (grades) dengan ID non-standar
+            try {
+                const gradesQ = query(collection(db, 'grades'), where('userId', '==', userId));
+                const gradesSnap = await getDocs(gradesQ);
+                
+                const gradeDocsMap = {};
+                gradesSnap.forEach(d => {
+                    gradeDocsMap[d.id] = d.data();
+                });
+                
+                const batch = writeBatch(db);
+                let gradesDuplicatesCount = 0;
+                
+                gradesSnap.forEach(d => {
+                    const data = d.data();
+                    const sanitizedMaterial = (data.material || '').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+                    const sanitizedAssessmentType = (data.assessmentType || '').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+                    const cleanDate = data.date ? (data.date.includes('T') ? data.date.split('T')[0] : data.date) : '';
+                    const standardId = `${data.studentId}-${data.classId}-${data.subjectId}-${cleanDate}-${sanitizedMaterial}-${sanitizedAssessmentType}`;
+                    
+                    if (d.id !== standardId) {
+                        gradesDuplicatesCount++;
+                        
+                        const standardRef = doc(db, 'grades', standardId);
+                        const mergedData = {
+                            ...data,
+                            date: cleanDate,
+                        };
+                        
+                        batch.set(standardRef, mergedData, { merge: true });
+                        batch.delete(d.ref);
+                    }
+                });
+                
+                if (gradesDuplicatesCount > 0) {
+                    await batch.commit();
+                    results.duplicatesRemoved += gradesDuplicatesCount;
+                }
+            } catch (error) {
+                results.errors.push({
+                    action: 'removeDuplicateGrades',
+                    collection: 'grades',
+                    error: error.message
+                });
+                console.error('Error cleaning duplicate grades:', error);
             }
         }
 

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import moment from 'moment';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { useSettings } from '../utils/SettingsContext';
 

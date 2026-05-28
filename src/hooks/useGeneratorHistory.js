@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { db, auth } from '../firebase';
+import { useAuth } from './useAuth';
+import { db } from '../firebase';
 import {
     collection,
     query,
@@ -17,21 +18,22 @@ import { toast } from 'react-hot-toast';
  * @param {string} historyCollection - Collection name for history (e.g., 'lkpd_history', 'quizzes')
  * @param {Object} options - Additional options
  */
-export const useGeneratorHistory = (historyCollection, options = {}) => {
+export const useGeneratorHistory = (historyCollection, _options = {}) => {
+    const { user } = useAuth();
     const [history, setHistory] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(true);
     const [classes, setClasses] = useState([]);
     const [userProfile, setUserProfile] = useState(null);
     const [loadingProfile, setLoadingProfile] = useState(true);
 
-    const { academicYear, activeSemester } = options;
+    // const { } = options;
 
     // Load User Profile
     useEffect(() => {
         const fetchUserProfile = async () => {
-            if (!auth.currentUser) return;
+            if (!user) return;
             try {
-                const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
                 if (userDoc.exists()) {
                     setUserProfile(userDoc.data());
                 }
@@ -42,16 +44,16 @@ export const useGeneratorHistory = (historyCollection, options = {}) => {
             }
         };
         fetchUserProfile();
-    }, []);
+    }, [user]);
 
     // Load History & Classes
     useEffect(() => {
-        if (!auth.currentUser) return;
+        if (!user) return;
 
         // Fetch History
         const historyQuery = query(
             collection(db, historyCollection),
-            where('userId', '==', auth.currentUser.uid)
+            where('userId', '==', user.uid)
         );
 
         const unsubHistory = onSnapshot(historyQuery, (snapshot) => {
@@ -72,7 +74,7 @@ export const useGeneratorHistory = (historyCollection, options = {}) => {
         // Fetch Classes
         const classesQuery = query(
             collection(db, 'classes'),
-            where('userId', '==', auth.currentUser.uid),
+            where('userId', '==', user.uid),
             orderBy('rombel')
         );
 
@@ -86,7 +88,7 @@ export const useGeneratorHistory = (historyCollection, options = {}) => {
             unsubHistory();
             unsubClasses();
         };
-    }, [historyCollection]);
+    }, [historyCollection, user]);
 
     const deleteHistoryItem = useCallback(async (id) => {
         try {

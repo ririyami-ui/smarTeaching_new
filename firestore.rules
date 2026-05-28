@@ -21,10 +21,13 @@ service cloud.firestore {
 
     // Defensive writing check for data being sent
     function isWritingOwner() {
-      return isAuthenticated() && (
-        request.resource == null || 
-        request.resource.data.get('userId', '') == request.auth.uid
-      );
+      return isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+    }
+
+    // Check if data has required fields for creation
+    function isValidCreate() {
+      return request.resource.data.userId == request.auth.uid;
     }
 
     // --- 1. Identity & Communication ---
@@ -37,36 +40,126 @@ service cloud.firestore {
 
     // --- 2. Academic Programs (Complex Access) ---
     match /teachingPrograms/{docId} {
-      allow read, write: if isDocOwner() && isWritingOwner();
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner();
     }
 
     // --- 3. Master Data & Journals ---
-    match /classes/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /subjects/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /holidays/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /teachingSchedules/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /schedules/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /teachingJournals/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /classes/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /subjects/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /holidays/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /teachingSchedules/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /schedules/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /teachingJournals/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
 
     // --- 4. Students & Performance ---
-    match /students/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /legendStudents/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /attendance/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /absensi/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /grades/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /studentTasks/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /studentNotes/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /kktpAssessments/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /students/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /legendStudents/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /attendance/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /absensi/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /grades/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner();
+    }
+    match /studentTasks/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /studentNotes/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /kktpAssessments/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
 
     // --- 5. Content & Conduct ---
-    match /lessonPlans/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /quizzes/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /handouts/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /lkpd_history/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /infractions/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /infraction_types/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /class_agreements/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
-    match /studentAppreciations/{docId} { allow read, write: if isDocOwner() && isWritingOwner(); }
+    match /lessonPlans/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /quizzes/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /handouts/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /lkpd_history/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /infractions/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /infraction_types/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /class_agreements/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
+    match /studentAppreciations/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
 
     // --- 6. Safety Catch-all ---
     match /{collection}/{docId} {

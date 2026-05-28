@@ -1,4 +1,4 @@
-import moment from 'moment';
+﻿import moment from 'moment';
 import 'moment/locale/id';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -72,16 +72,7 @@ export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate,
   // Footer - Two Column Signature
   const finalY = doc.autoTable.previous.finalY + 10;
   doc.setFontSize(10);
-  const leftColX = 14;
   const rightColX = doc.internal.pageSize.width - 60;
-
-  // Left Column (Principal) - assuming userProfile is available or passed? 
-  // Wait, generateAttendanceRecapPDF doesn't take userProfile arg currently. Need to add it or skip.
-  // It only takes (data, schoolName, startDate, endDate, teacherName, selectedClass).
-  // I will just add the Teacher part nicely first, and TODO: update caller to pass userProfile.
-  // Actually, I should update the caller first. But for now let's just format the Right column correctly.
-
-  // Actually, I can't add Principal without userProfile. 
   // Let's Skip Attendance update for Principal for now, just fix layout.
 
   // doc.text(`${fmtDate(startDate)} - ${fmtDate(endDate)}`, rightColX, finalY + 20); // Date Range as proxy for date? No, use current date.
@@ -753,10 +744,7 @@ const sanitizeForPdf = (str) => {
     // Remove emojis and other surrogates that cause PDF corruption in standard fonts
     .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '')
     // Filter out most non-ASCII/Extended Latin characters that show as Mojibake
-    .replace(/[^\x00-\x7F\xA0-\xFF]/g, (char) => {
-      // Keep some useful symbols if needed, otherwise replace with space or ?
-      return "";
-    });
+    .replace(/[^\x20-\x7F\xA0-\xFF]/g, '');
 };
 
 // Helper to add auto-paging text with basic Markdown support (Bold, Headers & Bullets)
@@ -1054,7 +1042,7 @@ const drawHorizontalBarChart = (doc, x, y, width, data) => {
   doc.setFontSize(9);
   doc.setTextColor(50, 50, 50);
 
-  data.forEach((item, i) => {
+  data.forEach((item) => {
     // Check for page break
     if (currentY + barHeight + spacing > pageHeight - bottomMargin) {
       doc.addPage();
@@ -1424,7 +1412,7 @@ export const generateStudentAnalysisPDF = (studentName, className, reportText, s
   doc.save(`Laporan_Siswa_${studentName}_${new Date().toISOString().slice(0, 10)}.pdf`);
 };
 
-export const generateStudentIndividualRecapPDF = ({ student, stats, grades, attendance, infractions, narrative, userProfile, teacherName, selectedSubject, radarChartImage, narrativeImage }) => {
+export const generateStudentIndividualRecapPDF = ({ student, stats, grades, attendance, infractions, appreciations, narrative, userProfile, teacherName, selectedSubject, radarChartImage }) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
@@ -1448,8 +1436,13 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
 
   // Student Info Block
   let yPos = 47;
+  doc.setFillColor(30, 58, 138);
+  doc.rect(14, yPos - 4, pageWidth - 28, 8, 'F');
+  doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.text("PROFIL SISWA", 14, yPos);
+  doc.setFontSize(9);
+  doc.text("PROFIL SISWA", 18, yPos + 1);
+  doc.setTextColor(0, 0, 0);
   doc.setFont('helvetica', 'normal');
   yPos += 7;
 
@@ -1459,11 +1452,22 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.text(`Kelas: ${student.rombel} `, 14, yPos);
   doc.text(`Kelamin: ${student.gender || '-'} `, pageWidth / 2, yPos);
 
+  // Separator
+  doc.setDrawColor(210, 210, 210);
+  doc.setLineWidth(0.2);
+  doc.line(14, yPos - 3, pageWidth - 14, yPos - 3);
+
   // Stats Block
-  yPos += 15;
+  yPos += 5;
+  doc.setFillColor(30, 58, 138);
+  doc.rect(14, yPos - 4, pageWidth - 28, 8, 'F');
+  doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.text("IKHTISAR CAPAIAN (SEMESTER BERJALAN)", 14, yPos);
-  yPos += 7;
+  doc.setFontSize(9);
+  doc.text("IKHTISAR CAPAIAN (SEMESTER BERJALAN)", 18, yPos + 1);
+  doc.setTextColor(0, 0, 0);
+  doc.setFont('helvetica', 'normal');
+  yPos += 8;
 
   const academicWeight = userProfile?.academicWeight || 50;
   const attitudeWeight = userProfile?.attitudeWeight || 50;
@@ -1482,17 +1486,52 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
     styles: { halign: 'center' }
   });
 
-  yPos = doc.autoTable.previous.finalY + 15;
+  // Box Nilai Akhir yang menonjol
+  const statsEndY = doc.autoTable.previous.finalY;
+  const boxW = 60;
+  const boxH = 18;
+  const boxX = (pageWidth - boxW) / 2;
+  const boxY = statsEndY + 10;
+  const finalScoreNum = parseFloat(stats.finalScore) || 0;
+  const passThreshold = 75;
+  const isPassed = finalScoreNum >= passThreshold;
+  const boxColor = isPassed ? [16, 185, 129] : [239, 68, 68];
 
-  // Radar Chart & Data Source Section
+  doc.setFillColor(...boxColor);
+  doc.roundedRect(boxX, boxY, boxW, boxH, 4, 4, 'F');
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(boxX + 1, boxY + 1, boxW - 2, boxH - 2, 3, 3, 'F');
+  doc.setDrawColor(...boxColor);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(boxX, boxY, boxW, boxH, 4, 4, 'S');
 
+  doc.setTextColor(...boxColor);
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`NILAI AKHIR (${academicWeight}/${attitudeWeight})`, pageWidth / 2, boxY + 7, { align: 'center' });
+  doc.setFontSize(16);
+  doc.text(stats.finalScore, pageWidth / 2, boxY + 15.5, { align: 'center' });
+  doc.setTextColor(0, 0, 0);
 
-  yPos = doc.autoTable.previous.finalY + 15;
+  yPos = boxY + boxH + 15;
+
   if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
 
-  // Academic Table (Moved here to fill Page 1)
+  // Separator
+  doc.setDrawColor(210, 210, 210);
+  doc.setLineWidth(0.2);
+  doc.line(14, yPos - 3, pageWidth - 14, yPos - 3);
+
+  // Academic Table
+  doc.setFillColor(30, 58, 138);
+  doc.rect(14, yPos - 4, pageWidth - 28, 8, 'F');
+  doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.text("DETAIL PENILAIAN AKADEMIK", 14, yPos);
+  doc.setFontSize(9);
+  doc.text("DETAIL PENILAIAN AKADEMIK", 18, yPos + 1);
+  doc.setTextColor(0, 0, 0);
+  doc.setFont('helvetica', 'normal');
+  yPos += 8;
 
   const gradeColumns = ["Tanggal", "Mata Pelajaran", "Materi", "Jenis", "Nilai"];
   const gradeRows = grades.map(g => [
@@ -1506,7 +1545,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.autoTable({
     head: [gradeColumns],
     body: gradeRows.length > 0 ? gradeRows : [["-", "Tidak ada data nilai", "-", "-", "-"]],
-    startY: yPos + 5,
+    startY: yPos - 3,
     theme: 'striped',
     styles: { fontSize: 8 },
     headStyles: { fillColor: [71, 85, 105] }
@@ -1515,9 +1554,21 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   yPos = doc.autoTable.previous.finalY + 15;
   if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
 
+  // Separator
+  doc.setDrawColor(210, 210, 210);
+  doc.setLineWidth(0.2);
+  doc.line(14, yPos - 3, pageWidth - 14, yPos - 3);
+
   // Behavior & Attendance Row
+  doc.setFillColor(30, 58, 138);
+  doc.rect(14, yPos - 4, pageWidth - 28, 8, 'F');
+  doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.text("CATATAN KEDISIPLINAN & KEHADIRAN", 14, yPos);
+  doc.setFontSize(9);
+  doc.text("CATATAN KEDISIPLINAN & KEHADIRAN", 18, yPos + 1);
+  doc.setTextColor(0, 0, 0);
+  doc.setFont('helvetica', 'normal');
+  yPos += 8;
 
   const behaviorColumns = ["Tanggal", "Jenis Pelanggaran", "Poin", "Keterangan"];
   const behaviorRows = infractions.map(i => [
@@ -1530,84 +1581,123 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.autoTable({
     head: [behaviorColumns],
     body: behaviorRows.length > 0 ? behaviorRows : [["-", "Tidak ada catatan pelanggaran", "-", "-"]],
-    startY: yPos + 5,
+    startY: yPos - 3,
     theme: 'grid',
     styles: { fontSize: 8 },
     headStyles: { fillColor: [220, 38, 38] }
   });
 
-  yPos = doc.autoTable.previous.finalY + 15;
+  // Detail kehadiran (di bawah tabel pelanggaran, masih dalam CATATAN KEDISIPLINAN & KEHADIRAN)
+  yPos = doc.autoTable.previous.finalY + 10;
   if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
 
-  // Attendance & Narrative Row
+  const attDetailColumns = ["Tanggal", "Mata Pelajaran", "Status"];
+  const attDetailRows = attendance.map(a => [
+    moment(a.date).format('DD/MM/YY'),
+    a.subjectName || '-',
+    a.status
+  ]);
+
+  doc.autoTable({
+    head: [attDetailColumns],
+    body: attDetailRows.length > 0 ? attDetailRows : [["-", "Tidak ada data kehadiran", "-"]],
+    startY: yPos,
+    theme: 'striped',
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [51, 65, 85] }
+  });
+
+  // Rekap kehadiran (kiri) + Rekam Prestasi (kanan) sejajar
+  yPos = doc.autoTable.previous.finalY + 10;
+  if (yPos > pageHeight - 40) { doc.addPage(); yPos = 20; }
+
+  const recapTopY = yPos;
+
   const attTable = [
-    ["Kehadiran", "Hari"],
-    ["Hadir", stats.attendance.Hadir || 0],
-    ["Sakit", stats.attendance.Sakit || 0],
-    ["Ijin", stats.attendance.Ijin || 0],
-    ["Alpha", stats.attendance.Alpha || 0]
+    ["Rekap Kehadiran", "Hari"],
+    ["Hadir", stats?.attendance?.Hadir || 0],
+    ["Sakit", stats?.attendance?.Sakit || 0],
+    ["Ijin", stats?.attendance?.Ijin || 0],
+    ["Alpha", stats?.attendance?.Alpha || 0]
   ];
 
   doc.autoTable({
     head: [attTable[0]],
     body: attTable.slice(1),
-    startY: yPos,
+    startY: recapTopY,
     theme: 'grid',
-    tableWidth: 60,
-    styles: { fontSize: 8, cellPadding: 2 },
+    tableWidth: 80,
+    styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
     headStyles: { fillColor: [51, 65, 85] }
   });
 
-  // Narrative positioned next to Attendance Table
-  const narrativeX = 80;
-  const narrativeWidth = pageWidth - narrativeX - 14;
+  const recapFinalY = doc.autoTable.previous.finalY;
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setFontSize(9);
-  doc.text("CATATAN PERKEMBANGAN (NARASI)", narrativeX, yPos + 3);
+  // Tabel Rekam Prestasi (kanan)
+  const aprecX = 102;
+  const aprecColumns = ["Tanggal", "Jenis Prestasi", "Poin"];
+  const aprecRows = appreciations.map(a => [
+    moment(a.date).format('DD/MM/YY'),
+    a.type,
+    `+${a.points}`
+  ]);
 
-  // Clean up AI intro fluff from narrative if present
+  doc.autoTable({
+    head: [aprecColumns],
+    body: aprecRows.length > 0 ? aprecRows : [["-", "Belum ada rekam prestasi", "-"]],
+    startY: recapTopY,
+    margin: { left: aprecX },
+    tableWidth: pageWidth - aprecX - 14,
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+    headStyles: { fillColor: [16, 185, 129] }
+  });
+
+  const aprecFinalY = doc.autoTable.previous.finalY;
+  yPos = Math.max(recapFinalY, aprecFinalY) + 10;
+
+  // Narrative section (below discipline section, full width)
+  if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
+
+  // Separator
+  doc.setDrawColor(210, 210, 210);
+  doc.setLineWidth(0.2);
+  doc.line(14, yPos - 3, pageWidth - 14, yPos - 3);
+
   const cleanedNarrative = (narrative || "Belum ada catatan narasi untuk periode ini.")
     .replace(/^Halo,.*?(Saya Smartty|asisten AI|Smartty).*?analisis.*?:[\s\n]*/is, '')
     .replace(/Smartty/g, 'Sistem');
 
-  if (narrativeImage) {
-    try {
-      doc.addImage(narrativeImage, 'PNG', narrativeX, yPos + 7, narrativeWidth, 0);
-      const props = doc.getImageProperties(narrativeImage);
-      const imgHeight = props.height * (narrativeWidth / props.width);
-      yPos += imgHeight + 15;
-    } catch (e) {
-      console.error("Error adding narrative image:", e);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(50, 50, 50);
-      yPos = addWrappedText(doc, cleanedNarrative, narrativeX, yPos + 9, narrativeWidth, 4);
-      yPos += 10;
-    }
-  } else {
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(50, 50, 50);
-    yPos = addWrappedText(doc, cleanedNarrative, narrativeX, yPos + 9, narrativeWidth, 4);
-    yPos += 10;
-  }
-  doc.setTextColor(0, 0, 0);
+  const narrativeWidth = pageWidth - 28;
 
-  // Scoring Note for Parents
-  // Update yPos to clear Narrative and Attendance
-  // Since we already updated yPos inside the if/else for narrative, 
-  // we just need to make sure it's also below doc.autoTable.previous.finalY
-  yPos = Math.max(doc.autoTable.previous.finalY + 10, yPos);
+  doc.setFillColor(30, 58, 138);
+  doc.rect(14, yPos - 4, pageWidth - 28, 8, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text("CATATAN PERKEMBANGAN (NARASI)", 18, yPos + 1);
+  doc.setTextColor(0, 0, 0);
+  doc.setFont('helvetica', 'normal');
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(50, 50, 50);
+  yPos = addWrappedText(doc, cleanedNarrative, 14, yPos + 9, narrativeWidth, 4);
+  yPos += 10;
+  doc.setTextColor(0, 0, 0);
 
   // Radar Chart & Data Source Section
   if (radarChartImage) {
-    // Reduced threshold to allow fitting on same page if possible
-    if (yPos + 180 > pageHeight - 20) { doc.addPage(); yPos = 20; }
+    if (yPos + 100 > pageHeight - 20) { doc.addPage(); yPos = 20; }
 
+    doc.setFillColor(30, 58, 138);
+    doc.rect(14, yPos - 4, pageWidth - 28, 8, 'F');
+    doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text("8 DIMENSI PROFIL LULUSAN", 14, yPos);
+    doc.setFontSize(9);
+    doc.text("8 DIMENSI PROFIL LULUSAN", 18, yPos + 1);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
     yPos += 8;
 
     try {

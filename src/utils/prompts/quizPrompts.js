@@ -1,4 +1,29 @@
-export const getAdvancedQuizPrompt = ({ topic, context, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty }) => `
+export const getStimulusModeInstruction = (stimulusMode, batchSize) => {
+    if (stimulusMode === 'with_stimulus') {
+        return `**ATURAN STIMULUS (MODE: WAJIB ADA STIMULUS)**:
+        - SETIAP soal dalam batch ini WAJIB memiliki teks stimulus di field "stimulus".
+        - Stimulus berupa: wacana ilmiah, narasi studi kasus, data/tabel, kutipan teks, atau skenario nyata.
+        - Field "stimulus" DILARANG kosong ("") atau null untuk semua soal.
+        - Pertanyaan harus mengacu pada stimulus yang diberikan ("Berdasarkan wacana di atas...", "Perhatikan data berikut...", dst).`;
+    }
+    if (stimulusMode === 'no_stimulus') {
+        return `**ATURAN STIMULUS (MODE: TANPA STIMULUS)**:
+        - SEMUA soal dalam batch ini WAJIB mengosongkan field "stimulus" (isi dengan string kosong: "").
+        - Soal harus dirumuskan secara langsung tanpa teks pendahuluan/wacana.
+        - DILARANG menyertakan narasi atau wacana apapun sebelum pertanyaan.`;
+    }
+    // 'auto' mode: strictly controlled 50/50 split
+    const withStimulusCount = Math.ceil(batchSize / 2);
+    const noStimulusCount = batchSize - withStimulusCount;
+    return `**ATURAN STIMULUS (MODE: CAMPURAN TERKONTROL)**:
+        - Distribusi WAJIB: tepat ${withStimulusCount} soal HARUS memiliki stimulus, tepat ${noStimulusCount} soal HARUS tanpa stimulus.
+        - Pola distribusi WAJIB bergantian: soal ganjil (1, 3, 5, ...) ADA stimulus, soal genap (2, 4, 6, ...) TANPA stimulus.
+        - Soal dengan stimulus: field "stimulus" berisi wacana/narasi/data konkret.
+        - Soal tanpa stimulus: field "stimulus" HARUS berupa string kosong "".
+        - DILARANG memberikan semua soal stimulus atau semua soal tanpa stimulus.`;
+};
+
+export const getAdvancedQuizPrompt = ({ topic, context, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty, stimulusMode = 'auto' }) => `
         LANDASAN REGULASI: **BSKAP No. 46 Tahun 2025** (Standar Nasional Kurikulum Merdeka).
         STANDAR PEDAGOGIS: **Buku Teks Utama Kemendikbudristek** (Mindful, Meaningful, Joyful).
         
@@ -18,7 +43,7 @@ export const getAdvancedQuizPrompt = ({ topic, context, gradeLevel, subject, bat
         STRICT RULES:
         1. Gunakan Bahasa Indonesia akademis formal (PUEBI).
         2. **REFERENSI MATERI (STRICT)**: Gunakan isi dari "Konteks" atau "RINGKASAN MATERI" sebagai sumber utama soal. Abaikan instruksi teknis guru jika ada; fokuslah pada konsep, fakta, dan data materi.
-        3. Soal harus berbasis data/stimulus (Tabel, Narasi Ilmiah, atau Studi Kasus). Dilarang soal hafalan definisi literal.
+        3. ${getStimulusModeInstruction(stimulusMode, batchInstructions.split('\n').length)}
         4. **VARIASI POSISI JAWABAN (MANDATORY)**: Pastikan posisi jawaban benar (untuk PG/Complex) selalu berpindah-pindah. Khusus soal "matching" (menjodohkan), urutan pada array "right_side" WAJIB diacak agar tidak lurus sejajar dengan "left_side" (Contoh pasangan variatif, bukan A-1, B-2).
         5. **PRINSIP DEEP LEARNING (WAJIB)**:
            - **Kontekstual**: Hubungkan soal dengan kehidupan sehari-hari siswa agar bermakna.
@@ -26,7 +51,10 @@ export const getAdvancedQuizPrompt = ({ topic, context, gradeLevel, subject, bat
            - **Eksploratif**: Berikan ruang untuk berbagai kemungkinan jawaban atau solusi kreatif.
         6. Pilihan jawaban (untuk PG) wajib ${optionCount} opsi (${optionLabel}).
             - **indicator**: Indikator soal (Format: Disajikan [konteks/stimulus], siswa dapat [KKO] [materi]). Harus SINGKAT dan PADAT.
-        7. **IMAGE HINT (OPTIONAL)**: Jika soal sangat membutuhkan dukungan visual (seperti diagram, grafik, peta, atau anatomi), sertakan field **"image_hint"** berisi instruksi spesifik untuk guru (Contoh: "[Sertakan gambar struktur sel hewan di sini]"). Jika tidak butuh gambar, kosongkan ("").
+        7. **IMAGE HINT (OPTIONAL)**: Jika soal sangat membutuhkan dukungan visual (seperti diagram, grafik, peta, anatomi, atau ilustrasi situasi), Anda WAJIB menyertakan field **"image_hint"**. 
+           - Isi dengan instruksi spesifik: "[Tempatkan Gambar: {deskripsi visual}]".
+           - Tambahkan referensi pencarian: "Referensi: {keyword pencarian gambar yang akurat}".
+           - Jika soal bisa dipahami tanpa gambar, kosongkan ("").
         8. **KEPATUHAN TIPE SOAL (CRITICAL)**: Field "type" pada JSON output **HARUS SAMA PERSIS** dengan instruksi tipe pada "TUGAS UTAMA". Dilarang keras menciptakan, menambah, atau membuang tipe soal yang ditentukan.
         9. **TIDAK ADA SUBSTITUSI TIPE (MANDATORY)**: Anda WAJIB menggunakan tepat kerangka/struktur JSON milik tipe soal yang bersangkutan sesuai panduan. JANGAN PERNAH mengubah tipe soal A menjadi tipe B dengan argumen kemiripan wujud/logika materi (Misal: merubah \`pg_matrix\` ke format \`true_false\`, \`essay\` ke \`short_answer\`, dsb). Konsekuensi struktural akan fatal jika ini dilanggar!
         
@@ -36,7 +64,7 @@ export const getAdvancedQuizPrompt = ({ topic, context, gradeLevel, subject, bat
           "competency": "Intisari CP relevan (Singkat)", 
           "indicator": "Indikator operasional (Singkat)", 
           "cognitive_level": "L1/L2/L3/L4/L5/L6",
-          "stimulus": "Teks stimulus/kasus untuk soal ini (jika ada)",
+          "stimulus": "Teks stimulus/kasus untuk soal ini (kosongkan jika mode tanpa stimulus)",
           "image_hint": "Instruksi gambar (Opsional, gunakan [] jika ada)"
         - **pg**: {"type": "pg", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["A...", "B..."], "answer": "A...", "explanation": "..."}
         - **pg_complex**: {"type": "pg_complex", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["1...", "2..."], "answer": ["1...", "3..."], "explanation": "..."}

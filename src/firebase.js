@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore"; // enableIndexedDbPersistence removed
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -38,16 +38,15 @@ const app = initializeApp(firebaseConfig);
 // Initialize and export Firebase services
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
-const db = getFirestore(app, '(default)', {
-  cache: {
-    kind: 'persistent', // Enable IndexedDB persistence
-    synchronizeTabs: true // Handle multi-tab scenarios
-  }
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  }),
+  experimentalForceLongPolling: true
 });
 const storage = getStorage(app);
 
-// Persistensi offline sekarang dikonfigurasi langsung di getFirestore.
-// Error handling untuk multi-tab ditangani oleh synchronizeTabs: true.
-// Error lain akan ditangani secara global atau saat inisialisasi.
+// Persistensi offline dikonfigurasi menggunakan initializeFirestore dengan persistentLocalCache.
+// Force long polling diaktifkan untuk menghindari error 400 Bad Request pada WebChannel di beberapa lingkungan jaringan.
 
 export { app, analytics, auth, db, storage };

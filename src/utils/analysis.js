@@ -105,7 +105,7 @@ export const getAllInfractions = async (userId, studentId = null, semester, acad
  * Runs the early warning system analysis.
  * This is the main function that will orchestrate the data fetching and analysis.
  */
-export const runEarlyWarningAnalysis = async (userId, activeSemester, academicYear, modelName) => {
+export const runEarlyWarningAnalysis = async (userId, activeSemester, academicYear, _modelName) => {
   if (!userId) {
     console.error("User ID is required for analysis.");
     return [];
@@ -113,11 +113,10 @@ export const runEarlyWarningAnalysis = async (userId, activeSemester, academicYe
 
   try {
     // 1. Fetch all necessary data in parallel
-    const [students, grades, attendance, journals, infractions, appreciations] = await Promise.all([
+    const [students, grades, attendance, infractions, appreciations] = await Promise.all([
       getAllStudents(userId),
       getAllGrades(userId, null, activeSemester, academicYear),
       getAllAttendance(userId, null, activeSemester, academicYear),
-      getAllJournals(userId, activeSemester, academicYear),
       getAllInfractions(userId, null, activeSemester, academicYear),
       getDocs(query(
         collection(db, 'studentAppreciations'),

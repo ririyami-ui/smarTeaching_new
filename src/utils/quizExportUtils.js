@@ -71,7 +71,12 @@ export const exportWord = async ({ quizResult, subject, gradeLevel, topic, userP
             combinedText += `${q.stimulus.replace(/\n/g, '<br/>')}<br/><br/>`;
         }
         if (q.image_hint) {
-            combinedText += `<div style="background-color: #f0f7ff; color: #1e40af; border: 1px dashed #34d399; padding: 10px; margin-bottom: 10px; text-align: center; font-style: italic;">${q.image_hint}</div>`;
+            combinedText += `
+                <div style="margin: 15px 0; border: 2px dashed #3B82F6; border-radius: 10px; background-color: #f8fafc; padding: 20px; text-align: center;">
+                    <p style="margin: 0; color: #1d4ed8; font-weight: bold; font-size: 10pt;">[ TEMPAT GAMBAR ]</p>
+                    <p style="margin: 5px 0 0 0; color: #475569; font-size: 9pt; font-style: italic;">Instruksi: ${q.image_hint}</p>
+                </div>
+            `;
         }
         combinedText += q.question;
         html += `<p><strong>${idx + 1}.</strong> ${combinedText}</p>`;
@@ -259,8 +264,6 @@ export const exportKartuSoalPDF = async ({ quizResult, topic, subject, gradeLeve
 
     const doc = new jsPDF('l', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
     quizResult.questions.forEach((q, idx) => {
         if (idx > 0) doc.addPage('a4', 'l');
         let currentY = 15;
@@ -293,7 +296,7 @@ export const exportKartuSoalPDF = async ({ quizResult, topic, subject, gradeLeve
         }
         const cleanQuestion = q.question.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
         if (q.image_hint) {
-            questionContent += `\n[INSTRUKSI GAMBAR: ${q.image_hint}]\n\n`;
+            questionContent += `\n\n--------------------------------------------------\n[ TEMPAT GAMBAR ]\nInstruksi: ${q.image_hint}\n--------------------------------------------------\n\n`;
         }
         questionContent += cleanQuestion;
 
@@ -434,7 +437,12 @@ export const exportKartuSoalWord = async ({ quizResult, topic, subject, gradeLev
                     innerHtml += `<div style="margin-bottom:10px; font-style:italic;">${q.stimulus}</div>`;
                 }
                 if (q.image_hint) {
-                    innerHtml += `<div style="margin-bottom:10px; text-align:center; border:1px dashed #666; padding:10px; background:#f9f9f9;">${q.image_hint}</div>`;
+                    innerHtml += `
+                        <div style="margin: 10px 0; border: 2px dashed #2563eb; background: #f1f5f9; padding: 10px; text-align: center;">
+                            <strong style="color: #1d4ed8; font-size: 9pt;">[ TEMPAT GAMBAR ]</strong><br/>
+                            <span style="font-size: 8pt; color: #64748b; font-style: italic;">${q.image_hint}</span>
+                        </div>
+                    `;
                 }
                 innerHtml += `<div style="margin-bottom:10px;"><strong>${q.question}</strong></div>`;
                 if ((q.type === 'pg' || q.type === 'pg_complex') && q.options && q.options.length > 0) {

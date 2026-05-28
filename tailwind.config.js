@@ -5,11 +5,32 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  safelist: [
+    'chart-container-glass',
+    'chart-glow-purple',
+    'chart-glow-orange',
+    'chart-glow-blue',
+    'glass-icon-container',
+    'glass-glow-indigo',
+    'glass-glow-blue',
+    'glass-glow-yellow',
+    'glass-glow-green',
+    'glass-glow-red',
+    'welcome-glass',
+    'animate-welcome-float',
+    'animate-fade-in-up',
+    'custom-scrollbar',
+    'rpp-prose',
+    'font-carakan',
+    'stagger-entry',
+    'animate-pulse-glow-head',
+    'animate-shimmer',
+  ],
   theme: {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#4F46E5', // Indigo 600
+          DEFAULT: '#6366F1', // Indigo 500 (Vibrant)
           '50': '#EEF2FF',
           '100': '#E0E7FF',
           '200': '#C7D2FE',
@@ -36,27 +57,29 @@ export default {
           '900': '#064E3B',
           '950': '#022C22',
         },
+        ai: {
+          indigo: '#6366F1',
+          purple: '#A855F7',
+          pink: '#EC4899',
+        },
         background: {
-          light: '#F9FAFB', // Gray 50
-          dark: '#111827',  // Gray 900
+          light: '#F8FAFC', // Slate 50 (Cleaner)
+          dark: '#0F172A',  // Slate 900 (Deep, modern)
         },
         surface: {
-          light: '#FFFFFF', // White
-          dark: '#1F2937',  // Gray 800
+          light: '#FFFFFF',
+          dark: '#1E293B',  // Slate 800
         },
         text: {
-          light: '#1F2937', // Gray 800
-          dark: '#F9FAFB',  // Gray 50
-        },
-        'text-muted': {
-          light: '#6B7280', // Gray 500
-          dark: '#9CA3AF',  // Gray 400
+          light: '#0F172A', // Slate 900
+          dark: '#F1F5F9',  // Slate 100
         },
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
         orbitron: ['Orbitron', 'sans-serif'],
-        dseg7classic: ['DSEG7Classic', 'monospace'], // Added DSEG7Classic
+        dseg7classic: ['DSEG7Classic', 'monospace'],
+        carakan: ['"Noto Sans Javanese"', 'serif'],
       },
       keyframes: {
         'pulse-yellow': {
