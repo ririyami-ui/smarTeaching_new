@@ -951,7 +951,7 @@ const ScheduleInputMasterData: React.FC = () => {
   return (
     <div className="container mx-auto p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-inner min-h-screen">
       {/* Template Management Section */}
-      <div className="mb-6 p-4 md:p-6 bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-blue-100 dark:border-gray-700 relative overflow-hidden">
+      <div className="mb-6 p-4 md:p-6 card-glass rounded-3xl shadow-xl border border-blue-100 dark:border-gray-700 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 md:p-8 opacity-5 pointer-events-none">
           <CalendarIcon size={80} className="text-blue-500 md:w-[120px] md:h-[120px]" />
         </div>
@@ -967,7 +967,7 @@ const ScheduleInputMasterData: React.FC = () => {
               {/* School Days Toggle */}
               <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/10 p-2 rounded-xl border border-blue-100 dark:border-gray-700">
                 <span className="text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase tracking-widest ml-2">Hari Sekolah:</span>
-                <div className="flex bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-blue-200 dark:border-gray-700 flex-1 md:flex-none">
+                <div className="flex card-glass rounded-lg overflow-hidden border border-blue-200 dark:border-gray-700 flex-1 md:flex-none">
                   <button
                     type="button"
                     onClick={() => handleSchoolDaysChange(5)}
@@ -1597,3 +1597,4 @@ const ScheduleInputMasterData: React.FC = () => {
 };
 
 export default ScheduleInputMasterData;
+

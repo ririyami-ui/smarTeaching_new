@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { BookOpen, Edit2, Save, X, Loader, Trash2 } from 'lucide-react';
 import moment from 'moment';
 import { Grade } from '../types/studentTypes';
@@ -223,7 +223,7 @@ const StudentAcademicDetail: React.FC<StudentAcademicDetailProps> = ({
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 flex flex-col h-full">
+        <div className="card-glass p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 flex flex-col h-full">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl text-blue-600">
@@ -269,7 +269,7 @@ const StudentAcademicDetail: React.FC<StudentAcademicDetailProps> = ({
                                 <td className="py-3 text-gray-500">{moment(g.date).format('DD/MM/YYYY')}</td>
                                 <td className="py-3">
                                     <p className="font-bold text-gray-800 dark:text-gray-200">{g.material}</p>
-                                    <p className="text-[10px] text-gray-400 uppercase">{g.subjectName} • {g.assessmentType}</p>
+                                    <p className="text-[10px] text-gray-400 uppercase">{g.subjectName} | {g.assessmentType}</p>
                                 </td>
                                 <td className="py-3 text-right">
                                     {isEditMode ? (
@@ -329,3 +329,5 @@ const StudentAcademicDetail: React.FC<StudentAcademicDetailProps> = ({
 };
 
 export default StudentAcademicDetail;
+
+

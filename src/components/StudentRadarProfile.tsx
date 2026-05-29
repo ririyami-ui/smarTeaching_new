@@ -9,7 +9,7 @@ interface StudentRadarProfileProps {
 
 const StudentRadarProfile: React.FC<StudentRadarProfileProps> = ({ stats }) => {
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 overflow-hidden relative min-h-[300px] sm:min-h-[400px] lg:min-h-[500px] flex flex-col">
+        <div className="card-glass p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 overflow-hidden relative min-h-[300px] sm:min-h-[400px] lg:min-h-[500px] flex flex-col">
             <div className="absolute top-0 right-0 p-4 opacity-10">
                 <Brain size={80} />
             </div>
@@ -50,3 +50,4 @@ const StudentRadarProfile: React.FC<StudentRadarProfileProps> = ({ stats }) => {
 };
 
 export default StudentRadarProfile;
+

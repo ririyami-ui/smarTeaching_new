@@ -1,9 +1,22 @@
 {
-  "appId": "com.smartteaching.app",
-  "appName": "Smart Teaching",
-  "webDir": "dist",
-  "server": {
-    "hostname": "localhost",
-    "androidScheme": "https"
-  }
+    "appId":  "com.smartteaching.app",
+    "appName":  "Smart Teaching",
+    "webDir":  "dist",
+    "server":  {
+                   "hostname":  "localhost",
+                   "androidScheme":  "https"
+               },
+    "plugins":  {
+                    "Haptics":  {
+                                    "enabled":  false
+                                },
+                    "StatusBar":  {
+                                      "overlaysWebView":  true,
+                                      "style":  "DEFAULT",
+                                      "backgroundColor":  "#00000000"
+                                  },
+                    "SplashScreen":  {
+                                         "launchShowDuration":  0
+                                     }
+                }
 }

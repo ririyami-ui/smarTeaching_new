@@ -64,7 +64,7 @@ const GlassIcon = ({ icon: Icon, colorClass = "glass-glow-blue", size = 20 }: Gl
 );
 
 const StatCard = ({ icon: Icon, label, value, colorClass, delay = "" }: StatCardProps) => (
-  <div className={`bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-gray-800/40 p-4 sm:p-5 md:p-6 rounded-3xl shadow-xl flex items-center gap-4 sm:gap-6 transition-all duration-500 md:hover:scale-[1.02] md:hover:z-10 md:hover:rotate-1 hover:shadow-blue-500/20 dark:hover:shadow-none overflow-hidden group stagger-entry ${delay}`}>
+  <div className={`card-glass p-4 sm:p-5 md:p-6 flex items-center gap-4 sm:gap-6 transition-all duration-500 md:hover:scale-[1.02] md:hover:z-10 md:hover:rotate-1 hover:shadow-blue-500/20 dark:hover:shadow-none overflow-hidden group stagger-entry ${delay}`}>
     <GlassIcon icon={Icon} colorClass={colorClass} size={24} />
     <div className="min-w-0">
       <p className="text-text-muted-light dark:text-text-muted-dark text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-70 mb-0.5 sm:mb-1">{label}</p>
@@ -626,3 +626,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+

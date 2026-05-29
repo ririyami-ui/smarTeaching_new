@@ -511,7 +511,7 @@ const PenilaianKktpPage: React.FC = () => {
     return (
         <div className="max-w-[1200px] mx-auto space-y-6">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 card-glass p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
                 <div className="flex items-center gap-4">
                     <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-2xl">
                         <ClipboardCheck size={28} />
@@ -531,7 +531,7 @@ const PenilaianKktpPage: React.FC = () => {
 
             {/* Config Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
+                <div className="card-glass p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
                     <div className="flex items-center gap-2 text-blue-600 font-bold mb-2">
                         <Search size={18} />
                         <span>1. Filter & Pilih RPP ({rpps.length} Total)</span>
@@ -588,7 +588,7 @@ const PenilaianKktpPage: React.FC = () => {
                     />
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
+                <div className="card-glass p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
                     <div className="flex items-center gap-2 text-blue-600 font-bold mb-2">
                         <Users size={18} />
                         <span>2. Pilih Kelas</span>
@@ -617,7 +617,7 @@ const PenilaianKktpPage: React.FC = () => {
                     )}
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="card-glass p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-2 text-blue-600 font-bold mb-4">
                         <CheckCircle2 size={18} />
                         <span>3. Info Kriteria (KKTP)</span>
@@ -695,7 +695,7 @@ const PenilaianKktpPage: React.FC = () => {
 
             {/* Assessment Table */}
             {(students.length > 0 || selectedClass) && (kktpData || isManualMode) && (
-                <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden animate-fade-in-up">
+                <div className="card-glass rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden animate-fade-in-up">
                     <div className="p-6 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/20">
                         <h3 className="font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                             <BookOpen size={18} className="text-blue-500" />
@@ -836,7 +836,7 @@ const PenilaianKktpPage: React.FC = () => {
 
             {/* Empty State */}
             {(!selectedRpp || !selectedClass) && (
-                <div className="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-sm border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="card-glass p-12 rounded-3xl shadow-sm border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center text-center space-y-4">
                     <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-full text-blue-500">
                         <Users size={64} />
                     </div>
@@ -848,7 +848,7 @@ const PenilaianKktpPage: React.FC = () => {
             {/* Sync Type Prompt Modal - Portal */}
             {showSyncPrompt && createPortal(
                 <div className="fixed top-0 left-0 w-full h-full z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-scale-up mx-4">
+                    <div className="card-glass rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-scale-up mx-4">
                         <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Konfirmasi Sinkronisasi Nilai</h3>
                         <p className="text-gray-600 dark:text-gray-300 mb-6">
                             Anda akan menyimpan penilaian ini ke <strong>Buku Nilai</strong>. Mohon tentukan jenis penilaiannya:
@@ -901,3 +901,4 @@ const PenilaianKktpPage: React.FC = () => {
 };
 
 export default PenilaianKktpPage;
+

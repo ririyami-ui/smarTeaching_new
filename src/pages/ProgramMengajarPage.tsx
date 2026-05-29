@@ -303,7 +303,7 @@ const ProgramMengajarPage: React.FC = () => {
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center gap-2 card-glass p-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                         <MapPin size={14} className="text-gray-500" />
                         <input
                             type="text"
@@ -324,7 +324,7 @@ const ProgramMengajarPage: React.FC = () => {
                         </button>
                     </div>
 
-                    <div className="flex flex-1 items-center gap-2 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="flex flex-1 items-center gap-2 card-glass p-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                         <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase px-2">Mapel:</span>
                         <select
                             value={selectedSubject}
@@ -349,7 +349,7 @@ const ProgramMengajarPage: React.FC = () => {
                         </select>
                     </div>
 
-                    <div className="flex flex-1 items-center gap-2 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="flex flex-1 items-center gap-2 card-glass p-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                         <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase px-2">Tingkat:</span>
                         <select
                             value={selectedGrade}
@@ -392,7 +392,7 @@ const ProgramMengajarPage: React.FC = () => {
                 ))}
             </div>
 
-            <div id="printable-area" className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 min-h-[500px] p-6">
+            <div id="printable-area" className="card-glass rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 min-h-[500px] p-6">
                 {!selectedGrade || !selectedSubject ? (
                     <div className="flex flex-col items-center justify-center h-full py-20 text-gray-400">
                         <BookOpen size={48} className="mb-4 opacity-20" />
@@ -470,3 +470,4 @@ const ProgramMengajarPage: React.FC = () => {
 };
 
 export default ProgramMengajarPage;
+

@@ -1,3 +1,43 @@
+/* --- Reduced Motion / Mobile Performance --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .animate-aurora {
+    animation: none !important;
+    opacity: 0.3;
+  }
+  .animate-welcome-float {
+    animation: none !important;
+    transform: none !important;
+  }
+  .animate-progress-line {
+    animation-duration: 4s !important;
+  }
+  .animate-smartty-float,
+  .animate-smartty-breathe,
+  .animate-smartty-think {
+    animation-duration: 6s !important;
+  }
+  .chart-container-glass:hover {
+    transform: none !important;
+  }
+  .glass-icon-container:hover {
+    transform: none !important;
+  }
+  .animate-pulse-glow-head {
+    animation: none !important;
+  }
+}
+
 /* ============================================
    animations.css
    All keyframes and animation utility classes
@@ -220,7 +260,7 @@
 }
 
 .animate-fade-in-up {
-    animation: fade-in-up 0.6s ease-out forwards;
+    animation: fade-in-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes stagger-fade-in {
@@ -421,3 +461,46 @@
         background-position: 100% 50%;
     }
 }
+
+
+/* --- Reduce blur on WelcomeScreen mobile for GPU perf --- */
+@media (max-width: 767px) {
+  /* Only target WelcomeScreen backdrop blur - not general UI */
+  .welcome-glass,
+  .glass-icon-container.glass-glow-indigo {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .welcome-glass {
+    background: rgba(255, 255, 255, 0.85) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .dark .welcome-glass {
+    background: rgba(15, 23, 42, 0.85) !important;
+  }
+
+  /* Reduce aurora blur on mobile */
+  .welcome-glass + div [class*="blur-"],
+  div:has(> .welcome-glass) ~ div [class*="blur-"] {
+    filter: none !important;
+  }
+}
+
+/* --- Route page transition --- */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.page-enter {
+  animation: page-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+

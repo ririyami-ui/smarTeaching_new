@@ -1,16 +1,2 @@
-import { useState, useEffect } from 'react';
-
-export default function useDarkMode() {
-  const [theme, setTheme] = useState(localStorage.getItem('theme') ?? 'light');
-
-  const colorTheme = theme === 'light' ? 'dark' : 'light';
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove(colorTheme);
-    root.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme, colorTheme]);
-
-  return [colorTheme, setTheme];
-}
+// Re-export the TypeScript implementation to avoid duplicate hooks.
+export { default } from './useDarkMode.ts';

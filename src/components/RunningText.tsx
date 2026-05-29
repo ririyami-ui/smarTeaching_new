@@ -20,3 +20,4 @@ const RunningText: React.FC<RunningTextProps> = ({ text }) => {
 };
 
 export default RunningText;
+

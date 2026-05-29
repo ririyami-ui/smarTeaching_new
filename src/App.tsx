@@ -139,7 +139,7 @@ function AppContent() {
           <ChatProvider>
             {user ? (
               <DashboardLayout>
-                <div className="animate-in fade-in zoom-in-95 duration-700 ease-out">
+                <div className="page-enter">
                   <Suspense fallback={<PageLoader />}>
                     <Routes>
                       <Route path="/" element={<DashboardPage />} />
@@ -204,3 +204,5 @@ function App() {
 }
 
 export default App;
+
+

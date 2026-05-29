@@ -309,3 +309,4 @@ const AIBriefing = ({ user, schedules, tasks, missingJournalsCount }: AIBriefing
 };
 
 export default AIBriefing;
+

@@ -24,7 +24,7 @@ const StudentNarrativeSection: React.FC<StudentNarrativeSectionProps> = ({
     isSaving
 }) => {
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 h-full flex flex-col">
+        <div className="card-glass p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 h-full flex flex-col">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl text-amber-600">
@@ -84,3 +84,4 @@ const StudentNarrativeSection: React.FC<StudentNarrativeSectionProps> = ({
 };
 
 export default StudentNarrativeSection;
+

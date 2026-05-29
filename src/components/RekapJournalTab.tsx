@@ -248,3 +248,4 @@ const RekapJournalTab: React.FC<RekapJournalTabProps> = ({
 };
 
 export default RekapJournalTab;
+

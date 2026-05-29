@@ -91,7 +91,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
     const totalQuestions = Object.values(typeCounts).reduce<number>((sum, c) => sum + (parseInt(c as string) || 0), 0);
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+        <div className="card-glass rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* LEFT: Context & Basics */}
                 <div className="space-y-4">
@@ -344,7 +344,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
                                     className="flex items-center justify-between p-4 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 shadow-sm hover:shadow-md transition-shadow cursor-help"
                                 >
                                     <div className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-300 flex-1 min-w-0 mr-3">
-                                        <div className="p-2 bg-white dark:bg-gray-800 rounded-md shadow-sm text-blue-500 shrink-0">
+                                        <div className="p-2 card-glass rounded-md shadow-sm text-blue-500 shrink-0">
                                             {type.icon}
                                         </div>
                                         <span className="leading-tight truncate">{type.label}</span>
@@ -391,3 +391,4 @@ const QuizForm: React.FC<QuizFormProps> = ({
 };
 
 export default QuizForm;
+

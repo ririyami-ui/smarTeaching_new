@@ -619,7 +619,7 @@ const LessonPlanPage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 print:block">
                 {/* Input Control */}
                 <div className="lg:col-span-1 space-y-6 no-print lg:sticky lg:top-8">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4">
+                    <div className="card-glass p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4">
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                             <Search size={20} className="text-blue-500" />
                             Pilih Sumber Materi
@@ -806,7 +806,7 @@ const LessonPlanPage: React.FC = () => {
                         </StyledButton>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4 no-print">
+                    <div className="card-glass p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4 no-print">
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                             <History size={20} className="text-purple-500" />
                             Riwayat RPP
@@ -872,14 +872,14 @@ const LessonPlanPage: React.FC = () => {
                 {/* Display Area */}
                 <div className="lg:col-span-3 flex flex-col h-[600px] lg:h-auto print:h-auto print:block print:w-full">
                     {isGenerating ? (
-                        <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 lg:p-12 shadow-xl border-2 border-dashed border-blue-200 dark:border-blue-900 flex flex-col items-center justify-center space-y-6 min-h-[500px] relative overflow-hidden">
+                        <div className="card-glass rounded-3xl p-8 lg:p-12 shadow-xl border-2 border-dashed border-blue-200 dark:border-blue-900 flex flex-col items-center justify-center space-y-6 min-h-[500px] relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-full -mr-16 -mt-16 blur-3xl animate-pulse" />
                             <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-50 dark:bg-purple-900/20 rounded-full -ml-16 -mb-16 blur-3xl animate-pulse" />
 
                             <div className="relative z-10">
                                 <div className="p-6 bg-blue-50 dark:bg-blue-900/30 rounded-full relative">
                                     <Loader2 className="animate-spin text-blue-500" size={80} strokeWidth={1} />
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg">
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 card-glass p-3 rounded-full shadow-lg">
                                         <Sparkles className="text-blue-600 animate-bounce" size={32} />
                                     </div>
                                 </div>
@@ -921,7 +921,7 @@ const LessonPlanPage: React.FC = () => {
                             </p>
                         </div>
                     ) : (generatedRPP || viewingRPP) ? (
-                        <div id="printable-area" className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full print:m-0 print:p-0 print:block print:h-auto print:shadow-none print:border-none">
+                        <div id="printable-area" className="card-glass rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full print:m-0 print:p-0 print:block print:h-auto print:shadow-none print:border-none">
                             <div className="p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center no-print sticky top-0 z-20">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-blue-600 rounded-lg">
@@ -979,7 +979,7 @@ const LessonPlanPage: React.FC = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-white dark:bg-gray-800 rounded-3xl p-12 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center space-y-6 text-center">
+                        <div className="card-glass rounded-3xl p-12 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center space-y-6 text-center">
                             <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-full">
                                 <BookOpen className="text-blue-600" size={64} />
                             </div>
@@ -1035,3 +1035,5 @@ const LessonPlanPage: React.FC = () => {
 };
 
 export default LessonPlanPage;
+
+

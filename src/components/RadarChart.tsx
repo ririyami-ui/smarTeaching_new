@@ -138,3 +138,4 @@ const RadarChart: React.FC<RadarChartProps> = ({ data, size = 300, descriptions 
 };
 
 export default RadarChart;
+

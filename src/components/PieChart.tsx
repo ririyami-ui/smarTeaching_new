@@ -33,7 +33,7 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 h-full flex flex-col min-w-[280px]">
+    <div className="card-glass p-4 sm:p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 h-full flex flex-col min-w-[280px]">
       <div className="flex items-center gap-3 mb-5">
         <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 shrink-0">
           <PieChartIcon size={20} />
@@ -47,7 +47,7 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
       <div className="bg-blue-50/30 dark:bg-blue-900/15 p-3.5 rounded-2xl border border-blue-100/50 dark:border-blue-800/30 mb-6 font-mono">
         <div className="flex justify-between items-center mb-1.5">
           <span className="text-[9px] font-black text-blue-700/50 dark:text-blue-300/50 uppercase tracking-widest">Konteks</span>
-          <span className="text-[10px] font-bold text-blue-600 dark:text-blue-300 px-2 py-0.5 bg-white dark:bg-gray-800 rounded-md border border-blue-100/50">{schoolDays || 0} Hari</span>
+          <span className="text-[10px] font-bold text-blue-600 dark:text-blue-300 px-2 py-0.5 card-glass rounded-md border border-blue-100/50">{schoolDays || 0} Hari</span>
         </div>
         <div className="text-[9px] font-bold text-blue-500/80 dark:text-blue-400">
           {studentCount || 0} Siswa <span className="opacity-30">×</span> {schoolDays || 0} Hari Efektif
@@ -98,3 +98,4 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
 };
 
 export default PieChart;
+

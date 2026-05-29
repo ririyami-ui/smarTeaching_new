@@ -243,3 +243,4 @@ export default function AboutPage({ installPrompt, onInstall, isPwaInstalled }: 
     </div>
   );
 }
+

@@ -260,3 +260,4 @@ const JournalReminder = ({ user, activeSemester, academicYear, activeTemplateId,
 };
 
 export default JournalReminder;
+

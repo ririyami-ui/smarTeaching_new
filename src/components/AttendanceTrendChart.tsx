@@ -313,3 +313,4 @@ const AttendanceTrendChart: React.FC = () => {
 };
 
 export default AttendanceTrendChart;
+

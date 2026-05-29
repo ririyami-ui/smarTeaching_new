@@ -263,3 +263,4 @@ const GradeDistributionChart: React.FC = () => {
 };
 
 export default GradeDistributionChart;
+

@@ -127,3 +127,4 @@ export default function CreateProfilePage({ onProfileCreated }: CreateProfilePag
     </div>
   );
 }
+

@@ -24,3 +24,4 @@ export default function LoadingSpinner({ size = 'md', text, label }: LoadingSpin
     </div>
   );
 }
+

@@ -59,7 +59,7 @@ const StudentStatsOverview: React.FC<StudentStatsOverviewProps> = ({
 
             {/* Class Agreement Display */}
             {classAgreement?.agreements && (
-                <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800/20 p-5 rounded-3xl flex items-start gap-4 animate-in fade-in duration-700">
+                <div className="card-glass p-5 flex items-start gap-4 animate-in fade-in duration-700">
                     <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-xl text-purple-600">
                         <Scale size={20} />
                     </div>
@@ -108,3 +108,5 @@ const StudentStatsOverview: React.FC<StudentStatsOverviewProps> = ({
 };
 
 export default StudentStatsOverview;
+
+

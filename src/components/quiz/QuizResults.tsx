@@ -106,7 +106,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
             <div className="grid grid-cols-1 gap-6">
                 {quizResult && Array.isArray(quizResult.questions) && quizResult.questions.length > 0 ? (
                     quizResult.questions.map((q, idx) => (
-                        <div key={idx} id={`quiz-question-${idx}`} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 relative">
+                        <div key={idx} id={`quiz-question-${idx}`} className="card-glass p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 relative">
                             <span className="absolute top-4 right-4 text-xs font-bold text-gray-400 uppercase border px-2 py-1 rounded">{(q.type || 'pg').replace('_', ' ')}</span>
                             <div className="flex gap-4 mb-4">
                                 <div className="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-lg shadow-sm">
@@ -123,7 +123,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
 
                                         {q.image_hint && (
                                             <div className="my-4 p-6 border-2 border-dashed border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl flex flex-col items-center justify-center text-center group hover:border-blue-400 transition-colors">
-                                                <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                                                <div className="w-12 h-12 card-glass rounded-full flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
                                                     <ImageIcon className="text-blue-500" size={24} />
                                                 </div>
                                                 <div className="text-sm font-bold text-blue-700 dark:text-blue-400 mb-1">PLACEHOLDER GAMBAR</div>
@@ -322,3 +322,4 @@ const QuizResults: React.FC<QuizResultsProps> = ({
 };
 
 export default QuizResults;
+

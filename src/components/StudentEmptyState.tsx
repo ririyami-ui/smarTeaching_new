@@ -53,7 +53,7 @@ const StudentEmptyState: React.FC<StudentEmptyStateProps> = ({
                         <UserSearch className="text-blue-600 dark:text-blue-400" size={40} />
                     </div>
                     {/* Lencana peringatan kecil dengan efek memantul */}
-                    <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-md border border-gray-100 dark:border-gray-700">
+                    <div className="absolute -bottom-1 -right-1 w-8 h-8 card-glass rounded-full flex items-center justify-center shadow-md border border-gray-100 dark:border-gray-700">
                         <AlertCircle className="text-amber-500 animate-bounce" size={18} />
                     </div>
                 </div>
@@ -109,7 +109,7 @@ const StudentEmptyState: React.FC<StudentEmptyStateProps> = ({
                                     <p className="font-bold text-gray-800 dark:text-white text-xs group-hover:text-blue-600 transition-colors uppercase truncate">{s.name}</p>
                                     <p className="text-[9px] text-gray-400 font-bold mt-0.5">{s.rombel} • {(s.warnings || s.triggers || []).length} Indikator</p>
                                 </div>
-                                <div className="p-1.5 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 group-hover:border-blue-200 flex-shrink-0">
+                                <div className="p-1.5 card-glass rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 group-hover:border-blue-200 flex-shrink-0">
                                     <AlertCircle size={12} className="text-red-500" />
                                 </div>
                             </button>
@@ -127,3 +127,4 @@ const StudentEmptyState: React.FC<StudentEmptyStateProps> = ({
 };
 
 export default StudentEmptyState;
+

@@ -34,7 +34,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
     };
 
     return (
-        <div className={`${colorClasses[color] || colorClasses.blue} rounded-xl border p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:z-10 group overflow-hidden relative`}>
+        <div className={`${colorClasses[color] || colorClasses.blue} rounded-xl border p-4 sm:p-5 transition-all duration-300 hover:shadow-lg group overflow-hidden relative bg-white/30 dark:bg-surface-dark/30 backdrop-blur-sm`}>
             <div className="flex items-start justify-between relative z-10">
                 <div className="flex-1">
                     <p className="text-sm font-bold opacity-100 mb-1">{title}</p>
@@ -62,3 +62,5 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
 };
 
 export default SummaryCard;
+
+

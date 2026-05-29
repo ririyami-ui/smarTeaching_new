@@ -51,7 +51,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        navigationPreload: true,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webp,avif,json}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
           {
@@ -100,8 +101,13 @@ export default defineConfig({
           'vendor-icons': ['lucide-react'],
           'vendor-utils': ['moment', 'react-hot-toast'],
           'vendor-markdown': ['react-markdown', 'remark-gfm', 'remark-math', 'rehype-raw', 'rehype-katex', 'katex'],
+          'vendor-office': ['xlsx', 'exceljs'],
+          'vendor-pdf': ['jspdf', 'jspdf-autotable', 'html2canvas'],
+          'vendor-mermaid': ['mermaid'],
         }
       }
     }
   }
 });
+
+

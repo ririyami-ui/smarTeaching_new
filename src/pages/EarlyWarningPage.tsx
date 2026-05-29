@@ -251,7 +251,7 @@ const EarlyWarningPage: React.FC = () => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Bar Chart: Students per Class */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+        <div className="card-glass p-6 rounded-2xl shadow-lg">
           <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
             <Users size={20} className="text-blue-500" />
             Siswa Berisiko per Kelas
@@ -272,7 +272,7 @@ const EarlyWarningPage: React.FC = () => {
         </div>
 
         {/* Pie Chart: Warning Types */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+        <div className="card-glass p-6 rounded-2xl shadow-lg">
           <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
             <AlertTriangle size={20} className="text-orange-500" />
             Distribusi Tipe Peringatan
@@ -304,7 +304,7 @@ const EarlyWarningPage: React.FC = () => {
       </div>
 
       {/* Quick Access Table */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+      <div className="card-glass p-6 rounded-2xl shadow-lg">
         <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
           <BookOpen size={20} className="text-green-500" />
           Daftar Siswa Memerlukan Perhatian ({filteredFlaggedStudents.length})
@@ -403,3 +403,5 @@ const EarlyWarningPage: React.FC = () => {
 };
 
 export default EarlyWarningPage;
+
+

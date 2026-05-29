@@ -295,3 +295,4 @@ export default function ScheduleEditor({ scheduleData, onSave, onClose, subjects
     </form>
   );
 }
+

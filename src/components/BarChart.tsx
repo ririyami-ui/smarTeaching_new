@@ -59,3 +59,4 @@ const BarChart: React.FC<BarChartProps> = ({ data, title }) => {
 };
 
 export default BarChart;
+

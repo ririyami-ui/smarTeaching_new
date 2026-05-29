@@ -469,7 +469,7 @@ export default function JurnalPage() {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-1/3">
-          <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 space-y-4">
+          <div className="sticky top-0 z-10 card-glass p-6 rounded-2xl shadow-lg mb-6 space-y-4">
             <StyledInput
               type="date"
               label="Tanggal"
@@ -719,3 +719,4 @@ export default function JurnalPage() {
     </div>
   );
 }
+

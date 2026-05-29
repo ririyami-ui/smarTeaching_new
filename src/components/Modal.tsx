@@ -30,3 +30,4 @@ export default function Modal({ children, onClose, title }: ModalProps) {
     document.body
   );
 }
+

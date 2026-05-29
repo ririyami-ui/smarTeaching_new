@@ -37,3 +37,4 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({ userProfile, signin
 };
 
 export default SignatureSection;
+

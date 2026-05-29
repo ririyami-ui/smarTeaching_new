@@ -37,7 +37,7 @@ const ClassCard = ({ classItem, onEdit, onDelete }: ClassCardProps) => {
             onClick={() => (classItem.onAgreement as ((item: unknown) => void) | undefined)?.(classItem)}
             variant="outline"
             size="sm"
-            className="!text-[10px] !py-1 text-purple-600 border-purple-200 dark:border-purple-900/30 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+            className="!text-[10px] !py-1 text-purple-600 border-purple-200 dark:border-purple-900/30 hover:bg--50 dark:hover:bg--50/20"
           >
             <Scale size={14} className="mr-1" /> Kesepakatan
           </StyledButton>
@@ -58,3 +58,5 @@ const ClassCard = ({ classItem, onEdit, onDelete }: ClassCardProps) => {
 };
 
 export default ClassCard;
+
+

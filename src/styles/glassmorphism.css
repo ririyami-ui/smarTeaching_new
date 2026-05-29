@@ -1,3 +1,26 @@
+/* --- Mobile Performance: disable heavy backdrop-filter --- */
+@media (max-width: 767px) {
+  .glass-icon-container,
+  .chart-container-glass,
+  .welcome-glass,
+  .card-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .chart-container-glass {
+    background-color: rgba(255, 255, 255, 0.75);
+  }
+
+  .dark .chart-container-glass {
+    background-color: rgba(15, 23, 42, 0.75);
+  }
+
+  .glass-icon-container {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.1));
+  }
+}
+
 /* ============================================
    glassmorphism.css
    Glass UI components, icon containers,
@@ -141,3 +164,46 @@
 .shadow-cekung {
     box-shadow: inset 0px 4px 10px rgba(0, 0, 0, 0.5);
 }
+
+/* --- Premium Card Glass Utility --- */
+.card-glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.02);
+  border-radius: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-glass:hover {
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.dark .card-glass {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.dark .card-glass:hover {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.card-premium {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.08);
+}
+
+.dark .card-premium {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.4));
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.2);
+}
+

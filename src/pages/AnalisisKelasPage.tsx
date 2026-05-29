@@ -388,14 +388,14 @@ if (attendance.length > 0) {
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg shadow-sm transition-all active:scale-95 border border-gray-200 dark:border-gray-700"
+          className="p-2 card-glass hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg shadow-sm transition-all active:scale-95 border border-gray-200 dark:border-gray-700"
         >
           <ArrowLeft className="text-gray-600 dark:text-gray-300" size={24} />
         </button>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">Laporan Analisis Kelas</h1>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+      <div className="card-glass p-6 rounded-lg shadow-md mb-6">
         <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Pilih Opsi Laporan</h2>
         {loadingClasses ? (
           <Loader className="animate-spin" />
@@ -446,7 +446,7 @@ if (attendance.length > 0) {
 
       {report && !loading && analysisData && (
         <div className="space-y-8 animate-fade-in-up">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-glass p-4 border border-gray-100 dark:border-gray-700">
             <h2 className="text-xl sm:text-2xl font-black text-gray-800 dark:text-white flex items-center gap-3">
               <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600">
                 <TrendingUp size={24} />
@@ -476,7 +476,7 @@ if (attendance.length > 0) {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div id="pdf-students" className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
+              <div id="pdf-students" className="card-glass p-6 border border-gray-100">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
                     <h3 className="text-xs font-black text-green-600 mb-4 uppercase tracking-widest flex items-center gap-2">
@@ -511,7 +511,7 @@ if (attendance.length > 0) {
                 </div>
               </div>
 
-              <div id="pdf-radar" className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 flex flex-col h-full">
+              <div id="pdf-radar" className="card-glass p-6 border border-gray-100 flex flex-col h-full">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 bg-orange-100 rounded-xl text-orange-600">
                     <GraduationCap size={24} />
@@ -563,7 +563,7 @@ if (attendance.length > 0) {
                 </div>
               )}
 
-              <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden border border-blue-100 dark:border-blue-900/30 flex flex-col h-full">
+              <div className="bg-white card-glass overflow-hidden border border-blue-100 dark:border-blue-900/30 flex flex-col h-full">
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 text-white flex items-center gap-4">
                   <div className="p-2 bg-white/20 rounded-xl backdrop-blur-md">
                     <Brain size={20} className="animate-pulse" />
@@ -604,3 +604,6 @@ if (attendance.length > 0) {
 };
 
 export default AnalisisKelasPage;
+
+
+

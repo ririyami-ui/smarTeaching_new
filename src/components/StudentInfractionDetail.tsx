@@ -9,7 +9,7 @@ interface StudentInfractionDetailProps {
 
 const StudentInfractionDetail: React.FC<StudentInfractionDetailProps> = ({ infractions }) => {
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 flex-1 flex flex-col">
+        <div className="card-glass p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 flex-1 flex flex-col">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-xl text-red-600">
                     <ShieldAlert size={20} />
@@ -40,3 +40,4 @@ const StudentInfractionDetail: React.FC<StudentInfractionDetailProps> = ({ infra
 };
 
 export default StudentInfractionDetail;
+

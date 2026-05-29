@@ -756,7 +756,7 @@ const RekapIndividuPage: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 gap-6">
-                        <div className="bg-gradient-to-br from-gray-800 to-black p-4 sm:p-6 md:p-8 rounded-[2.5rem] text-white shadow-2xl flex flex-col md:flex-row justify-between items-center gap-8 border border-white/10 overflow-hidden relative group">
+                        <div className="card-glass p-4 sm:p-6 md:p-8 flex text-white flex-col md:flex-row justify-between items-center gap-8 border border-white/10 overflow-hidden relative group">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-blue-500/20 transition-all duration-700"></div>
                             <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left relative z-10">
                                 <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 shrink-0">
@@ -792,7 +792,7 @@ const RekapIndividuPage: React.FC = () => {
 
                     {parentMessage && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-                            <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8 duration-500">
+                            <div className="card-glass w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8 duration-500">
                                 <div className="p-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white flex justify-between items-center">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-white/20 rounded-xl">
@@ -839,3 +839,6 @@ const RekapIndividuPage: React.FC = () => {
 };
 
 export default RekapIndividuPage;
+
+
+

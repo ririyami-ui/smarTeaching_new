@@ -20,9 +20,7 @@ const WelcomeScreen: React.FC = () => {
                     <div className="absolute inset-0 bg-indigo-500/20 blur-[100px] rounded-full scale-125 animate-pulse"></div>
                     <div className="relative glass-icon-container glass-glow-indigo !rounded-[4rem] backdrop-blur-[40px] shadow-[0_32px_64px_-16px_rgba(31,38,135,0.2)] p-10 sm:p-12 welcome-glass animate-welcome-float border border-white/40">
                         <div className="relative z-10">
-                            <img
-                                src="/Logo Smart Teaching 3D.png"
-                                alt="Smart Teaching logo"
+                            <img src="/Logo Smart Teaching 3D.png" alt="Smart Teaching logo" loading="lazy" decoding="async"
                                 className="w-28 h-28 sm:w-32 sm:h-32 object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.3)] transition-transform duration-700 hover:scale-110"
                                 onError={(e) => {
                                     const target = e.target as HTMLImageElement;
@@ -112,3 +110,6 @@ const WelcomeScreen: React.FC = () => {
 };
 
 export default WelcomeScreen;
+
+
+

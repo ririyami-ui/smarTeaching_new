@@ -99,7 +99,7 @@ const DatabaseCleanupPage: React.FC = () => {
 
     return (
         <div className="container mx-auto p-6 max-w-6xl">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+            <div className="card-glass rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div>
@@ -203,7 +203,7 @@ const DatabaseCleanupPage: React.FC = () => {
                             <h3 className="font-bold text-gray-800 dark:text-white mb-4">Detail per Collection</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 {Object.entries(report.collections).map(([name, data]) => (
-                                    <div key={name} className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <div key={name} className="card-glass p-3 rounded-lg border border-gray-200 dark:border-gray-700">
                                         <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{name}</p>
                                         <p className="text-2xl font-bold text-gray-800 dark:text-white">{data.total}</p>
                                     </div>
@@ -212,7 +212,7 @@ const DatabaseCleanupPage: React.FC = () => {
                         </div>
 
                         {/* Cleanup Options */}
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+                        <div className="card-glass rounded-xl p-5 border border-gray-200 dark:border-gray-700">
                             <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
                                 <Play size={18} className="text-blue-600" />
                                 Opsi Pembersihan
@@ -325,3 +325,5 @@ const DatabaseCleanupPage: React.FC = () => {
 };
 
 export default DatabaseCleanupPage;
+
+

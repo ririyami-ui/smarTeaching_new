@@ -187,3 +187,4 @@ const RekapitulasiNilai = ({ classes, subjects }: RekapitulasiNilaiProps) => {
 };
 
 export default RekapitulasiNilai;
+

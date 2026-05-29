@@ -347,7 +347,7 @@ const LkpdGeneratorPage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Sidebar Controls */}
                 <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-8 h-fit">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4">
+                    <div className="card-glass p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4">
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                             <Search size={20} className="text-purple-500" />
                             Konfigurasi
@@ -461,7 +461,7 @@ const LkpdGeneratorPage: React.FC = () => {
                     </div>
 
                     {/* History Section */}
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4">
+                    <div className="card-glass p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-4">
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                             <History size={20} className="text-purple-500" />
                             Riwayat LKPD
@@ -496,7 +496,7 @@ const LkpdGeneratorPage: React.FC = () => {
                 {/* Preview Area */}
                 <div className="lg:col-span-3">
                     {lkpdContent ? (
-                        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full min-h-[600px]">
+                        <div className="card-glass rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full min-h-[600px]">
                             <div className="p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center sticky top-0 z-20">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-purple-600 rounded-lg">
@@ -575,3 +575,5 @@ const LkpdGeneratorPage: React.FC = () => {
 };
 
 export default LkpdGeneratorPage;
+
+

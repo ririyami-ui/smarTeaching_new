@@ -149,3 +149,4 @@ export const getHolidayGreeting = (h: Holiday): GreetingResponse => {
         gradient: "from-indigo-600 via-purple-600 to-pink-600"
     };
 };
+

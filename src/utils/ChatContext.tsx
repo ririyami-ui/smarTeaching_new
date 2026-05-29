@@ -104,3 +104,4 @@ export const ChatProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
+

@@ -41,3 +41,4 @@ const StyledTable: React.FC<StyledTableProps> = ({ headers, children, maxHeight,
 );
 
 export default StyledTable;
+

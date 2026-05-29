@@ -338,7 +338,7 @@ const ATPView: React.FC<ATPViewProps> = ({ grade, subject, semester, year, userP
                 </button>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="card-glass rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 uppercase font-bold text-xs sticky top-0">
@@ -444,3 +444,4 @@ const ATPView: React.FC<ATPViewProps> = ({ grade, subject, semester, year, userP
 };
 
 export default ATPView;
+

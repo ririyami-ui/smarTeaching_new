@@ -286,3 +286,4 @@ const MaterialCompletionChart: React.FC = () => {
 };
 
 export default MaterialCompletionChart;
+

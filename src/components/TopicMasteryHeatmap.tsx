@@ -83,7 +83,7 @@ const TopicMasteryHeatmap: React.FC<TopicMasteryHeatmapProps> = ({ grades = [] }
     if (grades.length === 0) return null;
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 h-full flex flex-col">
+        <div className="card-glass p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 h-full flex flex-col">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-purple-600">
                     <BookOpen size={24} />
@@ -147,3 +147,4 @@ const TopicMasteryHeatmap: React.FC<TopicMasteryHeatmapProps> = ({ grades = [] }
 };
 
 export default TopicMasteryHeatmap;
+

@@ -28,7 +28,7 @@ const QuizHistory: React.FC<QuizHistoryProps> = ({
     activeSemester
 }) => {
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 border border-gray-100 dark:border-gray-700 h-full flex flex-col">
+        <div className="card-glass rounded-xl shadow-lg p-5 border border-gray-100 dark:border-gray-700 h-full flex flex-col">
             <h3 className="font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-4">
                 <History size={18} className="text-purple-500" />
                 Riwayat Kuis
@@ -92,3 +92,4 @@ const QuizHistory: React.FC<QuizHistoryProps> = ({
 };
 
 export default QuizHistory;
+

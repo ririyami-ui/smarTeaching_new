@@ -38,7 +38,7 @@ const InfractionChart: React.FC<InfractionChartProps> = ({ infractions }) => {
     ];
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 h-full flex flex-col">
+        <div className="card-glass p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 h-full flex flex-col">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-xl text-red-600">
                     <ShieldAlert size={24} />
@@ -103,3 +103,4 @@ const InfractionChart: React.FC<InfractionChartProps> = ({ infractions }) => {
 };
 
 export default InfractionChart;
+

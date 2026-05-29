@@ -295,3 +295,52 @@ body {
     box-shadow: none !important;
   }
 }
+/* --- Mobile touch performance --- */
+@media (pointer: coarse) {
+  body {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, a, select, input[type="button"], input[type="submit"] {
+    touch-action: manipulation;
+  }
+}
+
+/* --- Content visibility for long lists (performance) --- */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
+}
+
+/* --- Bottom nav GPU acceleration --- */
+.bottom-nav {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* --- Card list GPU hint --- */
+.list-gpu {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* --- Mobile performance: disable hover on touch (avoids double-tap) --- */
+@media (hover: none) and (pointer: coarse) {
+  .hover\:scale-105:hover,
+  .hover\:scale-110:hover,
+  .hover\:scale-102:hover {
+    transform: none !important;
+  }
+  .hover\:bg-gray-100:hover {
+    background-color: transparent !important;
+  }
+  .hover\:shadow-lg:hover {
+    box-shadow: none !important;
+  }
+}
+
+/* --- Prevent overscroll on modals --- */
+.modal-overlay {
+  overscroll-behavior: contain;
+}

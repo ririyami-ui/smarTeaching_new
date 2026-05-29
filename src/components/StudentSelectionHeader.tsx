@@ -44,7 +44,7 @@ const StudentSelectionHeader: React.FC<StudentSelectionHeaderProps> = ({
     students
 }) => {
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
+        <div className="card-glass p-6 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                     <button
@@ -107,3 +107,4 @@ const StudentSelectionHeader: React.FC<StudentSelectionHeaderProps> = ({
 };
 
 export default StudentSelectionHeader;
+

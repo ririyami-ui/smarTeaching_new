@@ -199,7 +199,7 @@ const LeaderboardPage: React.FC = () => {
                             placeholder="Cari nama atau kelas..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 outline-none transition-all dark:text-white w-full sm:w-64"
+                            className="pl-10 pr-4 py-2 card-glass border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 outline-none transition-all dark:text-white w-full sm:w-64"
                         />
                     </div>
                     <div className="w-full sm:w-48">
@@ -267,7 +267,7 @@ const LeaderboardPage: React.FC = () => {
 
                     {/* Full List */}
                     <div className="lg:col-span-2">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div className="card-glass rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
@@ -336,3 +336,4 @@ const LeaderboardPage: React.FC = () => {
 };
 
 export default LeaderboardPage;
+

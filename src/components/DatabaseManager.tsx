@@ -784,3 +784,4 @@ const DatabaseManager: React.FC = () => {
 };
 
 export default DatabaseManager;
+

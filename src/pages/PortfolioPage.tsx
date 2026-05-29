@@ -802,7 +802,7 @@ export default function PortfolioPage() {
             </div>
 
             {/* Progress Timeline Bar */}
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="card-glass rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
                         <h3 className="font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight">Progres Audit Akademik</h3>
@@ -850,7 +850,7 @@ export default function PortfolioPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 {/* Sidebar Chapters Navigation */}
                 <div className="lg:col-span-4 space-y-3">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div className="card-glass rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
                         <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4 px-2">Daftar Isi Laporan</h3>
                         <div className="space-y-2">
                             {CHAPTERS.map((chap) => (
@@ -896,7 +896,7 @@ export default function PortfolioPage() {
 
                 {/* Content Editor Area */}
                 <div className="lg:col-span-8 flex flex-col gap-6">
-                    <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-10 shadow-xl border border-gray-100 dark:border-gray-700 min-h-[600px] flex flex-col relative overflow-hidden">
+                    <div className="card-glass rounded-3xl p-6 md:p-10 shadow-xl border border-gray-100 dark:border-gray-700 min-h-[600px] flex flex-col relative overflow-hidden">
                         {/* Header Content Area */}
                         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-700 pb-6">
                             <div className="flex items-center gap-4">
@@ -950,7 +950,7 @@ export default function PortfolioPage() {
                                                                 {firstPart}
                                                             </ReactMarkdown>
                                                         )}
-                                                        <div id="chart-to-export" className="my-10 bg-white dark:bg-gray-800 rounded-3xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm no-print">
+                                                        <div id="chart-to-export" className="my-10 card-glass rounded-3xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm no-print">
                                                             <div className="flex items-center gap-2 mb-6 border-l-4 border-indigo-600 pl-4">
                                                                 <div>
                                                                     <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Visualisasi Data Utama</p>
@@ -988,7 +988,7 @@ export default function PortfolioPage() {
                                 </>
                             ) : (
                                 <div className="flex-1 flex flex-col items-center justify-center text-center p-12 bg-gray-50/50 dark:bg-gray-900/30 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-                                    <div className="p-6 bg-white dark:bg-gray-800 rounded-full shadow-lg mb-6">
+                                    <div className="p-6 card-glass rounded-full shadow-lg mb-6">
                                         <Bot size={48} className="text-indigo-600" />
                                     </div>
                                     <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2">Belum Ada Konten</h3>
@@ -1097,4 +1097,7 @@ export default function PortfolioPage() {
         </div>
     );
 }
+
+
+
 

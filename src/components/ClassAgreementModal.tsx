@@ -239,3 +239,4 @@ export default function ClassAgreementModal({ isOpen, onClose, classId, rombel, 
     </Modal>
   );
 }
+

@@ -1,7 +1,6 @@
-﻿import moment from 'moment';
+import moment from 'moment';
 import 'moment/locale/id';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+// dynamic import jspdf inside functions
 import { fmtDate, getSignatureCity } from './generalUtils';
 
 // Helper to group grades by Topic/Material (Mirrors TopicMasteryHeatmap logic)
@@ -30,8 +29,10 @@ const groupGradesByTopic = (grades = []) => {
 
 
 
-export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate, teacherName, selectedClass, userProfile, selectedSubject) => {
-  const doc = new jsPDF();
+export const generateAttendanceRecapPDF = async (data, schoolName, startDate, endDate, teacherName, selectedClass, userProfile, selectedSubject) => {
+  const { jsPDF } = await import("jspdf");
+    await import("jspdf-autotable");
+    const doc = new jsPDF();
 
   // Set font and size for headers
   doc.setFontSize(16);
@@ -89,8 +90,10 @@ export const generateAttendanceRecapPDF = (data, schoolName, startDate, endDate,
   doc.save(`Rekap_Kehadiran_${startDate}_${endDate}.pdf`);
 };
 
-export const generateDetailedAttendanceRecapPDF = (data, dates, schoolName, startDate, endDate, teacherName, selectedClass, userProfile, selectedSubject) => {
-  const doc = new jsPDF('landscape');
+export const generateDetailedAttendanceRecapPDF = async (data, dates, schoolName, startDate, endDate, teacherName, selectedClass, userProfile, selectedSubject) => {
+  const { jsPDF } = await import("jspdf");
+    await import("jspdf-autotable");
+    const doc = new jsPDF('landscape');
   const pageWidth = doc.internal.pageSize.width;
 
   // Header
@@ -144,7 +147,7 @@ export const generateDetailedAttendanceRecapPDF = (data, dates, schoolName, star
     // Fill Date Columns
     dates.forEach(date => {
       const status = student[date];
-      if (status === 'Hadir') row[date] = '•'; // Dot for presence
+      if (status === 'Hadir') row[date] = '.'; // Dot for presence
       else if (status === 'Sakit') row[date] = 'S';
       else if (status === 'Ijin') row[date] = 'I';
       else if (status === 'Alpha') row[date] = 'A';
@@ -195,30 +198,55 @@ export const generateDetailedAttendanceRecapPDF = (data, dates, schoolName, star
     },
   });
 
-  // Footer - Signature
-  const finalY = doc.autoTable.previous.finalY + 10;
-  const city = getSignatureCity(userProfile);
-  const dateStr = fmtDate(new Date());
+  // Calculate totals for pie chart
+  const totalHadir = data.reduce((sum, s) => sum + (s.Hadir || 0), 0);
+  const totalSakit = data.reduce((sum, s) => sum + (s.Sakit || 0), 0);
+  const totalIjin = data.reduce((sum, s) => sum + (s.Ijin || 0), 0);
+  const totalAlpha = data.reduce((sum, s) => sum + (s.Alpha || 0), 0);
 
-  // Calculate footer position (if near end of page, add page)
-  let footerY = finalY;
-  if (footerY + 40 > doc.internal.pageSize.height) {
+  // Add Footer Section (Chart & Signature side-by-side)
+  let sectionY = doc.autoTable.previous.finalY + 15;
+  const pageHeight = doc.internal.pageSize.height;
+  
+  // Check if we need a new page
+  if (sectionY + 60 > pageHeight - 30) {
     doc.addPage();
-    footerY = 20;
+    sectionY = 25;
   }
 
-  const rightColX = pageWidth - 60;
+  // Left Side: Pie Chart
   doc.setFontSize(10);
-  doc.text(`${city}, ${dateStr}`, rightColX, footerY);
-  doc.text('Guru Mata Pelajaran', rightColX, footerY + 5);
   doc.setFont('helvetica', 'bold');
-  doc.text(teacherName, rightColX, footerY + 25);
+  doc.setTextColor(31, 41, 55);
+  doc.text('Visualisasi Persentase Kehadiran', 14, sectionY);
+  
+  const attendanceChartData = [
+    { label: 'Hadir', value: totalHadir, color: [34, 197, 94] },
+    { label: 'Sakit', value: totalSakit, color: [59, 130, 246] },
+    { label: 'Ijin', value: totalIjin, color: [234, 179, 8] },
+    { label: 'Alpha', value: totalAlpha, color: [239, 68, 68] }
+  ];
+  
+  drawPieChart(doc, 14, sectionY + 5, 40, attendanceChartData);
+
+  // Right Side: Signature
+  const city = getSignatureCity(userProfile);
+  const dateStr = fmtDate(new Date());
+  const rightColX = pageWidth - 70;
+  const sigY = sectionY + 5;
+
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
   doc.setFont('helvetica', 'normal');
-  doc.text(`NIP. ${userProfile?.nip || '....................'}`, rightColX, footerY + 30);
+  doc.text(`${city}, ${dateStr}`, rightColX, sigY);
+  doc.text('Guru Mata Pelajaran', rightColX, sigY + 6);
+  doc.setFont('helvetica', 'bold');
+  doc.text(teacherName, rightColX, sigY + 28);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`NIP. ${userProfile?.nip || '....................'}`, rightColX, sigY + 34);
 
   // Page numbering
   const totalPages = doc.internal.getNumberOfPages();
-  const pageHeight = doc.internal.pageSize.height;
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
@@ -229,8 +257,10 @@ export const generateDetailedAttendanceRecapPDF = (data, dates, schoolName, star
   doc.save(`Rekap_Absensi_Detail_${selectedClass}_${startDate}_${endDate}.pdf`);
 };
 
-export const generateJurnalRecapPDF = (jurnalData, startDate, endDate, teacherName, userProfile) => {
-  const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+export const generateJurnalRecapPDF = async (jurnalData, startDate, endDate, teacherName, userProfile) => {
+  const { jsPDF } = await import("jspdf");
+    await import("jspdf-autotable");
+    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
 
   // Header
   doc.setFontSize(16);
@@ -248,7 +278,8 @@ export const generateJurnalRecapPDF = (jurnalData, startDate, endDate, teacherNa
     // Format Status String
     let statusString = "Terlaksana";
     if (jurnal.isImplemented === false) { // Explicit check as undefined might default to true in some legacy data
-      statusString = `Tidak Terlaksana\nKet: ${jurnal.challenges || '-'}`;
+      statusString = `Tidak Terlaksana
+Ket: ${jurnal.challenges || '-'}`;
     }
 
     const rowData = [
@@ -350,8 +381,10 @@ export const generateJurnalRecapPDF = (jurnalData, startDate, endDate, teacherNa
   doc.save(`Jurnal_Mengajar_${startDate}_${endDate}.pdf`);
 };
 
-export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate, teacherName, selectedClass, selectedSubject, userProfile, isDetailedView, detailedColumns) => {
-  const doc = new jsPDF('landscape');
+export const generateNilaiRecapPDF = async (nilaiData, schoolName, startDate, endDate, teacherName, selectedClass, selectedSubject, userProfile, isDetailedView, detailedColumns) => {
+  const { jsPDF } = await import("jspdf");
+    await import("jspdf-autotable");
+    const doc = new jsPDF('landscape');
 
   // Header
   doc.setFontSize(16);
@@ -458,8 +491,10 @@ export const generateNilaiRecapPDF = (nilaiData, schoolName, startDate, endDate,
   doc.save(`Rekap_Nilai_${selectedClass}_${selectedSubject}_${startDate}_${endDate}.pdf`);
 };
 
-export const generateClassAgreementPDF = ({ classData, agreementData, userProfile, teacherName, students = [] }) => {
-  const doc = new jsPDF();
+export const generateClassAgreementPDF = async ({ classData, agreementData, userProfile, teacherName, students = [] }) => {
+  const { jsPDF } = await import("jspdf");
+    await import("jspdf-autotable");
+    const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
   const mL = 30; // Margin Left for binding (3cm)
@@ -651,8 +686,10 @@ export const generateClassAgreementPDF = ({ classData, agreementData, userProfil
   doc.save(fileName);
 };
 
-export const generateViolationRecapPDF = (data, schoolName, startDate, endDate, teacherName, selectedClass, userProfile) => {
-  const doc = new jsPDF();
+export const generateViolationRecapPDF = async (data, schoolName, startDate, endDate, teacherName, selectedClass, userProfile) => {
+  const { jsPDF } = await import("jspdf");
+    await import("jspdf-autotable");
+    const doc = new jsPDF();
 
   // Header
   doc.setFontSize(16);
@@ -737,10 +774,10 @@ export const generateViolationRecapPDF = (data, schoolName, startDate, endDate, 
 const sanitizeForPdf = (str) => {
   if (!str) return "";
   return str
-    .replace(/[•●]/g, '-') // Normalize bullets
-    .replace(/[“”]/g, '"') // Normalize quotes
-    .replace(/[‘’]/g, "'")
-    .replace(/[–—]/g, '-') // Normalize dashes
+    .replace(/[�?]/g, '-') // Normalize bullets
+    .replace(/[��]/g, '"') // Normalize quotes
+    .replace(/[��]/g, "'")
+    .replace(/[��]/g, '-') // Normalize dashes
     // Remove emojis and other surrogates that cause PDF corruption in standard fonts
     .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '')
     // Filter out most non-ASCII/Extended Latin characters that show as Mojibake
@@ -755,7 +792,7 @@ const addWrappedText = (doc, text, x, y, maxWidth, lineHeight) => {
 
   const sanitizedText = sanitizeForPdf(text);
   // Split text into paragraphs
-  const paragraphs = sanitizedText.split('\n');
+  const paragraphs = sanitizedText.split(/\n/);
 
   paragraphs.forEach(paragraph => {
     const trimmed = paragraph.trim();
@@ -779,8 +816,8 @@ const addWrappedText = (doc, text, x, y, maxWidth, lineHeight) => {
       doc.setFont('helvetica', 'bold');
       currentY += 4;
     }
-    // 2. Detect Bullet Points (incl standard and •)
-    else if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('• ')) {
+    // 2. Detect Bullet Points (incl standard and �)
+    else if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('� ')) {
       isBullet = true;
       content = trimmed.substring(2);
       doc.setFont('helvetica', 'bold');
@@ -1087,15 +1124,17 @@ const drawHorizontalBarChart = (doc, x, y, width, data) => {
 
 // --- MAIN GENERATOR ---
 
-export const generateClassAnalysisPDF = (classData, reportText, teacherName, userProfile) => {
-  const doc = new jsPDF();
+export const generateClassAnalysisPDF = async (classData, reportText, teacherName, userProfile) => {
+  const { jsPDF } = await import("jspdf");
+    await import("jspdf-autotable");
+    const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
   const midPage = pageWidth / 2;
 
   // Clean up AI intro fluff if present
   const cleanedReportText = reportText
-    .replace(/^Halo,.*?(Saya Smartty|asisten AI|Smartty).*?analisis.*?:[\s\n]*/is, '')
+    .replace(/^Halo[\\s\\S]*?:\\s*/is, '')
     .replace(/Smartty/g, 'Sistem');
 
   // Professional Header Design
@@ -1327,14 +1366,16 @@ export const generateClassAnalysisPDF = (classData, reportText, teacherName, use
   doc.save(`Analisis_Kelas_${classData.className}_${new Date().toISOString().slice(0, 10)}.pdf`);
 };
 
-export const generateStudentAnalysisPDF = (studentName, className, reportText, stats, teacherName, userProfile) => {
-  const doc = new jsPDF();
+export const generateStudentAnalysisPDF = async (studentName, className, reportText, stats, teacherName, userProfile) => {
+  const { jsPDF } = await import("jspdf");
+    await import("jspdf-autotable");
+    const doc = new jsPDF();
   const pageHeight = doc.internal.pageSize.height;
   const pageWidth = doc.internal.pageSize.width;
 
   // Clean up AI intro fluff if present
   const cleanedReportText = reportText
-    .replace(/^Halo,.*?(Saya Smartty|asisten AI|Smartty).*?analisis.*?:[\s\n]*/is, '')
+    .replace(/^Halo[\\s\\S]*?:\\s*/is, '')
     .replace(/Smartty/g, 'Sistem');
 
   // Header
@@ -1363,11 +1404,11 @@ export const generateStudentAnalysisPDF = (studentName, className, reportText, s
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text(`• Rata - rata Nilai: ${stats.gradeAvg} `, 20, yPos);
+  doc.text(`� Rata - rata Nilai: ${stats.gradeAvg} `, 20, yPos);
   yPos += 6;
-  doc.text(`• Kehadiran: ${stats.attendancePct}% (Sakit: ${stats.sakit}, Ijin: ${stats.ijin}, Alpha: ${stats.alpha})`, 20, yPos);
+  doc.text(`� Kehadiran: ${stats.attendancePct}% (Sakit: ${stats.sakit}, Ijin: ${stats.ijin}, Alpha: ${stats.alpha})`, 20, yPos);
   yPos += 6;
-  doc.text(`• Poin Pelanggaran: ${stats.infractionPoints} `, 20, yPos);
+  doc.text(`� Poin Pelanggaran: ${stats.infractionPoints} `, 20, yPos);
   yPos += 12;
 
   // AI Analysis Body
@@ -1412,8 +1453,10 @@ export const generateStudentAnalysisPDF = (studentName, className, reportText, s
   doc.save(`Laporan_Siswa_${studentName}_${new Date().toISOString().slice(0, 10)}.pdf`);
 };
 
-export const generateStudentIndividualRecapPDF = ({ student, stats, grades, attendance, infractions, appreciations, narrative, userProfile, teacherName, selectedSubject, radarChartImage }) => {
-  const doc = new jsPDF();
+export const generateStudentIndividualRecapPDF = async ({ student, stats, grades, attendance, infractions, appreciations, narrative, userProfile, teacherName, selectedSubject, radarChartImage }) => {
+  const { jsPDF } = await import("jspdf");
+    await import("jspdf-autotable");
+    const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
 
@@ -1442,7 +1485,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.text("PROFIL SISWA", 18, yPos + 1);
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(31, 41, 55);
   doc.setFont('helvetica', 'normal');
   yPos += 7;
 
@@ -1465,7 +1508,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.text("IKHTISAR CAPAIAN (SEMESTER BERJALAN)", 18, yPos + 1);
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(31, 41, 55);
   doc.setFont('helvetica', 'normal');
   yPos += 8;
 
@@ -1511,7 +1554,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.text(`NILAI AKHIR (${academicWeight}/${attitudeWeight})`, pageWidth / 2, boxY + 7, { align: 'center' });
   doc.setFontSize(16);
   doc.text(stats.finalScore, pageWidth / 2, boxY + 15.5, { align: 'center' });
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(31, 41, 55);
 
   yPos = boxY + boxH + 15;
 
@@ -1529,7 +1572,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.text("DETAIL PENILAIAN AKADEMIK", 18, yPos + 1);
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(31, 41, 55);
   doc.setFont('helvetica', 'normal');
   yPos += 8;
 
@@ -1566,7 +1609,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.text("CATATAN KEDISIPLINAN & KEHADIRAN", 18, yPos + 1);
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(31, 41, 55);
   doc.setFont('helvetica', 'normal');
   yPos += 8;
 
@@ -1591,15 +1634,31 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   yPos = doc.autoTable.previous.finalY + 10;
   if (yPos > pageHeight - 60) { doc.addPage(); yPos = 20; }
 
-  const attDetailColumns = ["Tanggal", "Mata Pelajaran", "Status"];
-  const attDetailRows = attendance.map(a => [
-    moment(a.date).format('DD/MM/YY'),
-    a.subjectName || '-',
-    a.status
-  ]);
+  const attDetailColumns = ["Tanggal", "Mata Pelajaran", "Status", "Keterangan"];
+    const attDetailRows = attendance.map(a => {
+    const s = (a.status || '').toString().trim().toUpperCase();
+    let displayStatus = 'Hadir';
+    let keterangan = '-';
 
-  doc.autoTable({
-    head: [attDetailColumns],
+    if (s === 'A' || s === 'ALPA' || s === 'ALPHA') {
+      displayStatus = 'Alpa';
+      keterangan = 'Poin: 5 (Alpa)';
+    } else if (s === 'S' || s === 'SAKIT') {
+      displayStatus = 'Sakit';
+    } else if (s === 'I' || s === 'IJIN' || s === 'IZIN') {
+      displayStatus = 'Ijin';
+    }
+
+    return [
+      moment(a.date).format('DD/MM/YY'),
+      a.subjectName || '-',
+      displayStatus,
+      keterangan
+    ];
+  });
+
+  doc.autoTable({head: [attDetailColumns],
+    
     body: attDetailRows.length > 0 ? attDetailRows : [["-", "Tidak ada data kehadiran", "-"]],
     startY: yPos,
     theme: 'striped',
@@ -1665,7 +1724,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.line(14, yPos - 3, pageWidth - 14, yPos - 3);
 
   const cleanedNarrative = (narrative || "Belum ada catatan narasi untuk periode ini.")
-    .replace(/^Halo,.*?(Saya Smartty|asisten AI|Smartty).*?analisis.*?:[\s\n]*/is, '')
+    .replace(/^Halo[\\s\\S]*?:\\s*/is, '')
     .replace(/Smartty/g, 'Sistem');
 
   const narrativeWidth = pageWidth - 28;
@@ -1676,7 +1735,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.text("CATATAN PERKEMBANGAN (NARASI)", 18, yPos + 1);
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(31, 41, 55);
   doc.setFont('helvetica', 'normal');
 
   doc.setFont('helvetica', 'normal');
@@ -1684,7 +1743,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.setTextColor(50, 50, 50);
   yPos = addWrappedText(doc, cleanedNarrative, 14, yPos + 9, narrativeWidth, 4);
   yPos += 10;
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(31, 41, 55);
 
   // Radar Chart & Data Source Section
   if (radarChartImage) {
@@ -1696,7 +1755,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.text("8 DIMENSI PROFIL LULUSAN", 18, yPos + 1);
-    doc.setTextColor(0, 0, 0);
+    doc.setTextColor(31, 41, 55);
     doc.setFont('helvetica', 'normal');
     yPos += 8;
 
@@ -1813,7 +1872,7 @@ export const generateStudentIndividualRecapPDF = ({ student, stats, grades, atte
   doc.save(`Rekap_Individu_${student.name.replace(/\s+/g, '_')}.pdf`);
 };
 
-export const generateKktpAssessmentPDF = ({
+export const generateKktpAssessmentPDF = async ({
   students,
   kktpData,
   assessmentScores,
@@ -1826,7 +1885,9 @@ export const generateKktpAssessmentPDF = ({
   isManualMode,
   manualCriteria
 }) => {
-  const doc = new jsPDF('landscape');
+  const { jsPDF } = await import("jspdf");
+    await import("jspdf-autotable");
+    const doc = new jsPDF('landscape');
   const pageWidth = doc.internal.pageSize.width;
 
   // Header
@@ -1933,3 +1994,10 @@ export const generateKktpAssessmentPDF = ({
 
   doc.save(`Penilaian_KKTP_${selectedClass}_${topic.substring(0, 20)}.pdf`);
 };
+
+
+
+
+
+
+

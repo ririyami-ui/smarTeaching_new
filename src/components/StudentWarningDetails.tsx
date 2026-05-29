@@ -136,13 +136,13 @@ const StudentWarningDetails: React.FC<StudentWarningDetailsProps> = ({ student, 
         <p className="w-full text-xs font-bold text-primary uppercase tracking-wider mb-1">Tindakan Cepat:</p>
         <Link
           to={`/nilai?classId=${encodeURIComponent(student.rombel)}`}
-          className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-4 bg-white dark:bg-gray-800 text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-all text-sm font-semibold shadow-sm"
+          className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-4 card-glass text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-all text-sm font-semibold shadow-sm"
         >
           <BookOpen size={16} /> Input Nilai
         </Link>
         <button
           onClick={() => navigate('/pelanggaran', { state: { studentId: student.id, classId: student.rombel } })}
-          className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-4 bg-white dark:bg-gray-800 text-red-500 border border-red-200 rounded-lg hover:bg-red-500 hover:text-white transition-all text-sm font-semibold shadow-sm"
+          className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-4 card-glass text-red-500 border border-red-200 rounded-lg hover:bg-red-500 hover:text-white transition-all text-sm font-semibold shadow-sm"
         >
           <ShieldX size={16} /> Catat Pelanggaran
         </button>
@@ -214,3 +214,4 @@ const StudentWarningDetails: React.FC<StudentWarningDetailsProps> = ({ student, 
 };
 
 export default StudentWarningDetails;
+

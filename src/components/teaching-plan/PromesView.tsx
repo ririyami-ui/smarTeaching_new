@@ -680,7 +680,7 @@ const PromesView: React.FC<PromesViewProps> = ({ grade, subject, semester, year,
             </div>
 
             {semesterHolidays.length > 0 && (
-                <div className="mt-6 mb-8 p-5 bg-white dark:bg-gray-800 rounded-xl border-2 border-blue-100 dark:border-blue-900/50 shadow-sm">
+                <div className="mt-6 mb-8 p-5 card-glass rounded-xl border-2 border-blue-100 dark:border-blue-900/50 shadow-sm">
                     <h4 className="text-sm font-bold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
                         <Calendar size={18} className="text-blue-600" />
                         Agenda & Libur Sekolah Semester {semester} TA {year}
@@ -726,3 +726,5 @@ const PromesView: React.FC<PromesViewProps> = ({ grade, subject, semester, year,
 };
 
 export default PromesView;
+
+

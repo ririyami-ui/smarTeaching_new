@@ -6,6 +6,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { Calendar, Users, TrendingUp, FileDown, CheckCircle, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 
 import StyledInput from './StyledInput';
 import StyledSelect from './StyledSelect';
@@ -408,7 +409,55 @@ const RekapAttendanceTab: React.FC<RekapAttendanceTabProps> = ({
                                             ))}
                                         </tr>
                                     ))}
+                                    <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600">
+                                            TOTAL
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 dark:text-green-400 border-b border-gray-200 dark:border-gray-600">
+                                            {chartData.Hadir}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 dark:text-blue-400 border-b border-gray-200 dark:border-gray-600">
+                                            {chartData.Sakit}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-yellow-600 dark:text-yellow-400 border-b border-gray-200 dark:border-gray-600">
+                                            {chartData.Ijin}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 dark:text-red-400 border-b border-gray-200 dark:border-gray-600">
+                                            {chartData.Alpha}
+                                        </td>
+                                    </tr>
                                 </StyledTable>
+                            </div>
+                            <div className="p-6 border-t border-gray-100 dark:border-gray-800">
+                                <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Visualisasi Persentase Kehadiran</h4>
+                                <div className="flex justify-center">
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <PieChart>
+                                            <Pie
+                                                data={[
+                                                    { name: 'Hadir', value: chartData.Hadir },
+                                                    { name: 'Sakit', value: chartData.Sakit },
+                                                    { name: 'Ijin', value: chartData.Ijin },
+                                                    { name: 'Alpha', value: chartData.Alpha }
+                                                ]}
+                                                cx="50%"
+                                                cy="50%"
+                                                labelLine={false}
+                                                label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(1)}%)`}
+                                                outerRadius={80}
+                                                fill="#8884d8"
+                                                dataKey="value"
+                                            >
+                                                <Cell fill="#22c55e" />
+                                                <Cell fill="#3b82f6" />
+                                                <Cell fill="#eab308" />
+                                                <Cell fill="#ef4444" />
+                                            </Pie>
+                                            <Tooltip formatter={(value) => `${value}`} />
+                                            <Legend />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </div>
                         </div>
                     ) : (
@@ -494,3 +543,4 @@ const RekapAttendanceTab: React.FC<RekapAttendanceTabProps> = ({
 };
 
 export default RekapAttendanceTab;
+

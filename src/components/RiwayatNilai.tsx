@@ -360,7 +360,7 @@ const RiwayatNilai: React.FC<RiwayatNilaiProps> = ({ classes, subjects }) => {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-scale-up">
+          <div className="card-glass rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-scale-up">
             <div className="flex flex-col items-center text-center gap-4">
               <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full">
                 <AlertTriangle size={32} />
@@ -401,3 +401,4 @@ const RiwayatNilai: React.FC<RiwayatNilaiProps> = ({ classes, subjects }) => {
 };
 
 export default RiwayatNilai;
+

@@ -8,7 +8,7 @@ interface InstallPwaCardProps {
 
 const InstallPwaCard: React.FC<InstallPwaCardProps> = ({ onInstall, onDismiss }) => {
   return (
-    <div className="fixed bottom-4 right-4 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 z-50">
+    <div className="fixed bottom-4 right-4 w-80 card-glass rounded-lg shadow-lg p-4 z-50">
       <div className="flex items-start">
         <div className="flex-shrink-0">
           <Download className="h-6 w-6 text-primary" />
@@ -44,3 +44,4 @@ const InstallPwaCard: React.FC<InstallPwaCardProps> = ({ onInstall, onDismiss })
 };
 
 export default InstallPwaCard;
+

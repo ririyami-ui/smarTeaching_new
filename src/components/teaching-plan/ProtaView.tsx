@@ -415,3 +415,4 @@ const ProtaView: React.FC<ProtaViewProps> = ({ grade, subject, semester, year, a
 };
 
 export default ProtaView;
+

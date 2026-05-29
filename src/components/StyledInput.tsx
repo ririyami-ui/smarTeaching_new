@@ -146,3 +146,4 @@ const StyledInput: React.FC<StyledInputProps> = ({ label, type = 'text', voiceEn
 };
 
 export default StyledInput;
+

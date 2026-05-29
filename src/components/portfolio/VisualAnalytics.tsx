@@ -241,3 +241,4 @@ export default function VisualAnalytics({ chapterId, data }: VisualAnalyticsProp
             return null;
     }
 }
+

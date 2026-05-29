@@ -561,7 +561,7 @@ const PelanggaranPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl transition-all border border-gray-100 dark:border-gray-700">
+    <div className="p-4 md:p-6 card-glass rounded-2xl shadow-xl transition-all border border-gray-100 dark:border-gray-700">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h2 className="text-2xl md:text-3xl font-extrabold text-gray-800 dark:text-white flex items-center gap-3">
@@ -705,7 +705,7 @@ const PelanggaranPage: React.FC = () => {
                     type="number"
                     value={customPoints}
                     onChange={(e) => setCustomPoints(e.target.value)}
-                    className="w-full p-2.5 bg-white dark:bg-gray-800 border-2 border-red-200 dark:border-red-900/30 rounded-xl focus:ring-2 focus:ring-red-500 outline-none dark:text-white"
+                    className="w-full p-2.5 card-glass border-2 border-red-200 dark:border-red-900/30 rounded-xl focus:ring-2 focus:ring-red-500 outline-none dark:text-white"
                     placeholder="Misal: 10"
                   />
                 </div>
@@ -774,7 +774,7 @@ const PelanggaranPage: React.FC = () => {
                     type="number"
                     value={customPoints}
                     onChange={(e) => setCustomPoints(e.target.value)}
-                    className="w-full p-2.5 bg-white dark:bg-gray-800 border-2 border-blue-200 dark:border-blue-900/30 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
+                    className="w-full p-2.5 card-glass border-2 border-blue-200 dark:border-blue-900/30 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
                     placeholder="Misal: 1-5"
                   />
                 </div>
@@ -822,7 +822,7 @@ const PelanggaranPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div className="card-glass rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div className="p-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex justify-between items-center">
               <h3 className="text-sm font-bold text-gray-800 dark:text-white flex items-center gap-2">
                 {activeTab === 'infractions' ? 'Daftar Pelanggaran' : 'Daftar Apresiasi'}
@@ -957,7 +957,7 @@ const PelanggaranPage: React.FC = () => {
               roleModels.map(student => (
                 <div key={student.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-600 hover:border-amber-300 transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center border border-gray-100 dark:border-gray-700">
+                    <div className="w-10 h-10 card-glass rounded-full flex items-center justify-center border border-gray-100 dark:border-gray-700">
                       <UserCheck size={20} className="text-blue-500" />
                     </div>
                     <div className="text-left">
@@ -1044,7 +1044,7 @@ const PelanggaranPage: React.FC = () => {
                     value={newTypeName}
                     onChange={(e) => setNewTypeName(e.target.value)}
                     placeholder={settingsTab === 'infractions' ? 'Nama Pelanggaran (misal: Berkelahi)' : 'Nama Apresiasi (misal: Membantu Teman)'}
-                    className="w-full p-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2.5 card-glass border border-gray-200 dark:border-gray-700 rounded-xl outline-none dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div className="w-full md:w-32">
@@ -1053,7 +1053,7 @@ const PelanggaranPage: React.FC = () => {
                     value={newTypePoints}
                     onChange={(e) => setNewTypePoints(e.target.value)}
                     placeholder="Poin"
-                    className="w-full p-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2.5 card-glass border border-gray-200 dark:border-gray-700 rounded-xl outline-none dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <StyledButton variant={settingsTab === 'infractions' ? 'danger' : 'primary'} onClick={handleAddType} className="h-[42px] px-6">
@@ -1091,7 +1091,7 @@ const PelanggaranPage: React.FC = () => {
                   ) : (
                     <>
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-xl font-black text-xs shadow-sm ${settingsTab === 'infractions' ? 'text-red-500' : 'text-blue-500'}`}>
+                        <div className={`w-10 h-10 flex items-center justify-center card-glass rounded-xl font-black text-xs shadow-sm ${settingsTab === 'infractions' ? 'text-red-500' : 'text-blue-500'}`}>
                           {settingsTab === 'infractions' ? '-' : '+'}{type.points}
                         </div>
                         <span className="font-bold text-gray-700 dark:text-gray-200">{type.name}</span>
@@ -1157,3 +1157,5 @@ const PelanggaranPage: React.FC = () => {
 };
 
 export default PelanggaranPage;
+
+

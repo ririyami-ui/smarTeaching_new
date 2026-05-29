@@ -122,3 +122,4 @@ export const SettingsProvider: React.FC<{children: ReactNode}> = ({ children }) 
     </SettingsContext.Provider>
   );
 };
+

@@ -239,3 +239,4 @@ export default function StudentEditor({ studentData, onSave, onClose, classes }:
     </form>
   );
 }
+
