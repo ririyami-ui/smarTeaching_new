@@ -274,7 +274,10 @@ export const generateJurnalRecapPDF = async (jurnalData, startDate, endDate, tea
   const tableColumn = ["Tanggal", "Kelas", "Mapel", "Materi", "Tujuan", "Kegiatan", "Status & Catatan", "Tindak Lanjut"];
   const tableRows = [];
 
-  jurnalData.forEach(jurnal => {
+  // Sort jurnal data by date ascending (oldest first)
+  const sortedJurnalData = [...jurnalData].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  sortedJurnalData.forEach(jurnal => {
     // Format Status String
     let statusString = "Terlaksana";
     if (jurnal.isImplemented === false) { // Explicit check as undefined might default to true in some legacy data
@@ -333,8 +336,38 @@ Ket: ${jurnal.challenges || '-'}`;
   doc.setDrawColor(50, 50, 50);
   doc.line(14, tableEndY, doc.internal.pageSize.width - 14, tableEndY);
 
+  // Calculate jurnal statistics for chart
+  const totalJurnal = jurnalData.length;
+  const implementedCount = jurnalData.filter(j => j.isImplemented === true).length;
+  const notImplementedCount = jurnalData.filter(j => j.isImplemented === false).length;
+
+  // Add Chart Section (Jurnal Status)
+  let chartY = tableEndY + 15;
+  const pageHeight = doc.internal.pageSize.height;
+  
+  // Check if we need a new page for chart
+  if (chartY + 70 > pageHeight - 60) {
+    doc.addPage();
+    chartY = 25;
+  }
+
+  // Chart Title
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(31, 41, 55);
+  doc.text('Status Jurnal Mengajar', 14, chartY);
+  chartY += 10;
+
+  // Draw Pie Chart for Jurnal Status
+  const jurnalChartData = [
+    { label: 'Terlaksana', value: implementedCount, color: [34, 197, 94] },
+    { label: 'Tidak Terlaksana', value: notImplementedCount, color: [239, 68, 68] }
+  ];
+  
+  drawPieChart(doc, 14, chartY, 45, jurnalChartData);
+
   // Footer - Two Column Signature
-  const finalY = tableEndY + 10; // Get the Y position after the table with some padding
+  const finalY = chartY + 60; // Adjusted for chart position
   doc.setFontSize(10);
 
   const leftColX = 14;
@@ -369,7 +402,6 @@ Ket: ${jurnal.challenges || '-'}`;
 
   // Page numbering
   const totalPages = doc.internal.getNumberOfPages();
-  const pageHeight = doc.internal.pageSize.height;
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
