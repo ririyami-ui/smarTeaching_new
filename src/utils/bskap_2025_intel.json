@@ -3221,7 +3221,117 @@
                                 "elemen": "Sejarah Peradaban Islam"
                             }
                         ],
-                        "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                        "cp_snippet": "Qur'an Hadis Memahami ayat Al-Qur'an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                    }
+                },
+                "Pendidikan Agama Kristen": {
+                    "ganjil": {
+                        "elemen": ["Allah Berkarya", "Manusia dan Nilai-nilai Kristiani"],
+                        "materi_inti": [
+                            {"materi": "Karya Allah dalam Penciptaan", "elemen": "Allah Berkarya"},
+                            {"materi": "Hidup Berdasarkan Nilai-nilai Kristiani", "elemen": "Manusia dan Nilai-nilai Kristiani"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami karya Allah dalam penciptaan alam semesta dan menerapkan nilai-nilai Kristiani dalam kehidupan sehari-hari sesuai ajaran Alkitab."
+                    },
+                    "genap": {
+                        "elemen": ["Gereja dan Masyarakat Majemuk", "Alam dan Lingkungan Hidup"],
+                        "materi_inti": [
+                            {"materi": "Mengenal Gereja dan Persekutuan Umat", "elemen": "Gereja dan Masyarakat Majemuk"},
+                            {"materi": "Memelihara Lingkungan sebagai Ciptaan Tuhan", "elemen": "Alam dan Lingkungan Hidup"}
+                        ],
+                        "cp_snippet": "Peserta didik mengenali gereja sebagai persekutuan umat dan bertanggung jawab memelihara alam ciptaan Tuhan sebagai wujud iman Kristiani."
+                    }
+                },
+                "Pendidikan Agama Katolik": {
+                    "ganjil": {
+                        "elemen": ["Pribadi Peserta Didik", "Yesus Kristus"],
+                        "materi_inti": [
+                            {"materi": "Diri sebagai Pribadi yang Unik", "elemen": "Pribadi Peserta Didik"},
+                            {"materi": "Mengenal Pribadi Yesus Kristus", "elemen": "Yesus Kristus"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami dirinya sebagai pribadi yang unik dan mengenal Yesus Kristus melalui Kitab Suci."
+                    },
+                    "genap": {
+                        "elemen": ["Gereja", "Masyarakat"],
+                        "materi_inti": [
+                            {"materi": "Gereja sebagai Umat Allah", "elemen": "Gereja"},
+                            {"materi": "Hidup Bermasyarakat sebagai Murid Yesus", "elemen": "Masyarakat"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami Gereja sebagai umat Allah dan hidup bermasyarakat sesuai ajaran Gereja Katolik."
+                    }
+                },
+                "Pendidikan Agama Hindu": {
+                    "ganjil": {
+                        "elemen": ["Kitab Suci Weda", "Sraddha and Bhakti", "Susila"],
+                        "materi_inti": [
+                            {"materi": "Weda sebagai Kitab Suci dan Sumber Ajaran", "elemen": "Kitab Suci Weda"},
+                            {"materi": "Sraddha dan Bhakti kepada Tuhan", "elemen": "Sraddha and Bhakti"},
+                            {"materi": "Dasar-dasar Susila dalam Agama Hindu", "elemen": "Susila"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami Weda sebagai kitab suci, mengembangkan sraddha dan bhakti, serta menerapkan susila dalam kehidupan."
+                    },
+                    "genap": {
+                        "elemen": ["Acara", "Sejarah Agama Hindu"],
+                        "materi_inti": [
+                            {"materi": "Acara dan Upacara Keagamaan Hindu", "elemen": "Acara"},
+                            {"materi": "Sejarah Perkembangan Agama Hindu di Indonesia", "elemen": "Sejarah Agama Hindu"}
+                        ],
+                        "cp_snippet": "Peserta didik mengenal acara keagamaan Hindu dan memahami sejarah perkembangan agama Hindu di Indonesia."
+                    }
+                },
+                "Pendidikan Agama Buddha": {
+                    "ganjil": {
+                        "elemen": ["Sejarah", "Ritual"],
+                        "materi_inti": [
+                            {"materi": "Riwayat Hidup Buddha Gotama", "elemen": "Sejarah"},
+                            {"materi": "Macam-macam Ritual Keagamaan Buddha", "elemen": "Ritual"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami riwayat hidup Buddha Gotama dan melaksanakan ritual keagamaan Buddha."
+                    },
+                    "genap": {
+                        "elemen": ["Etika"],
+                        "materi_inti": [
+                            {"materi": "Dasar-dasar Etika Buddhis", "elemen": "Etika"},
+                            {"materi": "Penerapan Pancasila Buddhis dalam Kehidupan", "elemen": "Etika"}
+                        ],
+                        "cp_snippet": "Peserta didik menerapkan etika Buddhis dan Pancasila Buddhis dalam kehidupan sehari-hari."
+                    }
+                },
+                "Pendidikan Agama Khonghucu": {
+                    "ganjil": {
+                        "elemen": ["Sejarah Suci", "Kitab Suci", "Keimanan"],
+                        "materi_inti": [
+                            {"materi": "Sejarah Suci Nabi Kongzi", "elemen": "Sejarah Suci"},
+                            {"materi": "Kitab Suci dan Pokok Ajaran Khonghucu", "elemen": "Kitab Suci"},
+                            {"materi": "Keimanan kepada Tian", "elemen": "Keimanan"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami sejarah suci Nabi Kongzi dan kitab suci ajaran Khonghucu serta beriman kepada Tian."
+                    },
+                    "genap": {
+                        "elemen": ["Tata Ibadah", "Perilaku Junzi"],
+                        "materi_inti": [
+                            {"materi": "Tata Cara Ibadah dan Persembahyangan", "elemen": "Tata Ibadah"},
+                            {"materi": "Menjadi Pribadi Junzi yang Berbudi Luhur", "elemen": "Perilaku Junzi"}
+                        ],
+                        "cp_snippet": "Peserta didik melaksanakan tata ibadah dan mengembangkan perilaku Junzi yang berbudi luhur."
+                    }
+                },
+                "Pendidikan Kepercayaan terhadap Tuhan YME": {
+                    "ganjil": {
+                        "elemen": ["Sejarah", "Keyakinan"],
+                        "materi_inti": [
+                            {"materi": "Sejarah dan Perkembangan Penghayat Kepercayaan", "elemen": "Sejarah"},
+                            {"materi": "Keyakinan terhadap Tuhan YME dalam Penghayat Kepercayaan", "elemen": "Keyakinan"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami sejarah dan keyakinan penghayat kepercayaan terhadap Tuhan YME."
+                    },
+                    "genap": {
+                        "elemen": ["Ritual", "Budaya"],
+                        "materi_inti": [
+                            {"materi": "Ritual dan Tradisi dalam Penghayat Kepercayaan", "elemen": "Ritual"},
+                            {"materi": "Budaya dan Kearifan Lokal Penghayat Kepercayaan", "elemen": "Budaya"}
+                        ],
+                        "cp_snippet": "Peserta didik melaksanakan ritual dan menghayati budaya lokal sebagai ekspresi spiritual penghayat."
                     }
                 },
                 "Informatika": {
@@ -3366,6 +3476,63 @@
                             }
                         ],
                         "cp_snippet": "Experiencing) Menganalisis unsur rupa dan prinsip desain dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri dan teman sekelas; membandingkan unsur rupa, prinsip desain, dan fungsi karya seni rupa menggunakan kosa kata seni rupa yang sesuai. Artistik (Thinking and Working Artistically) Mengaplikasikan variasi teknik penggunaan alat dan bahan yang dimiliki untuk berkarya; mengeksplorasi alternatif/potensi alat dan bahan yang ada di li..."
+                    }
+                },
+                "Seni Musik": {
+                    "ganjil": {
+                        "elemen": ["Mengalami", "Berpikir dan Bekerja Artistik"],
+                        "materi_inti": [
+                            {"materi": "Unsur-unsur Musik (Irama, Melodi, Harmoni)", "elemen": "Mengalami"},
+                            {"materi": "Teknik Vokal Dasar dan Bernyanyi Bersama", "elemen": "Berpikir dan Bekerja Artistik"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami unsur-unsur musik dan bernyanyi bersama. Mereka merefleksikan karya musik Nusantara, menciptakan musik sederhana, dan memahami dampak musik dalam kehidupan."
+                    },
+                    "genap": {
+                        "elemen": ["Merefleksikan", "Menciptakan", "Berdampak"],
+                        "materi_inti": [
+                            {"materi": "Apresiasi Karya Musik Nusantara", "elemen": "Merefleksikan"},
+                            {"materi": "Karya Kreatif Musik Sederhana", "elemen": "Menciptakan"},
+                            {"materi": "Musik dan Pengaruhnya dalam Kehidupan", "elemen": "Berdampak"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami unsur-unsur musik dan bernyanyi bersama. Mereka merefleksikan karya musik Nusantara, menciptakan musik sederhana, dan memahami dampak musik dalam kehidupan."
+                    }
+                },
+                "Seni Tari": {
+                    "ganjil": {
+                        "elemen": ["Mengalami", "Berpikir dan Bekerja Artistik"],
+                        "materi_inti": [
+                            {"materi": "Gerak Dasar Tari dan Ruang Gerak", "elemen": "Mengalami"},
+                            {"materi": "Eksplorasi Gerak dan Pola Lantai", "elemen": "Berpikir dan Bekerja Artistik"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami gerak dasar tari dan mengeksplorasi pola lantai. Mereka merefleksikan tari Nusantara, menciptakan gerak sederhana, dan memahami peran tari dalam budaya masyarakat."
+                    },
+                    "genap": {
+                        "elemen": ["Merefleksikan", "Menciptakan", "Berdampak"],
+                        "materi_inti": [
+                            {"materi": "Tari Nusantara dan Makna Simbolik", "elemen": "Merefleksikan"},
+                            {"materi": "Menciptakan Gerak Tari Sederhana", "elemen": "Menciptakan"},
+                            {"materi": "Peran Tari dalam Budaya Masyarakat", "elemen": "Berdampak"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami gerak dasar tari dan mengeksplorasi pola lantai. Mereka merefleksikan tari Nusantara, menciptakan gerak sederhana, dan memahami peran tari dalam budaya masyarakat."
+                    }
+                },
+                "Seni Teater": {
+                    "ganjil": {
+                        "elemen": ["Mengalami", "Berpikir dan Bekerja Artistik"],
+                        "materi_inti": [
+                            {"materi": "Dasar-dasar Akting dan Olah Tubuh", "elemen": "Mengalami"},
+                            {"materi": "Latihan Olah Vokal dan Ekspresi", "elemen": "Berpikir dan Bekerja Artistik"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami dasar akting, olah tubuh, dan olah vokal. Mereka merefleksikan naskah drama, menciptakan fragmen pendek, dan memahami teater sebagai media pendidikan."
+                    },
+                    "genap": {
+                        "elemen": ["Merefleksikan", "Menciptakan", "Berdampak"],
+                        "materi_inti": [
+                            {"materi": "Mengenal Naskah Drama Sederhana", "elemen": "Merefleksikan"},
+                            {"materi": "Bermain Peran dalam Fragmen Pendek", "elemen": "Menciptakan"},
+                            {"materi": "Teater sebagai Media Pendidikan Karakter", "elemen": "Berdampak"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami dasar akting, olah tubuh, dan olah vokal. Mereka merefleksikan naskah drama, menciptakan fragmen pendek, dan memahami teater sebagai media pendidikan."
                     }
                 },
                 "Prakarya": {
@@ -3784,7 +3951,117 @@
                                 "elemen": "Sejarah Peradaban Islam"
                             }
                         ],
-                        "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                        "cp_snippet": "Qur'an Hadis Memahami ayat Al-Qur'an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                    }
+                },
+                "Pendidikan Agama Kristen": {
+                    "ganjil": {
+                        "elemen": ["Allah Berkarya", "Manusia dan Nilai-nilai Kristiani"],
+                        "materi_inti": [
+                            {"materi": "Karya Allah dalam Kehidupan Manusia", "elemen": "Allah Berkarya"},
+                            {"materi": "Nilai-nilai Kristiani dalam Keluarga dan Sekolah", "elemen": "Manusia dan Nilai-nilai Kristiani"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami karya Allah dalam kehidupan serta menerapkan nilai Kristiani di keluarga dan sekolah."
+                    },
+                    "genap": {
+                        "elemen": ["Gereja dan Masyarakat Majemuk", "Alam dan Lingkungan Hidup"],
+                        "materi_inti": [
+                            {"materi": "Gereja dan Dialog Antarumat Beragama", "elemen": "Gereja dan Masyarakat Majemuk"},
+                            {"materi": "Kelestarian Alam dan Keadilan Lingkungan", "elemen": "Alam dan Lingkungan Hidup"}
+                        ],
+                        "cp_snippet": "Peserta didik mendalami peran gereja dalam dialog antaragama dan tanggung jawab terhadap kelestarian alam."
+                    }
+                },
+                "Pendidikan Agama Katolik": {
+                    "ganjil": {
+                        "elemen": ["Pribadi Peserta Didik", "Yesus Kristus"],
+                        "materi_inti": [
+                            {"materi": "Citra Diri sebagai Citra Allah", "elemen": "Pribadi Peserta Didik"},
+                            {"materi": "Ajaran Yesus tentang Kerajaan Allah", "elemen": "Yesus Kristus"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami dirinya sebagai citra Allah dan mendalami ajaran Yesus tentang Kerajaan Allah."
+                    },
+                    "genap": {
+                        "elemen": ["Gereja", "Masyarakat"],
+                        "materi_inti": [
+                            {"materi": "Gereja yang Memperjuangkan Keadilan dan Perdamaian", "elemen": "Gereja"},
+                            {"materi": "Keterlibatan Umat Katolik dalam Masyarakat", "elemen": "Masyarakat"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami peran Gereja dalam keadilan dan perdamaian serta terlibat aktif dalam masyarakat."
+                    }
+                },
+                "Pendidikan Agama Hindu": {
+                    "ganjil": {
+                        "elemen": ["Kitab Suci Weda", "Sraddha and Bhakti", "Susila"],
+                        "materi_inti": [
+                            {"materi": "Weda Sruti dan Smerti sebagai Sumber Hukum Hindu", "elemen": "Kitab Suci Weda"},
+                            {"materi": "Konsep Sraddha dan Penerapan Bhakti", "elemen": "Sraddha and Bhakti"},
+                            {"materi": "Susila dalam Ajaran Tri Kaya Parisudha", "elemen": "Susila"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami Weda sebagai sumber hukum Hindu, mengembangkan sraddha dan bhakti melalui Tri Kaya Parisudha."
+                    },
+                    "genap": {
+                        "elemen": ["Acara", "Sejarah Agama Hindu"],
+                        "materi_inti": [
+                            {"materi": "Upacara Yadnya dan Maknanya", "elemen": "Acara"},
+                            {"materi": "Perkembangan Agama Hindu di Asia dan Indonesia", "elemen": "Sejarah Agama Hindu"}
+                        ],
+                        "cp_snippet": "Peserta didik melaksanakan yadnya dan memahami sejarah Hindu di Asia serta Indonesia."
+                    }
+                },
+                "Pendidikan Agama Buddha": {
+                    "ganjil": {
+                        "elemen": ["Sejarah", "Ritual"],
+                        "materi_inti": [
+                            {"materi": "Konsili Buddhis dan Perkembangan Agama Buddha", "elemen": "Sejarah"},
+                            {"materi": "Ritual Puja Bhakti dan Meditasi", "elemen": "Ritual"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami konsili Buddhis dan perkembangan Buddha, serta melaksanakan puja bhakti dan meditasi."
+                    },
+                    "genap": {
+                        "elemen": ["Etika"],
+                        "materi_inti": [
+                            {"materi": "Etika Sosial Buddhis", "elemen": "Etika"},
+                            {"materi": "Jalan Mulia Beruas Delapan dalam Kehidupan", "elemen": "Etika"}
+                        ],
+                        "cp_snippet": "Peserta didik menerapkan etika sosial dan Jalan Mulia Beruas Delapan dalam kehidupan."
+                    }
+                },
+                "Pendidikan Agama Khonghucu": {
+                    "ganjil": {
+                        "elemen": ["Sejarah Suci", "Kitab Suci", "Keimanan"],
+                        "materi_inti": [
+                            {"materi": "Perjuangan Nabi Kongzi Menyebarkan Ajaran", "elemen": "Sejarah Suci"},
+                            {"materi": "Kitab Si Shu dan Wu Jing", "elemen": "Kitab Suci"},
+                            {"materi": "Konsep Tian dan Pelaksanaan Ibadah", "elemen": "Keimanan"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami perjuangan Nabi Kongzi dan kitab Si Shu Wu Jing serta beriman kepada Tian."
+                    },
+                    "genap": {
+                        "elemen": ["Tata Ibadah", "Perilaku Junzi"],
+                        "materi_inti": [
+                            {"materi": "Tata Ibadah di Kelenteng dan Liturgi", "elemen": "Tata Ibadah"},
+                            {"materi": "Perilaku Junzi dalam Bermasyarakat", "elemen": "Perilaku Junzi"}
+                        ],
+                        "cp_snippet": "Peserta didik melaksanakan ibadah dan mengamalkan perilaku Junzi dalam masyarakat."
+                    }
+                },
+                "Pendidikan Kepercayaan terhadap Tuhan YME": {
+                    "ganjil": {
+                        "elemen": ["Sejarah", "Keyakinan"],
+                        "materi_inti": [
+                            {"materi": "Organisasi Penghayat dan Peran Sosialnya", "elemen": "Sejarah"},
+                            {"materi": "Keyakinan Spiritual dan Filosofi Kepercayaan", "elemen": "Keyakinan"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami organisasi penghayat dan filosofi kepercayaan terhadap Tuhan YME."
+                    },
+                    "genap": {
+                        "elemen": ["Ritual", "Budaya"],
+                        "materi_inti": [
+                            {"materi": "Ritual dalam Siklus Kehidupan Penghayat", "elemen": "Ritual"},
+                            {"materi": "Budaya Penghayat dan Pelestarian Tradisi", "elemen": "Budaya"}
+                        ],
+                        "cp_snippet": "Peserta didik melaksanakan ritual siklus kehidupan dan melestarikan budaya penghayat sebagai warisan leluhur."
                     }
                 },
                 "Informatika": {
@@ -3929,6 +4206,63 @@
                             }
                         ],
                         "cp_snippet": "Experiencing) Menganalisis unsur rupa dan prinsip desain dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri dan teman sekelas; membandingkan unsur rupa, prinsip desain, dan fungsi karya seni rupa menggunakan kosa kata seni rupa yang sesuai. Artistik (Thinking and Working Artistically) Mengaplikasikan variasi teknik penggunaan alat dan bahan yang dimiliki untuk berkarya; mengeksplorasi alternatif/potensi alat dan bahan yang ada di li..."
+                    }
+                },
+                "Seni Musik": {
+                    "ganjil": {
+                        "elemen": ["Mengalami", "Berpikir dan Bekerja Artistik"],
+                        "materi_inti": [
+                            {"materi": "Alat Musik Tradisional dan Modern", "elemen": "Mengalami"},
+                            {"materi": "Aransemen Musik Sederhana dan Improvisasi", "elemen": "Berpikir dan Bekerja Artistik"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami alat musik tradisional dan modern serta mengaransemen musik sederhana."
+                    },
+                    "genap": {
+                        "elemen": ["Merefleksikan", "Menciptakan", "Berdampak"],
+                        "materi_inti": [
+                            {"materi": "Apresiasi Musik Kontemporer Nusantara", "elemen": "Merefleksikan"},
+                            {"materi": "Menciptakan Karya Musik Bertema", "elemen": "Menciptakan"},
+                            {"materi": "Musik sebagai Sarana Ekspresi dan Komunikasi", "elemen": "Berdampak"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami alat musik tradisional dan modern serta mengaransemen musik sederhana. Mereka merefleksikan musik kontemporer, menciptakan karya bertema, dan memahami musik sebagai ekspresi."
+                    }
+                },
+                "Seni Tari": {
+                    "ganjil": {
+                        "elemen": ["Mengalami", "Berpikir dan Bekerja Artistik"],
+                        "materi_inti": [
+                            {"materi": "Ragam Gerak Tari Tradisional Nusantara", "elemen": "Mengalami"},
+                            {"materi": "Eksplorasi Koreografi Kelompok", "elemen": "Berpikir dan Bekerja Artistik"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami ragam gerak tari tradisional dan mengeksplorasi koreografi kelompok."
+                    },
+                    "genap": {
+                        "elemen": ["Merefleksikan", "Menciptakan", "Berdampak"],
+                        "materi_inti": [
+                            {"materi": "Apresiasi Karya Tari Kontemporer", "elemen": "Merefleksikan"},
+                            {"materi": "Menciptakan Tari Kreasi Sederhana", "elemen": "Menciptakan"},
+                            {"materi": "Tari sebagai Identitas Budaya Bangsa", "elemen": "Berdampak"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami ragam gerak tari tradisional dan mengeksplorasi koreografi kelompok. Mereka merefleksikan tari kontemporer, menciptakan tari kreasi, dan memahami tari sebagai identitas budaya."
+                    }
+                },
+                "Seni Teater": {
+                    "ganjil": {
+                        "elemen": ["Mengalami", "Berpikir dan Bekerja Artistik"],
+                        "materi_inti": [
+                            {"materi": "Karakterisasi dan Pembentukan Tokoh", "elemen": "Mengalami"},
+                            {"materi": "Blocking Panggung dan Tata Artistik", "elemen": "Berpikir dan Bekerja Artistik"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami karakterisasi tokoh dan blocking panggung."
+                    },
+                    "genap": {
+                        "elemen": ["Merefleksikan", "Menciptakan", "Berdampak"],
+                        "materi_inti": [
+                            {"materi": "Analisis Naskah dan Tema", "elemen": "Merefleksikan"},
+                            {"materi": "Pementasan Fragmen Drama", "elemen": "Menciptakan"},
+                            {"materi": "Teater sebagai Kritik Sosial", "elemen": "Berdampak"}
+                        ],
+                        "cp_snippet": "Peserta didik menganalisis naskah drama, mementaskan fragmen, dan memahami teater sebagai media kritik sosial."
                     }
                 },
                 "Prakarya": {
@@ -4333,7 +4667,117 @@
                                 "elemen": "Sejarah Peradaban Islam"
                             }
                         ],
-                        "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                        "cp_snippet": "Qur'an Hadis Memahami ayat Al-Qur'an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
+                    }
+                },
+                "Pendidikan Agama Kristen": {
+                    "ganjil": {
+                        "elemen": ["Allah Berkarya", "Manusia dan Nilai-nilai Kristiani"],
+                        "materi_inti": [
+                            {"materi": "Allah Berkarya dalam Sejarah dan Konteks Modern", "elemen": "Allah Berkarya"},
+                            {"materi": "Nilai-nilai Kristiani dalam Isu-isu Kontemporer", "elemen": "Manusia dan Nilai-nilai Kristiani"}
+                        ],
+                        "cp_snippet": "Peserta didik menganalisis karya Allah dalam sejarah modern dan menerapkan nilai Kristiani pada isu kontemporer."
+                    },
+                    "genap": {
+                        "elemen": ["Gereja dan Masyarakat Majemuk", "Alam dan Lingkungan Hidup"],
+                        "materi_inti": [
+                            {"materi": "Gereja dan Hak Asasi Manusia di Masyarakat Majemuk", "elemen": "Gereja dan Masyarakat Majemuk"},
+                            {"materi": "Krisis Lingkungan dan Tanggung Jawab Iman", "elemen": "Alam dan Lingkungan Hidup"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami peran gereja dalam HAM dan merespons krisis lingkungan berdasarkan iman."
+                    }
+                },
+                "Pendidikan Agama Katolik": {
+                    "ganjil": {
+                        "elemen": ["Pribadi Peserta Didik", "Yesus Kristus"],
+                        "materi_inti": [
+                            {"materi": "Panggilan Hidup dan Vokasi Pribadi", "elemen": "Pribadi Peserta Didik"},
+                            {"materi": "Yesus Kristus sebagai Juru Selamat dan Teladan", "elemen": "Yesus Kristus"}
+                        ],
+                        "cp_snippet": "Peserta didik memahami panggilan hidup pribadi dan Yesus sebagai juru selamat."
+                    },
+                    "genap": {
+                        "elemen": ["Gereja", "Masyarakat"],
+                        "materi_inti": [
+                            {"materi": "Gereja dan Masalah Sosial Kontemporer", "elemen": "Gereja"},
+                            {"materi": "Masyarakat Madani dan Peran Warga Katolik", "elemen": "Masyarakat"}
+                        ],
+                        "cp_snippet": "Peserta didik mendalami peran Gereja dalam masalah sosial kontemporer dan mewujudkan masyarakat madani."
+                    }
+                },
+                "Pendidikan Agama Hindu": {
+                    "ganjil": {
+                        "elemen": ["Kitab Suci Weda", "Sraddha and Bhakti", "Susila"],
+                        "materi_inti": [
+                            {"materi": "Weda, Upanishad, dan Filsafat Hindu", "elemen": "Kitab Suci Weda"},
+                            {"materi": "Sraddha dan Bhakti dalam Teologi Hindu Modern", "elemen": "Sraddha and Bhakti"},
+                            {"materi": "Susila dan Catur Asrama dalam Kehidupan", "elemen": "Susila"}
+                        ],
+                        "cp_snippet": "Peserta didik mendalami Weda dan Upanishad, memahami sraddha dalam teologi modern, dan menjalani Catur Asrama."
+                    },
+                    "genap": {
+                        "elemen": ["Acara", "Sejarah Agama Hindu"],
+                        "materi_inti": [
+                            {"materi": "Panca Yadnya dan Pelaksanaannya", "elemen": "Acara"},
+                            {"materi": "Hindu dalam Peradaban Global", "elemen": "Sejarah Agama Hindu"}
+                        ],
+                        "cp_snippet": "Peserta didik melaksanakan Panca Yadnya dan mengkaji peran Hindu dalam peradaban global."
+                    }
+                },
+                "Pendidikan Agama Buddha": {
+                    "ganjil": {
+                        "elemen": ["Sejarah", "Ritual"],
+                        "materi_inti": [
+                            {"materi": "Aliran-aliran Agama Buddha (Theravada, Mahayana, Vajrayana)", "elemen": "Sejarah"},
+                            {"materi": "Ritual dan Meditasi Vipassana", "elemen": "Ritual"}
+                        ],
+                        "cp_snippet": "Peserta didik menganalisis aliran-aliran Buddha dan melaksanakan meditasi Vipassana."
+                    },
+                    "genap": {
+                        "elemen": ["Etika"],
+                        "materi_inti": [
+                            {"materi": "Etika Lingkungan dan Kewarganegaraan Buddhis", "elemen": "Etika"},
+                            {"materi": "Penerapan Paramita dalam Kehidupan Modern", "elemen": "Etika"}
+                        ],
+                        "cp_snippet": "Peserta didik menerapkan etika lingkungan dan Paramita dalam kehidupan modern."
+                    }
+                },
+                "Pendidikan Agama Khonghucu": {
+                    "ganjil": {
+                        "elemen": ["Sejarah Suci", "Kitab Suci", "Keimanan"],
+                        "materi_inti": [
+                            {"materi": "Perkembangan Ajaran Khonghucu di Asia Timur", "elemen": "Sejarah Suci"},
+                            {"materi": "Kitab Sishu sebagai Pedoman Hidup", "elemen": "Kitab Suci"},
+                            {"materi": "Keimanan dan Hubungan Manusia dengan Tian", "elemen": "Keimanan"}
+                        ],
+                        "cp_snippet": "Peserta didik menganalisis perkembangan Khonghucu di Asia Timur dan Sishu sebagai pedoman hidup."
+                    },
+                    "genap": {
+                        "elemen": ["Tata Ibadah", "Perilaku Junzi"],
+                        "materi_inti": [
+                            {"materi": "Pengembangan Tata Ibadah dan Liturgi Khonghucu", "elemen": "Tata Ibadah"},
+                            {"materi": "Perilaku Junzi sebagai Pemimpin Masyarakat", "elemen": "Perilaku Junzi"}
+                        ],
+                        "cp_snippet": "Peserta didik memperdalam keimanan kepada Tian, mengembangkan liturgi, dan menjadi Junzi sebagai pemimpin."
+                    }
+                },
+                "Pendidikan Kepercayaan terhadap Tuhan YME": {
+                    "ganjil": {
+                        "elemen": ["Sejarah", "Keyakinan"],
+                        "materi_inti": [
+                            {"materi": "Penghayat dalam Arus Modernisasi dan Globalisasi", "elemen": "Sejarah"},
+                            {"materi": "Teologi dan Kosmologi Penghayat Kepercayaan", "elemen": "Keyakinan"}
+                        ],
+                        "cp_snippet": "Peserta didik menganalisis posisi penghayat dalam modernisasi, memahami teologi dan kosmologi kepercayaan."
+                    },
+                    "genap": {
+                        "elemen": ["Ritual", "Budaya"],
+                        "materi_inti": [
+                            {"materi": "Upacara Adat dan Siklus Kehidupan Penghayat", "elemen": "Ritual"},
+                            {"materi": "Diplomasi Budaya dan Pelestarian Warisan Penghayat", "elemen": "Budaya"}
+                        ],
+                        "cp_snippet": "Peserta didik melaksanakan upacara adat dan berperan dalam diplomasi budaya penghayat."
                     }
                 },
                 "Informatika": {
@@ -4478,6 +4922,63 @@
                             }
                         ],
                         "cp_snippet": "Experiencing) Menganalisis unsur rupa dan prinsip desain dalam benda-benda di sekitar/karya seni rupa.   (Reflecting) Merefleksikan dan mengapresiasi karya diri sendiri dan teman sekelas; membandingkan unsur rupa, prinsip desain, dan fungsi karya seni rupa menggunakan kosa kata seni rupa yang sesuai. Artistik (Thinking and Working Artistically) Mengaplikasikan variasi teknik penggunaan alat dan bahan yang dimiliki untuk berkarya; mengeksplorasi alternatif/potensi alat dan bahan yang ada di li..."
+                    }
+                },
+                "Seni Musik": {
+                    "ganjil": {
+                        "elemen": ["Mengalami", "Berpikir dan Bekerja Artistik"],
+                        "materi_inti": [
+                            {"materi": "Genre Musik Populer dan Musik Nusantara", "elemen": "Mengalami"},
+                            {"materi": "Komposisi Musik dan Aransemen Lagu", "elemen": "Berpikir dan Bekerja Artistik"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami genre musik populer dan mengomposisi lagu sederhana."
+                    },
+                    "genap": {
+                        "elemen": ["Merefleksikan", "Menciptakan", "Berdampak"],
+                        "materi_inti": [
+                            {"materi": "Kritik Musik dan Apresiasi Estetis", "elemen": "Merefleksikan"},
+                            {"materi": "Menciptakan Musik Orkestrasi Sederhana", "elemen": "Menciptakan"},
+                            {"materi": "Musik dalam Industri Kreatif dan Ekonomi", "elemen": "Berdampak"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami genre musik populer dan mengomposisi lagu sederhana. Mereka mengkritik musik secara estetis, menciptakan orkestrasi dasar, dan memahami peran musik dalam industri kreatif."
+                    }
+                },
+                "Seni Tari": {
+                    "ganjil": {
+                        "elemen": ["Mengalami", "Berpikir dan Bekerja Artistik"],
+                        "materi_inti": [
+                            {"materi": "Tari Kreasi dan Tari Kontemporer Nusantara", "elemen": "Mengalami"},
+                            {"materi": "Desain Koreografi dan Dramaturgi Tari", "elemen": "Berpikir dan Bekerja Artistik"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami tari kreasi kontemporer dan mendesain koreografi."
+                    },
+                    "genap": {
+                        "elemen": ["Merefleksikan", "Menciptakan", "Berdampak"],
+                        "materi_inti": [
+                            {"materi": "Analisis Kritis Karya Tari", "elemen": "Merefleksikan"},
+                            {"materi": "Menciptakan Karya Tari untuk Pementasan", "elemen": "Menciptakan"},
+                            {"materi": "Tari sebagai Daya Tarik Pariwisata dan Ekonomi Kreatif", "elemen": "Berdampak"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami tari kreasi kontemporer dan mendesain koreografi. Mereka menganalisis kritis karya tari, menciptakan tari untuk pementasan, dan memahami tari sebagai ekonomi kreatif."
+                    }
+                },
+                "Seni Teater": {
+                    "ganjil": {
+                        "elemen": ["Mengalami", "Berpikir dan Bekerja Artistik"],
+                        "materi_inti": [
+                            {"materi": "Teknik Akting Metode Stanislavski dan Brecht", "elemen": "Mengalami"},
+                            {"materi": "Sutradara dan Manajemen Pementasan", "elemen": "Berpikir dan Bekerja Artistik"}
+                        ],
+                        "cp_snippet": "Peserta didik mengalami teknik akting berbagai metode dan manajemen pementasan."
+                    },
+                    "genap": {
+                        "elemen": ["Merefleksikan", "Menciptakan", "Berdampak"],
+                        "materi_inti": [
+                            {"materi": "Kritik dan Apresiasi Teater", "elemen": "Merefleksikan"},
+                            {"materi": "Pementasan Drama Satu Babak", "elemen": "Menciptakan"},
+                            {"materi": "Teater dalam Pemberdayaan Masyarakat", "elemen": "Berdampak"}
+                        ],
+                        "cp_snippet": "Peserta didik mengkritik karya teater, mementaskan drama satu babak, dan memahami teater sebagai pemberdayaan masyarakat."
                     }
                 },
                 "Prakarya": {
@@ -7287,6 +7788,116 @@
                         "Bab 4: Mengagungkan Allah dengan Sujud",
                         "Bab 5: Damai dan Indahnya Berbagi dengan Zakat"
                     ]
+                },
+                "Pendidikan Agama Kristen": {
+                    "title": "Pendidikan Agama Kristen dan Budi Pekerti Kelas VII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Manusia sebagai Citra Allah",
+                        "Bab 2: Karya Keselamatan Allah dalam Yesus Kristus",
+                        "Bab 3: Hidup dalam Roh Kudus",
+                        "Bab 4: Gereja sebagai Persekutuan Orang Percaya",
+                        "Bab 5: Keluarga sebagai Komunitas Dasar"
+                    ]
+                },
+                "Pendidikan Agama Katolik": {
+                    "title": "Pendidikan Agama Katolik dan Budi Pekerti Kelas VII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Manusia sebagai Citra Allah",
+                        "Bab 2: Yesus Kristus Sang Juru Selamat",
+                        "Bab 3: Gereja sebagai Sakramen Keselamatan",
+                        "Bab 4: Sakramen-Sakramen dalam Gereja",
+                        "Bab 5: Hidup Mengikuti Yesus Kristus"
+                    ]
+                },
+                "Pendidikan Agama Hindu": {
+                    "title": "Pendidikan Agama Hindu dan Budi Pekerti Kelas VII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Weda sebagai Sumber Ajaran Hindu",
+                        "Bab 2: Tuhan dan Ciptaan-Nya",
+                        "Bab 3: Manusia dan Perilaku dalam Hindu",
+                        "Bab 4: Yadnya dalam Kehidupan",
+                        "Bab 5: Hari Suci dan Tempat Ibadah Hindu"
+                    ]
+                },
+                "Pendidikan Agama Buddha": {
+                    "title": "Pendidikan Agama Buddha dan Budi Pekerti Kelas VII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Riwayat Hidup Buddha Gautama",
+                        "Bab 2: Ajaran Buddha: Cinta Kasih dan Kebijaksanaan",
+                        "Bab 3: Hukum Karma dan Kelahiran Kembali",
+                        "Bab 4: Meditasi dan Pengembangan Batin",
+                        "Bab 5: Hari Raya dan Tradisi Buddhis"
+                    ]
+                },
+                "Pendidikan Agama Khonghucu": {
+                    "title": "Pendidikan Agama Khonghucu dan Budi Pekerti Kelas VII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Sejarah dan Kitab Suci Agama Khonghucu",
+                        "Bab 2: Konsep Tian dan Manusia",
+                        "Bab 3: Watak Sejati dan Kebajikan",
+                        "Bab 4: Sembahyang dan Doa",
+                        "Bab 5: Hari Raya dan Tradisi Khonghucu"
+                    ]
+                },
+                "Pendidikan Kepercayaan terhadap Tuhan YME": {
+                    "title": "Pendidikan Kepercayaan terhadap Tuhan YME Kelas VII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Nilai-Nilai Ketuhanan dalam Kearifan Lokal",
+                        "Bab 2: Ajaran Moral dan Etika dalam Tradisi",
+                        "Bab 3: Penghayatan terhadap Tuhan YME",
+                        "Bab 4: Tradisi dan Ritual Penghayatan Kepercayaan",
+                        "Bab 5: Kerukunan dalam Keberagaman"
+                    ]
+                },
+                "Seni Rupa": {
+                    "title": "Seni Rupa Kelas VII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Unsur dan Prinsip Seni Rupa",
+                        "Bab 2: Menggambar dan Melukis",
+                        "Bab 3: Seni Desain dan Kriya",
+                        "Bab 4: Seni Rupa Nusantara",
+                        "Bab 5: Pameran dan Apresiasi Seni Rupa"
+                    ]
+                },
+                "Seni Musik": {
+                    "title": "Seni Musik Kelas VII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Unsur-Unsur Musik",
+                        "Bab 2: Alat Musik dan Ensambel",
+                        "Bab 3: Bernyanyi dan Teknik Vokal",
+                        "Bab 4: Musik Nusantara",
+                        "Bab 5: Kreativitas Musik Sederhana"
+                    ]
+                },
+                "Seni Tari": {
+                    "title": "Seni Tari Kelas VII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Gerak Dasar Tari",
+                        "Bab 2: Level, Pola Lantai, dan Iringan Tari",
+                        "Bab 3: Tari Nusantara",
+                        "Bab 4: Koreografi dan Kreativitas Tari",
+                        "Bab 5: Pergelaran Tari"
+                    ]
+                },
+                "Seni Teater": {
+                    "title": "Seni Teater Kelas VII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Dasar-Dasar Teater",
+                        "Bab 2: Olah Tubuh, Olah Suara, dan Olah Rasa",
+                        "Bab 3: Naskah dan Pementasan",
+                        "Bab 4: Teater Nusantara",
+                        "Bab 5: Apresiasi dan Kritik Teater"
+                    ]
                 }
             },
             "8": {
@@ -7402,6 +8013,116 @@
                         "Bab 4: Ibadah dengan Disiplin dan Penuh Harap",
                         "Bab 5: Meneladani Produktivitas Ilmuwan Muslim"
                     ]
+                },
+                "Pendidikan Agama Kristen": {
+                    "title": "Pendidikan Agama Kristen dan Budi Pekerti Kelas VIII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Peran Allah dalam Sejarah Manusia",
+                        "Bab 2: Yesus Kristus sebagai Teladan Hidup",
+                        "Bab 3: Roh Kudus yang Membaharui",
+                        "Bab 4: Gereja dan Masyarakat",
+                        "Bab 5: Keluarga sebagai Gereja Mini"
+                    ]
+                },
+                "Pendidikan Agama Katolik": {
+                    "title": "Pendidikan Agama Katolik dan Budi Pekerti Kelas VIII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Manusia dan Keragaman Budaya",
+                        "Bab 2: Yesus Kristus yang Tersalib dan Bangkit",
+                        "Bab 3: Gereja sebagai Umat Allah",
+                        "Bab 4: Sakramen Inisiasi dan Sakramen Penyembuhan",
+                        "Bab 5: Panggilan Hidup sebagai Murid Yesus"
+                    ]
+                },
+                "Pendidikan Agama Hindu": {
+                    "title": "Pendidikan Agama Hindu dan Budi Pekerti Kelas VIII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Kitab Suci Weda (Sruti dan Smerti)",
+                        "Bab 2: Catur Guru dan Catur Asrama",
+                        "Bab 3: Catur Purusa Artha dan Karma Yoga",
+                        "Bab 4: Upacara dan Upakara Yadnya",
+                        "Bab 5: Perkembangan Agama Hindu di Indonesia"
+                    ]
+                },
+                "Pendidikan Agama Buddha": {
+                    "title": "Pendidikan Agama Buddha dan Budi Pekerti Kelas VIII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Riwayat Hidup Buddha dan Pengajaran Awal",
+                        "Bab 2: Karma, Punarbhava, dan Samsara",
+                        "Bab 3: Jalan Mulia Berunsur Delapan",
+                        "Bab 4: Meditasi Samatha dan Vipassana",
+                        "Bab 5: Kepemimpinan dan Etika Buddhis"
+                    ]
+                },
+                "Pendidikan Agama Khonghucu": {
+                    "title": "Pendidikan Agama Khonghucu dan Budi Pekerti Kelas VIII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Kitab Suci Ajaran Khonghucu (Si Shu dan Wu Jing)",
+                        "Bab 2: Tuhan (Tian) dalam Ajaran Khonghucu",
+                        "Bab 3: Watak Sejati, Kebajikan, dan Lima Hubungan Sosial",
+                        "Bab 4: Sembahyang kepada Leluhur dan Tuhan",
+                        "Bab 5: Nilai-Nilai Khonghucu dalam Kehidupan Modern"
+                    ]
+                },
+                "Pendidikan Kepercayaan terhadap Tuhan YME": {
+                    "title": "Pendidikan Kepercayaan terhadap Tuhan YME Kelas VIII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Sejarah dan Perkembangan Penghayat Kepercayaan",
+                        "Bab 2: Ajaran Moral dan Budi Pekerti Luhur",
+                        "Bab 3: Penghayatan terhadap Tuhan YME dan Alam Semesta",
+                        "Bab 4: Tradisi Lisan dan Ritual Penghayat Kepercayaan",
+                        "Bab 5: Toleransi dan Kerukunan dengan Pemeluk Agama"
+                    ]
+                },
+                "Seni Rupa": {
+                    "title": "Seni Rupa Kelas VIII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Unsur, Prinsip, dan Komposisi Seni Rupa",
+                        "Bab 2: Teknik Menggambar dan Melukis",
+                        "Bab 3: Seni Grafis dan Desain Komunikasi Visual",
+                        "Bab 4: Seni Rupa Daerah dan Kontemporer",
+                        "Bab 5: Apresiasi dan Kritik Karya Seni Rupa"
+                    ]
+                },
+                "Seni Musik": {
+                    "title": "Seni Musik Kelas VIII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Unsur-Unsur dan Struktur Musik",
+                        "Bab 2: Alat Musik dan Ansambel",
+                        "Bab 3: Teknik Vokal dan Bernyanyi",
+                        "Bab 4: Musik Tradisional Nusantara",
+                        "Bab 5: Kreativitas dan Kreasi Musik"
+                    ]
+                },
+                "Seni Tari": {
+                    "title": "Seni Tari Kelas VIII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Gerak, Ruang, Waktu, dan Tenaga dalam Tari",
+                        "Bab 2: Pola Lantai dan Iringan Tari",
+                        "Bab 3: Tari Kreasi Nusantara",
+                        "Bab 4: Koreografi Kelompok",
+                        "Bab 5: Pergelaran dan Apresiasi Tari"
+                    ]
+                },
+                "Seni Teater": {
+                    "title": "Seni Teater Kelas VIII",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Konsep dan Jenis Teater",
+                        "Bab 2: Latihan Olah Tubuh, Suara, dan Rasa",
+                        "Bab 3: Penyutradaraan dan Pemeranan",
+                        "Bab 4: Teater Modern dan Tradisional Nusantara",
+                        "Bab 5: Pementasan dan Kritik Teater"
+                    ]
                 }
             },
             "9": {
@@ -7503,6 +8224,116 @@
                         "Bab 3: Menjadi Pribadi Unggul dengan Kejujuran and Menepati Janji",
                         "Bab 4: Ibadah untuk Kesehatan Jiwa",
                         "Bab 5: Keteladanan Tokoh Penyebar Islam di Indonesia"
+                    ]
+                },
+                "Pendidikan Agama Kristen": {
+                    "title": "Pendidikan Agama Kristen dan Budi Pekerti Kelas IX",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Allah Karya Keselamatan dalam Perjanjian Baru",
+                        "Bab 2: Yesus Kristus sebagai Kepala Gereja",
+                        "Bab 3: Hidup dalam Kebebasan yang Bertanggung Jawab",
+                        "Bab 4: Gereja dalam Masyarakat Majemuk",
+                        "Bab 5: Keluarga sebagai Komunitas Iman"
+                    ]
+                },
+                "Pendidikan Agama Katolik": {
+                    "title": "Pendidikan Agama Katolik dan Budi Pekerti Kelas IX",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Manusia sebagai Pribadi yang Berelasi",
+                        "Bab 2: Yesus Kristus yang Diimani Gereja",
+                        "Bab 3: Gereja sebagai Persekutuan yang Terbuka",
+                        "Bab 4: Peran Gereja dalam Kehidupan Bermasyarakat",
+                        "Bab 5: Panggilan dan Misi Hidup Kristiani"
+                    ]
+                },
+                "Pendidikan Agama Hindu": {
+                    "title": "Pendidikan Agama Hindu dan Budi Pekerti Kelas IX",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Weda sebagai Wahyu dan Sumber Hukum Hindu",
+                        "Bab 2: Catur Marga Yoga dan Catur Warna",
+                        "Bab 3: Etika Hindu (Tri Kaya Parisudha, Catur Paramita)",
+                        "Bab 4: Filsafat Hindu (Darsana)",
+                        "Bab 5: Eksistensi Agama Hindu Era Global"
+                    ]
+                },
+                "Pendidikan Agama Buddha": {
+                    "title": "Pendidikan Agama Buddha dan Budi Pekerti Kelas IX",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Sutta dan Vinaya sebagai Sumber Ajaran",
+                        "Bab 2: Tilakhana (Tiga Corak Universal)",
+                        "Bab 3: Bodhisattva dan Bumi Paramita",
+                        "Bab 4: Meditasi dan Penerapan dalam Kehidupan",
+                        "Bab 5: Buddhisme di Indonesia dan Dunia"
+                    ]
+                },
+                "Pendidikan Agama Khonghucu": {
+                    "title": "Pendidikan Agama Khonghucu dan Budi Pekerti Kelas IX",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Zhong Yong (Jalan Tengah) dan Ajaran Dasar",
+                        "Bab 2: Tian, Ming, dan Konsep Takdir",
+                        "Bab 3: Junzi (Manusia Unggul) dan Kebajikan Universal",
+                        "Bab 4: Peribadatan dan Tradisi Keagamaan Khonghucu",
+                        "Bab 5: Kontribusi Ajaran Khonghucu bagi Bangsa"
+                    ]
+                },
+                "Pendidikan Kepercayaan terhadap Tuhan YME": {
+                    "title": "Pendidikan Kepercayaan terhadap Tuhan YME Kelas IX",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Identitas dan Dinamika Penghayat Kepercayaan",
+                        "Bab 2: Ajaran Kasih Sayang terhadap Sesama",
+                        "Bab 3: Penghayatan terhadap Tuhan dalam Kehidupan Sehari-hari",
+                        "Bab 4: Tradisi Lisan dan Upacara Adat Penghayat",
+                        "Bab 5: Kebinekaan dan Moderasi Beragama"
+                    ]
+                },
+                "Seni Rupa": {
+                    "title": "Seni Rupa Kelas IX",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Estetika dan Prinsip Desain",
+                        "Bab 2: Teknik Melukis dan Seni Lukis Kontemporer",
+                        "Bab 3: Desain Produk dan Kriya Kreatif",
+                        "Bab 4: Seni Lukis Nusantara dan Mancanegara",
+                        "Bab 5: Pameran dan Portofolio Seni Rupa"
+                    ]
+                },
+                "Seni Musik": {
+                    "title": "Seni Musik Kelas IX",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Eksplorasi Bunyi dan Musik",
+                        "Bab 2: Alat Musik dan Aransemen",
+                        "Bab 3: Teknik Vokal dan Paduan Suara",
+                        "Bab 4: Musik Kontemporer dan Kreasi Musik",
+                        "Bab 5: Pergelaran Musik dan Apresiasi"
+                    ]
+                },
+                "Seni Tari": {
+                    "title": "Seni Tari Kelas IX",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Eksplorasi Gerak dan Komposisi Tari",
+                        "Bab 2: Tari Kreasi Berpasangan dan Kelompok",
+                        "Bab 3: Tari Tradisi dan Inovasi",
+                        "Bab 4: Koreografi Nusantara",
+                        "Bab 5: Pergelaran Tari dan Kritik"
+                    ]
+                },
+                "Seni Teater": {
+                    "title": "Seni Teater Kelas IX",
+                    "publisher": "Kemdikbudristek",
+                    "chapters": [
+                        "Bab 1: Teater sebagai Media Ekspresi",
+                        "Bab 2: Akting dan Karakterisasi",
+                        "Bab 3: Sutradara dan Desain Pementasan",
+                        "Bab 4: Teater Kontemporer dan Tradisional",
+                        "Bab 5: Pementasan dan Evaluasi Teater"
                     ]
                 },
                 "Prakarya": {

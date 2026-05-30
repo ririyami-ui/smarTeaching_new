@@ -119,6 +119,29 @@
                 "name": "Isian Singkat"
             }
         ],
+        "subjects_list": [
+            "Pendidikan Agama Islam",
+            "Pendidikan Agama Kristen",
+            "Pendidikan Agama Katolik",
+            "Pendidikan Agama Hindu",
+            "Pendidikan Agama Buddha",
+            "Pendidikan Agama Khonghucu",
+            "Pendidikan Kepercayaan terhadap Tuhan YME",
+            "Pendidikan Pancasila",
+            "Bahasa Indonesia",
+            "Matematika",
+            "IPA",
+            "IPS",
+            "Bahasa Inggris",
+            "PJOK",
+            "Informatika",
+            "Seni Musik",
+            "Seni Rupa",
+            "Seni Tari",
+            "Seni Teater",
+            "Prakarya",
+            "Bahasa Daerah"
+        ],
         "semester_logic": {
             "ganjil": {
                 "focus": "Fondasi Dasar & Penguatan Konsep"
@@ -1514,6 +1537,81 @@
                         "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
                     }
                 },
+                "Pendidikan Agama Kristen": {
+                    "ganjil": {
+                        "elemen": [
+                            "Allah Berkarya",
+                            "Manusia dan Nilai-nilai Kristiani"
+                        ],
+                        "materi_inti": [
+                            "Allah Pencipta dan Pemelihara",
+                            "Hakikat Manusia sebagai Citra Allah"
+                        ],
+                        "cp_snippet": "Memahami karya Allah dalam hidup manusia yang mengubah masa depan; memahami Allah memelihara seluruh ciptaan-Nya. Memahami pergaulan remaja masa kini dengan meneladani Yesus Kristus; memahami prinsip rendah hati, penguasaan diri, dan peduli terhadap sesama."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Gereja dan Masyarakat Majemuk",
+                            "Alam dan Lingkungan Hidup"
+                        ],
+                        "materi_inti": [
+                            "Tugas Panggilan Gereja",
+                            "Dialog dan Kerukunan Umat Beragama",
+                            "Tanggung Jawab terhadap Alam"
+                        ],
+                        "cp_snippet": "Memahami makna kehadiran gereja dalam pelayanan yang membawa pembaruan; memahami dialog dan kerjasama antarumat beragama. Memahami bahwa manusia diberi tugas oleh Allah untuk mengolah serta memelihara alam dan lingkungan hidup."
+                    }
+                },
+                "Pendidikan Agama Katolik": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pribadi Peserta Didik",
+                            "Yesus Kristus"
+                        ],
+                        "materi_inti": [
+                            "Manusia sebagai Citra Allah",
+                            "Pribadi Yesus yang Berbelas Kasih"
+                        ],
+                        "cp_snippet": "Memahami manusia sebagai citra Allah yang unik, sebagai laki-laki dan perempuan; memahami kemampuan dan keterbatasan; memahami diri yang tumbuh dan berkembang karena peran keluarga, teman, dan satuan pendidikan. Memahami pribadi Yesus yang berbelas kasih, pengampun, dan pendoa."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Gereja",
+                            "Masyarakat"
+                        ],
+                        "materi_inti": [
+                            "Gereja sebagai Komunitas",
+                            "Kebebasan Anak-anak Allah dan Hidup Bersama"
+                        ],
+                        "cp_snippet": "Memahami gereja sebagai komunitas dan karya pelayanan; memahami sakramen-sakramen inisiasi. Memahami kebebasan sebagai anak-anak Allah dan sabda bahagia; memahami hak dan kewajiban anggota gereja dan masyarakat; memahami alam sebagai rumah kita bersama."
+                    }
+                },
+                "Seni Musik": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Unsur-unsur Musik (Nada, Irama, Melodi)",
+                            "Praktik Bermain Alat Musik Sederhana"
+                        ],
+                        "cp_snippet": "Mengenali dan menerapkan unsur-unsur musik berupa nada, irama, dan melodi dengan alat musik berbasis teknologi. Menghasilkan lagu sederhana dengan mengembangkan irama dan melodi menggunakan berbagai alat musik."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berpikir dan Bekerja Artistik",
+                            "Berdampak"
+                        ],
+                        "materi_inti": [
+                            "Apresiasi Karya Musik Daerah dan Nusantara",
+                            "Penyajian Musik Sederhana",
+                            "Empati dan Kepedulian melalui Musik"
+                        ],
+                        "cp_snippet": "Melakukan umpan balik kemampuan bermain musik dan karya musik sesuai genre menggunakan istilah musik yang tepat. Menerapkan proses berpraktik musik untuk pengembangan keterampilan bermusik; menyajikan musik daerah dan Nusantara. Menunjukkan empati dan kepedulian terhadap isu lingkungan melalui kegiatan bermusik."
+                    }
+                },
                 "Seni Rupa": {
                     "ganjil": {
                         "elemen": [
@@ -1579,18 +1677,145 @@
                             "Kemasan Produk Prakarya"
                         ],
                         "cp_snippet": "Menjelaskan aspek- aspek penting budi daya berdasarkan hasil observasi; menjelaskan produk budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan sesuai potensi lingkungan/kearifan lokal berdasarkan hasil eksplorasi.  /Perencanaan Menyusun rencana kegiatan budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan, sesuai potensi lingkungan/kearifan lokal. Menghasilkan produk budi daya yang aman berdasarkan potensi lingkungan/kearifan lokal dengan modifikasi bahan, alat, d..."
+                    }
+                },
+                "Pendidikan Agama Hindu": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sradha",
+                            "Etika dan Susila"
+                        ],
+                        "materi_inti": [
+                            "Konsep Ketuhanan dalam Hindu",
+                            "Tri Kaya Parisudha"
+                        ],
+                        "cp_snippet": "Memahami konsep Ketuhanan (Brahman), Tri Pramana, dan ajaran Tri Kaya Parisudha sebagai landasan etika; memahami makna hari suci keagamaan Hindu."
                     },
                     "genap": {
                         "elemen": [
-                            "Produksi",
-                            "Refleksi dan Evaluasi"
+                            "Acara dan Upacara",
+                            "Sejarah dan Kepemimpinan"
                         ],
                         "materi_inti": [
-                            "Produk Rekayasa Alat Penjernih Air",
-                            "Budi Daya Tanaman Sayuran",
-                            "Pemasaran Produk Sederhana"
+                            "Makna Panca Yadnya",
+                            "Kepemimpinan dalam Ramayana/Mahabharata"
                         ],
-                        "cp_snippet": "Menjelaskan aspek- aspek penting budi daya berdasarkan hasil observasi; menjelaskan produk budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan sesuai potensi lingkungan/kearifan lokal berdasarkan hasil eksplorasi.  /Perencanaan Menyusun rencana kegiatan budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan, sesuai potensi lingkungan/kearifan lokal. Menghasilkan produk budi daya yang aman berdasarkan potensi lingkungan/kearifan lokal dengan modifikasi bahan, alat, d..."
+                        "cp_snippet": "Memahami makna dan jenis-jenis Yadnya; memahami nilai-nilai kepemimpinan dalam kisah Ramayana dan Mahabharata."
+                    }
+                },
+                "Pendidikan Agama Buddha": {
+                    "ganjil": {
+                        "elemen": [
+                            "Keyakinan dan Sila"
+                        ],
+                        "materi_inti": [
+                            "Riwayat Hidup Buddha",
+                            "Tiga Perlindungan (Triratna)"
+                        ],
+                        "cp_snippet": "Memahami riwayat hidup Buddha Gotama; memahami makna Triratna (Buddha, Dhamma, Sangha) dan Pancasila Buddhis."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Meditasi",
+                            "Sejarah Buddhis"
+                        ],
+                        "materi_inti": [
+                            "Dasar-dasar Meditasi (Samatha Bhavana)",
+                            "Sejarah Perkembangan Buddhis di Indonesia"
+                        ],
+                        "cp_snippet": "Mempraktikkan dasar-dasar meditasi; memahami sejarah perkembangan agama Buddha di Indonesia."
+                    }
+                },
+                "Pendidikan Agama Khonghucu": {
+                    "ganjil": {
+                        "elemen": [
+                            "Keyakinan dan Ajaran"
+                        ],
+                        "materi_inti": [
+                            "Riwayat Hidup Nabi Kongzi",
+                            "Kitab Suci Si Shu dan Wu Jing"
+                        ],
+                        "cp_snippet": "Memahami riwayat hidup Nabi Kongzi; memahami kitab suci Si Shu (Empat Kitab) dan Wu Jing (Lima Kitab)."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Etika dan Laku Ibadah"
+                        ],
+                        "materi_inti": [
+                            "Li (Tata Susila) dan Ren (Cinta Kasih)",
+                            "Tata Ibadah Agama Khonghucu"
+                        ],
+                        "cp_snippet": "Memahami konsep Li dan Ren sebagai landasan moral; memahami tata cara ibadah dalam agama Khonghucu."
+                    }
+                },
+                "Pendidikan Kepercayaan terhadap Tuhan YME": {
+                    "ganjil": {
+                        "elemen": [
+                            "Akhlak dan Budi Pekerti"
+                        ],
+                        "materi_inti": [
+                            "Nilai-nilai Ketuhanan dalam Kepercayaan Lokal",
+                            "Ajaran Moral dan Budi Luhur"
+                        ],
+                        "cp_snippet": "Memahami nilai-nilai Ketuhanan Yang Maha Esa dalam berbagai aliran kepercayaan lokal; mengamalkan budi luhur dalam kehidupan sehari-hari."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Tradisi dan Kearifan Lokal"
+                        ],
+                        "materi_inti": [
+                            "Tradisi dan Ritual Penghayat Kepercayaan",
+                            "Peran Penghayat dalam Masyarakat Majemuk"
+                        ],
+                        "cp_snippet": "Memahami tradisi dan ritual penghayat kepercayaan; memahami peran penghayat kepercayaan dalam kerukunan bermasyarakat."
+                    }
+                },
+                "Seni Tari": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Unsur Gerak Tari (Wirama, Wiraga, Wirasa)",
+                            "Gerak Dasar Tari Tradisional Daerah"
+                        ],
+                        "cp_snippet": "Mengenali unsur-unsur gerak tari serta menerapkannya dalam gerak dasar tari tradisional daerah; menciptakan ragam gerak sederhana berdasarkan eksplorasi."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berapresiasi"
+                        ],
+                        "materi_inti": [
+                            "Apresiasi Karya Tari Nusantara",
+                            "Penyajian Tari Kreasi Sederhana"
+                        ],
+                        "cp_snippet": "Merefleksikan dan mengapresiasi karya tari dari berbagai daerah; menyajikan tari kreasi sederhana secara berkelompok."
+                    }
+                },
+                "Seni Teater": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Dasar-dasar Akting (Olah Tubuh, Olah Suara, Olah Rasa)",
+                            "Eksplorasi Naskah dan Karakter"
+                        ],
+                        "cp_snippet": "Mengenali dan menerapkan dasar-dasar akting melalui olah tubuh, olah suara, dan olah rasa; mengeksplorasi naskah dan pembentukan karakter."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berapresiasi"
+                        ],
+                        "materi_inti": [
+                            "Apresiasi Karya Teater Nusantara",
+                            "Pementasan Fragmen/Drama Sederhana"
+                        ],
+                        "cp_snippet": "Merefleksikan dan mengapresiasi karya teater tradisional dan modern; mementaskan fragmen atau drama sederhana."
                     }
                 }
             },
@@ -1834,6 +2059,81 @@
                         "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
                     }
                 },
+                "Pendidikan Agama Kristen": {
+                    "ganjil": {
+                        "elemen": [
+                            "Allah Berkarya",
+                            "Manusia dan Nilai-nilai Kristiani"
+                        ],
+                        "materi_inti": [
+                            "Allah Pencipta dan Pemelihara",
+                            "Hakikat Manusia sebagai Citra Allah"
+                        ],
+                        "cp_snippet": "Memahami karya Allah dalam hidup manusia yang mengubah masa depan; memahami Allah memelihara seluruh ciptaan-Nya. Memahami pergaulan remaja masa kini dengan meneladani Yesus Kristus; memahami prinsip rendah hati, penguasaan diri, dan peduli terhadap sesama."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Gereja dan Masyarakat Majemuk",
+                            "Alam dan Lingkungan Hidup"
+                        ],
+                        "materi_inti": [
+                            "Tugas Panggilan Gereja",
+                            "Dialog dan Kerukunan Umat Beragama",
+                            "Tanggung Jawab terhadap Alam"
+                        ],
+                        "cp_snippet": "Memahami makna kehadiran gereja dalam pelayanan yang membawa pembaruan; memahami dialog dan kerjasama antarumat beragama. Memahami bahwa manusia diberi tugas oleh Allah untuk mengolah serta memelihara alam dan lingkungan hidup."
+                    }
+                },
+                "Pendidikan Agama Katolik": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pribadi Peserta Didik",
+                            "Yesus Kristus"
+                        ],
+                        "materi_inti": [
+                            "Manusia sebagai Citra Allah",
+                            "Pribadi Yesus yang Berbelas Kasih"
+                        ],
+                        "cp_snippet": "Memahami manusia sebagai citra Allah yang unik, sebagai laki-laki dan perempuan; memahami kemampuan dan keterbatasan; memahami diri yang tumbuh dan berkembang karena peran keluarga, teman, dan satuan pendidikan. Memahami pribadi Yesus yang berbelas kasih, pengampun, dan pendoa."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Gereja",
+                            "Masyarakat"
+                        ],
+                        "materi_inti": [
+                            "Gereja sebagai Komunitas",
+                            "Kebebasan Anak-anak Allah dan Hidup Bersama"
+                        ],
+                        "cp_snippet": "Memahami gereja sebagai komunitas dan karya pelayanan; memahami sakramen-sakramen inisiasi. Memahami kebebasan sebagai anak-anak Allah dan sabda bahagia; memahami hak dan kewajiban anggota gereja dan masyarakat; memahami alam sebagai rumah kita bersama."
+                    }
+                },
+                "Seni Musik": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Unsur-unsur Musik (Nada, Irama, Melodi)",
+                            "Praktik Bermain Alat Musik Sederhana"
+                        ],
+                        "cp_snippet": "Mengenali dan menerapkan unsur-unsur musik berupa nada, irama, dan melodi dengan alat musik berbasis teknologi. Menghasilkan lagu sederhana dengan mengembangkan irama dan melodi menggunakan berbagai alat musik."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berpikir dan Bekerja Artistik",
+                            "Berdampak"
+                        ],
+                        "materi_inti": [
+                            "Apresiasi Karya Musik Daerah dan Nusantara",
+                            "Penyajian Musik Sederhana",
+                            "Empati dan Kepedulian melalui Musik"
+                        ],
+                        "cp_snippet": "Melakukan umpan balik kemampuan bermain musik dan karya musik sesuai genre menggunakan istilah musik yang tepat. Menerapkan proses berpraktik musik untuk pengembangan keterampilan bermusik; menyajikan musik daerah dan Nusantara. Menunjukkan empati dan kepedulian terhadap isu lingkungan melalui kegiatan bermusik."
+                    }
+                },
                 "Seni Rupa": {
                     "ganjil": {
                         "elemen": [
@@ -1911,6 +2211,145 @@
                             "Wirausaha Produk Prakarya"
                         ],
                         "cp_snippet": "Menjelaskan aspek- aspek penting budi daya berdasarkan hasil observasi; menjelaskan produk budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan sesuai potensi lingkungan/kearifan lokal berdasarkan hasil eksplorasi.  /Perencanaan Menyusun rencana kegiatan budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan, sesuai potensi lingkungan/kearifan lokal. Menghasilkan produk budi daya yang aman berdasarkan potensi lingkungan/kearifan lokal dengan modifikasi bahan, alat, d..."
+                    }
+                },
+                "Pendidikan Agama Hindu": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sradha",
+                            "Etika dan Susila"
+                        ],
+                        "materi_inti": [
+                            "Konsep Ketuhanan dalam Hindu",
+                            "Tri Kaya Parisudha"
+                        ],
+                        "cp_snippet": "Memahami konsep Ketuhanan (Brahman), Tri Pramana, dan ajaran Tri Kaya Parisudha sebagai landasan etika; memahami makna hari suci keagamaan Hindu."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Acara dan Upacara",
+                            "Sejarah dan Kepemimpinan"
+                        ],
+                        "materi_inti": [
+                            "Makna Panca Yadnya",
+                            "Kepemimpinan dalam Ramayana/Mahabharata"
+                        ],
+                        "cp_snippet": "Memahami makna dan jenis-jenis Yadnya; memahami nilai-nilai kepemimpinan dalam kisah Ramayana dan Mahabharata."
+                    }
+                },
+                "Pendidikan Agama Buddha": {
+                    "ganjil": {
+                        "elemen": [
+                            "Keyakinan dan Sila"
+                        ],
+                        "materi_inti": [
+                            "Riwayat Hidup Buddha",
+                            "Tiga Perlindungan (Triratna)"
+                        ],
+                        "cp_snippet": "Memahami riwayat hidup Buddha Gotama; memahami makna Triratna (Buddha, Dhamma, Sangha) dan Pancasila Buddhis."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Meditasi",
+                            "Sejarah Buddhis"
+                        ],
+                        "materi_inti": [
+                            "Dasar-dasar Meditasi (Samatha Bhavana)",
+                            "Sejarah Perkembangan Buddhis di Indonesia"
+                        ],
+                        "cp_snippet": "Mempraktikkan dasar-dasar meditasi; memahami sejarah perkembangan agama Buddha di Indonesia."
+                    }
+                },
+                "Pendidikan Agama Khonghucu": {
+                    "ganjil": {
+                        "elemen": [
+                            "Keyakinan dan Ajaran"
+                        ],
+                        "materi_inti": [
+                            "Riwayat Hidup Nabi Kongzi",
+                            "Kitab Suci Si Shu and Wu Jing"
+                        ],
+                        "cp_snippet": "Memahami riwayat hidup Nabi Kongzi; memahami kitab suci Si Shu (Empat Kitab) and Wu Jing (Lima Kitab)."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Etika and Laku Ibadah"
+                        ],
+                        "materi_inti": [
+                            "Li (Tata Susila) and Ren (Cinta Kasih)",
+                            "Tata Ibadah Agama Khonghucu"
+                        ],
+                        "cp_snippet": "Memahami konsep Li and Ren sebagai landasan moral; memahami tata cara ibadah dalam agama Khonghucu."
+                    }
+                },
+                "Pendidikan Kepercayaan terhadap Tuhan YME": {
+                    "ganjil": {
+                        "elemen": [
+                            "Akhlak and Budi Pekerti"
+                        ],
+                        "materi_inti": [
+                            "Nilai-nilai Ketuhanan dalam Kepercayaan Lokal",
+                            "Ajaran Moral and Budi Luhur"
+                        ],
+                        "cp_snippet": "Memahami nilai-nilai Ketuhanan Yang Maha Esa dalam berbagai aliran kepercayaan lokal; mengamalkan budi luhur dalam kehidupan sehari-hari."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Tradisi and Kearifan Lokal"
+                        ],
+                        "materi_inti": [
+                            "Tradisi and Ritual Penghayat Kepercayaan",
+                            "Peran Penghayat dalam Masyarakat Majemuk"
+                        ],
+                        "cp_snippet": "Memahami tradisi and ritual penghayat kepercayaan; memahami peran penghayat kepercayaan dalam kerukunan bermasyarakat."
+                    }
+                },
+                "Seni Tari": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Unsur Gerak Tari (Wirama, Wiraga, Wirasa)",
+                            "Gerak Dasar Tari Tradisional Daerah"
+                        ],
+                        "cp_snippet": "Mengenali unsur-unsur gerak tari serta menerapkannya dalam gerak dasar tari tradisional daerah; menciptakan ragam gerak sederhana berdasarkan eksplorasi."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berapresiasi"
+                        ],
+                        "materi_inti": [
+                            "Apresiasi Karya Tari Nusantara",
+                            "Penyajian Tari Kreasi Sederhana"
+                        ],
+                        "cp_snippet": "Merefleksikan and mengapresiasi karya tari dari berbagai daerah; menyajikan tari kreasi sederhana secara berkelompok."
+                    }
+                },
+                "Seni Teater": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Dasar-dasar Akting (Olah Tubuh, Olah Suara, Olah Rasa)",
+                            "Eksplorasi Naskah and Karakter"
+                        ],
+                        "cp_snippet": "Mengenali and menerapkan dasar-dasar akting melalui olah tubuh, olah suara, and olah rasa; mengeksplorasi naskah and pembentukan karakter."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berapresiasi"
+                        ],
+                        "materi_inti": [
+                            "Apresiasi Karya Teater Nusantara",
+                            "Pementasan Fragmen/Drama Sederhana"
+                        ],
+                        "cp_snippet": "Merefleksikan and mengapresiasi karya teater tradisional and modern; mementaskan fragmen atau drama sederhana."
                     }
                 }
             },
@@ -2153,6 +2592,81 @@
                         "cp_snippet": "Qur’an Hadis Memahami ayat Al-Qur’an dan hadis tentang pentingnya iman, takwa, toleransi, cinta tanah air, semangat keilmuan dan sabar dalam menghadapi musibah dan ujian. Memahami rukun iman dan hal-hal yang dapat meneguhkan iman. Memahami ikhlas, bersyukur kepada Allah Swt., cinta rasul, husnuzan, kasih sayang kepada sesama dan lingkungan alam. Memahami ketentuan sujud, salat, kewajiban terhadap jenazah, haji dan umrah, penyembelihan hewan, kurban, akikah, dan rukhsah dalam perspektif mazhab..."
                     }
                 },
+                "Pendidikan Agama Kristen": {
+                    "ganjil": {
+                        "elemen": [
+                            "Allah Berkarya",
+                            "Manusia dan Nilai-nilai Kristiani"
+                        ],
+                        "materi_inti": [
+                            "Allah Pencipta dan Pemelihara",
+                            "Hakikat Manusia sebagai Citra Allah"
+                        ],
+                        "cp_snippet": "Memahami karya Allah dalam hidup manusia yang mengubah masa depan; memahami Allah memelihara seluruh ciptaan-Nya. Memahami pergaulan remaja masa kini dengan meneladani Yesus Kristus; memahami prinsip rendah hati, penguasaan diri, dan peduli terhadap sesama."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Gereja dan Masyarakat Majemuk",
+                            "Alam dan Lingkungan Hidup"
+                        ],
+                        "materi_inti": [
+                            "Tugas Panggilan Gereja",
+                            "Dialog dan Kerukunan Umat Beragama",
+                            "Tanggung Jawab terhadap Alam"
+                        ],
+                        "cp_snippet": "Memahami makna kehadiran gereja dalam pelayanan yang membawa pembaruan; memahami dialog dan kerjasama antarumat beragama. Memahami bahwa manusia diberi tugas oleh Allah untuk mengolah serta memelihara alam dan lingkungan hidup."
+                    }
+                },
+                "Pendidikan Agama Katolik": {
+                    "ganjil": {
+                        "elemen": [
+                            "Pribadi Peserta Didik",
+                            "Yesus Kristus"
+                        ],
+                        "materi_inti": [
+                            "Manusia sebagai Citra Allah",
+                            "Pribadi Yesus yang Berbelas Kasih"
+                        ],
+                        "cp_snippet": "Memahami manusia sebagai citra Allah yang unik, sebagai laki-laki dan perempuan; memahami kemampuan dan keterbatasan; memahami diri yang tumbuh dan berkembang karena peran keluarga, teman, dan satuan pendidikan. Memahami pribadi Yesus yang berbelas kasih, pengampun, dan pendoa."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Gereja",
+                            "Masyarakat"
+                        ],
+                        "materi_inti": [
+                            "Gereja sebagai Komunitas",
+                            "Kebebasan Anak-anak Allah dan Hidup Bersama"
+                        ],
+                        "cp_snippet": "Memahami gereja sebagai komunitas dan karya pelayanan; memahami sakramen-sakramen inisiasi. Memahami kebebasan sebagai anak-anak Allah dan sabda bahagia; memahami hak dan kewajiban anggota gereja dan masyarakat; memahami alam sebagai rumah kita bersama."
+                    }
+                },
+                "Seni Musik": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Unsur-unsur Musik (Nada, Irama, Melodi)",
+                            "Praktik Bermain Alat Musik Sederhana"
+                        ],
+                        "cp_snippet": "Mengenali dan menerapkan unsur-unsur musik berupa nada, irama, dan melodi dengan alat musik berbasis teknologi. Menghasilkan lagu sederhana dengan mengembangkan irama dan melodi menggunakan berbagai alat musik."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berpikir dan Bekerja Artistik",
+                            "Berdampak"
+                        ],
+                        "materi_inti": [
+                            "Apresiasi Karya Musik Daerah dan Nusantara",
+                            "Penyajian Musik Sederhana",
+                            "Empati dan Kepedulian melalui Musik"
+                        ],
+                        "cp_snippet": "Melakukan umpan balik kemampuan bermain musik dan karya musik sesuai genre menggunakan istilah musik yang tepat. Menerapkan proses berpraktik musik untuk pengembangan keterampilan bermusik; menyajikan musik daerah dan Nusantara. Menunjukkan empati dan kepedulian terhadap isu lingkungan melalui kegiatan bermusik."
+                    }
+                },
                 "Seni Rupa": {
                     "ganjil": {
                         "elemen": [
@@ -2230,6 +2744,145 @@
                             "Laporan Keuangan & Evaluasi Bisnis Sederhana"
                         ],
                         "cp_snippet": "Menjelaskan aspek- aspek penting budi daya berdasarkan hasil observasi; menjelaskan produk budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan sesuai potensi lingkungan/kearifan lokal berdasarkan hasil eksplorasi.  /Perencanaan Menyusun rencana kegiatan budi daya serta modifikasi bahan, alat, dan teknik bila diperlukan, sesuai potensi lingkungan/kearifan lokal. Menghasilkan produk budi daya yang aman berdasarkan potensi lingkungan/kearifan lokal dengan modifikasi bahan, alat, d..."
+                    }
+                },
+                "Pendidikan Agama Hindu": {
+                    "ganjil": {
+                        "elemen": [
+                            "Sradha",
+                            "Etika dan Susila"
+                        ],
+                        "materi_inti": [
+                            "Konsep Ketuhanan dalam Hindu",
+                            "Tri Kaya Parisudha"
+                        ],
+                        "cp_snippet": "Memahami konsep Ketuhanan (Brahman), Tri Pramana, dan ajaran Tri Kaya Parisudha sebagai landasan etika; memahami makna hari suci keagamaan Hindu."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Acara dan Upacara",
+                            "Sejarah dan Kepemimpinan"
+                        ],
+                        "materi_inti": [
+                            "Makna Panca Yadnya",
+                            "Kepemimpinan dalam Ramayana/Mahabharata"
+                        ],
+                        "cp_snippet": "Memahami makna dan jenis-jenis Yadnya; memahami nilai-nilai kepemimpinan dalam kisah Ramayana dan Mahabharata."
+                    }
+                },
+                "Pendidikan Agama Buddha": {
+                    "ganjil": {
+                        "elemen": [
+                            "Keyakinan dan Sila"
+                        ],
+                        "materi_inti": [
+                            "Riwayat Hidup Buddha",
+                            "Tiga Perlindungan (Triratna)"
+                        ],
+                        "cp_snippet": "Memahami riwayat hidup Buddha Gotama; memahami makna Triratna (Buddha, Dhamma, Sangha) dan Pancasila Buddhis."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Meditasi",
+                            "Sejarah Buddhis"
+                        ],
+                        "materi_inti": [
+                            "Dasar-dasar Meditasi (Samatha Bhavana)",
+                            "Sejarah Perkembangan Buddhis di Indonesia"
+                        ],
+                        "cp_snippet": "Mempraktikkan dasar-dasar meditasi; memahami sejarah perkembangan agama Buddha di Indonesia."
+                    }
+                },
+                "Pendidikan Agama Khonghucu": {
+                    "ganjil": {
+                        "elemen": [
+                            "Keyakinan dan Ajaran"
+                        ],
+                        "materi_inti": [
+                            "Riwayat Hidup Nabi Kongzi",
+                            "Kitab Suci Si Shu and Wu Jing"
+                        ],
+                        "cp_snippet": "Memahami riwayat hidup Nabi Kongzi; memahami kitab suci Si Shu (Empat Kitab) and Wu Jing (Lima Kitab)."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Etika and Laku Ibadah"
+                        ],
+                        "materi_inti": [
+                            "Li (Tata Susila) and Ren (Cinta Kasih)",
+                            "Tata Ibadah Agama Khonghucu"
+                        ],
+                        "cp_snippet": "Memahami konsep Li and Ren sebagai landasan moral; memahami tata cara ibadah dalam agama Khonghucu."
+                    }
+                },
+                "Pendidikan Kepercayaan terhadap Tuhan YME": {
+                    "ganjil": {
+                        "elemen": [
+                            "Akhlak and Budi Pekerti"
+                        ],
+                        "materi_inti": [
+                            "Nilai-nilai Ketuhanan dalam Kepercayaan Lokal",
+                            "Ajaran Moral and Budi Luhur"
+                        ],
+                        "cp_snippet": "Memahami nilai-nilai Ketuhanan Yang Maha Esa dalam berbagai aliran kepercayaan lokal; mengamalkan budi luhur dalam kehidupan sehari-hari."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Tradisi and Kearifan Lokal"
+                        ],
+                        "materi_inti": [
+                            "Tradisi and Ritual Penghayat Kepercayaan",
+                            "Peran Penghayat dalam Masyarakat Majemuk"
+                        ],
+                        "cp_snippet": "Memahami tradisi and ritual penghayat kepercayaan; memahami peran penghayat kepercayaan dalam kerukunan bermasyarakat."
+                    }
+                },
+                "Seni Tari": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Unsur Gerak Tari (Wirama, Wiraga, Wirasa)",
+                            "Gerak Dasar Tari Tradisional Daerah"
+                        ],
+                        "cp_snippet": "Mengenali unsur-unsur gerak tari serta menerapkannya dalam gerak dasar tari tradisional daerah; menciptakan ragam gerak sederhana berdasarkan eksplorasi."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berapresiasi"
+                        ],
+                        "materi_inti": [
+                            "Apresiasi Karya Tari Nusantara",
+                            "Penyajian Tari Kreasi Sederhana"
+                        ],
+                        "cp_snippet": "Merefleksikan and mengapresiasi karya tari dari berbagai daerah; menyajikan tari kreasi sederhana secara berkelompok."
+                    }
+                },
+                "Seni Teater": {
+                    "ganjil": {
+                        "elemen": [
+                            "Mengalami",
+                            "Menciptakan"
+                        ],
+                        "materi_inti": [
+                            "Dasar-dasar Akting (Olah Tubuh, Olah Suara, Olah Rasa)",
+                            "Eksplorasi Naskah and Karakter"
+                        ],
+                        "cp_snippet": "Mengenali and menerapkan dasar-dasar akting melalui olah tubuh, olah suara, and olah rasa; mengeksplorasi naskah and pembentukan karakter."
+                    },
+                    "genap": {
+                        "elemen": [
+                            "Merefleksikan",
+                            "Berapresiasi"
+                        ],
+                        "materi_inti": [
+                            "Apresiasi Karya Teater Nusantara",
+                            "Pementasan Fragmen/Drama Sederhana"
+                        ],
+                        "cp_snippet": "Merefleksikan and mengapresiasi karya teater tradisional and modern; mementaskan fragmen atau drama sederhana."
                     }
                 }
             }
