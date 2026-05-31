@@ -1,0 +1,10 @@
+{
+  "bookId": "smp-prakarya-8",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Kerajinan Lunak", "pages": "1-40", "semester": "Ganjil" },
+    { "no": 2, "title": "Teknologi Informasi dan Komunikasi", "pages": "41-80", "semester": "Ganjil" },
+    { "no": 3, "title": "Budidaya Satwa Harapan", "pages": "81-120", "semester": "Genap" },
+    { "no": 4, "title": "Pengolahan Bahan Serealia", "pages": "121-160", "semester": "Genap" }
+  ]
+}

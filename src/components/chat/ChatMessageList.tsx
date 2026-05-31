@@ -3,7 +3,7 @@ import { Bot, User, Loader, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import rehypeRaw from 'rehype-raw';
+
 import remarkGfm from 'remark-gfm';
 import 'katex/dist/katex.min.css';
 import { ChatMessage } from '../../utils/ChatContext';
@@ -54,7 +54,7 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
                                     <div className="markdown-content text-sm sm:text-base">
                                         <ReactMarkdown
                                             remarkPlugins={[remarkMath, remarkGfm]}
-                                            rehypePlugins={[rehypeKatex, rehypeRaw]}
+                                            rehypePlugins={[rehypeKatex]}
                                         >
                                             {(() => {
                                                 let text = message.parts[0].text;

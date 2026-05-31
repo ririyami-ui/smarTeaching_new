@@ -17,7 +17,21 @@ export interface SettingsState {
   loadingSettings: boolean;
 }
 
-const SettingsContext = createContext<SettingsState | undefined>(undefined);
+const defaultSettings: SettingsState = {
+  activeSemester: 'Ganjil',
+  academicYear: '',
+  geminiModel: 'gemini-3.1-flash-lite',
+  academicWeight: 50,
+  attitudeWeight: 50,
+  scheduleNotificationsEnabled: true,
+  schoolDays: 6,
+  activeTemplateId: null,
+  activeTemplateName: 'Jadwal Normal',
+  userProfile: null,
+  loadingSettings: true,
+};
+
+const SettingsContext = createContext<SettingsState>(defaultSettings);
 
 const getCurrentSemester = (): string => {
   const month = new Date().getMonth() + 1;
@@ -25,11 +39,7 @@ const getCurrentSemester = (): string => {
 };
 
 export const useSettings = (): SettingsState => {
-  const context = useContext(SettingsContext);
-  if (context === undefined) {
-    return context as unknown as SettingsState;
-  }
-  return context;
+  return useContext(SettingsContext);
 };
 
 export const SettingsProvider: React.FC<{children: ReactNode}> = ({ children }) => {

@@ -152,10 +152,10 @@ const StudentAcademicDetail: React.FC<StudentAcademicDetailProps> = ({
             Object.values(gradesByKey).forEach(arr => {
                 if (arr.length > 1) {
                     arr.sort((a, b) => {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const tA = (a as any).timestamp?.toMillis?.() || new Date(a.date).getTime();
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const tB = (b as any).timestamp?.toMillis?.() || new Date(b.date).getTime();
+                        const grade = a as { timestamp?: { toMillis?: () => number }; date: string };
+                        const gradeB = b as { timestamp?: { toMillis?: () => number }; date: string };
+                        const tA = grade.timestamp?.toMillis?.() || new Date(grade.date).getTime();
+                        const tB = gradeB.timestamp?.toMillis?.() || new Date(gradeB.date).getTime();
                         return tB - tA;
                     });
                     arr.slice(1).forEach(g => {

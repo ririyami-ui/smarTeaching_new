@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { Calendar, Users, TrendingUp, FileDown, CheckCircle, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -277,25 +276,24 @@ const RekapAttendanceTab: React.FC<RekapAttendanceTabProps> = ({
         );
     };
 
-    const handleExcelExport = () => {
-        if (attendanceData.length === 0) {
+    const handleExcelExport = async () => {
+        if (!attendanceData || attendanceData.length === 0) {
             toast.error('Tidak ada data kehadiran untuk diekspor ke Excel.');
             return;
         }
-        const worksheet = XLSX.utils.json_to_sheet(attendanceData.map(item => ({
-            'No. Absen': item.absen || '',
-            'NIS': item.nis || '',
-            'Nama Siswa': item.name || '',
-            'Hadir': item.Hadir || 0,
-            'Sakit': item.Sakit || 0,
-            'Ijin': item.Ijin || 0,
-            'Alpha': item.Alpha || 0,
-        })));
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Kehadiran');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        saveAs(data, `Rekapitulasi_Kehadiran_${selectedClass}_${startDate}_${endDate}.xlsx`);
+
+        const toastId = toast.loading('Menyiapkan file Excel...');
+        try {
+            const XLSX = await import('xlsx');
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Kehadiran');
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            saveAs(data, `Rekapitulasi_Kehadiran_${selectedClass}_${startDate}_${endDate}.xlsx`);
+        } catch (error) {
+            console.error('Excel Export Error:', error);
+            toast.error('Gagal mengekspor data ke Excel.', { id: toastId });
+        }
     };
 
 

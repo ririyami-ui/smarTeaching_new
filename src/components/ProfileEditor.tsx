@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
+import { encrypt, decrypt } from '../utils/cryptoUtils';
 import StyledInput from './StyledInput';
 import StyledButton from './StyledButton';
 import StyledSelect from './StyledSelect';
@@ -36,7 +37,11 @@ export default function ProfileEditor() {
     const fetchProfile = async () => {
       if (user) {
         const cachedKey = localStorage.getItem('GEMINI_API_KEY');
-        if (cachedKey) setGeminiApiKey(cachedKey);
+        if (cachedKey) {
+            // Decrypt if it looks encrypted (btoa format might fail if not, so we try/catch)
+            const decrypted = decrypt(cachedKey);
+            setGeminiApiKey(decrypted || cachedKey);
+        }
 
         const userDocRef = doc(db, 'users', user.uid);
         try {
@@ -126,34 +131,34 @@ export default function ProfileEditor() {
     setError('');
     setSuccess('');
 
-    try {
-      // Update Firestore profile
-      const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, {
-        name: validated.name,
-        title: validated.title,
-        nip: validated.nip,
-        school: validated.school,
-        schoolLevel: validated.schoolLevel,
-        principalName: validated.principalName,
-        principalNip: validated.principalNip,
-        academicYear: validated.academicYear,
-        activeSemester: validated.activeSemester,
-        geminiModel: validated.geminiModel,
-        geminiApiKey: validated.geminiApiKey?.trim() || '',
-        academicWeight: validated.academicWeight,
-        attitudeWeight: validated.attitudeWeight,
-        scheduleNotificationsEnabled: validated.scheduleNotificationsEnabled,
-      });
+      try {
+        // Update Firestore profile
+        const userDocRef = doc(db, 'users', user.uid);
+        await updateDoc(userDocRef, {
+          name: validated.name,
+          title: validated.title,
+          nip: validated.nip,
+          school: validated.school,
+          schoolLevel: validated.schoolLevel,
+          principalName: validated.principalName,
+          principalNip: validated.principalNip,
+          academicYear: validated.academicYear,
+          activeSemester: validated.activeSemester,
+          geminiModel: validated.geminiModel,
+          geminiApiKey: validated.geminiApiKey?.trim() || '',
+          academicWeight: validated.academicWeight,
+          attitudeWeight: validated.attitudeWeight,
+          scheduleNotificationsEnabled: validated.scheduleNotificationsEnabled,
+        });
 
-      // Update Gemini API Key in localStorage
-      if (geminiApiKey.trim()) {
-        localStorage.setItem('GEMINI_API_KEY', geminiApiKey.trim());
-      } else {
-        localStorage.removeItem('GEMINI_API_KEY');
-      }
+        // Update Gemini API Key in localStorage (ENCRYPTED)
+        if (geminiApiKey.trim()) {
+          localStorage.setItem('GEMINI_API_KEY', encrypt(geminiApiKey.trim()));
+        } else {
+          localStorage.removeItem('GEMINI_API_KEY');
+        }
 
-      setSuccess('Profil dan API Key berhasil diperbarui!');
+        setSuccess('Profil dan API Key berhasil diperbarui!');
       // Force a reload of the model preference in localStorage for the gemini utility
       localStorage.setItem('GEMINI_MODEL', geminiModel);
     } catch (err) {

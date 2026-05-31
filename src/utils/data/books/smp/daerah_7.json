@@ -1,0 +1,10 @@
+{
+  "bookId": "smp-daerah-7",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Sastra Daerah Ganjil", "pages": "1-50", "semester": "Ganjil" },
+    { "no": 2, "title": "Aksara dan Budaya Ganjil", "pages": "51-100", "semester": "Ganjil" },
+    { "no": 3, "title": "Sastra Daerah Genap", "pages": "101-150", "semester": "Genap" },
+    { "no": 4, "title": "Aksara dan Budaya Genap", "pages": "151-200", "semester": "Genap" }
+  ]
+}

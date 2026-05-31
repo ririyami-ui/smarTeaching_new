@@ -1,0 +1,14 @@
+{
+  "bookId": "smp-pjok-7",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Permainan Bola Besar", "pages": "1-32", "semester": "Ganjil" },
+    { "no": 2, "title": "Permainan Bola Kecil", "pages": "33-60", "semester": "Ganjil" },
+    { "no": 3, "title": "Atletik", "pages": "61-88", "semester": "Ganjil" },
+    { "no": 4, "title": "Seni Beladiri", "pages": "89-115", "semester": "Ganjil" },
+    { "no": 5, "title": "Kebugaran Jasmani", "pages": "116-140", "semester": "Genap" },
+    { "no": 6, "title": "Senam Lantai", "pages": "141-165", "semester": "Genap" },
+    { "no": 7, "title": "Gerak Berirama", "pages": "166-190", "semester": "Genap" },
+    { "no": 8, "title": "Perkembangan Tubuh Remaja", "pages": "191-215", "semester": "Genap" }
+  ]
+}

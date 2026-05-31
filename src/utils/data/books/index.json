@@ -1,0 +1,298 @@
+[
+  {
+    "id": "smp-inf-7",
+    "jenjang": "SMP",
+    "mapel": "Informatika",
+    "kelas": "7",
+    "title": "Informatika Kelas VII (Kurikulum Merdeka)",
+    "path": "smp/informatika_7.json"
+  },
+  {
+    "id": "smp-inf-8",
+    "jenjang": "SMP",
+    "mapel": "Informatika",
+    "kelas": "8",
+    "title": "Informatika Kelas VIII (Kurikulum Merdeka)",
+    "path": "smp/informatika_8.json"
+  },
+  {
+    "id": "smp-inf-9",
+    "jenjang": "SMP",
+    "mapel": "Informatika",
+    "kelas": "9",
+    "title": "Informatika Kelas IX (Kurikulum Merdeka)",
+    "path": "smp/informatika_9.json"
+  },
+  {
+    "id": "smp-mat-7",
+    "jenjang": "SMP",
+    "mapel": "Matematika",
+    "kelas": "7",
+    "title": "Matematika Kelas VII (Kurikulum Merdeka)",
+    "path": "smp/matematika_7.json"
+  },
+  {
+    "id": "smp-mat-8",
+    "jenjang": "SMP",
+    "mapel": "Matematika",
+    "kelas": "8",
+    "title": "Matematika Kelas VIII (Kurikulum Merdeka)",
+    "path": "smp/matematika_8.json"
+  },
+  {
+    "id": "smp-mat-9",
+    "jenjang": "SMP",
+    "mapel": "Matematika",
+    "kelas": "9",
+    "title": "Matematika Kelas IX (Kurikulum Merdeka)",
+    "path": "smp/matematika_9.json"
+  },
+  {
+    "id": "smp-ipa-7",
+    "jenjang": "SMP",
+    "mapel": "IPA",
+    "kelas": "7",
+    "title": "Ilmu Pengetahuan Alam Kelas VII (Kurikulum Merdeka)",
+    "path": "smp/ipa_7.json"
+  },
+  {
+    "id": "smp-ipa-8",
+    "jenjang": "SMP",
+    "mapel": "IPA",
+    "kelas": "8",
+    "title": "Ilmu Pengetahuan Alam Kelas VIII (Kurikulum Merdeka)",
+    "path": "smp/ipa_8.json"
+  },
+  {
+    "id": "smp-ipa-9",
+    "jenjang": "SMP",
+    "mapel": "IPA",
+    "kelas": "9",
+    "title": "Ilmu Pengetahuan Alam Kelas IX (Kurikulum Merdeka)",
+    "path": "smp/ipa_9.json"
+  },
+  {
+    "id": "smp-indo-7",
+    "jenjang": "SMP",
+    "mapel": "Bahasa Indonesia",
+    "kelas": "7",
+    "title": "Bahasa Indonesia Kelas VII (Kurikulum Merdeka)",
+    "path": "smp/indo_7.json"
+  },
+  {
+    "id": "smp-indo-8",
+    "jenjang": "SMP",
+    "mapel": "Bahasa Indonesia",
+    "kelas": "8",
+    "title": "Bahasa Indonesia Kelas VIII (Kurikulum Merdeka)",
+    "path": "smp/indo_8.json"
+  },
+  {
+    "id": "smp-indo-9",
+    "jenjang": "SMP",
+    "mapel": "Bahasa Indonesia",
+    "kelas": "9",
+    "title": "Bahasa Indonesia Kelas IX (Kurikulum Merdeka)",
+    "path": "smp/indo_9.json"
+  },
+  {
+    "id": "smp-ing-7",
+    "jenjang": "SMP",
+    "mapel": "Bahasa Inggris",
+    "kelas": "7",
+    "title": "English for Nusantara Kelas VII",
+    "path": "smp/inggris_7.json"
+  },
+  {
+    "id": "smp-ing-8",
+    "jenjang": "SMP",
+    "mapel": "Bahasa Inggris",
+    "kelas": "8",
+    "title": "English for Nusantara Kelas VIII",
+    "path": "smp/inggris_8.json"
+  },
+  {
+    "id": "smp-ing-9",
+    "jenjang": "SMP",
+    "mapel": "Bahasa Inggris",
+    "kelas": "9",
+    "title": "English for Nusantara Kelas IX",
+    "path": "smp/inggris_9.json"
+  },
+  {
+    "id": "smp-ips-7",
+    "jenjang": "SMP",
+    "mapel": "IPS",
+    "kelas": "7",
+    "title": "Ilmu Pengetahuan Sosial Kelas VII",
+    "path": "smp/ips_7.json"
+  },
+  {
+    "id": "smp-ips-8",
+    "jenjang": "SMP",
+    "mapel": "IPS",
+    "kelas": "8",
+    "title": "Ilmu Pengetahuan Sosial Kelas VIII",
+    "path": "smp/ips_8.json"
+  },
+  {
+    "id": "smp-ips-9",
+    "jenjang": "SMP",
+    "mapel": "IPS",
+    "kelas": "9",
+    "title": "Ilmu Pengetahuan Sosial Kelas IX",
+    "path": "smp/ips_9.json"
+  },
+  {
+    "id": "smp-pkn-7",
+    "jenjang": "SMP",
+    "mapel": "Pendidikan Pancasila",
+    "kelas": "7",
+    "title": "Pendidikan Pancasila Kelas VII",
+    "path": "smp/pkn_7.json"
+  },
+  {
+    "id": "smp-pkn-8",
+    "jenjang": "SMP",
+    "mapel": "Pendidikan Pancasila",
+    "kelas": "8",
+    "title": "Pendidikan Pancasila Kelas VIII",
+    "path": "smp/pkn_8.json"
+  },
+  {
+    "id": "smp-pkn-9",
+    "jenjang": "SMP",
+    "mapel": "Pendidikan Pancasila",
+    "kelas": "9",
+    "title": "Pendidikan Pancasila Kelas IX",
+    "path": "smp/pkn_9.json"
+  },
+  {
+    "id": "smp-pjok-7",
+    "jenjang": "SMP",
+    "mapel": "PJOK",
+    "kelas": "7",
+    "title": "PJOK Kelas VII",
+    "path": "smp/pjok_7.json"
+  },
+  {
+    "id": "smp-pjok-8",
+    "jenjang": "SMP",
+    "mapel": "PJOK",
+    "kelas": "8",
+    "title": "PJOK Kelas VIII",
+    "path": "smp/pjok_8.json"
+  },
+  {
+    "id": "smp-pjok-9",
+    "jenjang": "SMP",
+    "mapel": "PJOK",
+    "kelas": "9",
+    "title": "PJOK Kelas IX",
+    "path": "smp/pjok_9.json"
+  },
+  {
+    "id": "smp-prakarya-7",
+    "jenjang": "SMP",
+    "mapel": "Prakarya",
+    "kelas": "7",
+    "title": "Prakarya Kelas VII",
+    "path": "smp/prakarya_7.json"
+  },
+  {
+    "id": "smp-prakarya-8",
+    "jenjang": "SMP",
+    "mapel": "Prakarya",
+    "kelas": "8",
+    "title": "Prakarya Kelas VIII",
+    "path": "smp/prakarya_8.json"
+  },
+  {
+    "id": "smp-prakarya-9",
+    "jenjang": "SMP",
+    "mapel": "Prakarya",
+    "kelas": "9",
+    "title": "Prakarya Kelas IX",
+    "path": "smp/prakarya_9.json"
+  },
+  {
+    "id": "smp-seni-rupa-8",
+    "jenjang": "SMP",
+    "mapel": "Seni Rupa",
+    "kelas": "8",
+    "title": "Seni Rupa Kelas VIII",
+    "path": "smp/seni_rupa_8.json"
+  },
+  {
+    "id": "smp-seni-rupa-9",
+    "jenjang": "SMP",
+    "mapel": "Seni Rupa",
+    "kelas": "9",
+    "title": "Seni Rupa Kelas IX",
+    "path": "smp/seni_rupa_9.json"
+  },
+  {
+    "id": "smp-daerah-7",
+    "jenjang": "SMP",
+    "mapel": "Bahasa Daerah",
+    "kelas": "7",
+    "title": "Bahasa Daerah Kelas VII",
+    "path": "smp/daerah_7.json"
+  },
+  {
+    "id": "smp-daerah-8",
+    "jenjang": "SMP",
+    "mapel": "Bahasa Daerah",
+    "kelas": "8",
+    "title": "Bahasa Daerah Kelas VIII",
+    "path": "smp/daerah_8.json"
+  },
+  {
+    "id": "smp-pai-7",
+    "jenjang": "SMP",
+    "mapel": "Pendidikan Agama Islam",
+    "kelas": "7",
+    "title": "Pendidikan Agama Islam dan Budi Pekerti Kelas VII",
+    "path": "smp/pai_7.json"
+  },
+  {
+    "id": "smp-pai-8",
+    "jenjang": "SMP",
+    "mapel": "Pendidikan Agama Islam",
+    "kelas": "8",
+    "title": "Pendidikan Agama Islam dan Budi Pekerti Kelas VIII",
+    "path": "smp/pai_8.json"
+  },
+  {
+    "id": "smp-pai-9",
+    "jenjang": "SMP",
+    "mapel": "Pendidikan Agama Islam",
+    "kelas": "9",
+    "title": "Pendidikan Agama Islam dan Budi Pekerti Kelas IX",
+    "path": "smp/pai_9.json"
+  },
+  {
+    "id": "smp-seni-musik-7",
+    "jenjang": "SMP",
+    "mapel": "Seni Musik",
+    "kelas": "7",
+    "title": "Seni Musik Kelas VII",
+    "path": "smp/seni_musik_7.json"
+  },
+  {
+    "id": "smp-seni-tari-7",
+    "jenjang": "SMP",
+    "mapel": "Seni Tari",
+    "kelas": "7",
+    "title": "Seni Tari Kelas VII",
+    "path": "smp/seni_tari_7.json"
+  },
+  {
+    "id": "smp-seni-teater-7",
+    "jenjang": "SMP",
+    "mapel": "Seni Teater",
+    "kelas": "7",
+    "title": "Seni Teater Kelas VII",
+    "path": "smp/seni_teater_7.json"
+  }
+]

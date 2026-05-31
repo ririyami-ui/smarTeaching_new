@@ -77,7 +77,7 @@ export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
                 }
             });
 
-            const cleanResult = typeof result === 'string' ? result.replace(/\|\|/g, '') : result as string | Record<string, unknown>;
+            const cleanResult = typeof result === 'string' ? result.replace(/\|\|/g, '') : result;
 
             updateTask(type, {
                 status: 'success',

@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import rehypeRaw from 'rehype-raw';
+
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { saveAs } from 'file-saver';
@@ -524,7 +524,7 @@ const LkpdGeneratorPage: React.FC = () => {
                             <div id="lkpd-preview-content" className="p-8 lg:p-12 overflow-y-auto flex-1 rpp-prose max-w-none custom-scrollbar">
                                 <ReactMarkdown
                                     remarkPlugins={[remarkGfm, remarkMath]}
-                                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                    rehypePlugins={[rehypeKatex]}
                                 >
                                     {lkpdContent}
                                 </ReactMarkdown>

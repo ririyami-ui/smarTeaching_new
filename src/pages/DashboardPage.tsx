@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { PieChart, Clock, BookOpen, Users, Target, ClipboardList, Trophy, ListTodo, AlertCircle, Calendar } from 'lucide-react';
-import { collection, getDocs, query, where, doc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, onSnapshot, limit } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
 import moment from 'moment';
@@ -169,40 +169,80 @@ export default function DashboardPage() {
     };
   }, [user]);
 
+  // Combined data fetcher for dashboard performance
   useEffect(() => {
-    const fetchTopStudents = async () => {
-      if (!user) return;
-      try {
-        const studentsSnapshot = await getDocs(query(collection(db, 'students'), where('userId', '==', user.uid)));
-        const students = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const infractionsSnapshot = await getDocs(query(collection(db, 'infractions'),
-          where('userId', '==', user.uid),
-          where('semester', '==', activeSemester),
-          where('academicYear', '==', academicYear)
-        ));
-        const infractions = infractionsSnapshot.docs.map(doc => doc.data());
+    const fetchDashboardData = async () => {
+      if (!user) {
+        setTeachingSchedules([]);
+        setTodaySchedules([]);
+        setStudentStats({ totalStudents: 0, maleStudents: 0, femaleStudents: 0, studentsByRombel: {} });
+        return;
+      }
 
-        const ranked = students.map(s => {
-          const score = 100 - infractions.filter(inf => inf.studentId === s.id).reduce((acc, curr) => acc + curr.points, 0);
+      try {
+        const uid = user.uid;
+
+        // 1. Fire all independent queries in parallel
+        const [
+          studentsSnap,
+          infractionsSnap,
+          holidaysSnap,
+          schedulesSnap,
+          missedJournalsSnap,
+          programsSnap,
+          classesSnap,
+          attendanceSnap,
+          gradesSnap
+        ] = await Promise.all([
+          getDocs(query(collection(db, 'students'), where('userId', '==', uid))),
+          getDocs(query(collection(db, 'infractions'), where('userId', '==', uid), where('semester', '==', activeSemester), where('academicYear', '==', academicYear), limit(500))),
+          getDocs(query(collection(db, 'holidays'), where('userId', '==', uid))),
+          activeTemplateId ? getDocs(query(collection(db, 'teachingSchedules'), where('userId', '==', uid), where('templateId', '==', activeTemplateId))) : Promise.resolve({ docs: [] }),
+          getDocs(query(collection(db, 'teachingJournals'), where('userId', '==', uid), where('isImplemented', '==', false), where('semester', '==', activeSemester), where('academicYear', '==', academicYear), limit(100))),
+          getDocs(query(collection(db, 'teachingPrograms'), where('userId', '==', uid))),
+          getDocs(query(collection(db, 'classes'), where('userId', '==', uid))),
+          getDocs(query(collection(db, 'attendance'), where('userId', '==', uid), where('semester', '==', activeSemester), where('academicYear', '==', academicYear), limit(500))),
+          getDocs(query(collection(db, 'grades'), where('userId', '==', uid), where('semester', '==', activeSemester), where('academicYear', '==', academicYear), limit(500)))
+        ]);
+
+        // 2. Process results
+        
+        // Students & Stats
+        const students = studentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
+        const infractions = infractionsSnap.docs.map(doc => doc.data());
+        
+        const uniqueStudentsMap = new Map();
+        students.forEach(s => uniqueStudentsMap.set(s.id, s));
+        const uniqueStudents = Array.from(uniqueStudentsMap.values()) as Student[];
+
+        let totalStudents = 0, maleStudents = 0, femaleStudents = 0;
+        const studentsByRombel: Record<string, { total: number; male: number; female: number; students: Student[] }> = {};
+
+        uniqueStudents.forEach(s => {
+          totalStudents++;
+          if (s.gender === 'Laki-laki') maleStudents++;
+          else if (s.gender === 'Perempuan') femaleStudents++;
+
+          if (s.rombel) {
+            if (!studentsByRombel[s.rombel]) studentsByRombel[s.rombel] = { total: 0, male: 0, female: 0, students: [] };
+            studentsByRombel[s.rombel].total++;
+            if (s.gender === 'Laki-laki') studentsByRombel[s.rombel].male++;
+            else if (s.gender === 'Perempuan') studentsByRombel[s.rombel].female++;
+            studentsByRombel[s.rombel].students.push(s);
+          }
+        });
+
+        setStudentStats({ totalStudents, maleStudents, femaleStudents, studentsByRombel });
+
+        // Top Students
+        const ranked = uniqueStudents.map(s => {
+          const score = 100 - infractions.filter(inf => inf.studentId === s.id).reduce((acc, curr) => acc + (curr.points || 0), 0);
           return { ...s, score };
         }).sort((a, b) => b.score - a.score).slice(0, 3);
-
         setTopStudents(ranked);
-      } catch (error) {
-        console.error("Error fetching top students:", error);
-      }
-    };
-    fetchTopStudents();
-  }, [user, activeSemester, academicYear]);
 
-  useEffect(() => {
-    const fetchHolidays = async () => {
-      if (!user) return;
-      try {
-        const q = query(collection(db, 'holidays'), where('userId', '==', user.uid));
-        const snapshot = await getDocs(q);
-        const holidays: (HolidayData & Record<string, unknown>)[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HolidayData & Record<string, unknown>));
-
+        // Holidays
+        const holidays = holidaysSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as HolidayData));
         const today = moment().startOf('day');
         const activeHoliday = holidays.find(h => {
           if (h.startDate && h.endDate) {
@@ -212,281 +252,72 @@ export default function DashboardPage() {
           }
           return h.date ? moment(h.date).isSame(today, 'day') : false;
         });
+        setTodayHoliday(activeHoliday || null);
 
-        if (activeHoliday) {
-          setTodayHoliday(activeHoliday);
-        } else {
-          setTodayHoliday(null);
-        }
-
-      } catch (error) {
-        console.error("Error fetching active holiday:", error);
-      }
-    };
-    fetchHolidays();
-  }, [user]);
-
-  useEffect(() => {
-    const fetchTeachingSchedules = async () => {
-      if (user && activeTemplateId) {
-
-        const q = query(
-          collection(db, 'teachingSchedules'),
-          where('userId', '==', user.uid),
-          where('templateId', '==', activeTemplateId)
-        );
-        const querySnapshot = await getDocs(q);
-        const fetchedSchedules = querySnapshot.docs.map(doc => {
+        // Schedules
+        const fetchedSchedules = (schedulesSnap.docs as any[]).map(doc => {
           const data = doc.data();
-          // Ensure 'class' is always a string (rombel)
-          const className = typeof data.class === 'object' && data.class !== null
-            ? data.class.rombel
-            : data.class;
-
+          const className = typeof data.class === 'object' && data.class !== null ? data.class.rombel : data.class;
           return { id: doc.id, ...data, class: className } as TeachingScheduleData;
         });
         setTeachingSchedules(fetchedSchedules);
 
-        // Filter and sort today's schedules
-        const today = moment();
-        const todayDayName = today.format('dddd'); // e.g., "Monday"
-        const dayMap: Record<string, string> = {
-          'Sunday': 'Minggu',
-          'Monday': 'Senin',
-          'Tuesday': 'Selasa',
-          'Wednesday': 'Rabu',
-          'Thursday': 'Kamis',
-          'Friday': 'Jumat',
-          'Saturday': 'Sabtu',
-        };
-        const currentDayIndonesian = dayMap[todayDayName];
+        const currentDayIndonesian = {
+          'Sunday': 'Minggu', 'Monday': 'Senin', 'Tuesday': 'Selasa', 'Wednesday': 'Rabu',
+          'Thursday': 'Kamis', 'Friday': 'Jumat', 'Saturday': 'Sabtu'
+        }[moment().format('dddd')] || '';
 
-        const filteredTodaySchedules = fetchedSchedules.filter(
-          (schedule: TeachingScheduleData) => schedule.day === currentDayIndonesian
-        ).sort((a: TeachingScheduleData, b: TeachingScheduleData) => {
-          const timeA = moment(a.startTime, 'HH:mm');
-          const timeB = moment(b.startTime, 'HH:mm');
-          return timeA.diff(timeB);
-        });
-
-        setTodaySchedules(filteredTodaySchedules);
-
-        // Fetch "Tidak Terlaksana" journals for Carry-over alerts
-        const missedJournalsQuery = query(
-          collection(db, 'teachingJournals'),
-          where('userId', '==', user.uid),
-          where('isImplemented', '==', false),
-          where('semester', '==', activeSemester),
-          where('academicYear', '==', academicYear)
+        setTodaySchedules(fetchedSchedules
+          .filter(s => s.day === currentDayIndonesian)
+          .sort((a, b) => moment(a.startTime, 'HH:mm').diff(moment(b.startTime, 'HH:mm')))
         );
-        const missedJournalsSnap = await getDocs(missedJournalsQuery);
+
+        // Carry Over Journals
         const missedMap: Record<string, { material: string; date: string }> = {};
         missedJournalsSnap.docs.forEach(doc => {
           const data = doc.data();
           const key = `${data.className}-${data.subjectName}`;
-          // Keep the latest one
           if (!missedMap[key] || moment(data.date).isAfter(missedMap[key].date)) {
-            missedMap[key] = {
-              material: data.material,
-              date: data.date
-            };
+            missedMap[key] = { material: data.material, date: data.date };
           }
         });
         setCarryOverMap(missedMap);
 
-        // Fetch programs and classes for topic resolution
-        const programsQuery = query(collection(db, 'teachingPrograms'), where('userId', '==', user.uid));
-        const classesQuery = query(collection(db, 'classes'), where('userId', '==', user.uid));
-
-        const [programsSnap, classesSnap] = await Promise.all([
-          getDocs(programsQuery),
-          getDocs(classesQuery)
-        ]);
-
         setPrograms(programsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         setClasses(classesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
-
-      } else {
-        // Handle case where user is not authenticated (e.g., set schedules to empty array)
-        setTeachingSchedules([]);
-        setTodaySchedules([]);
-      }
-    };
-
-    // Initial fetch
-    fetchTeachingSchedules();
-  }, [user, activeTemplateId, activeSemester, academicYear]);
-
-  useEffect(() => {
-    const fetchStudentStats = async () => {
-      try {
-        if (!user) { // Check if user is authenticated
-          setStudentStats({
-            totalStudents: 0,
-            maleStudents: 0,
-            femaleStudents: 0,
-            studentsByRombel: {},
-          });
-          return;
-        }
-
-        const userId = user.uid; // Get current user's UID
-        const studentsCollectionRef = collection(db, 'students');
-        const q = query(studentsCollectionRef, where('userId', '==', userId)); // Add user ID filter
-        const querySnapshot = await getDocs(q);
-        const fetchedStudentsRaw = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Get doc.id
-        // De-duplicate fetchedStudents based on a unique ID (assuming 'id' field exists)
-        const uniqueStudentsMap = new Map();
-        fetchedStudentsRaw.forEach(student => {
-          if (student.id) {
-            uniqueStudentsMap.set(student.id, student);
-          } else {
-            // Fallback if no ID, use a combination of fields or log a warning
-            console.warn("Student document missing 'id' field for de-duplication:", student);
-            // For now, if no ID, just add it. This might lead to duplicates if IDs are truly missing.
-            // A better approach would be to use a combination of fields like name + rombel
-            uniqueStudentsMap.set(JSON.stringify(student), student);
-          }
+        // Attendance Chart
+        const attendanceCounts: Record<string, number> = { 'Hadir': 0, 'Sakit': 0, 'Ijin': 0, 'Alpha': 0 };
+        attendanceSnap.docs.forEach(doc => {
+          const status = doc.data().status;
+          if (attendanceCounts[status] !== undefined) attendanceCounts[status]++;
         });
-        const fetchedStudents = Array.from(uniqueStudentsMap.values());
+        setAttendanceChartData(Object.keys(attendanceCounts).map(status => ({ name: status, value: attendanceCounts[status] })));
 
-
-        let totalStudents = 0;
-        let maleStudents = 0;
-        let femaleStudents = 0;
-        const studentsByRombel: Record<string, { total: number; male: number; female: number; students: Student[] }> = {};
-
-        fetchedStudents.forEach((student: Record<string, unknown>) => {
-          const gender = student.gender as string | undefined;
-          const rombel = student.rombel as string | undefined;
-          totalStudents++;
-          if (gender === 'Laki-laki') {
-            maleStudents++;
-          } else if (gender === 'Perempuan') {
-            femaleStudents++;
-          }
-
-          if (rombel) {
-            if (!studentsByRombel[rombel]) {
-              studentsByRombel[rombel] = {
-                total: 0,
-                male: 0,
-                female: 0,
-                students: [],
-              };
-            }
-            studentsByRombel[rombel].total++;
-            if (gender === 'Laki-laki') {
-              studentsByRombel[rombel].male++;
-            } else if (gender === 'Perempuan') {
-              studentsByRombel[rombel].female++;
-            }
-            studentsByRombel[rombel].students.push(student as unknown as Student);
-          }
-        });
-
-        setStudentStats({
-          totalStudents,
-          maleStudents,
-          femaleStudents,
-          studentsByRombel,
-        });
-      } catch (error) {
-        console.error("Error fetching student stats:", error);
-      }
-    };
-
-    fetchStudentStats();
-  }, [user]);
-
-  useEffect(() => {
-    const fetchAttendanceData = async () => {
-      if (!user) return;
-
-      try {
-        const userId = user.uid;
-        const attendanceCollectionRef = collection(db, 'attendance');
-        const q = query(
-          attendanceCollectionRef,
-          where('userId', '==', userId),
-          where('semester', '==', activeSemester),
-          where('academicYear', '==', academicYear)
-        );
-        const querySnapshot = await getDocs(q);
-
-        const attendanceCounts: Record<string, number> = {
-          'Hadir': 0,
-          'Sakit': 0,
-          'Ijin': 0,
-          'Alpha': 0,
-        };
-
-        querySnapshot.docs.forEach(doc => {
-          const status: string = doc.data().status;
-          if (Object.prototype.hasOwnProperty.call(attendanceCounts, status)) {
-            attendanceCounts[status]++;
-          }
-        });
-
-        const chartData = Object.keys(attendanceCounts).map(status => ({
-          name: status,
-          value: attendanceCounts[status],
-        }));
-
-        setAttendanceChartData(chartData);
-      } catch (error) {
-        console.error("Error fetching attendance data for chart:", error);
-      }
-    };
-
-    fetchAttendanceData();
-  }, [user, activeSemester, academicYear]); // Re-run when user changes
-
-  useEffect(() => {
-    const fetchGradeData = async () => {
-      if (!user) return;
-
-      try {
-        const userId = user.uid;
-        const gradesCollectionRef = collection(db, 'grades');
-        const q = query(
-          gradesCollectionRef,
-          where('userId', '==', userId),
-          where('semester', '==', activeSemester),
-          where('academicYear', '==', academicYear)
-        );
-        const querySnapshot = await getDocs(q);
-
+        // Grade Chart
         const gradesByDate: Record<string, { totalScore: number; count: number }> = {};
-
-        querySnapshot.docs.forEach(doc => {
+        gradesSnap.docs.forEach(doc => {
           const grade = doc.data();
           const date = moment(grade.date).format('YYYY-MM-DD');
           const score = parseFloat(grade.score);
-
           if (!isNaN(score)) {
-            if (!gradesByDate[date]) {
-              gradesByDate[date] = { totalScore: 0, count: 0 };
-            }
+            if (!gradesByDate[date]) gradesByDate[date] = { totalScore: 0, count: 0 };
             gradesByDate[date].totalScore += score;
             gradesByDate[date].count++;
           }
         });
-
-        const chartData = Object.keys(gradesByDate).map(date => ({
+        setGradeChartData(Object.keys(gradesByDate).map(date => ({
           name: moment(date).format('DD MMM'),
           'Rata-rata Nilai': parseFloat((gradesByDate[date].totalScore / gradesByDate[date].count).toFixed(2)),
-        })).sort((a: { name: string; 'Rata-rata Nilai': number }, b: { name: string; 'Rata-rata Nilai': number }) => new Date(a.name).getTime() - new Date(b.name).getTime());
+        })).sort((a, b) => moment(a.name, 'DD MMM').diff(moment(b.name, 'DD MMM'))));
 
-        setGradeChartData(chartData);
       } catch (error) {
-        console.error("Error fetching grade data for chart:", error);
+        console.error("Error fetching dashboard data:", error);
       }
     };
 
-    fetchGradeData();
-  }, [user, activeSemester, academicYear]);
+    fetchDashboardData();
+  }, [user, activeSemester, academicYear, activeTemplateId]);
 
   return (
     <div className="space-y-4">

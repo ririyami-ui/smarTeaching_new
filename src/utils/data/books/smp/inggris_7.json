@@ -1,0 +1,11 @@
+{
+  "bookId": "smp-ing-7",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "About Me", "pages": "1-52", "semester": "Ganjil", "sub_topics": ["Galang from Kalimantan", "Personal Identity", "Hobbies", "Physical Traits"] },
+    { "no": 2, "title": "Culinary and Me", "pages": "53-104", "semester": "Ganjil", "sub_topics": ["My Favorite Food", "Cooking and Recipes", "A School Festival"] },
+    { "no": 3, "title": "Home Sweet Home", "pages": "105-152", "semester": "Ganjil", "sub_topics": ["My House", "House Cleaning", "My Room"] },
+    { "no": 4, "title": "My School Activities", "pages": "153-200", "semester": "Genap", "sub_topics": ["My Class Schedule", "Online Learning", "My Study Habits"] },
+    { "no": 5, "title": "This is My School", "pages": "201-250", "semester": "Genap", "sub_topics": ["School Buildings", "Extracurricular Activities", "School Map"] }
+  ]
+}

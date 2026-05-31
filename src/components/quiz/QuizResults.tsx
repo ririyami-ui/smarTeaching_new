@@ -6,7 +6,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import rehypeRaw from 'rehype-raw';
+
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { formatAnswer } from '../../utils/quizExportUtils';
@@ -116,7 +116,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                     <div className="font-normal text-lg text-gray-800 dark:text-white prose dark:prose-invert max-w-none">
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm, remarkMath]}
-                                            rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                            rehypePlugins={[rehypeKatex]}
                                         >
                                             {q.stimulus ? q.stimulus + '\n\n' : ''}
                                         </ReactMarkdown>
@@ -135,7 +135,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
 
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm, remarkMath]}
-                                            rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                            rehypePlugins={[rehypeKatex]}
                                         >
                                             {q.question || 'Petunjuk: Klik "Generate" untuk membuat soal.'}
                                         </ReactMarkdown>
@@ -167,7 +167,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                             <div key={oIdx} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
                                                 <div className={`w-4 h-4 border rounded-full flex items-center justify-center ${q.type === 'pg_complex' ? 'rounded-md' : 'rounded-full'} border-gray-400`}></div>
                                                 <span className="text-gray-600 dark:text-gray-300">
-                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                         {opt}
                                                     </ReactMarkdown>
                                                 </span>
@@ -181,7 +181,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                         <div className="space-y-2">
                                             {q.left_side.map((l, i) => (
                                                 <div key={i} className="p-2 border bg-white dark:bg-gray-800 rounded text-sm">
-                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                         {l}
                                                     </ReactMarkdown>
                                                 </div>
@@ -190,7 +190,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                         <div className="space-y-2">
                                             {q.right_side.map((r, i) => (
                                                 <div key={i} className="p-2 border bg-white dark:bg-gray-800 rounded text-sm">
-                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                         {r}
                                                     </ReactMarkdown>
                                                 </div>
@@ -207,7 +207,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                                     <th className="p-2 border dark:border-gray-600 font-bold">Pernyataan</th>
                                                     {q.columns.map((col, cIdx) => (
                                                         <th key={cIdx} className="p-2 border dark:border-gray-600 text-center font-bold">
-                                                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                                 {col}
                                                             </ReactMarkdown>
                                                         </th>
@@ -218,7 +218,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                                 {q.rows.map((row, rIdx) => (
                                                     <tr key={rIdx} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                                         <td className="p-2 border dark:border-gray-600">
-                                                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                                 {row}
                                                             </ReactMarkdown>
                                                         </td>
@@ -239,7 +239,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                         {q.statements.map((s, i) => (
                                             <div key={i} className="flex justify-between items-center p-2 border-b last:border-0 border-dashed">
                                                 <span className="text-sm">
-                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                         {s.text}
                                                     </ReactMarkdown>
                                                 </span>
@@ -269,7 +269,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                                     <ChevronDown size={12} className="text-gray-400" />
                                                 </div>
                                                 <div className="flex-grow text-sm">
-                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                         {item}
                                                     </ReactMarkdown>
                                                 </div>
@@ -289,7 +289,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                             <div className="flex gap-1">
                                                 <strong>Jawaban:</strong>
                                                 <div className="prose-sm dark:prose-invert">
-                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                         {formatAnswer(q)}
                                                     </ReactMarkdown>
                                                 </div>
@@ -298,7 +298,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                                 <div className="mt-2">
                                                     <strong>Pembahasan:</strong>
                                                     <div className="prose-sm dark:prose-invert">
-                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeRaw, rehypeKatex]}>
+                                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                             {q.explanation}
                                                         </ReactMarkdown>
                                                     </div>

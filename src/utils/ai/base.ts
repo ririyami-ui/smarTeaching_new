@@ -2,6 +2,7 @@ import { GoogleGenerativeAI, GenerativeModel, GenerationConfig } from "@google/g
 import { SMARTTY_BRAIN } from "../prompts/smarttyPrompts";
 import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { decrypt } from "../cryptoUtils";
 
 /**
  * Gets the current Gemini API Key.
@@ -25,9 +26,12 @@ export const getApiKey = async (): Promise<string> => {
         }
     }
 
-    // 2. Fallback to localStorage
+    // 2. Fallback to localStorage (Encrypted)
     const cachedKey = localStorage.getItem('GEMINI_API_KEY');
-    if (cachedKey) return cachedKey;
+    if (cachedKey) {
+        // Try to decrypt if it looks like an encrypted string (btoa format)
+        return decrypt(cachedKey) || cachedKey;
+    }
 
     // 3. Fallback to environment variables
     return (import.meta as { env: Record<string, string | undefined> }).env.VITE_GEMINI_API_KEY || "";

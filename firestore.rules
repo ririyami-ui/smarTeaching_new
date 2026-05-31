@@ -30,6 +30,20 @@ service cloud.firestore {
       return request.resource.data.userId == request.auth.uid;
     }
 
+    // Validate document structure for grades
+    function isValidGrade() {
+      return request.resource.data.keys().hasAll(['userId', 'studentId', 'score', 'date', 'semester', 'academicYear'])
+        && request.resource.data.score is number
+        && request.resource.data.score >= 0
+        && request.resource.data.score <= 100;
+    }
+
+    // Validate document structure for attendance
+    function isValidAttendance() {
+      return request.resource.data.keys().hasAll(['userId', 'studentId', 'status', 'date', 'semester', 'academicYear'])
+        && request.resource.data.status in ['Hadir', 'Sakit', 'Izin', 'Alpa', 'Terlambat'];
+    }
+
     // --- 1. Identity & Communication ---
     match /users/{userId} {
       allow read, write: if isOwner(userId);
@@ -90,7 +104,8 @@ service cloud.firestore {
     }
     match /attendance/{docId} { 
       allow read: if isDocOwner();
-      allow write: if isWritingOwner() && isValidCreate();
+      allow create: if isWritingOwner() && isValidAttendance();
+      allow update: if isWritingOwner();
       allow delete: if isDocOwner(); 
     }
     match /absensi/{docId} { 
@@ -100,7 +115,8 @@ service cloud.firestore {
     }
     match /grades/{docId} { 
       allow read: if isDocOwner();
-      allow write: if isWritingOwner() && isValidCreate();
+      allow create: if isWritingOwner() && isValidGrade();
+      allow update: if isWritingOwner();
       allow delete: if isDocOwner();
     }
     match /studentTasks/{docId} { 
@@ -161,12 +177,9 @@ service cloud.firestore {
       allow delete: if isDocOwner(); 
     }
 
-    // --- 6. Safety Catch-all ---
+    // --- 6. Safety Catch-all (BLOCK unlisted collections) ---
     match /{collection}/{docId} {
-      allow read: if isDocOwner();
-      allow create: if isWritingOwner();
-      allow update, delete: if isAuthenticated() && 
-        resource.data.get('userId', '') == request.auth.uid;
+      allow read, write: if false;
     }
   }
 }

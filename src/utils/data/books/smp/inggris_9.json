@@ -1,0 +1,11 @@
+{
+  "bookId": "smp-ing-9",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Exploring Fauna of Indonesia", "pages": "1-60", "semester": "Ganjil", "sub_topics": ["Bekantan from Kalimantan", "Orangutan", "Describing Animals"] },
+    { "no": 2, "title": "Taking Care of Yourself", "pages": "61-120", "semester": "Ganjil", "sub_topics": ["Healthy Food", "Mental Health", "Study Habits"] },
+    { "no": 3, "title": "Journey to the Fantasy World", "pages": "121-180", "semester": "Ganjil", "sub_topics": ["Fantasy Stories", "Legend of the Dragon", "Mythical Creatures"] },
+    { "no": 4, "title": "Upcycling Used Materials", "pages": "181-230", "semester": "Genap", "sub_topics": ["Recycling Projects", "Paper Making", "DIY Crafts"] },
+    { "no": 5, "title": "Digital Life", "pages": "231-280", "semester": "Genap", "sub_topics": ["Social Media Use", "Digital Citizenship", "Internet Safety"] }
+  ]
+}

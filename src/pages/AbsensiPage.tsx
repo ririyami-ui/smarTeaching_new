@@ -119,10 +119,13 @@ const AbsensiPage: React.FC = () => {
         const rombelName = active.class;
 
         // Fetch the last teaching journal entry
+        const journalClassFilter = active.classId
+          ? where('classId', '==', active.classId)
+          : where('class', '==', rombelName);
         const lastJournalQuery = query(
           collection(db, 'teachingJournals'),
           where('userId', '==', userId),
-          where('classId', '==', active.classId || rombelName),
+          journalClassFilter,
           where('subjectId', '==', active.subjectId || active.subject),
           where('semester', '==', activeSemester),
           where('academicYear', '==', academicYear),
@@ -141,10 +144,13 @@ const AbsensiPage: React.FC = () => {
         }
 
         // Fetch students
+        const studentClassFilter = active.classId
+          ? where('classId', '==', active.classId)
+          : where('rombel', '==', rombelName);
         const studentsByClassIdQuery = query(
           collection(db, 'students'),
           where('userId', '==', userId),
-          where('classId', '==', active.classId || rombelName)
+          studentClassFilter
         );
 
         const fetchedStudentsSnap = await getDocs(studentsByClassIdQuery);
@@ -159,11 +165,14 @@ const AbsensiPage: React.FC = () => {
         setStudents(fetchedStudents);
 
         // Fetch today's existing attendance
+        const attendanceClassFilter = active.classId
+          ? where('classId', '==', active.classId)
+          : where('rombel', '==', rombelName);
         const existingAttendanceQuery = query(
           collection(db, 'attendance'),
           where('userId', '==', userId),
           where('date', '==', attendanceDate),
-          where('classId', '==', active.classId || rombelName),
+          attendanceClassFilter,
           where('semester', '==', activeSemester),
           where('academicYear', '==', academicYear)
         );

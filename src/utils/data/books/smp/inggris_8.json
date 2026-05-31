@@ -1,0 +1,11 @@
+{
+  "bookId": "smp-ing-8",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Celebrating Independence Day", "pages": "1-64", "semester": "Ganjil", "sub_topics": ["The Independence Day Games", "Panjat Pinang", "Personal Experiences"] },
+    { "no": 2, "title": "Kindness and Happiness", "pages": "65-128", "semester": "Ganjil", "sub_topics": ["The Ugly Duckling", "Elephant and Friends", "Giving Help"] },
+    { "no": 3, "title": "Love Our World", "pages": "129-180", "semester": "Ganjil", "sub_topics": ["Look at My Garden", "Plastic Waste", "Environmental Awareness"] },
+    { "no": 4, "title": "No Littering", "pages": "181-220", "semester": "Genap", "sub_topics": ["Save the Planet", "Sorting Waste", "Cleanliness Campaign"] },
+    { "no": 5, "title": "Embrace Yourself", "pages": "221-260", "semester": "Genap", "sub_topics": ["Physical Appearance", "Self Confidence", "Being Unique"] }
+  ]
+}

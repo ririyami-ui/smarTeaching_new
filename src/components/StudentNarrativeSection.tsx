@@ -3,7 +3,7 @@ import { FileText, Zap } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import rehypeRaw from 'rehype-raw';
+
 import rehypeKatex from 'rehype-katex';
 
 interface StudentNarrativeSectionProps {
@@ -62,7 +62,7 @@ const StudentNarrativeSection: React.FC<StudentNarrativeSectionProps> = ({
                     <div id="narrative-preview-content" className="p-6 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100/50 dark:border-blue-800/20 prose dark:prose-invert max-w-none text-sm custom-scrollbar max-h-[300px] overflow-y-auto">
                         <ReactMarkdown
                             remarkPlugins={[remarkGfm, remarkMath]}
-                            rehypePlugins={[rehypeRaw, rehypeKatex]}
+                            rehypePlugins={[rehypeKatex]}
                         >
                             {narrativeNote}
                         </ReactMarkdown>

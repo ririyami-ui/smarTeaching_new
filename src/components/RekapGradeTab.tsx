@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { Award, TrendingUp, FileDown, CheckCircle, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';

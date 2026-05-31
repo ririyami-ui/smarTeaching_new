@@ -7,7 +7,7 @@ import { Loader, FileText, Zap } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import rehypeRaw from 'rehype-raw';
+
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { generateClassAnalysisReport, generateConciseClassAnalysisReport } from '../utils/gemini';
@@ -243,7 +243,7 @@ const AnalisisKelasPage: React.FC = () => {
       const violRombelQuery = query(
         collection(db, 'infractions'),
         where('userId', '==', currentUser.uid),
-        where('classId', '==', classInfo.rombel),
+        where('rombel', '==', classInfo.rombel),
         where('semester', '==', activeSemester),
         where('academicYear', '==', academicYear)
       );
@@ -577,7 +577,7 @@ if (attendance.length > 0) {
                   <div id="ai-analysis-report" className="prose dark:prose-invert max-w-none prose-xs prose-p:leading-relaxed">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm, remarkMath]}
-                      rehypePlugins={[rehypeRaw, rehypeKatex]}
+                      rehypePlugins={[rehypeKatex]}
                     >
                       {report}
                     </ReactMarkdown>

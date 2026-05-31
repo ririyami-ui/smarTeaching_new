@@ -67,6 +67,7 @@ export interface GradeRecord {
   semester: string;
   academicYear: string;
   createdAt: Timestamp;
+  timestamp?: Timestamp;
 }
 
 // 5. Teaching Journal (Jurnal Mengajar)
@@ -103,6 +104,17 @@ export interface Infraction {
   semester: string;
   academicYear: string;
   createdAt: Timestamp;
+}
+
+// 8. Class (Rombel)
+export interface ClassData {
+  id: string;
+  userId: string;
+  code: string;
+  level: string;
+  rombel: string;
+  description?: string;
+  createdAt?: Timestamp;
 }
 
 // 7. Student Appreciation (Pemberian Bintang/Penghargaan)

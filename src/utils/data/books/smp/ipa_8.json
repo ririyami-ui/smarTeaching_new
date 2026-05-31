@@ -1,0 +1,12 @@
+{
+  "bookId": "smp-ipa-8",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Sel", "pages": "1-30", "semester": "Ganjil", "sub_topics": ["Mikroskop", "Sel Hewan dan Sel Tumbuhan", "Spesialisasi Sel"] },
+    { "no": 2, "title": "Struktur dan Fungsi Tubuh Makhluk Hidup", "pages": "31-104", "semester": "Ganjil", "sub_topics": ["Makanan dan Sistem Pencernaan", "Sistem Pernapasan", "Sistem Peredaran Darah", "Sistem Ekskresi"] },
+    { "no": 3, "title": "Usaha, Energi, dan Pesawat Sederhana", "pages": "105-132", "semester": "Ganjil", "sub_topics": ["Usaha dan Daya", "Energi Potensial & Kinetik", "Pesawat Sederhana pada Tubuh & Alat"] },
+    { "no": 4, "title": "Getaran, Gelombang, dan Cahaya", "pages": "133-170", "semester": "Genap", "sub_topics": ["Getaran dan Gelombang", "Bunyi dan Pendengaran", "Cahaya dan Alat Optik"] },
+    { "no": 5, "title": "Unsur, Senyawa, dan Campuran", "pages": "171-200", "semester": "Genap", "sub_topics": ["Atom dan Molekul", "Zat Tunggal (Unsur & Senyawa)", "Campuran dan Pemisahannya"] },
+    { "no": 6, "title": "Struktur Bumi dan Perkembangannya", "pages": "201-230", "semester": "Genap", "sub_topics": ["Lapisan Bumi", "Lempeng Tektonik", "Gunung Berapi dan Gempa"] }
+  ]
+}

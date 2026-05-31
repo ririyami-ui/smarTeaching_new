@@ -306,15 +306,16 @@ const RekapIndividuPage: React.FC = () => {
                     getDocs(appreciationsQuery)
                 ]);
 
-                const filterByPeriod = (docs: { id: string; data: () => Record<string, unknown> }[]) => docs
-                    .map(doc => ({ id: doc.id, ...doc.data() } as any))
+                const filterByPeriod = <T,>(docs: { id: string; data: () => Record<string, unknown> }[]): (T & { id: string; semester: string; academicYear: string; date?: string })[] =>
+                    docs
+                    .map(doc => ({ id: doc.id, ...doc.data() } as T & { id: string; semester: string; academicYear: string; date?: string }))
                     .filter(d => d.semester === activeSemester && d.academicYear === academicYear)
-                    .sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime());
+                    .sort((a, b) => new Date(b.date || '').getTime() - new Date(a.date || '').getTime());
 
-                setGrades(filterByPeriod(gradesSnap.docs as any) as unknown as Grade[]);
-                setAttendance(filterByPeriod(attendanceSnap.docs) as unknown as AttendanceRecord[]);
-                setInfractions(filterByPeriod(infractionsSnap.docs) as unknown as Infraction[]);
-                setAppreciations(filterByPeriod(appreciationsSnap.docs) as unknown as Appreciation[]);
+                setGrades(filterByPeriod(gradesSnap.docs));
+                setAttendance(filterByPeriod(attendanceSnap.docs));
+                setInfractions(filterByPeriod(infractionsSnap.docs));
+                setAppreciations(filterByPeriod(appreciationsSnap.docs));
 
                 let existingNote = '';
                 try {
@@ -733,11 +734,12 @@ const RekapIndividuPage: React.FC = () => {
                                         const uid = user.uid;
                                         const gradesQuery = query(collection(db, 'grades'), where('userId', '==', uid), where('studentId', '==', selectedStudentId));
                                         const gradesSnap = await getDocs(gradesQuery);
-                                        const filterByPeriod = (docs: { id: string; data: () => Record<string, unknown> }[]) => docs
-                                            .map(doc => ({ id: doc.id, ...doc.data() } as any))
+                                        const filterByPeriod = <T,>(docs: { id: string; data: () => Record<string, unknown> }[]): (T & { id: string; semester: string; academicYear: string; date?: string })[] =>
+                                            docs
+                                            .map(doc => ({ id: doc.id, ...doc.data() } as T & { id: string; semester: string; academicYear: string; date?: string }))
                                             .filter(d => d.semester === activeSemester && d.academicYear === academicYear)
-                                            .sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime());
-                                        setGrades(filterByPeriod(gradesSnap.docs as any) as unknown as Grade[]);
+                                            .sort((a, b) => new Date(b.date || '').getTime() - new Date(a.date || '').getTime());
+                                        setGrades(filterByPeriod(gradesSnap.docs));
                                     } catch (err) {
                                         console.error(err);
                                     }

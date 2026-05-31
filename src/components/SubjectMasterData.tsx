@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc } from 'firebase/firestore';
-import { db, auth } from '../firebase'; // Import auth
+import { db, auth } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
+import { z } from 'zod';
 import StyledInput from './StyledInput';
 import StyledButton from './StyledButton';
 import StyledTable from './StyledTable';
@@ -10,6 +11,12 @@ import toast from 'react-hot-toast';
 import Modal from './Modal';
 import bskapData from '../utils/bskap_2025_intel.json';
 import { useSettings } from '../utils/SettingsContext';
+
+const subjectSchema = z.object({
+  code: z.string().min(1, 'Kode mata pelajaran wajib diisi').max(10, 'Kode maksimal 10 karakter'),
+  name: z.string().min(1, 'Nama mata pelajaran wajib diisi').max(100, 'Nama maksimal 100 karakter'),
+  schoolLevel: z.string().optional(),
+});
 
 export default function SubjectMasterData() {
   const { user } = useAuth();
@@ -102,34 +109,36 @@ export default function SubjectMasterData() {
         setEditedSubjectName('');
         setEditedRegion('');
       } else {
-        toast.error('Kode dan Nama mata pelajaran wajib diisi.');
+        const parsedEdit = subjectSchema.safeParse({ code: editedSubjectCode, name: editedSubjectName, schoolLevel: selectedSchoolLevel });
+        toast.error(parsedEdit.success ? 'Kode dan Nama mata pelajaran wajib diisi.' : parsedEdit.error.errors[0].message);
       }
     } else { // Add new subject
-      if (newSubjectCode && newSubjectName) {
-        let finalName = newSubjectName.trim();
-        if (finalName === 'Bahasa Daerah' && selectedRegion) {
-          finalName = `Bahasa Daerah (${selectedRegion})`;
-        }
-
-        const isDuplicate = subjects.some(s => s.name.trim().toLowerCase() === finalName.toLowerCase());
-        if (isDuplicate) {
-          toast.error(`Mata pelajaran "${finalName}" sudah ada.`);
-          return;
-        }
-
-        await addDoc(subjectsCollectionRef, {
-          code: newSubjectCode.trim(),
-          name: finalName,
-          userId: user.uid,
-          schoolLevel: selectedSchoolLevel
-        });
-        toast.success('Mata pelajaran berhasil ditambahkan!');
-        setNewSubjectCode('');
-        setNewSubjectName('');
-        setSelectedRegion('');
-      } else {
-        toast.error('Please enter both subject code and name.');
+      const parsed = subjectSchema.safeParse({ code: newSubjectCode, name: newSubjectName, schoolLevel: selectedSchoolLevel });
+      if (!parsed.success) {
+        toast.error(parsed.error.errors[0].message);
+        return;
       }
+      let finalName = parsed.data.name.trim();
+      if (finalName === 'Bahasa Daerah' && selectedRegion) {
+        finalName = `Bahasa Daerah (${selectedRegion})`;
+      }
+
+      const isDuplicate = subjects.some(s => s.name.trim().toLowerCase() === finalName.toLowerCase());
+      if (isDuplicate) {
+        toast.error(`Mata pelajaran "${finalName}" sudah ada.`);
+        return;
+      }
+
+      await addDoc(subjectsCollectionRef, {
+        code: parsed.data.code.trim(),
+        name: finalName,
+        userId: user.uid,
+        schoolLevel: selectedSchoolLevel
+      });
+      toast.success('Mata pelajaran berhasil ditambahkan!');
+      setNewSubjectCode('');
+      setNewSubjectName('');
+      setSelectedRegion('');
     }
     // Re-fetch subjects after saving
     const q = query(subjectsCollectionRef, where('userId', '==', user.uid));

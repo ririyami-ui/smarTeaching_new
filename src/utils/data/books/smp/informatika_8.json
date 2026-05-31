@@ -1,0 +1,15 @@
+{
+  "bookId": "smp-inf-8",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Informatika dan Profil Pelajar Pancasila", "pages": "1-16", "semester": "Ganjil", "sub_topics": ["Kaitan Informatika dengan Profil Pancasila", "Kolaborasi dalam Tim Komputasi"] },
+    { "no": 2, "title": "Berpikir Komputasional", "pages": "17-42", "semester": "Ganjil", "sub_topics": ["Fungsi", "Himpunan dan Sistem Bilangan", "Algoritma Pemrograman", "Struktur Data (Stack & Queue)"] },
+    { "no": 3, "title": "Teknologi Informasi dan Komunikasi", "pages": "43-62", "semester": "Ganjil", "sub_topics": ["Integrasi Konten Aplikasi Perkantoran (Object Linking & Embedding)", "Fitur Lanjut Aplikasi Perkantoran", "Laboratorium Maya"] },
+    { "no": 4, "title": "Sistem Komputer", "pages": "63-94", "semester": "Ganjil", "sub_topics": ["Komponen Sistem Komputer", "Pengalamatan Memori", "Central Processing Unit (CPU)", "Logic Gate (Gerbang Logika)"] },
+    { "no": 5, "title": "Jaringan Komputer dan Internet", "pages": "95-120", "semester": "Genap", "sub_topics": ["Jaringan Lokal dan Internet", "Komunikasi Data pada Ponsel", "Proteksi Data di Internet"] },
+    { "no": 6, "title": "Analisis Data", "pages": "121-150", "semester": "Genap", "sub_topics": ["Pencarian Data", "Visualisasi Data", "Peringkasan Data", "Pengelolaan Data Manual vs Digital"] },
+    { "no": 7, "title": "Algoritma dan Pemrograman", "pages": "151-180", "semester": "Genap", "sub_topics": ["Bahasa Pemrograman Blok", "Eksplorasi Scratch Lanjutan", "Pemrograman dengan Blockly", "Konsep Dasar Robotika"] },
+    { "no": 8, "title": "Dampak Sosial Informatika", "pages": "181-200", "semester": "Genap", "sub_topics": ["Media Sosial dan Dunia Maya", "Cyberbullying dan Etika", "Pengkajian Dampak Teknologi"] },
+    { "no": 9, "title": "Praktik Lintas Bidang Informatika", "pages": "201-220", "semester": "Genap", "sub_topics": ["Media Interaktif", "Pengembangan Aplikasi Mini", "Laporan Pengembangan Proyek"] }
+  ]
+}

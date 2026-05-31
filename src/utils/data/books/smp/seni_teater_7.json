@@ -1,0 +1,10 @@
+{
+  "bookId": "smp-seni-teater-7",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Dasar Pemeranan", "pages": "1-36", "semester": "Ganjil" },
+    { "no": 2, "title": "Eksplorasi Naskah dan Improvisasi", "pages": "37-72", "semester": "Ganjil" },
+    { "no": 3, "title": "Pementasan Teater Daerah", "pages": "73-108", "semester": "Genap" },
+    { "no": 4, "title": "Pertunjukan Teater Akhir Semester", "pages": "109-140", "semester": "Genap" }
+  ]
+}

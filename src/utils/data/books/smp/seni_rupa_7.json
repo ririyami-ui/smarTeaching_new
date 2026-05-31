@@ -1,0 +1,10 @@
+{
+  "bookId": "smp-seni-7",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Menggambar", "pages": "1-35", "semester": "Ganjil" },
+    { "no": 2, "title": "Mendesain", "pages": "36-70", "semester": "Ganjil" },
+    { "no": 3, "title": "Menyanyi Solo", "pages": "71-105", "semester": "Genap" },
+    { "no": 4, "title": "Bermain Ansambel", "pages": "106-140", "semester": "Genap" }
+  ]
+}

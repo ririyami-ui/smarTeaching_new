@@ -1,0 +1,10 @@
+{
+  "bookId": "smp-daerah-9",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Sastra Klasik", "pages": "1-50", "semester": "Ganjil" },
+    { "no": 2, "title": "Kebudayaan Daerah", "pages": "51-100", "semester": "Ganjil" },
+    { "no": 3, "title": "Karya Modern", "pages": "101-150", "semester": "Genap" },
+    { "no": 4, "title": "Etika dan Tata Krama", "pages": "151-200", "semester": "Genap" }
+  ]
+}

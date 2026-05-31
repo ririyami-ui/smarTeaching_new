@@ -1,0 +1,13 @@
+{
+  "bookId": "smp-ipa-9",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Pertumbuhan dan Perkembangan", "pages": "1-32", "semester": "Ganjil", "sub_topics": ["Pertumbuhan Hewan", "Pertumbuhan Tumbuhan", "Pertumbuhan Manusia"] },
+    { "no": 2, "title": "Sistem Koordinasi, Reproduksi, dan Homeostasis", "pages": "33-90", "semester": "Ganjil", "sub_topics": ["Sistem Saraf", "Alat Indera", "Sistem Hormon", "Sistem Reproduksi", "Homeostasis"] },
+    { "no": 3, "title": "Tekanan", "pages": "91-120", "semester": "Ganjil", "sub_topics": ["Tekanan Zat Padat", "Tekanan Zat Cair (Pascal, Archimedes)", "Tekanan Gas"] },
+    { "no": 4, "title": "Listrik, Magnet, dan Sumber Energi Alternatif", "pages": "121-160", "semester": "Genap", "sub_topics": ["Listrik Statis & Dinamis", "Kemagnetan", "Energi Terbarukan"] },
+    { "no": 5, "title": "Reaksi-Reaksi Kimia dan Dinamikanya", "pages": "161-190", "semester": "Genap", "sub_topics": ["Ciri Reaksi Kimia", "Laju Reaksi", "Asam dan Basa"] },
+    { "no": 6, "title": "Pewarisan Sifat dan Bioteknologi", "pages": "191-220", "semester": "Genap", "sub_topics": ["Materi Genetik", "Hukum Mendel", "Bioteknologi Konvensional & Modern"] },
+    { "no": 7, "title": "Isu-Isu Lingkungan", "pages": "221-250", "semester": "Genap", "sub_topics": ["Pemanasan Global", "Pencemaran Lingkungan", "Solusi Krisis Energi"] }
+  ]
+}

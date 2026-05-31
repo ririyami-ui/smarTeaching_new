@@ -3,11 +3,12 @@ import { db } from '../firebase';
 import { doc, getDoc, collection, addDoc, deleteDoc, serverTimestamp, query, where, getDocs, onSnapshot } from 'firebase/firestore';
 import { generateHandout } from '../utils/gemini';
 import BSKAP_DATA_RAW from '../utils/bskap_2025_intel.json';
+import { findAutoMatchingBook, loadBookContent } from '../utils/bookUtils';
 import { BookOpen, Save, Download, Wand2, History, Trash2, Clock, X, Eye, Sparkles, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import rehypeRaw from 'rehype-raw';
+
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import toast from 'react-hot-toast';
@@ -392,6 +393,13 @@ const HandoutGeneratorPage: React.FC = () => {
             const subjectName = subjectObj?.name || selectedSubject;
             const selectedRPP = savedRPPs.find(rpp => rpp.id === selectedRPPId);
 
+            // 1. Fetch Auto-matching Book Context
+            let bookContext = null;
+            const matchedBook = findAutoMatchingBook(userProfile?.schoolLevel || 'SMP', subjectName, selectedGrade);
+            if (matchedBook) {
+                bookContext = await loadBookContent(matchedBook.path);
+            }
+
             await startGeneration('handout', async (context: { onProgress: (msg: string) => void }) => {
                 const atpMateri = selectedAtpItem?.materi || topic;
                 const atpKd = selectedAtpItem?.tp || selectedAtpItem?.kd;
@@ -405,6 +413,7 @@ const HandoutGeneratorPage: React.FC = () => {
                     rppContent: sourceType === 'rpp' ? selectedRPP?.content : null,
                     teacherName: userProfile?.name || 'Guru Smart Teaching',
                     teacherTitle: userProfile?.title || 'Bapak/Ibu',
+                    bookContext: bookContext, // Kirim konteks buku ke AI
                     onProgress: context.onProgress
                 }, userProfile?.geminiModel || '');
             }, {
@@ -937,7 +946,7 @@ const HandoutGeneratorPage: React.FC = () => {
                             <div className={`prose dark:prose-invert max-w-none bg-white p-8 rounded-lg shadow-sm border border-gray-100 min-h-[500px] ${getRegionFromSubject(selectedSubject) === 'Jawa' ? 'font-carakan' : ''}`} id="handout-preview">
                                 <ReactMarkdown
                                     remarkPlugins={[remarkGfm, remarkMath]}
-                                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                    rehypePlugins={[rehypeKatex]}
                                     components={{
                                         code({ inline, className, children, ...props }: React.ComponentPropsWithoutRef<'code'> & { inline?: boolean }) {
                                             const match = /language-mermaid/.exec(className || '');

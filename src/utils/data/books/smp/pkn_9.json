@@ -1,0 +1,11 @@
+{
+  "bookId": "smp-pkn-9",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Hubungan Pancasila dengan UUD NRI Tahun 1945", "pages": "1-28", "semester": "Ganjil", "sub_topics": ["Pancasila sebagai Sumber Hukum", "Kedudukan Pembukaan UUD 1945"] },
+    { "no": 2, "title": "Sistem Pemerintahan di Indonesia", "pages": "29-56", "semester": "Ganjil", "sub_topics": ["Lembaga Negara", "Otonomi Daerah", "Demokrasi Pancasila"] },
+    { "no": 3, "title": "Kedaulatan Negara dalam Konteks Digital", "pages": "57-84", "semester": "Ganjil", "sub_topics": ["Keamanan Siber", "Kedaulatan Informasi", "Hukum Siber di Indonesia"] },
+    { "no": 4, "title": "Tradisi, Budaya, dan Agama dalam Kebinekaan", "pages": "85-110", "semester": "Genap", "sub_topics": ["Kearifan Lokal", "Moderat Beragama", "Harmoni Kebinekaan"] },
+    { "no": 5, "title": "Menjaga Keutuhan NKRI", "pages": "111-135", "semester": "Genap", "sub_topics": ["Bela Negara", "Ancaman terhadap Negara", "Cinta Tanah Air"] }
+  ]
+}

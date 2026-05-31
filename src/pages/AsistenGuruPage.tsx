@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Bot, Trash2, Volume2, VolumeX, StopCircle } from 'lucide-react';
 import { generateChatResponse } from '../utils/gemini';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import toast from 'react-hot-toast';
 import { useChat } from '../utils/ChatContext';
@@ -51,11 +51,11 @@ const AsistenGuruPage = () => {
 
       // Fetch necessary data for context
       const [attSnap, gradesSnap, journalsSnap, infractionsSnap, starsSnap] = await Promise.all([
-        getDocs(query(collection(db, 'attendance'), where('userId', '==', userId), where('semester', '==', activeSemester), where('academicYear', '==', academicYear))),
-        getDocs(query(collection(db, 'grades'), where('userId', '==', userId), where('semester', '==', activeSemester), where('academicYear', '==', academicYear))),
-        getDocs(query(collection(db, 'teachingJournals'), where('userId', '==', userId), where('semester', '==', activeSemester), where('academicYear', '==', academicYear))),
-        getDocs(query(collection(db, 'infractions'), where('userId', '==', userId), where('semester', '==', activeSemester), where('academicYear', '==', academicYear))),
-        getDocs(query(collection(db, 'studentAppreciations'), where('userId', '==', userId), where('semester', '==', activeSemester), where('academicYear', '==', academicYear))),
+        getDocs(query(collection(db, 'attendance'), where('userId', '==', userId), where('semester', '==', activeSemester), where('academicYear', '==', academicYear), limit(500))),
+        getDocs(query(collection(db, 'grades'), where('userId', '==', userId), where('semester', '==', activeSemester), where('academicYear', '==', academicYear), limit(500))),
+        getDocs(query(collection(db, 'teachingJournals'), where('userId', '==', userId), where('semester', '==', activeSemester), where('academicYear', '==', academicYear), limit(200))),
+        getDocs(query(collection(db, 'infractions'), where('userId', '==', userId), where('semester', '==', activeSemester), where('academicYear', '==', academicYear), limit(200))),
+        getDocs(query(collection(db, 'studentAppreciations'), where('userId', '==', userId), where('semester', '==', activeSemester), where('academicYear', '==', academicYear), limit(200))),
       ]);
 
       const attendance = attSnap.docs.map(doc => doc.data());

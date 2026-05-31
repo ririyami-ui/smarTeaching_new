@@ -16,16 +16,18 @@ export interface ChatContextType {
   clearChat: () => void;
 }
 
-const ChatContext = createContext<ChatContextType | undefined>(undefined);
+const defaultChatContext: ChatContextType = {
+  chatHistory: [],
+  loadingHistory: false,
+  addMessageToHistory: () => {},
+  setChatHistory: () => {},
+  clearChat: () => {},
+};
+
+const ChatContext = createContext<ChatContextType>(defaultChatContext);
 
 export const useChat = (): ChatContextType => {
-  const context = useContext(ChatContext);
-  if (context === undefined) {
-    // In JS we just returned the context, but in TS we throw an error for non-null assertion.
-    // However to prevent breaking changes we can allow it or cast it
-    return context as unknown as ChatContextType;
-  }
-  return context;
+  return useContext(ChatContext);
 };
 
 export const ChatProvider: React.FC<{children: ReactNode}> = ({ children }) => {

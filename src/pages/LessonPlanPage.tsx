@@ -32,12 +32,13 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import rehypeRaw from 'rehype-raw';
+
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { asBlob } from 'html-docx-js-typescript';
 import { saveAs } from 'file-saver';
 import { generateLessonPlan } from '../utils/gemini';
+import { findAutoMatchingBook, loadBookContent } from '../utils/bookUtils';
 import { useAI } from '../utils/AIContext';
 import BSKAP_DATA from '../utils/bskap_2025_intel.json';
 import StyledSelect from '../components/StyledSelect';
@@ -119,7 +120,7 @@ const LessonPlanPage: React.FC = () => {
     const [manualKd, setManualKd] = useState('');
     const [manualMateri, setManualMateri] = useState('');
 
-    const [userProfile, setUserProfile] = useState({ name: '', school: '', nip: '', principalName: '', principalNip: '' });
+    const [userProfile, setUserProfile] = useState({ name: '', school: '', nip: '', principalName: '', principalNip: '', schoolLevel: '' });
     const [signingLocation, setSigningLocation] = useState('Jakarta');
     const [detectingLocation, setDetectingLocation] = useState(false);
     const [studentCharacteristics, setStudentCharacteristics] = useState('');
@@ -188,7 +189,7 @@ const LessonPlanPage: React.FC = () => {
                     getDocs(subjectsQuery)
                 ]);
 
-                const uniqueLevels = [...new Set(classesSnap.docs.map(doc => doc.data().level as string))].sort();
+                const uniqueLevels = [...new Set(classesSnap.docs.map(doc => doc.data().level as string))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
                 const fetchedSubjects = subjectsSnap.docs.map(doc => ({ id: doc.id, name: doc.data().name as string })).sort((a, b) => a.name.localeCompare(b.name));
 
                 setLevels(uniqueLevels);
@@ -204,7 +205,8 @@ const LessonPlanPage: React.FC = () => {
                         school: userDoc.data().school || '',
                         nip: userDoc.data().nip || '',
                         principalName: userDoc.data().principalName || '',
-                        principalNip: userDoc.data().principalNip || ''
+                        principalNip: userDoc.data().principalNip || '',
+                        schoolLevel: userDoc.data().schoolLevel || ''
                     });
                 }
             } catch (error) {
@@ -250,27 +252,26 @@ const LessonPlanPage: React.FC = () => {
 
             if (sourceType === 'promes') {
                 try {
-                    const subjectData = subjects.find(s => s.id === selectedSubject);
-                    const subjectName = subjectData?.name || selectedSubject;
+                    const subjectDataInner = subjects.find(s => s.id === selectedSubject);
+                    const subjectNameInner = subjectDataInner?.name || selectedSubject;
                     const yearId = academicYear.replace('/', '-');
-                    const docId = `${user.uid}_${subjectName}_${selectedGrade}_${yearId}_${activeSemester}`;
-                    const docRef = doc(db, 'teachingPrograms', docId);
-                    const docSnap = await getDoc(docRef);
+                    const programId = `${user.uid}_${subjectNameInner}_${selectedGrade}_${yearId}_${activeSemester}`;
+                    const programDoc = await getDoc(doc(db, 'teachingPrograms', programId));
 
                     let protaData: MaterialItem[] = [];
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
+                    if (programDoc.exists()) {
+                        const data = programDoc.data();
                         const prota = (data.prota || []) as MaterialItem[];
                         const promes = data.promes || {};
                         protaData = prota.map(item => {
                             const distributions: number[] = [];
                             Object.keys(promes).forEach(key => {
                                 if (key.startsWith(`${item.id}_`)) {
-                                    const val = parseInt(promes[key]);
+                                    const val = Number.parseInt(promes[key], 10);
                                     if (val > 0) distributions.push(val);
                                 }
                             });
-                            return { ...item, distribution: distributions } as MaterialItem;
+                            return { ...item, distribution: distributions };
                         });
                     } else {
                         const q = query(
@@ -291,11 +292,11 @@ const LessonPlanPage: React.FC = () => {
                                 const distributions: number[] = [];
                                 Object.keys(promes).forEach(key => {
                                     if (key.startsWith(`${item.id}_`)) {
-                                        const val = parseInt(promes[key]);
+                                        const val = Number.parseInt(promes[key], 10);
                                         if (val > 0) distributions.push(val);
                                     }
                                 });
-                                return { ...item, distribution: distributions } as MaterialItem;
+                                return { ...item, distribution: distributions };
                             });
                         }
                     }
@@ -312,14 +313,14 @@ const LessonPlanPage: React.FC = () => {
                 }
             } else {
                 try {
-                    const subjectData = subjects.find(s => s.id === selectedSubject);
-                    const subjectName = subjectData?.name || selectedSubject;
+                    const subjectDataInner = subjects.find(s => s.id === selectedSubject);
+                    const subjectNameInner = subjectDataInner?.name || selectedSubject;
                     const yearId = academicYear.replace('/', '-');
 
-                    const atpId = `${user.uid}_${subjectName}_${selectedGrade}_${yearId}_${activeSemester}_ATP`;
+                    const atpId = `${user.uid}_${subjectNameInner}_${selectedGrade}_${yearId}_${activeSemester}_ATP`;
                     const atpSnap = await getDoc(doc(db, 'teachingPrograms', atpId));
 
-                    const mainDocId = `${user.uid}_${subjectName}_${selectedGrade}_${yearId}_${activeSemester}`;
+                    const mainDocId = `${user.uid}_${subjectNameInner}_${selectedGrade}_${yearId}_${activeSemester}`;
                     const mainDocSnap = await getDoc(doc(db, 'teachingPrograms', mainDocId));
                     const promes = mainDocSnap.exists() ? mainDocSnap.data().promes || {} : {};
 
@@ -331,11 +332,11 @@ const LessonPlanPage: React.FC = () => {
                             const distributions: number[] = [];
                             Object.keys(promes).forEach(key => {
                                 if (key.startsWith(`${protaId}_`)) {
-                                    const val = parseInt(promes[key]);
+                                    const val = Number.parseInt(promes[key], 10);
                                     if (val > 0) distributions.push(val);
                                 }
                             });
-                            return { ...item, id: protaId, distribution: distributions } as MaterialItem;
+                            return { ...item, id: protaId, distribution: distributions };
                         });
 
                         setAtpMaterials(enhancedAtp);
@@ -406,6 +407,13 @@ const LessonPlanPage: React.FC = () => {
         };
 
         try {
+            // 1. Fetch Auto-matching Book Context
+            let bookContext = null;
+            const matchedBook = findAutoMatchingBook(userProfile?.schoolLevel || 'SMP', subjectName, selectedGrade);
+            if (matchedBook) {
+                bookContext = await loadBookContent(matchedBook.path);
+            }
+
             await startGeneration('lessonPlan', async (context) => {
                 startSimulation();
                 return await generateLessonPlan({
@@ -429,6 +437,7 @@ const LessonPlanPage: React.FC = () => {
                     elemen: selectedMaterial.elemen || '',
                     profilLulusan: selectedMaterial.profilLulusan || '',
                     studentCharacteristics: studentCharacteristics,
+                    bookContext: bookContext, // Pass book context to AI
                     onProgress: context.onProgress
                 });
             }, {
@@ -953,7 +962,7 @@ const LessonPlanPage: React.FC = () => {
                             <div className={`p-8 lg:p-12 overflow-y-auto flex-1 rpp-prose max-w-none print:p-0 print:overflow-visible custom-scrollbar ${getRegionFromSubject(viewingRPP?.subject || selectedMaterial?.subject || '') === 'Jawa' ? 'font-carakan' : ''}`}>
                                 <ReactMarkdown
                                     remarkPlugins={[remarkGfm, remarkMath]}
-                                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                    rehypePlugins={[rehypeKatex]}
                                 >
                                     {generatedRPP || (viewingRPP ? viewingRPP.content : '')}
                                 </ReactMarkdown>

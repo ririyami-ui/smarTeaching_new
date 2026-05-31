@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { collection, getDocs, addDoc, deleteDoc, doc, query, where, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
 
 import StyledInput from './StyledInput';
@@ -11,9 +11,17 @@ import ClassCard from './ClassCard';
 import Modal from './Modal';
 import { Plus, Upload, Download, Trash2, Scale } from 'lucide-react';
 import ClassAgreementModal from './ClassAgreementModal';
+import type { ClassData } from '../types/index';
+
+const classSchema = z.object({
+  code: z.string().min(1, 'Kode kelas wajib diisi').max(20, 'Kode kelas maksimal 20 karakter'),
+  level: z.string().min(1, 'Tingkat wajib diisi'),
+  rombel: z.string().min(1, 'Rombel wajib diisi'),
+  description: z.string().max(200, 'Keterangan maksimal 200 karakter').optional().nullable(),
+});
 
 export default function ClassMasterData() {
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<ClassData[]>([]);
   // State for new class form
   const [newCode, setNewCode] = useState('');
   const [newLevel, setNewLevel] = useState('');
@@ -24,9 +32,9 @@ export default function ClassMasterData() {
   // State for edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAgreementModalOpen, setIsAgreementModalOpen] = useState(false);
-  const [currentClass, setCurrentClass] = useState<any>(null);
-  const [editData, setEditData] = useState<any>({ code: '', level: '', rombel: '', description: '' });
-  const [confirmModal, setConfirmModal] = useState<any>({ isOpen: false, title: '', message: '', onConfirm: null });
+  const [currentClass, setCurrentClass] = useState<ClassData | null>(null);
+  const [editData, setEditData] = useState<Partial<ClassData>>({ code: '', level: '', rombel: '', description: '' });
+  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: (() => void) | null }>({ isOpen: false, title: '', message: '', onConfirm: null });
 
   const classesCollectionRef = collection(db, 'classes');
 
@@ -37,8 +45,8 @@ export default function ClassMasterData() {
         const data = await getDocs(q);
         setClasses(
           data.docs
-            .map((doc) => ({ ...doc.data() as any, id: doc.id }))
-            .sort((a: any, b: any) => a.rombel.localeCompare(b.rombel)) as any
+            .map((doc) => ({ ...doc.data(), id: doc.id } as ClassData))
+            .sort((a: ClassData, b: ClassData) => a.rombel.localeCompare(b.rombel))
         );
       } catch (error: any) {
         console.error("Error getting classes: ", error);
@@ -60,30 +68,28 @@ export default function ClassMasterData() {
   }, [getClasses]);
 
   const addClass = async () => {
-    if (!newCode || !newLevel || !newRombel) {
-      toast.error('Kode Kelas, Tingkat, dan Rombel wajib diisi.');
+    const parsed = classSchema.safeParse({ code: newCode, level: newLevel, rombel: newRombel, description: newDescription });
+    if (!parsed.success) {
+      toast.error(parsed.error.errors[0].message);
       return;
     }
     if (!auth.currentUser) {
       toast.error('Silakan login untuk menambah kelas.');
       return;
     }
+    const { code, level, rombel, description } = parsed.data;
 
     // Check for duplicate class code
-    const q = query(classesCollectionRef, where('userId', '==', auth.currentUser.uid), where('code', '==', newCode));
+    const q = query(classesCollectionRef, where('userId', '==', auth.currentUser.uid), where('code', '==', code));
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
       toast.error('Kode Kelas sudah ada.');
       return;
     }
 
-
-
     const promise = addDoc(classesCollectionRef, {
-      code: newCode,
-      level: newLevel,
-      rombel: newRombel,
-      description: newDescription,
+      code, level, rombel,
+      description: description || '',
       userId: auth.currentUser.uid
     });
 
@@ -136,9 +142,16 @@ export default function ClassMasterData() {
     e.preventDefault();
     if (!currentClass) return;
 
+    const parsed = classSchema.safeParse(editData);
+    if (!parsed.success) {
+      toast.error(parsed.error.errors[0].message);
+      return;
+    }
+    const { code } = parsed.data;
+
     // Check if the new code already exists in another class
-    if (editData.code !== currentClass.code) {
-      const q = query(classesCollectionRef, where('userId', '==', auth.currentUser?.uid || ''), where('code', '==', editData.code));
+    if (code !== currentClass.code) {
+      const q = query(classesCollectionRef, where('userId', '==', auth.currentUser?.uid || ''), where('code', '==', code));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         toast.error('Kode Kelas sudah ada.');
@@ -147,7 +160,7 @@ export default function ClassMasterData() {
     }
 
     const classDocRef = doc(db, 'classes', currentClass.id);
-    const promise = updateDoc(classDocRef, editData);
+    const promise = updateDoc(classDocRef, parsed.data);
 
     toast.promise(promise, {
       loading: 'Memperbarui...',
@@ -175,59 +188,69 @@ export default function ClassMasterData() {
     }
 
     const toastId = toast.loading('Mengimpor data...');
-    const reader = new FileReader();
-    reader.onload = async (e: any) => {
-      try {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json(worksheet) as any[];
+    try {
+      const XLSX = await import('xlsx');
+      const reader = new FileReader();
+      reader.onload = async (e: any) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json<Record<string, string>>(worksheet);
 
-        // Fetch existing class codes to prevent duplicates
-        const existingClassesQuery = query(classesCollectionRef, where('userId', '==', auth.currentUser?.uid || ''));
-        const existingClassesSnapshot = await getDocs(existingClassesQuery);
-        const existingClassCodes = new Set(existingClassesSnapshot.docs.map(doc => (doc.data() as any).code));
+          // Fetch existing class codes to prevent duplicates
+          const existingClassesQuery = query(classesCollectionRef, where('userId', '==', auth.currentUser?.uid || ''));
+          const existingClassesSnapshot = await getDocs(existingClassesQuery);
+          const existingClassCodes = new Set(existingClassesSnapshot.docs.map(doc => (doc.data()).code as string));
 
-        let importedCount = 0;
-        let skippedCount = 0;
+          let importedCount = 0;
+          let skippedCount = 0;
 
-        const promises = json.map((row: any) => {
-          const code = row['Kode Kelas'];
-          if (code && row['Tingkat'] && row['Rombel']) {
+          const promises = json.map((row) => {
+            const parsed = classSchema.safeParse({
+              code: row['Kode Kelas'] || '',
+              level: row['Tingkat'] || '',
+              rombel: row['Rombel'] || '',
+              description: row['Keterangan'] || '',
+            });
+            if (!parsed.success) {
+              skippedCount++;
+              return null;
+            }
+            const { code, level, rombel, description } = parsed.data;
             if (existingClassCodes.has(code)) {
               skippedCount++;
-              return null; // Skip duplicate
+              return null;
             }
             importedCount++;
-            existingClassCodes.add(code); // Add to set to handle duplicates within the file itself
+            existingClassCodes.add(code);
             return addDoc(classesCollectionRef, {
-              code: code,
-              level: row['Tingkat'],
-              rombel: row['Rombel'],
-              description: row['Keterangan'] || '',
+              code, level, rombel,
+              description: description || '',
               userId: auth.currentUser?.uid || ''
             });
+          }).filter(p => p !== null);
+
+          await Promise.all(promises);
+
+          let message = `Impor selesai! ${importedCount} kelas berhasil ditambahkan.`;
+          if (skippedCount > 0) {
+            message += ` ${skippedCount} kelas dilewati karena kode sudah ada.`;
           }
-          return null;
-        }).filter(p => p !== null);
-
-        await Promise.all(promises);
-
-        let message = `Impor selesai! ${importedCount} kelas berhasil ditambahkan.`;
-        if (skippedCount > 0) {
-          message += ` ${skippedCount} kelas dilewati karena kode sudah ada.`;
+          toast.success(message, { id: toastId, duration: 5000 });
+          getClasses();
+          setFile(null);
+        } catch (error) {
+          console.error("Error processing Excel file:", error);
+          toast.error('Gagal memproses file Excel.', { id: toastId });
         }
-        toast.success(message, { id: toastId, duration: 5000 });
-
-        setFile(null);
-        getClasses();
-      } catch (error) {
-        console.error("Error importing classes: ", error);
-        toast.error('Gagal mengimpor data.', { id: toastId });
-      }
-    };
-    reader.readAsArrayBuffer(file);
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error("Error loading library:", error);
+      toast.error('Gagal memuat library Excel.', { id: toastId });
+    }
   };
 
   const downloadTemplate = () => {

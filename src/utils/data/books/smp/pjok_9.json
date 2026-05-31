@@ -1,0 +1,11 @@
+{
+  "bookId": "smp-pjok-9",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Permainan Bola Besar", "pages": "1-40", "semester": "Ganjil" },
+    { "no": 2, "title": "Permainan Bola Kecil", "pages": "41-80", "semester": "Ganjil" },
+    { "no": 3, "title": "Atletik", "pages": "81-110", "semester": "Ganjil" },
+    { "no": 4, "title": "Bela Diri", "pages": "111-140", "semester": "Genap" },
+    { "no": 5, "title": "Kebugaran Jasmani", "pages": "141-170", "semester": "Genap" }
+  ]
+}

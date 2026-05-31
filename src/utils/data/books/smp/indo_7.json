@@ -1,0 +1,12 @@
+{
+  "bookId": "smp-indo-7",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Jelajah Nusantara", "pages": "1-36", "semester": "Ganjil", "sub_topics": ["Teks Deskripsi", "Unsur Kebahasaan Teks Deskripsi", "Menulis Teks Deskripsi"] },
+    { "no": 2, "title": "Berkelana di Dunia Imajinasi", "pages": "37-70", "semester": "Ganjil", "sub_topics": ["Cerita Fantasi", "Puisi Rakyat (Pantun, Gurindam)", "Menulis Cerita Fantasi"] },
+    { "no": 3, "title": "Hal yang Baik bagi Tubuh", "pages": "71-100", "semester": "Ganjil", "sub_topics": ["Teks Prosedur", "Struktur Teks Prosedur", "Menulis Teks Prosedur"] },
+    { "no": 4, "title": "Aksi Nyata Para Pelindung Bumi", "pages": "101-138", "semester": "Genap", "sub_topics": ["Teks Berita", "Unsur-unsur Berita", "Menulis Teks Berita"] },
+    { "no": 5, "title": "Membuka Gerbang Dunia", "pages": "139-170", "semester": "Genap", "sub_topics": ["Buku Fiksi dan Nonfiksi", "Unsur Buku", "Menanggapi Buku"] },
+    { "no": 6, "title": "Sampaikan dengan Surat", "pages": "171-200", "semester": "Genap", "sub_topics": ["Surat Pribadi", "Surat Resmi", "Berkomunikasi lewat Surat Elektronik"] }
+  ]
+}

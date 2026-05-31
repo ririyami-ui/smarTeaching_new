@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { exportToDocx } from '../../utils/teachingPlanUtils';
 import { useSettings } from '../../utils/SettingsContext';
 import { generateATP } from '../../utils/gemini';
+import { findAutoMatchingBook, loadBookContent } from '../../utils/bookUtils';
 
 interface ATPItem {
   id: string | number;
@@ -137,7 +138,15 @@ const ATPView: React.FC<ATPViewProps> = ({ grade, subject, semester, year, userP
         setIsGenerating(true);
         setGenerationProgress({ stage: 'init', message: 'Memulai koneksi ke sistem pakar...', percentage: 5 });
         try {
-            // 1. Fetch Existing RPPs for Context
+            // 1. Fetch Auto-matching Book Context
+            let bookContext = null;
+            const matchedBook = findAutoMatchingBook(userProfile.schoolLevel as string || 'SMP', subject, grade);
+            if (matchedBook) {
+                setGenerationProgress(prev => ({ ...prev, message: `Menemukan buku referensi: ${matchedBook.title}...` }));
+                bookContext = await loadBookContent(matchedBook.path);
+            }
+
+            // 2. Fetch Existing RPPs for Context
             const rppQuery = query(
                 collection(db, 'lessonPlans'),
                 where('userId', '==', user.uid),
@@ -157,7 +166,7 @@ const ATPView: React.FC<ATPViewProps> = ({ grade, subject, semester, year, userP
                 modelName: geminiModel,
                 existingRPPs: existingRPPs,
                 userProfile: userProfile,
-                // Note: onProgress is not supported by backend yet, but passed just in case
+                bookContext: bookContext, // Pass book context to AI
                 onProgress: (msg: string) => setGenerationProgress(prev => ({ ...prev, message: msg }))
             }, geminiModel); // Pass modelName as 2nd arg to match service signature
 

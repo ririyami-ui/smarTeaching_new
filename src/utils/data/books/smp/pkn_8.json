@@ -1,0 +1,12 @@
+{
+  "bookId": "smp-pkn-8",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Kedudukan dan Fungsi Pancasila", "pages": "1-24", "semester": "Ganjil", "sub_topics": ["Pancasila Dasar Negara", "Pancasila Pandangan Hidup", "Pancasila Ideologi Negara"] },
+    { "no": 2, "title": "Bentuk dan Kedaulatan Negara", "pages": "25-50", "semester": "Ganjil", "sub_topics": ["Negara Kesatuan", "Negara Republik", "Kedaulatan Rakyat"] },
+    { "no": 3, "title": "Tata Tertib dan Hukum di Indonesia", "pages": "51-78", "semester": "Ganjil", "sub_topics": ["Peraturan Perundang-undangan", "Kesadaran Hukum", "Budaya Hukum"] },
+    { "no": 4, "title": "Kebangkitan Nasional dan Sumpah Pemuda", "pages": "79-105", "semester": "Genap", "sub_topics": ["Masa Kebangkitan Nasional", "Semangat Sumpah Pemuda", "Kontribusi Pemuda"] },
+    { "no": 5, "title": "Jati Diri Bangsa dalam Kebinekaan", "pages": "106-130", "semester": "Genap", "sub_topics": ["Budaya Nasional", "Pelestarian Budaya", "Kebanggaan Nasional"] },
+    { "no": 6, "title": "Literasi Digital dalam Kebinekaan Bangsa", "pages": "131-155", "semester": "Genap", "sub_topics": ["Etika Berinternet", "Keamanan Digital", "Memproduksi Konten Positif"] }
+  ]
+}

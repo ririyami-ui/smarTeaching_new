@@ -236,6 +236,9 @@ ${(BSKAP_DATA.standards?.profile_lulusan_2025 || []).filter(d => d.id !== 1).map
       1. Jika materi "${data.materi}" cocok dengan salah satu bab di atas, Anda **WAJIB** menyebutkan nama bab tersebut secara spesifik di bagian "Buku Sumber".
       2. Gunakan urutan logika dari buku tersebut untuk menyusun langkah pembelajaran.
 
+      **REFERENSI BUKU TEKS (WAJIB DIGUNAKAN):**
+      ${data.bookContext ? (function() { try { var ctx = data.bookContext; return '\n      Sistem menemukan buku referensi resmi yang cocok untuk materi ini.\n      - **Daftar Bab & Alur Materi**:\n      ' + (ctx.chapters || []).map(function(c) { return '- Bab ' + c.no + ': ' + c.title; }).join('\n      ') + '\n      \n      **INSTRUKSI KHUSUS**: Gunakan alur topik dari buku tersebut sebagai panduan utama dalam menyusun SEKSI II (Langkah Pembelajaran) dan SEKSI V (Materi Ajar Mendetail). Pastikan sub-materi yang dibahas selaras dengan buku teks di atas agar tidak melenceng dari pegangan siswa. JANGAN menuliskan nomor halaman atau "Bab X" di teks narasi.'; } catch(e) { return ''; } })() : 'Gunakan pengetahuan Anda tentang buku teks resmi Kemendikdasmen RI untuk Kelas ' + data.gradeLevel + ' sebagai panduan alur materi.'}
+
       **STRUKTUR RPP YANG HARUS DIHASILKAN (Gunakan Format Markdown Ini):**
 
       # MODUL AJAR DEEP LEARNING (STANDARD 2026)

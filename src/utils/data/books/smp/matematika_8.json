@@ -1,0 +1,12 @@
+{
+  "bookId": "smp-mat-8",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Bilangan Berpangkat", "pages": "1-56", "semester": "Ganjil", "sub_topics": ["Sifat-sifat Eksponen", "Bentuk Akar", "Notasi Ilmiah (Bentuk Baku)"] },
+    { "no": 2, "title": "Teorema Pythagoras", "pages": "57-102", "semester": "Ganjil", "sub_topics": ["Menemukan Konsep Pythagoras", "Tripel Pythagoras", "Segitiga Istimewa", "Penerapan Teorema Pythagoras"] },
+    { "no": 3, "title": "Persamaan Linear Dua Variabel", "pages": "103-148", "semester": "Ganjil", "sub_topics": ["Konsep SPLDV", "Penyelesaian dengan Grafik", "Penyelesaian dengan Substitusi", "Penyelesaian dengan Eliminasi"] },
+    { "no": 4, "title": "Relasi dan Fungsi", "pages": "149-180", "semester": "Genap", "sub_topics": ["Konsep Relasi", "Ciri-ciri Fungsi", "Rumus Fungsi", "Grafik Fungsi"] },
+    { "no": 5, "title": "Persamaan Garis Lurus", "pages": "181-210", "semester": "Genap", "sub_topics": ["Kemiringan Garis (Gradien)", "Persamaan Garis Lurus", "Garis Sejajar dan Tegak Lurus"] },
+    { "no": 6, "title": "Statistika", "pages": "211-240", "semester": "Genap", "sub_topics": ["Pemusatan Data (Mean, Median, Modus)", "Penyebaran Data (Jangkauan, Kuartil)", "Distribusi Data"] }
+  ]
+}

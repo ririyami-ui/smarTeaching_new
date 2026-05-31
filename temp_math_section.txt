@@ -1,0 +1,1000 @@
+﻿IV.1. CAPAIAN PEMBELAJARAN MATEMATIKA
+A. Rasional
+Matematika merupakan ilmu atau pengetahuan tentang belajar
+atau berpikir logis yang mendasari perkembangan teknologi
+modern dan sangat dibutuhkan dalam kehidupan manusia.
+Matematika berkontribusi terhadap pengembangan dan
+pemahaman dalam berbagai disiplin ilmu dan menjadi landasan
+bagi banyak inovasi saat ini maupun memberikan solusi masa
+depan. Matematika dipelajari bukan hanya untuk dipahami,
+tetapi juga berperan sebagai alat untuk membangun
+pemahaman, melatih cara berpikir, dan menyelesaikan masalah
+dalam kehidupan. Belajar matematika dapat meningkatkan
+
+=== HALAMAN 107 ===
+
+kemampuan murid dalam berpikir logis, analitis, sistematis,
+kritis, dan kreatif. Kompetensi tersebut diperlukan agar murid
+memiliki kemampuan memperoleh, mengelola, dan
+memanfaatkan informasi untuk bertahan hidup pada keadaan
+yang selalu berubah, penuh dengan ketidakpastian, dan bersifat
+kompetitif.
+Mata pelajaran Matematika membekali murid dengan
+pengetahuan dan keterampilan yang diperlukan serta kapasitas
+untuk berpikir logis, kritis, dan analitis sehingga mereka belajar
+bernalar secara bertahap untuk memahami konsep, prinsip, dan
+solusi dalam matematika. Proses ini juga membentuk sikap
+positif terhadap matematika dan menumbuhkan nilai-nilai
+seperti kemandirian, ketekunan, ketelitian, rasionalitas, serta
+kreativitas.
+Dengan demikian, mata pelajaran matematika relevan dan
+berkontribusi dalam mewujudkan delapan dimensi profil
+lulusan, di antaranya untuk mengembangkan kompetensi
+penalaran kritis, kreativitas, kolaborasi, kemandirian, dan
+komunikasi murid. Materi pembelajaran pada mata pelajaran
+Matematika di setiap jenjang pendidikan dikemas melalui
+elemen, domain atau bidang kajian Bilangan, Aljabar,
+Pengukuran, Geometri, serta Analisis Data dan Peluang.
+B. Tujuan
+Mata pelajaran Matematika bertujuan untuk membekali murid
+agar dapat:
+1. memahami materi pembelajaran matematika berupa fakta,
+konsep, prinsip, operasi, dan relasi matematis dan
+mengaplikasikannya secara luwes, akurat, efisien, dan tepat
+dalam pemecahan masalah matematis (pemahaman
+matematis dan kecakapan prosedural);
+2. menggunakan penalaran pada pola dan sifat, melakukan
+manipulasi matematis dalam membuat generalisasi,
+menyusun bukti, atau menjelaskan gagasan dan
+pernyataan matematika (penalaran dan pembuktian
+matematis);
+3. memecahkan masalah yang meliputi kemampuan
+
+=== HALAMAN 108 ===
+
+memahami masalah, merancang model matematis,
+menyelesaikan model atau menafsirkan solusi yang
+diperoleh (pemecahan masalah matematis);
+4. mengomunikasikan gagasan dengan simbol, tabel, diagram,
+atau media lain untuk memperjelas keadaan atau masalah,
+serta menyajikan suatu situasi ke dalam simbol atau model
+matematis (komunikasi dan representasi matematis);
+5. mengaitkan materi pembelajaran matematika berupa fakta,
+konsep, prinsip, operasi, dan relasi matematis pada suatu
+bidang kajian, lintas bidang kajian, lintas bidang ilmu, dan
+dengan kehidupan (koneksi matematis); dan
+6. memiliki sikap menghargai kegunaan matematika dalam
+kehidupan, yaitu memiliki rasa ingin tahu, perhatian, dan
+minat dalam mempelajari matematika, serta sikap kreatif,
+sabar, mandiri, tekun, terbuka, tangguh, ulet, dan percaya
+diri dalam pemecahan masalah (disposisi matematis).
+C. Karakteristik
+Mata pelajaran Matematika diorganisasikan dalam lingkup lima
+elemen konten dan lima elemen proses.
+1. Elemen konten dalam mata pelajaran Matematika terkait
+dengan pandangan bahwa matematika sebagai materi
+pembelajaran (subject matter) yang harus dipahami murid.
+Pemahaman matematis terkait erat dengan pembentukan
+alur pemahaman terhadap materi pembelajaran matematika
+berupa fakta, konsep, prinsip, operasi, dan relasi yang
+bersifat formal-universal.
+Elemen dan deskripsi elemen konten mata pelajaran Matematika
+adalah sebagai berikut.
+Elemen Deskripsi
+Bilangan Bidang kajian Bilangan membahas
+tentang angka sebagai simbol
+bilangan, konsep bilangan, operasi
+hitung bilangan, dan relasi antara
+berbagai operasi hitung bilangan
+dalam sub-elemen representasi visual,
+
+=== HALAMAN 109 ===
+
+Elemen Deskripsi
+sifat urutan, dan operasi.
+Aljabar Bidang kajian Aljabar membahas
+tentang aljabar non-formal dalam
+bentuk simbol gambar sampai dengan
+aljabar formal dalam bentuk simbol
+huruf yang mewakili bilangan tertentu
+dalam sub-elemen persamaan dan
+pertidaksamaan, relasi dan pola
+bilangan, serta rasio dan proporsi.
+Pengukuran Bidang kajian Pengukuran membahas
+tentang besaran-besaran pengukuran,
+cara mengukur besaran tertentu, dan
+membuktikan prinsip atau teorema
+terkait besaran tertentu dalam
+sub-elemen pengukuran besaran
+geometris dan non-geometris.
+Geometri Bidang kajian Geometri membahas
+tentang berbagai bentuk bangun datar
+dan bangun ruang serta ciri-cirinya
+dalam sub-elemen geometri datar dan
+geometri ruang.
+Analisis Data Bidang kajian Analisis Data dan
+dan Peluang Peluang membahas tentang pengertian
+data, jenis-jenis data, pengolahan data
+dalam berbagai bentuk representasi,
+dan analisis data kuantitatif terkait
+pemusatan dan penyebaran data serta
+peluang munculnya suatu data atau
+kejadian tertentu dalam sub-elemen
+data dan representasinya, serta
+ketidakpastian dan peluang.
+2. Elemen proses dalam mata pelajaran Matematika, terkait
+dengan pandangan bahwa matematika sebagai alat
+konseptual untuk mengkonstruksi dan merekonstruksi
+materi pembelajaran matematika berupa aktivitas mental
+
+=== HALAMAN 110 ===
+
+yang membentuk alur berpikir dan alur pemahaman yang
+dapat mengembangkan kecakapan matematika berikut.
+Elemen Deskripsi
+Penalaran dan Penalaran terkait dengan proses
+Pembuktian penggunaan pola hubungan dalam
+Matematis menganalisis situasi untuk
+menyusun serta menyelidiki praduga.
+Pembuktian matematis terkait proses
+membuktikan kebenaran suatu
+prinsip, rumus, atau teorema
+tertentu.
+Pemecahan Masalah Pemecahan masalah matematis
+Matematis terkait dengan proses penyelesaian
+masalah matematis atau masalah
+sehari-hari dengan cara menerapkan
+dan mengadaptasi berbagai strategi
+yang efektif. Proses ini juga
+mencakup konstruksi dan
+rekonstruksi pemahaman
+matematika melalui pemecahan
+masalah.
+Komunikasi Komunikasi matematis terkait
+dengan pembentukan alur
+pemahaman materi pembelajaran
+matematika melalui cara
+mengomunikasikan pemikiran
+matematis menggunakan bahasa
+matematis yang tepat. Komunikasi
+matematis juga mencakup proses
+menganalisis dan mengevaluasi
+pemikiran matematis orang lain.
+Representasi Representasi matematis terkait
+Matematis dengan proses membuat dan
+menggunakan simbol, tabel, diagram,
+atau bentuk lain untuk
+mengomunikasikan gagasan dan
+
+=== HALAMAN 111 ===
+
+Elemen Deskripsi
+pemodelan matematika. Proses ini
+juga mencakup fleksibilitas dalam
+mengubah dari satu bentuk
+representasi ke bentuk representasi
+lainnya, dan memilih representasi
+yang paling sesuai untuk
+memecahkan masalah.
+Koneksi Matematis Koneksi matematis terkait dengan
+proses mengaitkan antara materi
+pembelajaran matematika pada
+suatu bidang kajian, lintas bidang
+kajian, lintas bidang ilmu, dan
+dengan kehidupan.
+D. Capaian Pembelajaran
+1. Fase A (Umumnya untuk Kelas I dan II SD/MI/Program
+Paket A)
+Pada akhir Fase A, murid memiliki kemampuan sebagai
+berikut.
+1.1. Bilangan
+Menunjukkan pemahaman dan memiliki intuisi
+bilangan (number sense) pada bilangan cacah
+sampai 100; membaca, menulis, menentukan
+nilai tempat, membandingkan, mengurutkan,
+serta melakukan komposisi (menyusun) dan
+dekomposisi (mengurai) bilangan; melakukan
+operasi penjumlahan dan pengurangan
+menggunakan benda-benda konkret yang
+banyaknya sampai 20; dan menunjukkan
+pemahaman pecahan sebagai bagian dari
+keseluruhan melalui konteks membagi sebuah
+benda atau kumpulan benda sama banyak
+(pecahan yang diperkenalkan adalah setengah
+dan seperempat).
+1.2. Aljabar
+Menunjukan pemahaman makna simbol
+
+=== HALAMAN 112 ===
+
+matematika "=" dalam suatu kalimat matematika
+yang terkait dengan penjumlahan dan
+pengurangan bilangan cacah sampai 20
+menggunakan gambar. Contoh:
+Murid dapat mengenali, meniru, dan
+melanjutkan pola bukan bilangan (misalnya,
+gambar, warna, bunyi/suara).
+1.3. Pengukuran
+Membandingkan panjang dan berat benda
+secara langsung, dan membandingkan durasi
+waktu; mengukur dan mengestimasi panjang
+dan berat benda menggunakan satuan tidak
+baku.
+1.4. Geometri
+Mengenal berbagai bangun datar (segitiga,
+segiempat, segi banyak, lingkaran) dan bangun
+ruang (balok, kubus, kerucut, dan bola);
+melakukan komposisi (penyusunan) dan
+dekomposisi (penguraian) suatu bangun datar
+(segitiga, segiempat, dan segi banyak); dan
+menentukan posisi benda terhadap benda lain
+(kanan, kiri, depan belakang, bawah, atas).
+1.5. Analisis Data dan Peluang
+Mengurutkan, menyortir, mengelompokkan,
+membandingkan, dan menyajikan data dari
+banyak benda dengan menggunakan turus dan
+piktogram paling banyak 4 kategori.
+2. Fase B (Umumnya untuk Kelas III dan IV
+SD/MI/Program Paket A)
+Pada akhir Fase B, murid memiliki kemampuan sebagai
+berikut.
+2.1. Bilangan
+Memiliki pemahaman dan intuisi bilangan
+(number sense) pada bilangan cacah sampai
+
+=== HALAMAN 113 ===
+
+10.000; membaca, menulis, membandingkan,
+dan mengurutkan bilangan; menentukan dan
+menggunakan nilai tempat; melakukan
+komposisi dan dekomposisi bilangan cacah
+sampai 10.000.
+Murid dapat melakukan dan menyelesaikan
+masalah operasi bilangan penjumlahan dan
+pengurangan bilangan cacah sampai 1.000;
+melakukan dan menyelesaikan masalah operasi
+perkalian dan pembagian bilangan cacah sampai
+100 dengan bantuan benda konkret, gambar dan
+simbol; mengenal kelipatan dan faktor.
+Murid dapat melakukan perbandingan dan
+pengurutan pecahan dengan pembilang satu dan
+antar pecahan dengan penyebut yang sama;
+mengenal dan dapat menerapkan pecahan
+senilai, memiliki intuisi pecahan dan desimal,
+serta dapat menentukan pecahan sebagai
+desimal dan persen.
+2.2. Aljabar
+Menemukan nilai yang tidak diketahui dalam
+kalimat matematika yang melibatkan
+penjumlahan dan pengurangan pada bilangan
+cacah sampai 100, dengan menggunakan
+sifat-sifat bilangan dan operasinya.
+Murid dapat mengidentifikasi, meniru, dan
+mengembangkan pola gambar atau objek
+sederhana dan pola bilangan membesar dan
+mengecil yang dapat melibatkan penjumlahan
+dan pengurangan pada bilangan cacah sampai
+100.
+2.3. Pengukuran
+Mengukur panjang dan berat benda
+menggunakan satuan baku; menentukan
+hubungan antar-satuan baku panjang (cm, m)
+dan antar-satuan berat (g, kg); serta mengukur
+dan mengestimasi luas dan volume
+
+=== HALAMAN 114 ===
+
+menggunakan satuan tidak baku dan satuan
+baku berupa bilangan cacah.
+2.4. Geometri
+Mendeskripsikan ciri berbagai bentuk bangun
+datar (segiempat, segitiga, segi banyak);
+menyusun (komposisi) dan mengurai
+(dekomposisi) berbagai bangun datar dengan
+lebih dari satu cara jika memungkinkan.
+2.5. Analisis Data dan Peluang
+Mengurutkan, membandingkan, menyajikan,
+menganalisis dan menginterpretasi data dalam
+bentuk tabel, diagram gambar, piktogram, dan
+diagram batang (skala satu satuan).
+3. Fase C (Umumnya untuk Kelas V dan VI SD/MI/Program
+Paket A)
+Pada akhir Fase C, murid memiliki kemampuan sebagai
+berikut.
+3.1. Bilangan
+Menunjukkan pemahaman dan intuisi bilangan
+(number sense) pada bilangan cacah sampai
+1.000.000; membaca, menulis, menentukan nilai
+tempat, membandingkan, mengurutkan,
+melakukan komposisi dan dekomposisi bilangan;
+menyelesaikan masalah yang berkaitan dengan
+uang; melakukan operasi penjumlahan,
+pengurangan, perkalian, dan pembagian
+bilangan cacah sampai 100.000; serta
+menyelesaikan masalah yang berkaitan dengan
+KPK dan FPB.
+Murid dapat membandingkan dan mengurutkan
+berbagai pecahan termasuk pecahan campuran,
+melakukan operasi penjumlahan dan
+pengurangan pecahan, serta melakukan operasi
+perkalian dan pembagian pecahan dengan
+bilangan asli; mengubah pecahan menjadi
+berbagai bentuk pecahan lain, serta
+
+=== HALAMAN 115 ===
+
+membandingkan dan mengurutkan bilangan
+desimal (satu angka di belakang koma).
+3.2. Aljabar
+Menemukan nilai yang belum diketahui dalam
+kalimat matematika yang melibatkan
+penjumlahan, pengurangan, perkalian, dan
+pembagian pada bilangan cacah sampai 1000
+dengan menggunakan sifat-sifat bilangan dan
+operasinya.
+Murid dapat mengidentifikasi, meniru, dan
+mengembangkan pola bilangan membesar dan
+mengecil yang melibatkan perkalian dan
+pembagian; bernalar secara proporsional untuk
+menyelesaikan masalah sehari-hari dengan rasio
+satuan; menggunakan operasi perkalian dan
+pembagian dalam menyelesaikan masalah
+sehari- hari yang terkait dengan proporsi.
+3.3. Pengukuran
+Menentukan keliling dan luas berbagai bentuk
+bangun datar (segitiga, segiempat, dan segi
+banyak) serta gabungannya; menghitung durasi
+waktu dan mengukur besar sudut pada bangun
+datar atau yang dibentuk dari dua garis
+berpotongan.
+3.4. Geometri
+Mengkonstruksi dan mengurai bangun ruang
+(kubus, balok, dan gabungannya) dan mengenali
+visualisasi spasial (bagian depan, atas, dan
+samping); membandingkan karakteristik antar
+bangun datar dan antar bangun ruang; serta
+menentukan lokasi pada peta yang
+menggunakan sistem berpetak.
+3.5. Analisis Data dan Peluang
+Mengurutkan, membandingkan, menyajikan,
+dan menganalisis data banyak benda dan data
+hasil pengukuran dalam bentuk gambar,
+piktogram, diagram batang, dan tabel frekuensi
+
+=== HALAMAN 116 ===
+
+untuk mendapatkan informasi; menentukan
+kejadian dengan kemungkinan yang lebih besar
+atau lebih kecil dalam suatu percobaan acak.
+4. Fase D (Umumnya untuk Kelas VII, VIII dan IX
+SMP/MTs/Program Paket B)
+Pada akhir Fase D, murid memiliki kemampuan sebagai
+berikut
+4.1. Bilangan
+Membaca, menulis, dan membandingkan
+bilangan bulat, bilangan rasional, bilangan
+desimal, bilangan berpangkat bulat dan akar,
+bilangan dalam notasi ilmiah; menerapkan
+operasi aritmatika pada bilangan real, dan
+memberikan estimasi/perkiraan dalam
+menyelesaikan masalah (termasuk berkaitan
+dengan literasi finansial).
+Murid dapat menggunakan rasio (skala,
+proporsi, dan laju perubahan) dalam
+penyelesaian masalah.
+4.2. Aljabar
+Mengenali, memprediksi dan menggeneralisasi
+pola dalam bentuk susunan benda dan bilangan;
+Menyatakan suatu situasi ke dalam bentuk
+aljabar; menggunakan sifat-sifat operasi
+(komutatif, asosiatif, dan distributif) untuk
+menghasilkan bentuk aljabar yang ekuivalen.
+Murid dapat memahami relasi dan fungsi
+(domain, kodomain, range) serta menyajikannya
+dalam bentuk diagram panah, tabel, himpunan
+pasangan berurutan, dan grafik; membedakan
+beberapa fungsi non linear dari fungsi linear
+secara grafik; menyelesaikan persamaan dan
+pertidaksamaan linear satu variabel;
+menyajikan, menganalisis, dan menyelesaikan
+masalah dengan menggunakan relasi, fungsi dan
+persamaan linear; serta menyelesaikan sistem
+
+=== HALAMAN 117 ===
+
+persaman linear dua variabel melalui beberapa
+cara untuk penyelesaian masalah.
+4.3. Pengukuran
+Menentukan keliling, luas, panjang busur, sudut
+dan luas juring lingkaran, serta menyelesaikan
+masalah yang terkait; menjelaskan cara untuk
+menentukan luas permukaan dan volume
+bangun ruang (prisma, tabung, bola, limas dan
+kerucut) dan menyelesaikan masalah yang
+terkait; dan menjelaskan pengaruh perubahan
+secara proporsional dari bangun datar dan
+bangun ruang terhadap ukuran panjang, besar
+sudut, luas, dan/atau volume.
+4.4. Geometri
+Membuat jaring-jaring bangun ruang (prisma,
+tabung, limas dan kerucut) dan membuat
+bangun ruang dari jaring-jaringnya.
+Murid dapat menggunakan hubungan
+antar-sudut yang terbentuk oleh dua garis yang
+berpotongan, dan oleh dua garis sejajar yang
+dipotong sebuah garis transversal untuk
+menyelesaikan masalah (termasuk menentukan
+jumlah besar sudut dalam sebuah segitiga,
+menentukan besar sudut yang belum diketahui
+pada sebuah segitiga); menjelaskan sifat-sifat
+kekongruenan dan kesebangunan pada segitiga
+dan segiempat, dan menggunakannya untuk
+menyelesaikan masalah; menunjukkan
+kebenaran teorema Pythagoras dan
+menggunakannya dalam menyelesaikan masalah
+(termasuk pengenalan bilangan irasional dan
+jarak antara dua titik pada bidang koordinat
+Kartesius).
+Murid dapat melakukan transformasi tunggal
+(refleksi, translasi, rotasi, dan dilatasi) titik,
+garis, dan bangun datar pada bidang koordinat
+Kartesius dan menggunakannya untuk
+
+=== HALAMAN 118 ===
+
+menyelesaikan masalah.
+4.5. Analisis Data dan Peluang
+Merumuskan pertanyaan, mengumpulkan,
+menyajikan, dan menganalisis data untuk
+menjawab pertanyaan dari situasi atau masalah;
+menggunakan diagram batang dan diagram
+lingkaran untuk menyajikan dan
+menginterpretasi data; mengambil sampel yang
+mewakili suatu populasi untuk mendapatkan
+data yang terkait dengan diri dan lingkungan
+mereka; menentukan dan menafsirkan rerata
+(mean), median, modus, dan jangkauan (range)
+dari data tersebut untuk menyelesaikan masalah
+(termasuk membandingkan suatu data terhadap
+kelompoknya, membandingkan dua kelompok
+data, memprediksi, membuat keputusan);
+menyelidiki kemungkinan adanya perubahan
+pengukuran pusat tersebut akibat perubahan
+data.
+Murid dapat menjelaskan dan menggunakan
+pengertian peluang dan frekuensi relatif untuk
+menentukan frekuensi harapan satu kejadian
+pada suatu percobaan sederhana (semua hasil
+percobaan dapat muncul secara merata).
+5. Fase E (Umumnya untuk Kelas X
+SMA/MA/SMK/MAK/Program Paket C)
+Pada akhir Fase E, murid memiliki kemampuan sebagai
+berikut
+5.1. Bilangan
+Menggeneralisasi sifat-sifat bilangan berpangkat
+(termasuk bilangan pangkat pecahan), dan
+menggunakannya untuk menyelesaikan
+masalah.
+5.2. Aljabar dan Fungsi
+Menyelesaikan masalah yang berkaitan dengan
+sistem pertidaksamaan linear dua variabel;
+
+=== HALAMAN 119 ===
+
+menyelesaikan masalah yang berkaitan dengan
+persamaan dan fungsi kuadrat (termasuk akar
+imajiner), serta persamaan eksponensial
+(berbasis/ bilangan pokok sama) dan fungsi
+eksponensial.
+5.3. Geometri
+Mengaplikasikan perbandingan trigonometri
+(sinus, cosinus, tangen) dari sudut lancip.
+5.4. Analisis Data dan Peluang
+Merepresentasikan dan menginterpretasi data
+dengan cara menentukan jangkauan kuartil dan
+interkuartil; membuat dan menginterpretasi
+diagram box plot dan menggunakannya untuk
+membandingkan himpunan data; menentukan
+dan menggunakan dari box plot, histogram dan
+dot plot sesuai dengan natur (karakteristik) data
+dan kebutuhan; menggunakan diagram pencar
+untuk menyelidiki dan menjelaskan hubungan
+antara dua variabel numerik/kuantitatif
+(termasuk salah satunya variabel bebas berupa
+waktu); serta mengevaluasi laporan statistika di
+media berdasarkan tampilan, statistika dan
+representasi data, termasuk yang disajikan
+dalam bentuk matriks.
+6. Fase F (Umumnya untuk Kelas XI dan XII
+SMA/MA/SMK/MAK/Program Paket C)
+Pada akhir Fase F, murid memiliki kemampuan sebagai
+berikut
+6.1. Bilangan
+Menjelaskan barisan dan deret (aritmetika dan
+geometri), menerapkannya pada beragam
+masalah terutama masalah bunga tunggal dan
+majemuk, memodelkan pinjaman dan investasi
+dengan bunga majemuk dan anuitas, serta
+menyelidiki (secara numerik atau grafis)
+pengaruh masing-masing parameter (suku
+
+=== HALAMAN 120 ===
+
+bunga, periode pembayaran) dalam model
+tersebut.
+6.2. Aljabar dan Fungsi
+Menentukan fungsi invers, komposisi fungsi, dan
+transformasi fungsi untuk memodelkan situasi
+dunia nyata menggunakan fungsi yang sesuai
+(linear, kuadrat, eksponensial).
+6.3. Geometri
+Menerapkan, mengidentifikasi dan menjelaskan
+hubungan antara unsur-unsur lingkaran untuk
+menyelesaikan masalah.
+6.4. Analisis Data dan Peluang
+Melakukan proses penyelidikan statistika untuk
+mengidentifikasi dan menjelaskan asosiasi
+antara dua variabel kategorikal (kualitatif) dan
+antara dua variabel numerikal (kuantitatif);
+memperkirakan model linear terbaik (best fit
+linear) pada data numerikal (kuantitatif);
+membedakan hubungan asosiasi dan
+sebab-akibat; menjelaskan peluang dan
+menentukan frekuensi harapan dari kejadian
+majemuk; menyelidiki konsep dari kejadian
+saling bebas dan saling lepas, dan menentukan
+peluangnya; serta memahami konsep peluang
+bersyarat dan kejadian yang saling bebas
+menggunakan konsep permutasi dan kombinasi.
+IV.2. CAPAIAN PEMBELAJARAN MATEMATIKA TINGKAT LANJUT
+A. Rasional
+Matematika Tingkat Lanjut memuat materi pembelajaran untuk
+memperdalam pemahaman konsep-konsep matematika yang
+telah dipelajari pada mata pelajaran Matematika sebelumnya.
+Mata pelajaran Matematika Tingkat Lanjut merupakan mata
+pelajaran pilihan dalam struktur kurikulum di fase F dalam
+memperkuat abstraksi murid dalam meningkatkan
+pengetahuan, konsep, dan keterampilan matematika yang
+dibutuhkan dalam berbagai bidang disiplin ilmu seperti teknik
+
+=== HALAMAN 121 ===
+
+dan kerekayasaan serta aplikasi lainnya yang lebih luas dalam
+kehidupan sehari-hari.
+Sesuai dengan karakteristiknya, mata pelajaran matematika
+tingkat lanjut tetap relevan dan berkontribusi dalam
+mewujudkan delapan dimensi profil lulusan, di antaranya untuk
+mengembangkan kompetensi penalaran kritis, kreativitas,
+kolaborasi, kemandirian, dan komunikasi murid. Adapun materi
+pembelajaran pada mata pelajaran Matematika Tingkat Lanjut
+dikemas melalui elemen, domain atau bidang kajian Aljabar dan
+Fungsi, Geometri, Analisis Data dan Peluang, serta Kalkulus.
+B. Tujuan
+Mata pelajaran Matematika Tingkat Lanjut bertujuan untuk
+membekali murid agar dapat:
+1. memahami materi pembelajaran Matematika berupa fakta,
+konsep, prinsip, operasi, dan relasi matematis dan
+mengaplikasikannya secara luwes, akurat, efisien, dan tepat
+dalam pemecahan masalah matematis (pemahaman
+matematis dan kecakapan prosedural);
+2. menggunakan penalaran pada pola dan sifat, melakukan
+manipulasi matematis dalam membuat generalisasi,
+menyusun bukti, atau menjelaskan gagasan dan
+pernyataan Matematika (penalaran dan pembuktian
+matematis);
+3. memecahkan masalah yang meliputi kemampuan
+memahami masalah, merancang model matematis,
+menyelesaikan model atau menafsirkan solusi yang
+diperoleh (pemecahan masalah matematis);
+4. mengomunikasikan gagasan dengan simbol, tabel, diagram,
+atau media lain untuk memperjelas keadaan atau masalah,
+serta menyajikan suatu situasi ke dalam simbol atau model
+matematis (komunikasi dan representasi matematis);
+5. mengaitkan materi pembelajaran Matematika berupa fakta,
+konsep, prinsip, operasi, dan relasi matematis pada suatu
+bidang kajian, lintas bidang kajian, lintas bidang ilmu, dan
+dengan kehidupan (koneksi matematis); dan
+6. memiliki sikap menghargai kegunaan Matematika dalam
+
+=== HALAMAN 122 ===
+
+kehidupan, yaitu memiliki rasa ingin tahu, perhatian, dan
+minat dalam mempelajari Matematika, serta sikap kreatif,
+sabar, mandiri, tekun, terbuka, tangguh, ulet, dan percaya
+diri dalam pemecahan masalah (disposisi matematis).
+C. Karakteristik
+Mata pelajaran Matematika Tingkat Lanjut diorganisasikan
+dalam lingkup empat elemen konten dan lima elemen proses.
+1. Elemen konten dalam mata pelajaran Matematika Tingkat
+Lanjut terkait dengan pandangan bahwa matematika
+sebagai materi pembelajaran (subject matter) yang harus
+dipahami murid. Pemahaman matematis terkait erat
+dengan pembentukan alur pemahaman terhadap materi
+pembelajaran Matematika berupa fakta, konsep, prinsip,
+operasi, dan relasi yang bersifat formal-universal.
+Elemen dan deskripsi elemen konten mata pelajaran
+Matematika Tingkat Lanjut adalah sebagai berikut.
+Elemen Deskripsi
+Aljabar dan Bidang kajian Aljabar membahas
+Fungsi tentang bentuk aljabar nonformal
+dalam bentuk simbol gambar
+sampai dengan aljabar formal
+dalam bentuk simbol huruf yang
+mewakili bilangan tertentu dalam
+subelemen persamaan dan
+pertidaksamaan, relasi dan pola
+bilangan, rasio dan proporsi,
+transformasi geometri, dan fungsi
+trigonometri
+Geometri Bidang kajian Geometri
+membahas tentang berbagai
+bentuk bangun datar dan bangun
+ruang, vektor, serta ciri-cirinya
+dalam subelemen geometri datar
+dan geometri ruang.
+Analisis Data Bidang kajian Analisis Data dan
+
+=== HALAMAN 123 ===
+
+Elemen Deskripsi
+dan Peluang Peluang membahas tentang
+pengertian data, jenis-jenis data,
+pengolahan data dalam berbagai
+bentuk representasi, dan analisis
+data kuantitatif terkait pemusatan
+dan penyebaran data serta
+peluang munculnya suatu data
+atau kejadian tertentu dalam
+sub-elemen data dan
+representasinya, serta membahas
+variabel acak diskrit dan fungsi
+peluang.
+Kalkulus Bidang kajian Kalkulus
+membahas tentang laju
+perubahan sesaat dari suatu
+fungsi kontinu, dan mencakup
+topik limit, diferensial, dan
+integral, serta penggunaannya.
+2. Elemen proses dalam mata pelajaran Matematika Tingkat
+Lanjut, terkait dengan pandangan bahwa Matematika
+sebagai alat konseptual untuk mengkonstruksi dan
+merekonstruksi materi pembelajaran Matematika berupa
+aktivitas mental yang membentuk alur berpikir dan alur
+pemahaman yang dapat mengembangkan kecakapan
+Matematika.
+Elemen dan deskripsi elemen mata pelajaran Matematika
+Tingkat Lanjut adalah sebagai berikut.
+Elemen Deskripsi
+Penalaran Penalaran terkait dengan proses
+dan penggunaan pola hubungan dalam
+Pembuktian menganalisis situasi untuk
+Matematis menyusun serta menyelidiki
+praduga. Pembuktian matematis
+terkait proses membuktikan
+
+=== HALAMAN 124 ===
+
+Elemen Deskripsi
+kebenaran suatu prinsip, rumus,
+atau teorema tertentu.
+Pemecahan Pemecahan masalah matematis
+Masalah terkait dengan proses penyelesaian
+Matematis masalah matematis atau masalah
+sehari-hari dengan cara
+menerapkan dan mengadaptasi
+berbagai strategi yang efektif.
+Proses ini juga mencakup
+konstruksi dan rekonstruksi
+pemahaman Matematika melalui
+pemecahan masalah.
+Komunikasi Komunikasi matematis terkait
+dengan pembentukan alur
+pemahaman materi pembelajaran
+Matematika melalui cara
+mengomunikasikan pemikiran
+matematis menggunakan bahasa
+matematis yang tepat. Komunikasi
+matematis juga mencakup proses
+menganalisis dan mengevaluasi
+pemikiran matematis orang lain.
+Representasi Representasi matematis terkait
+Matematis dengan proses membuat dan
+menggunakan simbol, tabel,
+diagram, atau bentuk lain untuk
+mengomunikasikan gagasan dan
+pemodelan Matematika. Proses ini
+juga mencakup fleksibilitas dalam
+mengubah dari satu bentuk
+representasi ke bentuk representasi
+lainnya, dan memilih representasi
+yang paling sesuai untuk
+memecahkan masalah.
+Koneksi Koneksi matematis terkait dengan
+
+=== HALAMAN 125 ===
+
+Elemen Deskripsi
+Matematis proses mengaitkan antara materi
+pembelajaran Matematika pada
+suatu bidang kajian, lintas bidang
+kajian, lintas bidang ilmu, dan
+dengan kehidupan.
+D. Capaian Pembelajaran
+Fase F (Umumnya untuk Kelas XI dan XII SMA/MA/Program
+Paket C)
+Pada akhir Fase F, murid memiliki kemampuan sebagai berikut.
+1. Aljabar dan Fungsi
+Melakukan operasi aritmetika pada polinomial (suku
+banyak), menentukan faktor polinomial, dan menggunakan
+identitas polinomial untuk menyelesaikan masalah;
+melakukan operasi aljabar pada matriks dan
+menerapkannya dalam transformasi geometri; menyatakan
+fungsi trigonometri menggunakan lingkaran satuan,
+memodelkan fenomena periodik dengan fungsi trigonometri,
+dan membuktikan serta menerapkan identitas trigonometri
+dan aturan cosinus dan sinus; mengenal berbagai fungsi
+(termasuk fungsi rasional, fungsi akar, fungsi eksponensial,
+fungsi logaritma, fungsi nilai mutlak, fungsi tangga dan
+fungsi piecewise) dan menggunakannya untuk memodelkan
+berbagai fenomena.
+2. Geometri
+Menyatakan vektor pada bidang datar, dan melakukan
+operasi aljabar pada vektor; melakukan pembuktian
+geometris menggunakan vektor; serta menyatakan
+sifat-sifat geometri dari persamaan lingkaran, elips dan
+persamaan garis singgung.
+3. Analisis Data dan Peluang
+Memahami variabel acak diskrit (distribusi binomial) dan
+fungsi peluang (distribusi normal), dan menggunakannya
+dalam memodelkan data; menginterpretasi parameter
+distribusi data secara statistik, menghitung nilai harapan
+
+=== HALAMAN 126 ===
+
+distribusi binomial dan normal, dan menggunakannya
+dalam penyelesaian masalah.
+4. Kalkulus
+Memahami laju perubahan dan laju perubahan rata-rata,
+serta laju perubahan sesaat sebagai konsep kunci derivatif
+(turunan), baik secara geometris maupun aljabar;
+menentukan turunan dari fungsi polinomial, eksponensial,
+dan trigonometri, dan menerapkan derivatif untuk
+membuat sketsa kurva, menghitung gradien dan
+menentukan persamaan garis singgung, menentukan
+kecepatan sesaat dan menyelesaikan soal optimasi;
+memahami integral, baik sebagai proses yang merupakan
+kebalikan dari derivatif dan juga sebagai cara menghitung
+luas; serta memahami teorema dasar kalkulus sebagai
+penghubung antara derivatif dan integral.
+V.1. CAPAIAN PEMBELAJARAN BAHASA INGGRIS
+A. Rasional
+Bahasa Inggris adalah salah satu bahasa yang digunakan secara
+global dalam banyak aspek, termasuk pendidikan, bisnis,
+perdagangan, ilmu pengetahuan, hukum, pariwisata, hubungan
+internasional, kesehatan, dan teknologi. Kemampuan berbahasa
+Inggris diharapkan mampu memberikan murid kesempatan
+untuk berkomunikasi dengan warga dunia dari latar belakang
+budaya yang berbeda. Dengan menguasai bahasa Inggris, maka
+murid diharapkan memiliki kesempatan yang lebih besar untuk
+berinteraksi dengan berbagai pihak tidak hanya di dalam negeri
+tetapi juga secara global. Dari interaksi tersebut, mereka
+diharapkan memperoleh pengetahuan, mempelajari berbagai
+keterampilan, dan perilaku manusia yang dibutuhkan untuk
+dapat hidup dalam budaya dunia yang beraneka ragam.
+Pembelajaran bahasa Inggris pada jenjang Pendidikan Dasar dan
+Menengah (SD/MI/Program Paket A; SMP/MTs/Program Paket
+B; dan SMA/SMK/MA/MAK/Program Paket C) dalam kurikulum
+memberikan kesempatan bagi murid untuk membuka wawasan
+yang berkaitan dengan diri sendiri, hubungan sosial,
+kebudayaan, dan kesempatan kerja yang tersedia secara global.
+
+=== HALAMAN 127 ===
+
+Pembelajaran bahasa Inggris ditujukan untuk memberikan
+murid kemampuan untuk mendapatkan akses ke dunia luar dan
+memahami cara berpikir yang berbeda. Pemahaman mereka
+terhadap pengetahuan sosial budaya dan interkultural ini dapat
+meningkatkan kemampuan bernalar kritis. Dengan memahami
+budaya lain dan interaksinya dengan budaya Indonesia, mereka
+mengembangkan pemahaman yang mendalam tentang budaya
+Indonesia, memperkuat identitas dirinya, dan dapat menghargai
+perbedaan.
+Pembelajaran bahasa Inggris difokuskan pada penguatan
+kemampuan menggunakan bahasa Inggris dalam enam elemen,
+yakni menyimak, berbicara, membaca, memirsa, menulis, dan
+mempresentasikan secara terintegrasi, dalam berbagai jenis teks
+dengan berbagai jenis moda. Capaian Pembelajaran keenam
+keterampilan bahasa Inggris ini mengacu pada Common
+European Framework of Reference for Languages: Learning,
+Teaching, Assessment (CEFR) dan setara level B1. Level B1
+(CEFR) mencerminkan spesifikasi yang dapat dilihat dari
+kemampuan murid untuk:
+1. mempertahankan interaksi dan menyampaikan sesuatu
+yang diinginkan, dalam berbagai konteks dengan artikulasi
+jelas;
+2. mengungkapkan pokok pikiran utama yang ingin
+disampaikan secara komprehensif; dan
+3. mempertahankan komunikasi walaupun terkadang masih
+terdapat jeda.
+Pembelajaran bahasa Inggris pada jenjang Pendidikan Dasar dan
+Menengah (SD/MI/Program Paket A; SMP/MTs/Program Paket
+B; dan SMA/SMK/MA/MAK/Program Paket C) diharapkan dapat
+membantu murid berhasil mencapai kemampuan berkomunikasi
+dalam bahasa Inggris sebagai bagian dari keterampilan hidup
+(life skills). Pendekatan yang digunakan dalam pembelajaran
+bahasa Inggris adalah pendekatan pembelajaran mendalam yang
+diintegrasikan dengan pengajaran berbasis teks (genre-based
+pedagogy), yakni pembelajaran yang difokuskan pada teks dalam
+berbagai moda, baik lisan, tulisan, visual, audio, maupun
+multimodal, sebagai berikut.
+
+=== HALAMAN 128 ===
+
+1. Building Knowledge of the Field (BKoF): pendidik
+membangun pengetahuan atau latar belakang pengetahuan
+murid terhadap topik yang akan ditulis atau dibicarakan.
+Pada tahapan ini, pendidik atau pendidik juga membangun
+konteks budaya dari teks yang diajarkan.
+2. Modelling of the Text (MoT): pendidik memberikan
+model/contoh teks sebagai acuan bagi murid dalam
+menghasilkan karya, baik secara lisan maupun tulisan.
+3. Joint Construction of the Text (JCoT): pendidik membimbing
+murid dan bersama-sama memproduksi teks dengan
+pendidik sebagai scribe.
+4. Independent Construction of the Text (ICoT): murid
+memproduksi teks lisan dan tulisan secara mandiri.
+Komunikasi akan terjadi pada tingkat teks, bukan hanya
+sekedar kalimat. Artinya, makna tidak hanya disampaikan oleh
+kata-kata, melainkan harus didukung oleh konteks. Oleh karena
+itu, dalam mempelajari dan memproduksi berbagai jenis teks,
+murid perlu memperhatikan fungsi sosial, struktur organisasi,
+dan unsur kebahasaan yang tepat sesuai dengan tujuan dan
+target pembaca/pemirsa. Dalam pelaksanaannya, selain
+pengajaran berbasis berbasis teks, pembelajaran bahasa Inggris
+juga dapat menggunakan berbagai pengajaran bahasa lainnya
+yang relevan.
+Pembelajaran bahasa Inggris di dalam kurikulum diharapkan
+membantu murid untuk menyiapkan diri menjadi pembelajar
+sepanjang hayat, yang memiliki delapan dimensi profil lulusan
+yaitu keimanan dan ketaqwaan terhadap Tuhan YME,
+kewargaan, kreativitas, kemandirian, komunikasi, kesehatan,
+kolaborasi dan penalaran kritis. Profil ini dapat dikembangkan
+dalam pembelajaran bahasa Inggris karena sifat
+pembelajarannya yang dinamis dan fleksibel, yaitu memberikan
+kesempatan bagi murid untuk terlibat dalam pemilihan teks
+atau jenis aktivitas belajarnya sehingga pembelajaran akan lebih
+bermakna. Pembelajaran bahasa Inggris mendukung pencapaian
+dimensi profil lulusan yang diharapkan melalui materi teks
+tertulis, visual, teks lisan, maupun aktivitas-aktivitas yang
+dikembangkan dalam proses belajar mengajar.
+
+=== HALAMAN 129 ===
+
+B. Tujuan
+Mata pelajaran Bahasa Inggris bertujuan untuk memastikan
+murid dapat melakukan hal-hal sebagai berikut:
+1. mengembangkan kompetensi komunikatif dalam bahasa
+Inggris dengan berbagai teks, lisan, tulis, visual, audio
+visual, atau multimodal;
+2. mengembangkan kompetensi interkultural untuk
+memahami dan menghargai perspektif, praktik, dan produk
+budaya Indonesia dan budaya asing;
+3. mengembangkan kepercayaan diri untuk berekspresi
+sebagai individu yang mandiri dan bertanggung jawab; dan
+4. mengembangkan keterampilan bernalar kritis dan kreatif.
+C. Karakteristik
+1. Pembelajaran berfokus pada teks. Jenis teks yang diajarkan
+dalam bahasa Inggris beragam dan disajikan bukan hanya
+dalam bentuk teks tulisan saja, tetapi juga teks lisan
+(monolog atau dialog), teks visual, teks audio, dan teks
+multimodal (teks yang mengandung aspek verbal, visual,
+dan audio), baik otentik maupun teks yang dibuat untuk
+tujuan pembelajaran, baik tunggal maupun teks ganda,
+yang diproduksi dalam kertas maupun digital. Hal ini
+diupayakan untuk memfasilitasi murid untuk terampil
+menggunakan teknologi (literasi teknologi), sehingga dapat
+meningkatkan kemampuan mereka dalam menavigasi
+informasi digital.
+2. Pendidik dapat menentukan jenis teks yang ingin diajarkan
+sesuai dengan kondisi di kelas. Pembelajaran dapat dimulai
+dari jenis teks yang memuat topik yang sudah dikenal oleh
+murid untuk membantu mereka memahami isi teks yang
+dibacanya dan kemudian mampu menghasilkan teks jenis
+tersebut dalam bentuk lisan, tulisan, visual, atau
+multimodal. Selanjutnya, pendidik dapat memperkenalkan
+kepada murid jenis teks yang baru diketahui oleh murid.
+pendidik dapat membantu mereka membangun
+pemahaman terhadap jenis teks baru tersebut, sehingga
+
+=== HALAMAN 130 ===
+
+murid mampu menghasilkan karya dalam jenis teks
+tersebut, baik lisan maupun tulisan. Pemilihan jenis teks
+juga dapat disesuaikan dengan kondisi yang sering dialami
+oleh murid baik di dalam konteks satuan pendidikan,
+maupun konteks di rumah agar murid memiliki
+kesempatan untuk mempelajari dan mempraktikkan teks
+tersebut dalam kehidupan nyata.
+3. Pengajaran bahasa Inggris berbasis teks menghendaki
+murid untuk memahami teks sesuai dengan tingkat
+kesulitannya. Murid perlu memahami jenis teks pendukung
+untuk mempelajari jenis teks yang lebih kompleks
+(prerequisite). Oleh karena itu, pendidik perlu
+memperhatikan gradasi tingkat kesulitan/kompleksitas
+jenis teks.
+4. Proses belajar berfokus pada murid, yakni upaya mengubah
+perilaku murid dari tidak mampu menjadi mampu, dari
+tidak suka menjadi suka, dalam menggunakan bahasa
+Inggris pada enam elemen dalam berbagai jenis teks.
+5. Kata konteks dalam CP, yang berbunyi â€œsesuai konteksâ€
+merujuk pada dua konteks yang memengaruhi teks, yakni
+konteks budaya (terkait dengan genre atau tujuan serta
+elemen atau tahapan dari teks) dan konteks situasi, yang
+terdiri atas 3 aspek dari teks, yakni topik, siapa
+penulis/pembicara kepada siapa, dan moda-tulis, lisan,
+visual, multimoda).
+6. Pembelajaran bahasa Inggris difokuskan pada kemampuan
+berbahasa murid sesuai dengan tahapan perkembangan
+kemampuan berbahasa. Pembelajaran bahasa Inggris
+umum mencakup keterampilan reseptif (menyimak,
+membaca, dan memirsa), serta keterampilan produktif
+(berbicara, menulis, dan mempresentasikan).
+Elemen dan deskripsi elemen mata pelajaran Bahasa Inggris
+adalah sebagai berikut.
+Elemen Deskripsi
+Menyimak-Berbicara Kemampuan menangkap pesan yang
+(Listening-Speaking) disampaikan secara lisan,
+mengapresiasi lawan bicara, dan
+
+=== HALAMAN 131 ===
+
+Elemen Deskripsi
+kemampuan berinteraksi dengan lancar,
+spontan, teratur dan tanpa ada
+hambatan untuk berkomunikasi secara
+lisan, relevan, dan kontekstual.
+Kemampuan menyimak memengaruhi
+komunikasi lisan murid dalam
+menyampaikan gagasan, pikiran, serta
+perasaan secara lisan dalam interaksi
+sosial.
+Membaca-Memirsa Kemampuan menangkap pesan yang
+(Reading-Viewing) disajikan dalam berbagai jenis teks
+tulis, visual atau multimodal,
+menggunakan dan merefleksi berbagai
+jenis teks (genre) sesuai tujuan/fungsi
+sosialnya sehingga murid dapat
+berpartisipasi dalam masyarakat
+melalui pengetahuan dan kemampuan
+membaca/memirsanya
+Menulis-Mempresent Kemampuan mengomunikasikan
+asikan gagasan dan pengalaman,
+(Writing-Presenting) mengekspresikan kreativitas, dan
+mencipta dalam berbagai jenis teks
+(genre) dengan efektif, yakni dengan
+struktur teks dan unsur kebahasaan
+yang tepat, sehingga teks itu dapat
+dipahami dengan mudah serta diminati
+oleh pembaca/pemirsa.
+Elemen menyimak dan berbicara memampukan murid untuk
+berbicara atau merespons secara
+lisan/tulisan/visual/multimodal. Keterkaitan kemampuan
+menyimak dan berbicara mendorong adanya evaluasi terhadap
+informasi yang diterima secara lisan untuk dapat
+mengomunikasikan ide atau pesan secara tepat kepada lawan
+bicaranya.
+Elemen membaca dan memirsa memberikan stimulasi bahasa
+
+=== HALAMAN 132 ===
+
+dalam berbagai jenis teks, lisan, tulisan, visual, atau
+multimodal. Dengan membaca dan memirsa, murid
+mengembangkan kompetensi untuk memahami makna tersurat
+maupun yang tersirat dari berbagai jenis teks dan menggunakan
+teks tersebut untuk melatih keterampilan bernalar kritisnya
+terhadap suatu ide atau pesan. Keterkaitan kemampuan
+membaca dan memirsa mendorong murid mengembangkan
+wawasan dan perspektifnya terhadap teks yang dibaca atau
+dipirsanya untuk berinteraksi dengan masyarakat di sekitarnya
+dan secara global.
+Elemen menulis dan mempresentasikan merupakan

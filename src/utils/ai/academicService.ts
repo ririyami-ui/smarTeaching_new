@@ -131,8 +131,16 @@ export async function generateATP(data: Record<string, unknown>, modelName: stri
 
         const prompt = getATPPrompt(data, BSKAP_DATA, level, subjectData, cpFullVerbatim, getSemesterLabel(typedData.semester), semesterKey, subjectKey, typedData.userProfile, getRegionalLanguage);
 
+        // Append Book Context if available
+        let finalPrompt = prompt;
+        if (data.bookContext) {
+            const book: { chapters?: Array<{ title: string }> } = data.bookContext as any;
+            const chaptersText = book.chapters.map((c: any) => `- ${c.title}`).join('\n');
+            finalPrompt += `\n\n**KONTEKS MATERI BUKU TEKS:**\n${chaptersText}\n\nInstruksi: Gunakan urutan topik dari buku teks di atas sebagai panduan alur (sequence) materi. Pastikan cakupan materi tidak melenceng dari buku siswa, namun fokuskan output pada kompetensi Kurikulum Merdeka (CP/TP). JANGAN sertakan nomor halaman atau nomor bab dalam teks hasil akhir.`;
+        }
+
         const model = await getModel(modelName, true, STRICT_DOCUMENT_BRAIN);
-        const result = await retryWithBackoff(() => model.generateContent(prompt));
+        const result = await retryWithBackoff(() => model.generateContent(finalPrompt));
         return extractJSON(result.response.text());
     } catch (error) {
         throw new Error(handleGeminiError(error, "generateATP"));

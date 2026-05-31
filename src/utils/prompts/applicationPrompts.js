@@ -22,6 +22,11 @@ export const getHandoutPrompt = (data, BSKAP_DATA, getRegionalLanguage) => `
     --- END RPP ---
     - Anda **WAJIB** memastikan isi Handout ini selaras dengan langkah-langkah pembelajaran, media, dan istilah yang digunakan dalam RPP di atas. Handout adalah "pendamping" siswa saat menjalankan aktivitas di RPP tersebut.` : ''}
 
+    **PANDUAN SUB-TOPIKS (WAJIB DIGUNAKAN):** ${data.bookContext ? (() => { try { const ctx = data.bookContext; return `
+    Sistem menemukan referensi buku teks yang cocok dengan materi ini. Berikut adalah sub-topik yang harus dijadikan acuan utama penyusunan Materi Inti (jangan melenceng dari daftar ini):
+    ${(ctx.chapters || []).filter(function(c) { return c.sub_topics; }).map(function(c) { return '- ' + c.title + ': ' + c.sub_topics.join(', '); }).join('\n    ')}
+    Gunakan sub-topik di atas sebagai daftar isi dan panduan alur pembahasan. JANGAN menambahkan topik baru yang tidak ada di daftar ini. JANGAN menuliskan nomor halaman di output.`; } catch(e) { return ''; } })() : ''}
+
     ${getRegionalLanguage(data.subject) ? `
     **INSTRUKSI BAHASA DAERAH (${getRegionalLanguage(data.subject)})**:
     - Karena mata pelajaran ini adalah Bahasa Daerah, Anda **WAJIB** menggunakan **Bahasa ${getRegionalLanguage(data.subject)}** untuk seluruh isi materi edukasi, sapaan, dan tantangan dalam handout ini.
@@ -356,7 +361,7 @@ export const getATPPrompt = (data, BSKAP_DATA, level, subjectData, cpFullVerbati
     ` : ''}
 
     **PEMETAAN PROFIL LULUSAN (8 DIMENSI 2025):**
-    Setiap TP HARUS dipetakan ke salah satu atau beberapa dimensi Profil Lulusan berikut:
+    Setiap TP HARUS dipetakan ke **minimal 2 dan maksimal 3** dimensi Profil Lulusan berikut (pisahkan dengan koma):
     ${BSKAP_DATA.standards.profile_lulusan_2025.map(p => `- ${p.dimensi}${p.dimensi === 'Keimanan & Ketakwaan' ? ' (Gunakan jika TP mengandung unsur: Integritas/kejujuran, etika profesi/digital, rasa syukur atas keteraturan ilmu/alam, atau tanggung jawab moral/sosial).' : ''}`).join('\n    ')}
     
     **KOMPETENSI INDUSTRI (STRATEGIS 2026):**
@@ -369,7 +374,7 @@ export const getATPPrompt = (data, BSKAP_DATA, level, subjectData, cpFullVerbati
     ⚠️ PENTING: Field 'elemen' harus HANYA dari list: ${JSON.stringify(subjectData?.[semesterKey]?.elemen || [])}
     ⚠️ PENTING: Field 'materi' harus MERUJUK materi dalam list: ${JSON.stringify(subjectData?.[semesterKey]?.materi_inti || [])}
     [
-      { "no": 1, "elemen": "ELEMEN_TUNGGAL", "materi": "JUDUL_UNIK_SPESIFIK", "tp": "TP_DESKRIPTIF_PROYEK/TEORI", "jp": ${data.jpPerWeek}, "profilLulusan": "DIMENSI_8" }
+      { "no": 1, "elemen": "ELEMEN_TUNGGAL", "materi": "JUDUL_UNIK_SPESIFIK", "tp": "TP_DESKRIPTIF_PROYEK/TEORI", "jp": ${data.jpPerWeek}, "profilLulusan": "DIMENSI_1, DIMENSI_2" }
     ]
 `;
 

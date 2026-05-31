@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import * as XLSX from 'xlsx';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { useAuth } from '../hooks/useAuth';

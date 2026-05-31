@@ -1,0 +1,10 @@
+{
+  "bookId": "smp-daerah-8",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Unggah-Ungguh Bahasa", "pages": "1-50", "semester": "Ganjil" },
+    { "no": 2, "title": "Aksara Daerah", "pages": "51-100", "semester": "Ganjil" },
+    { "no": 3, "title": "Sastra Daerah", "pages": "101-150", "semester": "Genap" },
+    { "no": 4, "title": "Pertunjukan Budaya", "pages": "151-200", "semester": "Genap" }
+  ]
+}

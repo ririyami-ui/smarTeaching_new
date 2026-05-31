@@ -1,0 +1,10 @@
+{
+  "bookId": "smp-prakarya-7",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Kerajinan Bahan Alam", "pages": "1-45", "semester": "Ganjil" },
+    { "no": 2, "title": "Rekayasa Teknologi Konstruksi", "pages": "46-85", "semester": "Ganjil" },
+    { "no": 3, "title": "Budidaya Tanaman Sayuran", "pages": "86-125", "semester": "Genap" },
+    { "no": 4, "title": "Pengolahan Bahan Pangan Buah", "pages": "126-170", "semester": "Genap" }
+  ]
+}

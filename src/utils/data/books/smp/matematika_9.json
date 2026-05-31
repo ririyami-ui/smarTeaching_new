@@ -1,0 +1,10 @@
+{
+  "bookId": "smp-mat-9",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Persamaan Kuadrat", "pages": "1-64", "semester": "Ganjil", "sub_topics": ["Bentuk Umum Persamaan Kuadrat", "Akar-akar Persamaan Kuadrat", "Menyusun Persamaan Kuadrat"] },
+    { "no": 2, "title": "Fungsi Kuadrat", "pages": "65-128", "semester": "Ganjil", "sub_topics": ["Grafik Fungsi Kuadrat", "Sumbu Simetri dan Titik Puncak", "Aplikasi Fungsi Kuadrat"] },
+    { "no": 3, "title": "Transformasi Geometri", "pages": "129-170", "semester": "Genap", "sub_topics": ["Translasi (Pergeseran)", "Refleksi (Pencerminan)", "Rotasi (Perputaran)", "Dilatasi (Perkalian)"] },
+    { "no": 4, "title": "Peluang dan Statistika", "pages": "171-210", "semester": "Genap", "sub_topics": ["Ruang Sampel dan Kejadian", "Peluang Empirik dan Teoretik", "Statistika Lanjutan"] }
+  ]
+}

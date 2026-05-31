@@ -1,0 +1,12 @@
+{
+  "bookId": "smp-pai-9",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Al-Qur'an dan Hadis tentang Hukum", "pages": "1-40", "semester": "Ganjil" },
+    { "no": 2, "title": "Aqidah Akhlak", "pages": "41-78", "semester": "Ganjil" },
+    { "no": 3, "title": "Zakat dan Sedekah", "pages": "79-114", "semester": "Ganjil" },
+    { "no": 4, "title": "Haji dan Umrah", "pages": "115-150", "semester": "Genap" },
+    { "no": 5, "title": "Sejarah Peradaban Islam Masa Daulah Abbasiyah", "pages": "151-186", "semester": "Genap" },
+    { "no": 6, "title": "Membiasakan Akhlak Mulia", "pages": "187-220", "semester": "Genap" }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "bookId": "smp-prakarya-9",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Kerajinan Berbasis Media Campuran", "pages": "1-45", "semester": "Ganjil" },
+    { "no": 2, "title": "Prinsip Kelistrikan", "pages": "46-90", "semester": "Ganjil" },
+    { "no": 3, "title": "Budidaya Ikan Hias", "pages": "91-130", "semester": "Genap" },
+    { "no": 4, "title": "Pengolahan Hasil Peternakan", "pages": "131-180", "semester": "Genap" }
+  ]
+}

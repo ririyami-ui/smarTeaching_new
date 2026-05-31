@@ -1,0 +1,10 @@
+{
+  "bookId": "smp-seni-musik-7",
+  "publisher": "Kemendikbudristek",
+  "chapters": [
+    { "no": 1, "title": "Bernyanyi Solo dan Vokal Grup", "pages": "1-36", "semester": "Ganjil" },
+    { "no": 2, "title": "Bermain Ansambel Musik", "pages": "37-72", "semester": "Ganjil" },
+    { "no": 3, "title": "Karya Musik Nusantara", "pages": "73-108", "semester": "Genap" },
+    { "no": 4, "title": "Karya Musik Mancanegara", "pages": "109-140", "semester": "Genap" }
+  ]
+}
