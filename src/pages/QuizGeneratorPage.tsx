@@ -65,6 +65,12 @@ interface QuizQuestionType {
   answer?: string;
   correct_answer?: string;
   pairs?: Array<{ left: string; right: string }>;
+  
+  // Visualization support (Phase 1)
+  visualization?: {
+    type: 'chart' | 'diagram' | 'image';
+    config: Record<string, unknown>;
+  };
 }
 
 interface QuizDataType {

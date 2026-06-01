@@ -10,6 +10,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { formatAnswer } from '../../utils/quizExportUtils';
+import VisualizationRenderer from './VisualizationRenderer';
 
 interface QuizQuestion {
   type: string;
@@ -27,6 +28,10 @@ interface QuizQuestion {
   items?: string[];
   explanation?: string;
   competency?: string;
+  visualization?: {
+    type: 'chart' | 'diagram' | 'image';
+    config: Record<string, unknown>;
+  };
 }
 
 interface QuizResultType {
@@ -120,6 +125,10 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                         >
                                             {q.stimulus ? q.stimulus + '\n\n' : ''}
                                         </ReactMarkdown>
+
+                                        {q.visualization && (
+                                            <VisualizationRenderer visualization={q.visualization} />
+                                        )}
 
                                         {q.image_hint && (
                                             <div className="my-4 p-6 border-2 border-dashed border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl flex flex-col items-center justify-center text-center group hover:border-blue-400 transition-colors">
