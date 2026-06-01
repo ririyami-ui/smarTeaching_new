@@ -184,8 +184,16 @@ const PelanggaranPage: React.FC = () => {
         fetchDynamicTypes();
       }
     } catch (error) {
-      console.error("Error fetching types:", error);
-      toast.error("Gagal memuat preferensi");
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('permission') || errorMessage.includes('insufficient')) {
+        // Suppress permission warnings in production
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn("Firebase permissions not configured for infraction/appreciation types. Using defaults.");
+        }
+      } else {
+        console.error("Error fetching types:", error);
+        toast.error("Gagal memuat preferensi");
+      }
     } finally {
       setIsSettingsLoading(false);
     }

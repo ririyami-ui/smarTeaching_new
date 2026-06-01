@@ -122,7 +122,7 @@ export default function ProfileEditor() {
         attitudeWeight,
         scheduleNotificationsEnabled,
       });
-    } catch (e) {
+    } catch {
       setError('Input tidak valid.');
       return;
     }

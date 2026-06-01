@@ -337,7 +337,6 @@ Ket: ${jurnal.challenges || '-'}`;
   doc.line(14, tableEndY, doc.internal.pageSize.width - 14, tableEndY);
 
   // Calculate jurnal statistics for chart
-  const totalJurnal = jurnalData.length;
   const implementedCount = jurnalData.filter(j => j.isImplemented === true).length;
   const notImplementedCount = jurnalData.filter(j => j.isImplemented === false).length;
 

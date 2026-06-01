@@ -39,7 +39,7 @@ export const decrypt = (encoded: string): string => {
             result += String.fromCharCode(charCode);
         }
         return result;
-    } catch (e) {
+    } catch {
         // If decryption fails for any reason, return the original (might be plaintext)
         return encoded;
     }

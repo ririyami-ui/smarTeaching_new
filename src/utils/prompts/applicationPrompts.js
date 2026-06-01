@@ -25,7 +25,7 @@ export const getHandoutPrompt = (data, BSKAP_DATA, getRegionalLanguage) => `
     **PANDUAN SUB-TOPIKS (WAJIB DIGUNAKAN):** ${data.bookContext ? (() => { try { const ctx = data.bookContext; return `
     Sistem menemukan referensi buku teks yang cocok dengan materi ini. Berikut adalah sub-topik yang harus dijadikan acuan utama penyusunan Materi Inti (jangan melenceng dari daftar ini):
     ${(ctx.chapters || []).filter(function(c) { return c.sub_topics; }).map(function(c) { return '- ' + c.title + ': ' + c.sub_topics.join(', '); }).join('\n    ')}
-    Gunakan sub-topik di atas sebagai daftar isi dan panduan alur pembahasan. JANGAN menambahkan topik baru yang tidak ada di daftar ini. JANGAN menuliskan nomor halaman di output.`; } catch(e) { return ''; } })() : ''}
+    Gunakan sub-topik di atas sebagai daftar isi dan panduan alur pembahasan. JANGAN menambahkan topik baru yang tidak ada di daftar ini. JANGAN menuliskan nomor halaman di output.`; } catch { return ''; } })() : ''}
 
     ${getRegionalLanguage(data.subject) ? `
     **INSTRUKSI BAHASA DAERAH (${getRegionalLanguage(data.subject)})**:

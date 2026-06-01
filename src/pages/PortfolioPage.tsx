@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
     Book, Sparkles, Send, Download, Save, RefreshCw, ChevronRight, FileText,
     PieChart, BarChart, ShieldCheck, Zap, Bot, Loader, Trash2, AlertTriangle
@@ -105,7 +105,8 @@ export default function PortfolioPage() {
                 } else {
                     setChaptersContent({});
                 }
-            } catch {
+            } catch (error) {
+                console.error("Error loading portfolio:", error);
                 toast.error("Gagal memuat data portofolio.");
             } finally {
                 setIsLoading(false);
@@ -781,7 +782,7 @@ export default function PortfolioPage() {
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/20">TA {academicYear} • SMTR {activeSemester?.toUpperCase()}</span>
+                            <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/20">TA {academicYear} â€¢ SMTR {activeSemester?.toUpperCase()}</span>
                             <span className="px-3 py-1 bg-green-500/20 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-wider border border-green-500/30 text-green-200">AI-POWERED AUDIT</span>
                         </div>
                     </div>
@@ -907,7 +908,7 @@ export default function PortfolioPage() {
                                     <h2 className="text-xl font-black text-gray-800 dark:text-white uppercase tracking-tight">
                                         {CHAPTERS.find(c => c.id === activeChapter)?.title}
                                     </h2>
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Draf Editor v1.0 • Smartty Generated</p>
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Draf Editor v1.0 â€¢ Smartty Generated</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
@@ -1097,6 +1098,7 @@ export default function PortfolioPage() {
         </div>
     );
 }
+
 
 
 

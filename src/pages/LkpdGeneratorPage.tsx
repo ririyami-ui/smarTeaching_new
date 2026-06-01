@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import ProgressBar from '../components/ProgressBar';
+import DOMPurify from 'dompurify';
 import { useGeneratorHistory, useProgressSimulation } from '../hooks/useGeneratorHistory';
 import { useAuth } from '../hooks/useAuth';
 
@@ -229,7 +230,7 @@ const LkpdGeneratorPage: React.FC = () => {
             return;
         }
 
-        const contentHtml = content.innerHTML;
+        const contentHtml = DOMPurify.sanitize(content.innerHTML);
         const dateStr = formatDate(new Date());
 
         const htmlString = `
@@ -575,5 +576,8 @@ const LkpdGeneratorPage: React.FC = () => {
 };
 
 export default LkpdGeneratorPage;
+
+
+
 
 

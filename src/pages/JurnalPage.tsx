@@ -87,8 +87,8 @@ export default function JurnalPage() {
   const [carryOverSuggestion, setCarryOverSuggestion] = useState<JournalEntry | null>(null);
   const [similarJournalSuggestion, setSimilarJournalSuggestion] = useState<JournalEntry | null>(null);
   const [firestoreHolidays, setFirestoreHolidays] = useState<Holiday[]>([]);
-  const [pekanEfektifData, setPekanEfektifData] = useState<Record<string, unknown>>({});
   const [isDateEffectiveStatus, setIsDateEffectiveStatus] = useState(true);
+  const [pekanEfektifData, setPekanEfektifData] = useState<Record<string, unknown>>({});
   const { activeSemester, academicYear, geminiModel } = useSettings();
 
   const isJavanese = useMemo(() => {

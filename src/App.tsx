@@ -1,12 +1,11 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 
 declare global {
   interface Window {
     deferredPrompt?: BeforeInstallPromptEvent | null;
   }
 }
-import { Toaster } from 'react-hot-toast';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/DashboardLayout';
 import ErrorBoundary, { withErrorBoundary } from './components/ErrorBoundary';
@@ -64,7 +63,7 @@ function AppContent() {
 
   useEffect(() => {
     const checkPwaInstalled = () => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      const isStandalone = globalThis.matchMedia('(display-mode: standalone)').matches;
       setIsPwaInstalled(isStandalone);
     };
     checkPwaInstalled();
@@ -86,23 +85,23 @@ function AppContent() {
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e as BeforeInstallPromptEvent);
-      window.deferredPrompt = e as BeforeInstallPromptEvent;
+      const event = e as BeforeInstallPromptEvent;
+      setInstallPrompt(event);
+      (globalThis as typeof globalThis & { deferredPrompt?: BeforeInstallPromptEvent | null }).deferredPrompt = event;
       const isDismissed = sessionStorage.getItem('pwa_dismissed') === 'true';
       if (!isDismissed) {
         setShowInstallCard(true);
       }
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
+    globalThis.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
+      globalThis.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
 
   const handleInstall = () => {
-    const promptEvent = installPrompt || window.deferredPrompt;
+    const promptEvent = installPrompt || (globalThis as typeof globalThis & { deferredPrompt?: BeforeInstallPromptEvent | null }).deferredPrompt;
     if (!promptEvent) {
       toast.error('Gagal memulai instalasi. Silakan cari menu "Install App" di browser Anda.');
       return;
@@ -115,7 +114,7 @@ function AppContent() {
       }
       setShowInstallCard(false);
       setInstallPrompt(null);
-      window.deferredPrompt = null;
+      (globalThis as typeof globalThis & { deferredPrompt?: BeforeInstallPromptEvent | null }).deferredPrompt = null;
     });
   };
 
@@ -126,7 +125,7 @@ function AppContent() {
 
   if (isWelcomeVisible || (loading && !user && !authTimedOut)) {
     return (
-      <div className={!isWelcomeVisible ? 'animate-welcome-fade-out' : ''}>
+      <div className={isWelcomeVisible ? '' : 'animate-welcome-fade-out'}>
         <WelcomeScreen />
       </div>
     );

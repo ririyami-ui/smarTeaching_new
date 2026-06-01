@@ -45,6 +45,7 @@ import StyledSelect from '../components/StyledSelect';
 import StyledButton from '../components/StyledButton';
 import toast from 'react-hot-toast';
 import Modal from '../components/Modal';
+import DOMPurify from 'dompurify';
 
 interface MaterialItem {
   id?: string | number;
@@ -778,7 +779,7 @@ const LessonPlanPage: React.FC = () => {
             </head>
             <body>
                 <div class="rpp-prose">
-                    ${clone.innerHTML}
+                    ${DOMPurify.sanitize(clone.innerHTML)}
                 </div>
                 
                 <table style="border: none; margin-top: 50px; width: 100%;">
@@ -1067,5 +1068,8 @@ const LessonPlanPage: React.FC = () => {
 };
 
 export default LessonPlanPage;
+
+
+
 
 

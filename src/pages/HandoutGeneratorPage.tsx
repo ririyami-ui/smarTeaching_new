@@ -18,6 +18,7 @@ import { asBlob } from 'html-docx-js-typescript';
 import { useAI } from '../utils/AIContext';
 import Modal from '../components/Modal';
 import ProgressBar from '../components/ProgressBar';
+import DOMPurify from 'dompurify';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../hooks/useAuth';
 
@@ -164,7 +165,7 @@ const HandoutGeneratorPage: React.FC = () => {
             <div className="my-10 flex flex-col items-center group w-full">
                 <div
                     className="relative bg-white p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] border border-blue-50/50 hover:shadow-[0_20px_60px_rgba(99,_102,_241,_0.12)] transition-all duration-500 w-full overflow-hidden flex justify-center items-center"
-                    dangerouslySetInnerHTML={{ __html: svg }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svg) }}
                 />
 
                 <div className="flex gap-3 mt-6 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
@@ -573,7 +574,7 @@ const HandoutGeneratorPage: React.FC = () => {
                     </style>
                 </head>
                 <body>
-                    ${previewEl.innerHTML}
+                    ${DOMPurify.sanitize(previewEl.innerHTML)}
                 </body>
                 </html>
             `;
@@ -1076,5 +1077,9 @@ const HandoutGeneratorPage: React.FC = () => {
 };
 
 export default HandoutGeneratorPage;
+
+
+
+
 
 

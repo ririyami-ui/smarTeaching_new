@@ -176,8 +176,27 @@ service cloud.firestore {
       allow write: if isWritingOwner() && isValidCreate();
       allow delete: if isDocOwner(); 
     }
+    match /appreciation_types/{docId} { 
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner(); 
+    }
 
-    // --- 6. Safety Catch-all (BLOCK unlisted collections) ---
+    // --- 7. Schedule Templates ---
+    match /scheduleTemplates/{docId} {
+      allow read: if isDocOwner();
+      allow write: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner();
+    }
+
+    // --- 8. Semester Portfolio ---
+    match /semesterPortfolios/{docId} {
+      allow read, write: if isDocOwner();
+      allow create: if isWritingOwner() && isValidCreate();
+      allow delete: if isDocOwner();
+    }
+
+    // --- 9. Safety Catch-all (BLOCK unlisted collections) ---
     match /{collection}/{docId} {
       allow read, write: if false;
     }

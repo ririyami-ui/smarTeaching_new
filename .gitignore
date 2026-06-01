@@ -60,6 +60,7 @@ Thumbs.db
 
 # Functions dependencies
 functions/node_modules/
+functions/lib/
 
 # Temp / scratch files
 temp.ts

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, setDoc, query, where, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { db, auth } from '../firebase';
@@ -218,6 +218,7 @@ const ScheduleInputMasterData: React.FC = () => {
       if (user) {
         setIsLoadingTemplates(true);
         try {
+          if (import.meta.env.DEV) console.log("Fetching scheduleTemplates for user:", user.uid);
           const templatesQuery = query(collection(db, 'scheduleTemplates'), where('userId', '==', user.uid));
           const templateSnapshot = await getDocs(templatesQuery);
           let fetchedTemplates: TemplateItem[] = templateSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TemplateItem));
@@ -229,15 +230,18 @@ const ScheduleInputMasterData: React.FC = () => {
               isActive: true,
               createdAt: serverTimestamp()
             };
+            if (import.meta.env.DEV) console.log("Adding default template");
             const tempDoc = await addDoc(collection(db, 'scheduleTemplates'), defaultTemplate);
             const templateId = tempDoc.id;
             fetchedTemplates = [{ id: templateId, ...defaultTemplate } as TemplateItem];
 
+            if (import.meta.env.DEV) console.log("Updating users document");
             await setDoc(doc(db, 'users', user.uid), {
               activeTemplateId: templateId,
               activeTemplateName: 'Jadwal Normal'
             }, { merge: true });
 
+            if (import.meta.env.DEV) console.log("Fetching teachingSchedules");
             const schedulesQuery = query(collection(db, 'teachingSchedules'), where('userId', '==', user.uid));
             const schedulesSnapshot = await getDocs(schedulesQuery);
             const batch = writeBatch(db);
@@ -274,6 +278,9 @@ const ScheduleInputMasterData: React.FC = () => {
           const sortedClasses = fetchedClasses.sort((a, b) => a.rombel.localeCompare(b.rombel));
           setClasses(sortedClasses);
 
+        } catch (error) {
+          console.error("Error in fetchMasterData:", error);
+          toast.error("Gagal memuat data master. Periksa permission Firestore.");
         } finally {
           setIsLoadingTemplates(false);
         }
@@ -1006,7 +1013,7 @@ const ScheduleInputMasterData: React.FC = () => {
                 >
                   {templates.map(t => (
                     <option key={t.id} value={t.id}>
-                      {t.name} {t.isActive ? '✓' : ''}
+                      {t.name} {t.isActive ? 'âœ“' : ''}
                     </option>
                   ))}
                 </select>
@@ -1597,4 +1604,5 @@ const ScheduleInputMasterData: React.FC = () => {
 };
 
 export default ScheduleInputMasterData;
+
 
