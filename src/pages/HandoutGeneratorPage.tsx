@@ -77,6 +77,7 @@ interface UserProfile {
   name?: string;
   title?: string;
   school?: string;
+  schoolLevel?: string;
   geminiModel?: string;
 }
 

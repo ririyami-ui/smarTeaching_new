@@ -2,9 +2,9 @@
   "bookId": "smp-ips-7",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Keluarga Awal Kehidupan", "pages": "1-68", "semester": "Ganjil", "sub_topics": ["Silsilah Keluarga", "Lokasi Suatu Tempat", "Sosialisasi dalam Masyarakat"] },
-    { "no": 2, "title": "Pembiasaan Diri untuk Melestarikan Lingkungan", "pages": "69-128", "semester": "Ganjil", "sub_topics": ["Mengenal Alam", "Pencemaran Lingkungan", "Pelestarian Lingkungan"] },
-    { "no": 3, "title": "Potensi Ekonomi Lingkungan", "pages": "129-194", "semester": "Genap", "sub_topics": ["Kegiatan Ekonomi", "Pelaku Ekonomi", "Permintaan dan Penawaran"] },
-    { "no": 4, "title": "Pemberdayaan Masyarakat", "pages": "195-250", "semester": "Genap", "sub_topics": ["Keragaman Masyarakat", "Pemberdayaan Ekonomi", "Pembangunan Berkelanjutan"] }
+    { "no": 1, "title": "Keluarga Awal Kehidupan", "pages": "1-68", "semester": "Ganjil", "sub_topics": ["Silsilah Keluarga", "Lokasi Suatu Tempat", "Sosialisasi dalam Masyarakat"], "key_terms": ["Keluarga", "Silsilah", "Lokasi", "Sosialisasi"] },
+    { "no": 2, "title": "Pembiasaan Diri untuk Melestarikan Lingkungan", "pages": "69-128", "semester": "Ganjil", "sub_topics": ["Mengenal Alam", "Pencemaran Lingkungan", "Pelestarian Lingkungan"], "key_terms": ["Lingkungan", "Pencemaran", "Pelestarian", "Alam"] },
+    { "no": 3, "title": "Potensi Ekonomi Lingkungan", "pages": "129-194", "semester": "Genap", "sub_topics": ["Kegiatan Ekonomi", "Pelaku Ekonomi", "Permintaan dan Penawaran"], "key_terms": ["Ekonomi", "Produksi", "Konsumsi", "Pasar"] },
+    { "no": 4, "title": "Pemberdayaan Masyarakat", "pages": "195-250", "semester": "Genap", "sub_topics": ["Keragaman Masyarakat", "Pemberdayaan Ekonomi", "Pembangunan Berkelanjutan"], "key_terms": ["Masyarakat", "Pemberdayaan", "Berkelanjutan", "Ekonomi"] }
   ]
 }

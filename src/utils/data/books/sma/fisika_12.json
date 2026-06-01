@@ -1,0 +1,121 @@
+﻿{
+    "publisher":  "Kemendikbudristek",
+    "bookId":  "sma-fis-12",
+    "chapters":  [
+                     {
+                         "no":  1,
+                         "pages":  "1-26",
+                         "sub_topics":  [
+                                            "Muatan Listrik",
+                                            "Hukum Coulomb",
+                                            "Medan Listrik",
+                                            "Potensial Listrik",
+                                            "Energi Potensial Listrik"
+                                        ],
+                         "key_terms":  [
+                                           "Listrik",
+                                           "Muatan",
+                                           "Coulomb",
+                                           "Medan"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Listrik Statis"
+                     },
+                     {
+                         "no":  2,
+                         "pages":  "27-55",
+                         "sub_topics":  [
+                                            "Arus Listrik",
+                                            "Hukum Ohm",
+                                            "Rangkaian Seri",
+                                            "Rangkaian Paralel",
+                                            "Hukum Kirchhoff"
+                                        ],
+                         "key_terms":  [
+                                           "Arus",
+                                           "Tegangan",
+                                           "Hambatan",
+                                           "Kirchhoff"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Listrik Dinamis"
+                     },
+                     {
+                         "no":  3,
+                         "pages":  "56-87",
+                         "sub_topics":  [
+                                            "Sumber Medan Magnet",
+                                            "Gaya Lorentz",
+                                            "Kawat Berarus",
+                                            "Medan Magnet Solenoida",
+                                            "Aplikasi Medan Magnet"
+                                        ],
+                         "key_terms":  [
+                                           "Magnet",
+                                           "Lorentz",
+                                           "Medan",
+                                           "Solenoida"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Medan Magnet"
+                     },
+                     {
+                         "no":  4,
+                         "pages":  "88-110",
+                         "sub_topics":  [
+                                            "Fluks Magnetik",
+                                            "GGL Induksi",
+                                            "Transformator",
+                                            "Generator",
+                                            "Arus Bolak Balik"
+                                        ],
+                         "key_terms":  [
+                                           "Induksi",
+                                           "GGL",
+                                           "Transformator",
+                                           "Generator"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Induksi Elektromagnetik"
+                     },
+                     {
+                         "no":  5,
+                         "pages":  "111-136",
+                         "sub_topics":  [
+                                            "Struktur Atom",
+                                            "Model Atom",
+                                            "Radioaktivitas",
+                                            "Reaksi Nuklir",
+                                            "Energi Nuklir"
+                                        ],
+                         "key_terms":  [
+                                           "Atom",
+                                           "Inti",
+                                           "Radioaktif",
+                                           "Nuklir"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Fisika Atom dan Nuklir"
+                     },
+                     {
+                         "no":  6,
+                         "pages":  "137-165",
+                         "sub_topics":  [
+                                            "Relativitas Khusus",
+                                            "Dilatasi Waktu",
+                                            "Kontraksi Panjang",
+                                            "Efek Fotolistrik",
+                                            "Dualisme Gelombang Partikel"
+                                        ],
+                         "key_terms":  [
+                                           "Relativitas",
+                                           "Kuantum",
+                                           "Fotolistrik",
+                                           "Dualisme"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Fisika Modern"
+                     }
+                 ],
+    "isbn":  "978-623-194-722-6"
+}

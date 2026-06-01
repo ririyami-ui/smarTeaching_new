@@ -1,0 +1,121 @@
+﻿{
+    "publisher":  "Kemendikbudristek",
+    "bookId":  "sma-fis-11",
+    "chapters":  [
+                     {
+                         "no":  1,
+                         "pages":  "1-26",
+                         "sub_topics":  [
+                                            "Momen Gaya",
+                                            "Momen Inersia",
+                                            "Kesetimbangan Benda Tegar",
+                                            "Titik Berat",
+                                            "Hukum Kekekalan Momentum"
+                                        ],
+                         "key_terms":  [
+                                           "Momen",
+                                           "Inersia",
+                                           "Kesetimbangan",
+                                           "Momentum"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Mekanika"
+                     },
+                     {
+                         "no":  2,
+                         "pages":  "27-55",
+                         "sub_topics":  [
+                                            "Tekanan Hidrostatis",
+                                            "Hukum Pascal",
+                                            "Hukum Archimedes",
+                                            "Tegangan Permukaan",
+                                            "Viskositas"
+                                        ],
+                         "key_terms":  [
+                                           "Fluida",
+                                           "Tekanan",
+                                           "Pascal",
+                                           "Archimedes"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Fluida"
+                     },
+                     {
+                         "no":  3,
+                         "pages":  "56-87",
+                         "sub_topics":  [
+                                            "Hukum ke-0 Termodinamika",
+                                            "Hukum ke-1 Termodinamika",
+                                            "Hukum ke-2 Termodinamika",
+                                            "Siklus Termodinamika",
+                                            "Mesin Kalor"
+                                        ],
+                         "key_terms":  [
+                                           "Termodinamika",
+                                           "Entropi",
+                                           "Kalor",
+                                           "Usaha"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Termodinamika"
+                     },
+                     {
+                         "no":  4,
+                         "pages":  "88-110",
+                         "sub_topics":  [
+                                            "Cahaya",
+                                            "Pemantulan",
+                                            "Pembiasan",
+                                            "Lensa",
+                                            "Alat Optik"
+                                        ],
+                         "key_terms":  [
+                                           "Optik",
+                                           "Cahaya",
+                                           "Lensa",
+                                           "Pemantulan"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Optik"
+                     },
+                     {
+                         "no":  5,
+                         "pages":  "111-136",
+                         "sub_topics":  [
+                                            "Cepat Rambat Bunyi",
+                                            "Frekuensi Bunyi",
+                                            "Resonansi",
+                                            "Efek Doppler",
+                                            "Intensitas Bunyi"
+                                        ],
+                         "key_terms":  [
+                                           "Bunyi",
+                                           "Resonansi",
+                                           "Doppler",
+                                           "Intensitas"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Bunyi"
+                     },
+                     {
+                         "no":  6,
+                         "pages":  "137-165",
+                         "sub_topics":  [
+                                            "Sifat Cahaya",
+                                            "Interferensi",
+                                            "Difraksi",
+                                            "Polarisasi",
+                                            "Dispersi"
+                                        ],
+                         "key_terms":  [
+                                           "Cahaya",
+                                           "Interferensi",
+                                           "Difraksi",
+                                           "Polarisasi"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Cahaya"
+                     }
+                 ],
+    "isbn":  "978-623-194-723-9"
+}

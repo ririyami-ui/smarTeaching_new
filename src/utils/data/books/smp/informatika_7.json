@@ -2,14 +2,14 @@
   "bookId": "smp-inf-7",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Informatika dan Keterampilan Generik", "pages": "1-22", "semester": "Ganjil", "sub_topics": ["Tentang Informatika", "Masyarakat Digital", "Kolaborasi dalam Kelompok", "Komunikasi Hasil Kerja"] },
-    { "no": 2, "title": "Berpikir Komputasional", "pages": "23-44", "semester": "Ganjil", "sub_topics": ["Algoritma", "Optimasi Penjadwalan", "Struktur Data (List, Tree, Graph)", "Representasi Data (Biner)"] },
-    { "no": 3, "title": "Teknologi Informasi dan Komunikasi", "pages": "45-66", "semester": "Ganjil", "sub_topics": ["Perangkat Lunak Aplikasi", "Antarmuka Pengguna", "Pengelolaan Folder dan File", "Pencarian Informasi (Search Engine)", "Surat Elektronik (Email)"] },
-    { "no": 4, "title": "Sistem Komputer", "pages": "67-100", "semester": "Ganjil", "sub_topics": ["Komponen Perangkat Keras", "Perangkat Lunak Sistem", "Interaksi Antar Perangkat", "Sistem Operasi", "Bilangan Biner"] },
-    { "no": 5, "title": "Jaringan Komputer dan Internet", "pages": "101-124", "semester": "Genap", "sub_topics": ["Konsep Jaringan Komputer", "Internet dan World Wide Web", "Enkripsi Data", "Keamanan Koneksi Wi-Fi"] },
-    { "no": 6, "title": "Analisis Data", "pages": "125-156", "semester": "Genap", "sub_topics": ["Pengenalan Perkakas Pengolah Lembar Kerja", "Pengolahan Data Dasar", "Pengolahan Data Lanjutan", "Kasus Analisis Data Unplugged"] },
-    { "no": 7, "title": "Algoritma dan Pemrograman", "pages": "157-190", "semester": "Genap", "sub_topics": ["Pemrograman Visual (Scratch)", "Gerakan dan Suara", "Variabel dan Input", "Pengulangan (Loop)", "Percabangan (If-Else)"] },
-    { "no": 8, "title": "Dampak Sosial Informatika", "pages": "191-210", "semester": "Genap", "sub_topics": ["Media Sosial", "Informasi Pribadi dan Hukum Privasi", "Dampak Ekonomi dan Pekerjaan"] },
-    { "no": 9, "title": "Praktik Lintas Bidang Informatika", "pages": "211-230", "semester": "Genap", "sub_topics": ["Pengembangan Artefak Komputasional", "Aktivitas Unplugged", "Presentasi Proyek"] }
+    { "no": 1, "title": "Informatika dan Keterampilan Generik", "pages": "1-22", "semester": "Ganjil", "sub_topics": ["Tentang Informatika", "Masyarakat Digital", "Kolaborasi dalam Kelompok", "Komunikasi Hasil Kerja"], "key_terms": ["Informatika", "Digital", "Kolaborasi", "Komunikasi"] },
+    { "no": 2, "title": "Berpikir Komputasional", "pages": "23-44", "semester": "Ganjil", "sub_topics": ["Algoritma", "Optimasi Penjadwalan", "Struktur Data (List, Tree, Graph)", "Representasi Data (Biner)"], "key_terms": ["Algoritma", "Struktur Data", "Biner", "Optimasi"] },
+    { "no": 3, "title": "Teknologi Informasi dan Komunikasi", "pages": "45-66", "semester": "Ganjil", "sub_topics": ["Perangkat Lunak Aplikasi", "Antarmuka Pengguna", "Pengelolaan Folder dan File", "Pencarian Informasi (Search Engine)", "Surat Elektronik (Email)"], "key_terms": ["Aplikasi", "Antarmuka", "Search Engine", "Email"] },
+    { "no": 4, "title": "Sistem Komputer", "pages": "67-100", "semester": "Ganjil", "sub_topics": ["Komponen Perangkat Keras", "Perangkat Lunak Sistem", "Interaksi Antar Perangkat", "Sistem Operasi", "Bilangan Biner"], "key_terms": ["Hardware", "Software", "Sistem Operasi", "CPU"] },
+    { "no": 5, "title": "Jaringan Komputer dan Internet", "pages": "101-124", "semester": "Genap", "sub_topics": ["Konsep Jaringan Komputer", "Internet dan World Wide Web", "Enkripsi Data", "Keamanan Koneksi Wi-Fi"], "key_terms": ["Jaringan", "Internet", "Enkripsi", "Keamanan"] },
+    { "no": 6, "title": "Analisis Data", "pages": "125-156", "semester": "Genap", "sub_topics": ["Pengenalan Perkakas Pengolah Lembar Kerja", "Pengolahan Data Dasar", "Pengolahan Data Lanjutan", "Kasus Analisis Data Unplugged"], "key_terms": ["Data", "Spreadsheet", "Analisis", "Visualisasi"] },
+    { "no": 7, "title": "Algoritma dan Pemrograman", "pages": "157-190", "semester": "Genap", "sub_topics": ["Pemrograman Visual (Scratch)", "Gerakan dan Suara", "Variabel dan Input", "Pengulangan (Loop)", "Percabangan (If-Else)"], "key_terms": ["Scratch", "Variabel", "Loop", "Percabangan"] },
+    { "no": 8, "title": "Dampak Sosial Informatika", "pages": "191-210", "semester": "Genap", "sub_topics": ["Media Sosial", "Informasi Pribadi dan Hukum Privasi", "Dampak Ekonomi dan Pekerjaan"], "key_terms": ["Media Sosial", "Privasi", "Cyber", "Digital"] },
+    { "no": 9, "title": "Praktik Lintas Bidang Informatika", "pages": "211-230", "semester": "Genap", "sub_topics": ["Pengembangan Artefak Komputasional", "Aktivitas Unplugged", "Presentasi Proyek"], "key_terms": ["Proyek", "Artefak", "Unplugged", "Presentasi"] }
   ]
 }

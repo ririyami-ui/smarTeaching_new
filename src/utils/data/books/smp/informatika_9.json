@@ -2,14 +2,14 @@
   "bookId": "smp-inf-9",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Informatika dan Keterampilan Generik", "pages": "1-14", "semester": "Ganjil", "sub_topics": ["Informatika di Masa Depan", "Perencanaan Proyek Komputasi"] },
-    { "no": 2, "title": "Berpikir Komputasional", "pages": "15-38", "semester": "Ganjil", "sub_topics": ["Struktur Data Pohon (Tree)", "Graf (Graph)", "Algoritma Optimasi", "Kriptografi Sederhana"] },
-    { "no": 3, "title": "Teknologi Informasi dan Komunikasi", "pages": "39-58", "semester": "Ganjil", "sub_topics": ["Integrasi Aplikasi Perkantoran Dinamis", "Blog dan Video Vlog", "Analisis Konten Digital"] },
-    { "no": 4, "title": "Sistem Komputer", "pages": "59-80", "semester": "Ganjil", "sub_topics": ["Multitasking", "Komponen Sistem Operasi", "Interaksi Manusia dan Komputer"] },
-    { "no": 5, "title": "Jaringan Komputer dan Internet", "pages": "81-104", "semester": "Genap", "sub_topics": ["Keamanan Data di Jaringan", "Teknologi Komunikasi Data", "Konfigurasi Jaringan Sederhana"] },
-    { "no": 6, "title": "Analisis Data", "pages": "105-130", "semester": "Genap", "sub_topics": ["Pengumpulan Data", "Pengolahan Data Berbasis Web", "Visualisasi Data Interaktif"] },
-    { "no": 7, "title": "Algoritma dan Pemrograman", "pages": "131-160", "semester": "Genap", "sub_topics": ["Bahasa Pemrograman Tekstual (Python)", "Struktur Kontrol Python", "List dan Fungsi Python"] },
-    { "no": 8, "title": "Dampak Sosial Informatika", "pages": "161-180", "semester": "Genap", "sub_topics": ["Keamanan Siber", "Kekayaan Intelektual", "Pemanfaatan Teknologi Informasi Masa Kini"] },
-    { "no": 9, "title": "Praktik Lintas Bidang Informatika", "pages": "181-200", "semester": "Genap", "sub_topics": ["Pengembangan Aplikasi Sosial", "Uji Coba Pengguna", "Dokumentasi Teknis"] }
+    { "no": 1, "title": "Informatika dan Keterampilan Generik", "pages": "1-14", "semester": "Ganjil", "sub_topics": ["Informatika di Masa Depan", "Perencanaan Proyek Komputasi"], "key_terms": ["Informatika", "Masa Depan", "Proyek", "Komputasi"] },
+    { "no": 2, "title": "Berpikir Komputasional", "pages": "15-38", "semester": "Ganjil", "sub_topics": ["Struktur Data Pohon (Tree)", "Graf (Graph)", "Algoritma Optimasi", "Kriptografi Sederhana"], "key_terms": ["Tree", "Graph", "Optimasi", "Kriptografi"] },
+    { "no": 3, "title": "Teknologi Informasi dan Komunikasi", "pages": "39-58", "semester": "Ganjil", "sub_topics": ["Integrasi Aplikasi Perkantoran Dinamis", "Blog dan Video Vlog", "Analisis Konten Digital"], "key_terms": ["Integrasi", "Blog", "Vlog", "Konten Digital"] },
+    { "no": 4, "title": "Sistem Komputer", "pages": "59-80", "semester": "Ganjil", "sub_topics": ["Multitasking", "Komponen Sistem Operasi", "Interaksi Manusia dan Komputer"], "key_terms": ["Multitasking", "Sistem Operasi", "Interaksi", "HCI"] },
+    { "no": 5, "title": "Jaringan Komputer dan Internet", "pages": "81-104", "semester": "Genap", "sub_topics": ["Keamanan Data di Jaringan", "Teknologi Komunikasi Data", "Konfigurasi Jaringan Sederhana"], "key_terms": ["Keamanan", "Jaringan", "Konfigurasi", "Data"] },
+    { "no": 6, "title": "Analisis Data", "pages": "105-130", "semester": "Genap", "sub_topics": ["Pengumpulan Data", "Pengolahan Data Berbasis Web", "Visualisasi Data Interaktif"], "key_terms": ["Pengumpulan", "Web", "Visualisasi", "Interaktif"] },
+    { "no": 7, "title": "Algoritma dan Pemrograman", "pages": "131-160", "semester": "Genap", "sub_topics": ["Bahasa Pemrograman Tekstual (Python)", "Struktur Kontrol Python", "List dan Fungsi Python"], "key_terms": ["Python", "Struktur Kontrol", "List", "Fungsi"] },
+    { "no": 8, "title": "Dampak Sosial Informatika", "pages": "161-180", "semester": "Genap", "sub_topics": ["Keamanan Siber", "Kekayaan Intelektual", "Pemanfaatan Teknologi Informasi Masa Kini"], "key_terms": ["Siber", "Keamanan", "Intelektual", "Teknologi"] },
+    { "no": 9, "title": "Praktik Lintas Bidang Informatika", "pages": "181-200", "semester": "Genap", "sub_topics": ["Pengembangan Aplikasi Sosial", "Uji Coba Pengguna", "Dokumentasi Teknis"], "key_terms": ["Aplikasi", "Uji Coba", "Dokumentasi", "Sosial"] }
   ]
 }

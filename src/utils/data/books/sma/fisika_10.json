@@ -1,0 +1,121 @@
+﻿{
+    "publisher":  "Kemendikbudristek",
+    "bookId":  "sma-fis-10",
+    "chapters":  [
+                     {
+                         "no":  1,
+                         "pages":  "1-26",
+                         "sub_topics":  [
+                                            "Besaran Pokok",
+                                            "Besaran Turunan",
+                                            "Satuan SI",
+                                            "Alat Ukur",
+                                            "Angka Penting"
+                                        ],
+                         "key_terms":  [
+                                           "Besaran",
+                                           "Satuan",
+                                           "Mengukur",
+                                           "Angka Penting"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Besaran dan Pengukuran"
+                     },
+                     {
+                         "no":  2,
+                         "pages":  "27-55",
+                         "sub_topics":  [
+                                            "Gerak Lurus Beraturan",
+                                            "Gerak Lurus Berubah Beraturan",
+                                            "Gerak Vertikal",
+                                            "Gerak Parabola",
+                                            "Perpindahan dan Jarak"
+                                        ],
+                         "key_terms":  [
+                                           "Kinematika",
+                                           "Kecepatan",
+                                           "Percepatan",
+                                           "Gerak"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Kinematika"
+                     },
+                     {
+                         "no":  3,
+                         "pages":  "56-87",
+                         "sub_topics":  [
+                                            "Hukum Newton",
+                                            "Gaya Berat",
+                                            "Gaya Normal",
+                                            "Gaya Gesek",
+                                            "Aplikasi Hukum Newton"
+                                        ],
+                         "key_terms":  [
+                                           "Newton",
+                                           "Gaya",
+                                           "Massa",
+                                           "Gesek"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Dinamika"
+                     },
+                     {
+                         "no":  4,
+                         "pages":  "88-110",
+                         "sub_topics":  [
+                                            "Konsep Usaha",
+                                            "Energi Kinetik",
+                                            "Energi Potensial",
+                                            "Hukum Kekekalan Energi",
+                                            "Daya"
+                                        ],
+                         "key_terms":  [
+                                           "Usaha",
+                                           "Energi",
+                                           "Kinetik",
+                                           "Potensial"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Usaha dan Energi"
+                     },
+                     {
+                         "no":  5,
+                         "pages":  "111-136",
+                         "sub_topics":  [
+                                            "Skala Suhu",
+                                            "Pemuaian",
+                                            "Kalor",
+                                            "Kapasitas Kalor",
+                                            "Perpindahan Kalor"
+                                        ],
+                         "key_terms":  [
+                                           "Suhu",
+                                           "Kalor",
+                                           "Pemuaian",
+                                           "Konduksi"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Suhu dan Kalor"
+                     },
+                     {
+                         "no":  6,
+                         "pages":  "137-165",
+                         "sub_topics":  [
+                                            "Jenis Gelombang",
+                                            "Besaran Gelombang",
+                                            "Gelombang Berjalan",
+                                            "Gelombang Stasioner",
+                                            "Cepat Rambat Gelombang"
+                                        ],
+                         "key_terms":  [
+                                           "Gelombang",
+                                           "Frekuensi",
+                                           "Panjang",
+                                           "Amplitudo"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Gelombang"
+                     }
+                 ],
+    "isbn":  "978-623-194-724-2"
+}

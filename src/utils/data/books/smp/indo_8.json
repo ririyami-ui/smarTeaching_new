@@ -2,11 +2,11 @@
   "bookId": "smp-indo-8",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Laporan Hasil Observasi", "pages": "1-36", "semester": "Ganjil", "sub_topics": ["Pengertian LHO", "Struktur LHO", "Menulis LHO"] },
-    { "no": 2, "title": "Iklan, Slogan, dan Poster", "pages": "37-72", "semester": "Ganjil", "sub_topics": ["Unsur Iklan", "Membuat Iklan Kreatif", "Bahasa Slogan dan Poster"] },
-    { "no": 3, "title": "Artikel Ilmiah Populer", "pages": "73-108", "semester": "Ganjil", "sub_topics": ["Fakta dan Opini", "Langkah Menulis Artikel", "Kaidah Kebahasaan"] },
-    { "no": 4, "title": "Karya Fiksi", "pages": "109-144", "semester": "Genap", "sub_topics": ["Unsur Pembangun Cerpen", "Analisis Watak Tokoh", "Menulis Cerita Pendek"] },
-    { "no": 5, "title": "Puisi", "pages": "145-176", "semester": "Genap", "sub_topics": ["Majas dan Imaji", "Puisi Modern", "Menulis Puisi Bebas"] },
-    { "no": 6, "title": "Teks Pidato", "pages": "177-210", "semester": "Genap", "sub_topics": ["Persiapan Pidato", "Struktur Pidato", "Praktik Berpidato"] }
+    { "no": 1, "title": "Laporan Hasil Observasi", "pages": "1-36", "semester": "Ganjil", "sub_topics": ["Pengertian LHO", "Struktur LHO", "Menulis LHO"], "key_terms": ["Laporan", "Observasi", "Data", "Fakta"] },
+    { "no": 2, "title": "Iklan, Slogan, dan Poster", "pages": "37-72", "semester": "Ganjil", "sub_topics": ["Unsur Iklan", "Membuat Iklan Kreatif", "Bahasa Slogan dan Poster"], "key_terms": ["Iklan", "Slogan", "Poster", "Persuasi"] },
+    { "no": 3, "title": "Artikel Ilmiah Populer", "pages": "73-108", "semester": "Ganjil", "sub_topics": ["Fakta dan Opini", "Langkah Menulis Artikel", "Kaidah Kebahasaan"], "key_terms": ["Artikel", "Ilmiah", "Fakta", "Opini"] },
+    { "no": 4, "title": "Karya Fiksi", "pages": "109-144", "semester": "Genap", "sub_topics": ["Unsur Pembangun Cerpen", "Analisis Watak Tokoh", "Menulis Cerita Pendek"], "key_terms": ["Cerpen", "Tokoh", "Alur", "Latar"] },
+    { "no": 5, "title": "Puisi", "pages": "145-176", "semester": "Genap", "sub_topics": ["Majas dan Imaji", "Puisi Modern", "Menulis Puisi Bebas"], "key_terms": ["Puisi", "Majas", "Imaji", "Rima"] },
+    { "no": 6, "title": "Teks Pidato", "pages": "177-210", "semester": "Genap", "sub_topics": ["Persiapan Pidato", "Struktur Pidato", "Praktik Berpidato"], "key_terms": ["Pidato", "Persuasi", "Salam", "Audiensi"] }
   ]
 }

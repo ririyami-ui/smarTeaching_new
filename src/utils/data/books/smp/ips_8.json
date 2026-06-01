@@ -2,9 +2,9 @@
   "bookId": "smp-ips-8",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Kondisi Geografis dan Pelestarian Sumber Daya Alam", "pages": "1-64", "semester": "Ganjil", "sub_topics": ["Kekayaan Alam Indonesia", "Pemanfaatan Sumber Daya Alam", "Sumber Daya Manusia"] },
-    { "no": 2, "title": "Kemajemukan Masyarakat Indonesia", "pages": "65-138", "semester": "Ganjil", "sub_topics": ["Keragaman Budaya", "Mobilitas Sosial", "Pluralitas Bangsa"] },
-    { "no": 3, "title": "Nasionalisme dan Jati Diri Bangsa", "pages": "139-210", "semester": "Genap", "sub_topics": ["Penjelajahan Samudra", "Pergerakan Nasional", "Kemerdekaan Indonesia"] },
-    { "no": 4, "title": "Pembangunan Ekonomi dan Pemberdayaan Masyarakat", "pages": "211-280", "semester": "Genap", "sub_topics": ["Ekonomi Maritim", "Agrikultur", "Pemerataan Pendapatan"] }
+    { "no": 1, "title": "Kondisi Geografis dan Pelestarian Sumber Daya Alam", "pages": "1-64", "semester": "Ganjil", "sub_topics": ["Kekayaan Alam Indonesia", "Pemanfaatan Sumber Daya Alam", "Sumber Daya Manusia"], "key_terms": ["Geografis", "SDA", "Pelestarian", "Manusia"] },
+    { "no": 2, "title": "Kemajemukan Masyarakat Indonesia", "pages": "65-138", "semester": "Ganjil", "sub_topics": ["Keragaman Budaya", "Mobilitas Sosial", "Pluralitas Bangsa"], "key_terms": ["Budaya", "Mobilitas", "Pluralitas", "Masyarakat"] },
+    { "no": 3, "title": "Nasionalisme dan Jati Diri Bangsa", "pages": "139-210", "semester": "Genap", "sub_topics": ["Penjelajahan Samudra", "Pergerakan Nasional", "Kemerdekaan Indonesia"], "key_terms": ["Nasionalisme", "Kemerdekaan", "Pergerakan", "Samudra"] },
+    { "no": 4, "title": "Pembangunan Ekonomi dan Pemberdayaan Masyarakat", "pages": "211-280", "semester": "Genap", "sub_topics": ["Ekonomi Maritim", "Agrikultur", "Pemerataan Pendapatan"], "key_terms": ["Maritim", "Agrikultur", "Pendapatan", "Pembangunan"] }
   ]
 }

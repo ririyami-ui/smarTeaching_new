@@ -1,0 +1,102 @@
+﻿{
+    "publisher":  "Kemendikbudristek",
+    "bookId":  "sma-kim-10",
+    "chapters":  [
+                     {
+                         "no":  1,
+                         "pages":  "1-26",
+                         "sub_topics":  [
+                                            "Teori Atom",
+                                            "Partikel Penyusun Atom",
+                                            "Konfigurasi Elektron",
+                                            "Bilangan Kuantum",
+                                            "SPU"
+                                        ],
+                         "key_terms":  [
+                                           "Atom",
+                                           "Proton",
+                                           "Elektron",
+                                           "Neutron"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Struktur Atom"
+                     },
+                     {
+                         "no":  2,
+                         "pages":  "27-55",
+                         "sub_topics":  [
+                                            "Ikatan Ion",
+                                            "Ikatan Kovalen",
+                                            "Ikatan Logam",
+                                            "Ikatan Hidrogen",
+                                            "Gaya Antarmolekul"
+                                        ],
+                         "key_terms":  [
+                                           "Ikatan",
+                                           "Kovalen",
+                                           "Ion",
+                                           "Logam"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Ikatan Kimia"
+                     },
+                     {
+                         "no":  3,
+                         "pages":  "56-87",
+                         "sub_topics":  [
+                                            "Massa Atom Relatif",
+                                            "Massa Molekul Relatif",
+                                            "Mol",
+                                            "Rumus Kimia",
+                                            "Pereaksi Pembatas"
+                                        ],
+                         "key_terms":  [
+                                           "Stoikiometri",
+                                           "Mol",
+                                           "Massa",
+                                           "Reaksi"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Stoikiometri"
+                     },
+                     {
+                         "no":  4,
+                         "pages":  "88-110",
+                         "sub_topics":  [
+                                            "Konsentrasi Larutan",
+                                            "Elektrolit Non Elektrolit",
+                                            "Sifat Koligatif",
+                                            "pH Larutan",
+                                            "Titrasi"
+                                        ],
+                         "key_terms":  [
+                                           "Larutan",
+                                           "Konsentrasi",
+                                           "pH",
+                                           "Titrasi"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Larutan"
+                     },
+                     {
+                         "no":  5,
+                         "pages":  "111-136",
+                         "sub_topics":  [
+                                            "Sistem dan Lingkungan",
+                                            "Entalpi",
+                                            "Reaksi Eksoterm",
+                                            "Reaksi Endoterm",
+                                            "Hukum Hess"
+                                        ],
+                         "key_terms":  [
+                                           "Termokimia",
+                                           "Entalpi",
+                                           "Eksoterm",
+                                           "Endoterm"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Termokimia"
+                     }
+                 ],
+    "isbn":  "978-623-194-727-1"
+}

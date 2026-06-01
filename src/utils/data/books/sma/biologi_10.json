@@ -1,0 +1,121 @@
+﻿{
+    "publisher":  "Kemendikbudristek",
+    "bookId":  "sma-bio-10",
+    "chapters":  [
+                     {
+                         "no":  1,
+                         "pages":  "1-26",
+                         "sub_topics":  [
+                                            "Keanekaragaman Gen",
+                                            "Keanekaragaman Spesies",
+                                            "Keanekaragaman Ekosistem",
+                                            "Klasifikasi Makhluk Hidup",
+                                            "Pelestarian"
+                                        ],
+                         "key_terms":  [
+                                           "Biodiversitas",
+                                           "Spesies",
+                                           "Gen",
+                                           "Ekosistem"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Keanekaragaman Hayati"
+                     },
+                     {
+                         "no":  2,
+                         "pages":  "27-55",
+                         "sub_topics":  [
+                                            "Struktur Virus",
+                                            "Reproduksi Virus",
+                                            "Peran Virus",
+                                            "Struktur Bakteri",
+                                            "Peran Bakteri"
+                                        ],
+                         "key_terms":  [
+                                           "Virus",
+                                           "Bakteri",
+                                           "Replikasi",
+                                           "Prokariot"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Virus dan Bakteri"
+                     },
+                     {
+                         "no":  3,
+                         "pages":  "56-87",
+                         "sub_topics":  [
+                                            "Karakteristik Jamur",
+                                            "Klasifikasi Jamur",
+                                            "Reproduksi Jamur",
+                                            "Peran Jamur",
+                                            "Zygomycota Ascomycota Basidiomycota"
+                                        ],
+                         "key_terms":  [
+                                           "Jamur",
+                                           "Fungi",
+                                           "Miselium",
+                                           "Spora"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Jamur"
+                     },
+                     {
+                         "no":  4,
+                         "pages":  "88-110",
+                         "sub_topics":  [
+                                            "Bryophyta",
+                                            "Pteridophyta",
+                                            "Gymnospermae",
+                                            "Angiospermae",
+                                            "Peran Tumbuhan"
+                                        ],
+                         "key_terms":  [
+                                           "Tumbuhan",
+                                           "Lumut",
+                                           "Paku",
+                                           "Biji"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Kingdom Plantae"
+                     },
+                     {
+                         "no":  5,
+                         "pages":  "111-136",
+                         "sub_topics":  [
+                                            "Invertebrata",
+                                            "Vertebrata",
+                                            "Porifera",
+                                            "Arthropoda",
+                                            "Mamalia"
+                                        ],
+                         "key_terms":  [
+                                           "Hewan",
+                                           "Invertebrata",
+                                           "Vertebrata",
+                                           "Mamalia"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Kingdom Animalia"
+                     },
+                     {
+                         "no":  6,
+                         "pages":  "137-165",
+                         "sub_topics":  [
+                                            "Komponen Ekosistem",
+                                            "Aliran Energi",
+                                            "Rantai Makanan",
+                                            "Daur Biogeokimia",
+                                            "Suksesi"
+                                        ],
+                         "key_terms":  [
+                                           "Ekosistem",
+                                           "Rantai",
+                                           "Energi",
+                                           "Suksesi"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Ekosistem"
+                     }
+                 ],
+    "isbn":  "978-623-194-730-0"
+}

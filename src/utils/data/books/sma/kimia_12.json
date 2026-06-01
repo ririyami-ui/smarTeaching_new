@@ -1,0 +1,102 @@
+﻿{
+    "publisher":  "Kemendikbudristek",
+    "bookId":  "sma-kim-12",
+    "chapters":  [
+                     {
+                         "no":  1,
+                         "pages":  "1-26",
+                         "sub_topics":  [
+                                            "Penurunan Tekanan Uap",
+                                            "Kenaikan Titik Didih",
+                                            "Penurunan Titik Beku",
+                                            "Tekanan Osmotik",
+                                            "Aplikasi Sifat Koligatif"
+                                        ],
+                         "key_terms":  [
+                                           "Koligatif",
+                                           "Tekanan",
+                                           "Titik Didih",
+                                           "Osmotik"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Sifat Koligatif"
+                     },
+                     {
+                         "no":  2,
+                         "pages":  "27-55",
+                         "sub_topics":  [
+                                            "Potensial Sel",
+                                            "Reaksi Sel",
+                                            "Deret Volta",
+                                            "Korosi",
+                                            "Elektroplating"
+                                        ],
+                         "key_terms":  [
+                                           "Elektrokimia",
+                                           "Potensial",
+                                           "Volta",
+                                           "Korosi"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Elektrokimia"
+                     },
+                     {
+                         "no":  3,
+                         "pages":  "56-87",
+                         "sub_topics":  [
+                                            "Senyawa Karbon",
+                                            "Gugus Fungsi",
+                                            "Hidrokarbon",
+                                            "Alkana",
+                                            "Alkena dan Alkuna"
+                                        ],
+                         "key_terms":  [
+                                           "Organik",
+                                           "Karbon",
+                                           "Hidrokarbon",
+                                           "Gugus Fungsi"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Kimia Organik"
+                     },
+                     {
+                         "no":  4,
+                         "pages":  "88-110",
+                         "sub_topics":  [
+                                            "Konsep Polimer",
+                                            "Polimer Adisi",
+                                            "Polimer Kondensasi",
+                                            "Kegunaan Polimer",
+                                            "Dampak Polimer"
+                                        ],
+                         "key_terms":  [
+                                           "Polimer",
+                                           "Adisi",
+                                           "Kondensasi",
+                                           "Plastik"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Polimer"
+                     },
+                     {
+                         "no":  5,
+                         "pages":  "111-136",
+                         "sub_topics":  [
+                                            "Kelimpahan Unsur",
+                                            "Unsur Utama",
+                                            "Unsur Transisi",
+                                            "Mineral",
+                                            "Pembuatan Unsur"
+                                        ],
+                         "key_terms":  [
+                                           "Unsur",
+                                           "Periodik",
+                                           "Transisi",
+                                           "Mineral"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Kimia Unsur"
+                     }
+                 ],
+    "isbn":  "978-623-194-725-5"
+}

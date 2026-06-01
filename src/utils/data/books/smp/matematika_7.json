@@ -2,11 +2,11 @@
   "bookId": "smp-mat-7",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Bilangan Bulat", "pages": "1-54", "semester": "Ganjil", "sub_topics": ["Bilangan Bulat Positif dan Negatif", "Operasi Hitung Penjumlahan & Pengurangan", "Operasi Hitung Perkalian & Pembagian", "Faktor dan Kelipatan (FPB & KPK)"] },
-    { "no": 2, "title": "Bilangan Rasional", "pages": "55-90", "semester": "Ganjil", "sub_topics": ["Pecahan Biasa dan Campuran", "Bilangan Desimal", "Perbandingan Bilangan Rasional", "Estimasi dengan Bilangan Rasional"] },
-    { "no": 3, "title": "Rasio", "pages": "91-124", "semester": "Ganjil", "sub_topics": ["Konsep Rasio", "Rasio Senilai", "Rasio Berbalik Nilai", "Penerapan Rasio dalam Kehidupan"] },
-    { "no": 4, "title": "Bentuk Aljabar", "pages": "125-156", "semester": "Genap", "sub_topics": ["Unsur-unsur Aljabar (Variabel, Koefisien, Konstanta)", "Operasi Hitung Aljabar", "Menyederhanakan Bentuk Aljabar", "Pemodelan Matematika dengan Aljabar"] },
-    { "no": 5, "title": "Kesebangunan", "pages": "157-188", "semester": "Genap", "sub_topics": ["Skala pada Peta dan Model", "Syarat Kesebangunan Bangun Datar", "Segitiga yang Sebangun", "Aplikasi Kesebangunan"] },
-    { "no": 6, "title": "Data dan Statistika", "pages": "189-210", "semester": "Genap", "sub_topics": ["Pengumpulan Data", "Penyajian Data (Tabel & Diagram)", "Rata-rata (Mean)", "Median dan Modus"] }
+    { "no": 1, "title": "Bilangan Bulat", "pages": "1-54", "semester": "Ganjil", "sub_topics": ["Bilangan Bulat Positif dan Negatif", "Operasi Hitung Penjumlahan & Pengurangan", "Operasi Hitung Perkalian & Pembagian", "Faktor dan Kelipatan (FPB & KPK)"], "key_terms": ["Bilangan Bulat", "FPB", "KPK", "Operasi Hitung"] },
+    { "no": 2, "title": "Bilangan Rasional", "pages": "55-90", "semester": "Ganjil", "sub_topics": ["Pecahan Biasa dan Campuran", "Bilangan Desimal", "Perbandingan Bilangan Rasional", "Estimasi dengan Bilangan Rasional"], "key_terms": ["Pecahan", "Desimal", "Rasional", "Estimasi"] },
+    { "no": 3, "title": "Rasio", "pages": "91-124", "semester": "Ganjil", "sub_topics": ["Konsep Rasio", "Rasio Senilai", "Rasio Berbalik Nilai", "Penerapan Rasio dalam Kehidupan"], "key_terms": ["Rasio", "Senilai", "Berbalik Nilai", "Skala"] },
+    { "no": 4, "title": "Bentuk Aljabar", "pages": "125-156", "semester": "Genap", "sub_topics": ["Unsur-unsur Aljabar (Variabel, Koefisien, Konstanta)", "Operasi Hitung Aljabar", "Menyederhanakan Bentuk Aljabar", "Pemodelan Matematika dengan Aljabar"], "key_terms": ["Aljabar", "Variabel", "Koefisien", "Konstanta"] },
+    { "no": 5, "title": "Kesebangunan", "pages": "157-188", "semester": "Genap", "sub_topics": ["Skala pada Peta dan Model", "Syarat Kesebangunan Bangun Datar", "Segitiga yang Sebangun", "Aplikasi Kesebangunan"], "key_terms": ["Kesebangunan", "Skala", "Segitiga", "Bangun Datar"] },
+    { "no": 6, "title": "Data dan Statistika", "pages": "189-210", "semester": "Genap", "sub_topics": ["Pengumpulan Data", "Penyajian Data (Tabel & Diagram)", "Rata-rata (Mean)", "Median dan Modus"], "key_terms": ["Data", "Statistika", "Mean", "Median", "Modus"] }
   ]
 }

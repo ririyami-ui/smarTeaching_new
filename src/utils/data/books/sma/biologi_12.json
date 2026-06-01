@@ -1,0 +1,102 @@
+﻿{
+    "publisher":  "Kemendikbudristek",
+    "bookId":  "sma-bio-12",
+    "chapters":  [
+                     {
+                         "no":  1,
+                         "pages":  "1-26",
+                         "sub_topics":  [
+                                            "Sifat Enzim",
+                                            "Kerja Enzim",
+                                            "Katabolisme",
+                                            "Anabolisme",
+                                            "Fotosintesis"
+                                        ],
+                         "key_terms":  [
+                                           "Enzim",
+                                           "Metabolisme",
+                                           "Katabolisme",
+                                           "Anabolisme"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Enzim dan Metabolisme"
+                     },
+                     {
+                         "no":  2,
+                         "pages":  "27-55",
+                         "sub_topics":  [
+                                            "Hukum Mendel",
+                                            "Persilangan Monohibrid",
+                                            "Persilangan Dihibrid",
+                                            "Penyimpangan Semu",
+                                            "Pola Hereditas"
+                                        ],
+                         "key_terms":  [
+                                           "Genetika",
+                                           "Mendel",
+                                           "Persilangan",
+                                           "Hereditas"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Genetika"
+                     },
+                     {
+                         "no":  3,
+                         "pages":  "56-87",
+                         "sub_topics":  [
+                                            "Teori Evolusi",
+                                            "Seleksi Alam",
+                                            "Adaptasi",
+                                            "Spesiasi",
+                                            "Bukti Evolusi"
+                                        ],
+                         "key_terms":  [
+                                           "Evolusi",
+                                           "Darwin",
+                                           "Seleksi",
+                                           "Spesiasi"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Evolusi"
+                     },
+                     {
+                         "no":  4,
+                         "pages":  "88-110",
+                         "sub_topics":  [
+                                            "Konsep Bioteknologi",
+                                            "Bioteknologi Konvensional",
+                                            "Bioteknologi Modern",
+                                            "Rekayasa Genetika",
+                                            "Dampak Bioteknologi"
+                                        ],
+                         "key_terms":  [
+                                           "Bioteknologi",
+                                           "Genetika",
+                                           "DNA Rekombinan",
+                                           "Bioetika"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Bioteknologi"
+                     },
+                     {
+                         "no":  5,
+                         "pages":  "111-136",
+                         "sub_topics":  [
+                                            "Pertumbuhan Primer",
+                                            "Pertumbuhan Sekunder",
+                                            "Faktor Pertumbuhan",
+                                            "Perkembangan Embrio",
+                                            "Regulasi Pertumbuhan"
+                                        ],
+                         "key_terms":  [
+                                           "Pertumbuhan",
+                                           "Perkembangan",
+                                           "Hormon",
+                                           "Embrio"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Pertumbuhan dan Perkembangan"
+                     }
+                 ],
+    "isbn":  "978-623-194-728-4"
+}

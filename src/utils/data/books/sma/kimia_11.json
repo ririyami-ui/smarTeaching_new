@@ -1,0 +1,102 @@
+﻿{
+    "publisher":  "Kemendikbudristek",
+    "bookId":  "sma-kim-11",
+    "chapters":  [
+                     {
+                         "no":  1,
+                         "pages":  "1-26",
+                         "sub_topics":  [
+                                            "Konsep Laju Reaksi",
+                                            "Faktor Laju Reaksi",
+                                            "Orde Reaksi",
+                                            "Teori Tumbukan",
+                                            "Katalis"
+                                        ],
+                         "key_terms":  [
+                                           "Laju",
+                                           "Reaksi",
+                                           "Katalis",
+                                           "Orde"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Laju Reaksi"
+                     },
+                     {
+                         "no":  2,
+                         "pages":  "27-55",
+                         "sub_topics":  [
+                                            "Konsep Kesetimbangan",
+                                            "Tetapan Kesetimbangan",
+                                            "Pergeseran Kesetimbangan",
+                                            "Faktor Pergeseran",
+                                            "Asas Le Chatelier"
+                                        ],
+                         "key_terms":  [
+                                           "Kesetimbangan",
+                                           "Le Chatelier",
+                                           "Tetapan",
+                                           "Dinamis"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Kesetimbangan Kimia"
+                     },
+                     {
+                         "no":  3,
+                         "pages":  "56-87",
+                         "sub_topics":  [
+                                            "Teori Asam Basa",
+                                            "pH Asam Basa",
+                                            "Kekuatan Asam Basa",
+                                            "Indikator",
+                                            "Hidrolisis Garam"
+                                        ],
+                         "key_terms":  [
+                                           "Asam",
+                                           "Basa",
+                                           "pH",
+                                           "Indikator"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Asam dan Basa"
+                     },
+                     {
+                         "no":  4,
+                         "pages":  "88-110",
+                         "sub_topics":  [
+                                            "Hidrolisis Garam",
+                                            "pH Hidrolisis",
+                                            "Larutan Buffer",
+                                            "Kapasitas Buffer",
+                                            "Aplikasi Buffer"
+                                        ],
+                         "key_terms":  [
+                                           "Hidrolisis",
+                                           "Buffer",
+                                           "Garam",
+                                           "pH"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Hidrolisis"
+                     },
+                     {
+                         "no":  5,
+                         "pages":  "111-136",
+                         "sub_topics":  [
+                                            "Konsep Redoks",
+                                            "Bilangan Oksidasi",
+                                            "Penyetaraan Reaksi",
+                                            "Sel Volta",
+                                            "Sel Elektrolisis"
+                                        ],
+                         "key_terms":  [
+                                           "Redoks",
+                                           "Oksidasi",
+                                           "Reduksi",
+                                           "Elektrokimia"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Redoks dan Elektrokimia"
+                     }
+                 ],
+    "isbn":  "978-623-194-726-8"
+}

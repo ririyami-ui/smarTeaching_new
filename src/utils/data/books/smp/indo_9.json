@@ -2,11 +2,11 @@
   "bookId": "smp-indo-9",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Demi Keluarga", "pages": "1-34", "semester": "Ganjil", "sub_topics": ["Teks Deskripsi Lanjut", "Keluarga dalam Karya Sastra"] },
-    { "no": 2, "title": "Buku-Buku Berbicara", "pages": "35-68", "semester": "Ganjil", "sub_topics": ["Teks Resensi", "Menganalisis Karya", "Langkah Menulis Resensi"] },
-    { "no": 3, "title": "Komunikasi Ujung Jari", "pages": "69-102", "semester": "Ganjil", "sub_topics": ["Teks Eksposisi", "Argumen yang Logis", "Etika Komunikasi Digital"] },
-    { "no": 4, "title": "Dari Hobi Menjadi Pundi", "pages": "103-136", "semester": "Genap", "sub_topics": ["Teks Naratif", "Wirausaha Muda", "Menyusun Langkah Bisnis"] },
-    { "no": 5, "title": "Menyisip Masa Depan", "pages": "137-168", "semester": "Genap", "sub_topics": ["Teks Tanggapan", "Apresiasi Seni", "Memberi Kritik yang Membangun"] },
-    { "no": 6, "title": "Merencanakan Masa Depan", "pages": "169-200", "semester": "Genap", "sub_topics": ["Teks Pidato Persuasif", "Membangun Motivasi", "Langkah Mencapai Cita-cita"] }
+    { "no": 1, "title": "Demi Keluarga", "pages": "1-34", "semester": "Ganjil", "sub_topics": ["Teks Deskripsi Lanjut", "Keluarga dalam Karya Sastra"], "key_terms": ["Deskripsi", "Keluarga", "Nilai", "Karakter"] },
+    { "no": 2, "title": "Buku-Buku Berbicara", "pages": "35-68", "semester": "Ganjil", "sub_topics": ["Teks Resensi", "Menganalisis Karya", "Langkah Menulis Resensi"], "key_terms": ["Resensi", "Kritik", "Analisis", "Ulasan"] },
+    { "no": 3, "title": "Komunikasi Ujung Jari", "pages": "69-102", "semester": "Ganjil", "sub_topics": ["Teks Eksposisi", "Argumen yang Logis", "Etika Komunikasi Digital"], "key_terms": ["Eksposisi", "Argumen", "Digital", "Etika"] },
+    { "no": 4, "title": "Dari Hobi Menjadi Pundi", "pages": "103-136", "semester": "Genap", "sub_topics": ["Teks Naratif", "Wirausaha Muda", "Menyusun Langkah Bisnis"], "key_terms": ["Naratif", "Wirausaha", "Bisnis", "Kreatif"] },
+    { "no": 5, "title": "Menyisip Masa Depan", "pages": "137-168", "semester": "Genap", "sub_topics": ["Teks Tanggapan", "Apresiasi Seni", "Memberi Kritik yang Membangun"], "key_terms": ["Tanggapan", "Kritik", "Apresiasi", "Seni"] },
+    { "no": 6, "title": "Merencanakan Masa Depan", "pages": "169-200", "semester": "Genap", "sub_topics": ["Teks Pidato Persuasif", "Membangun Motivasi", "Langkah Mencapai Cita-cita"], "key_terms": ["Pidato", "Persuasif", "Motivasi", "Cita-cita"] }
   ]
 }

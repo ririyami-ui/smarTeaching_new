@@ -2,12 +2,12 @@
   "bookId": "smp-ipa-7",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Hakikat Ilmu Sains dan Metode Ilmiah", "pages": "1-40", "semester": "Ganjil", "sub_topics": ["Apa itu Sains?", "Laboratorium IPA", "Merancang Percobaan", "Pengukuran", "Pelaporan Hasil Percobaan"] },
-    { "no": 2, "title": "Zat dan Perubahannya", "pages": "41-80", "semester": "Ganjil", "sub_topics": ["Wujud Zat dan Model Partikel", "Perubahan Wujud Zat", "Perubahan Fisika dan Kimia", "Kerapatan Zat"] },
-    { "no": 3, "title": "Suhu, Kalor, dan Pemuaian", "pages": "81-120", "semester": "Ganjil", "sub_topics": ["Suhu dan Termometer", "Kalor dan Perpindahannya", "Pemuaian pada Benda"] },
-    { "no": 4, "title": "Gerak dan Gaya", "pages": "121-150", "semester": "Genap", "sub_topics": ["Gerak Lurus (Jarak, Perpindahan, Kelajuan)", "Gaya (Gaya Sentuh & Tak Sentuh)", "Hukum Newton"] },
-    { "no": 5, "title": "Klasifikasi Makhluk Hidup", "pages": "151-185", "semester": "Genap", "sub_topics": ["Makhluk Hidup atau Benda Mati?", "Kunci Determinasi", "Kingdom Monera, Protista, Fungi", "Kingdom Plantae & Animalia"] },
-    { "no": 6, "title": "Ekologi dan Keanekaragaman Hayati Indonesia", "pages": "186-220", "semester": "Genap", "sub_topics": ["Interaksi Antarkomponen Ekosistem", "Aliran Energi", "Keanekaragaman Hayati", "Konservasi Lingkungan"] },
-    { "no": 7, "title": "Bumi dan Tata Surya", "pages": "221-252", "semester": "Genap", "sub_topics": ["Sistem Tata Surya", "Bumi dan Satelitnya", "Matahari Sebagai Bintang"] }
+    { "no": 1, "title": "Hakikat Ilmu Sains dan Metode Ilmiah", "pages": "1-40", "semester": "Ganjil", "sub_topics": ["Apa itu Sains?", "Laboratorium IPA", "Merancang Percobaan", "Pengukuran", "Pelaporan Hasil Percobaan"], "key_terms": ["Sains", "Metode Ilmiah", "Pengukuran", "Hipotesis"] },
+    { "no": 2, "title": "Zat dan Perubahannya", "pages": "41-80", "semester": "Ganjil", "sub_topics": ["Wujud Zat dan Model Partikel", "Perubahan Wujud Zat", "Perubahan Fisika dan Kimia", "Kerapatan Zat"], "key_terms": ["Zat", "Partikel", "Fisika", "Kimia", "Kerapatan"] },
+    { "no": 3, "title": "Suhu, Kalor, dan Pemuaian", "pages": "81-120", "semester": "Ganjil", "sub_topics": ["Suhu dan Termometer", "Kalor dan Perpindahannya", "Pemuaian pada Benda"], "key_terms": ["Suhu", "Kalor", "Termometer", "Pemuaian"] },
+    { "no": 4, "title": "Gerak dan Gaya", "pages": "121-150", "semester": "Genap", "sub_topics": ["Gerak Lurus (Jarak, Perpindahan, Kelajuan)", "Gaya (Gaya Sentuh & Tak Sentuh)", "Hukum Newton"], "key_terms": ["Gerak", "Gaya", "Newton", "Kelajuan"] },
+    { "no": 5, "title": "Klasifikasi Makhluk Hidup", "pages": "151-185", "semester": "Genap", "sub_topics": ["Makhluk Hidup atau Benda Mati?", "Kunci Determinasi", "Kingdom Monera, Protista, Fungi", "Kingdom Plantae & Animalia"], "key_terms": ["Klasifikasi", "Kingdom", "Determinasi", "Taksonomi"] },
+    { "no": 6, "title": "Ekologi dan Keanekaragaman Hayati Indonesia", "pages": "186-220", "semester": "Genap", "sub_topics": ["Interaksi Antarkomponen Ekosistem", "Aliran Energi", "Keanekaragaman Hayati", "Konservasi Lingkungan"], "key_terms": ["Ekologi", "Ekosistem", "Biodiversitas", "Konservasi"] },
+    { "no": 7, "title": "Bumi dan Tata Surya", "pages": "221-252", "semester": "Genap", "sub_topics": ["Sistem Tata Surya", "Bumi dan Satelitnya", "Matahari Sebagai Bintang"], "key_terms": ["Tata Surya", "Bumi", "Matahari", "Satelit"] }
   ]
 }

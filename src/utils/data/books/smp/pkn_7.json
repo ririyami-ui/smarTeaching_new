@@ -2,11 +2,11 @@
   "bookId": "smp-pkn-7",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Sejarah Kelahiran Pancasila", "pages": "1-30", "semester": "Ganjil", "sub_topics": ["Masa Sejarah", "Masa Kebangkitan Nasional", "Sidang BPUPKI", "Panitia Sembilan"] },
-    { "no": 2, "title": "Norma dan UUD NRI Tahun 1945", "pages": "31-60", "semester": "Ganjil", "sub_topics": ["Norma Masyarakat", "Hak dan Kewajiban", "UUD NRI Tahun 1945"] },
-    { "no": 3, "title": "Kesatuan Indonesia dan Karakteristik Daerah", "pages": "61-90", "semester": "Ganjil", "sub_topics": ["Kesatuan Indonesia", "Peran Daerah dalam NKRI", "Persatuan Bangsa"] },
-    { "no": 4, "title": "Kebinekaan Indonesia", "pages": "91-120", "semester": "Genap", "sub_topics": ["Keragaman Gender", "Keragaman Suku", "Keragaman Budaya", "Keragaman Agama"] },
-    { "no": 5, "title": "Menghargai Lingkungan dan Budaya Lokal", "pages": "121-145", "semester": "Genap", "sub_topics": ["Mengenal Lingkungan", "Budaya Lokal", "Makanan Tradisional", "Produk Lokal"] },
-    { "no": 6, "title": "Bekerja Sama dan Bergotong Royong", "pages": "146-170", "semester": "Genap", "sub_topics": ["Kerja Sama", "Gotong Royong", "Revolusi Mental"] }
+    { "no": 1, "title": "Sejarah Kelahiran Pancasila", "pages": "1-30", "semester": "Ganjil", "sub_topics": ["Masa Sejarah", "Masa Kebangkitan Nasional", "Sidang BPUPKI", "Panitia Sembilan"], "key_terms": ["Pancasila", "BPUPKI", "PPKI", "Dasar Negara"] },
+    { "no": 2, "title": "Norma dan UUD NRI Tahun 1945", "pages": "31-60", "semester": "Ganjil", "sub_topics": ["Norma Masyarakat", "Hak dan Kewajiban", "UUD NRI Tahun 1945"], "key_terms": ["Norma", "Hak", "Kewajiban", "UUD 1945"] },
+    { "no": 3, "title": "Kesatuan Indonesia dan Karakteristik Daerah", "pages": "61-90", "semester": "Ganjil", "sub_topics": ["Kesatuan Indonesia", "Peran Daerah dalam NKRI", "Persatuan Bangsa"], "key_terms": ["NKRI", "Otonomi", "Daerah", "Persatuan"] },
+    { "no": 4, "title": "Kebinekaan Indonesia", "pages": "91-120", "semester": "Genap", "sub_topics": ["Keragaman Gender", "Keragaman Suku", "Keragaman Budaya", "Keragaman Agama"], "key_terms": ["Bineka", "Tunggal Ika", "Keberagaman", "Toleransi"] },
+    { "no": 5, "title": "Menghargai Lingkungan dan Budaya Lokal", "pages": "121-145", "semester": "Genap", "sub_topics": ["Mengenal Lingkungan", "Budaya Lokal", "Makanan Tradisional", "Produk Lokal"], "key_terms": ["Lingkungan", "Budaya Lokal", "Tradisional", "Kearifan"] },
+    { "no": 6, "title": "Bekerja Sama dan Bergotong Royong", "pages": "146-170", "semester": "Genap", "sub_topics": ["Kerja Sama", "Gotong Royong", "Revolusi Mental"], "key_terms": ["Gotong Royong", "Kerja Sama", "Revolusi Mental", "Solidaritas"] }
   ]
 }

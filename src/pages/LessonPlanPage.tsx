@@ -74,6 +74,317 @@ interface SavedRPP {
   createdAt?: { toDate: () => Date };
 }
 
+// === Helpers ===
+
+function getDistributions(itemId: string | number | undefined, promes: Record<string, number>): number[] {
+    const distributions: number[] = [];
+    Object.keys(promes).forEach(key => {
+        if (key.startsWith(`${itemId}_`)) {
+            const val = Number(promes[key]);
+            if (val > 0) distributions.push(val);
+        }
+    });
+    return distributions;
+}
+
+interface FetchDeps {
+    user: { uid: string };
+    selectedGrade: string;
+    selectedSubject: string;
+    academicYear: string;
+    activeSemester: string;
+    subjects: { id: string; name: string }[];
+}
+
+async function fetchPromesMaterialsData(deps: FetchDeps): Promise<MaterialItem[]> {
+    const { user, selectedGrade, selectedSubject, academicYear, activeSemester, subjects } = deps;
+    const subjectData = subjects.find(s => s.id === selectedSubject);
+    const subjectName = subjectData?.name || selectedSubject;
+    const yearId = academicYear.replace('/', '-');
+    const programId = `${user.uid}_${subjectName}_${selectedGrade}_${yearId}_${activeSemester}`;
+    const programDoc = await getDoc(doc(db, 'teachingPrograms', programId));
+
+    let protaData: MaterialItem[] = [];
+    if (programDoc.exists()) {
+        const data = programDoc.data();
+        const prota = (data.prota || []) as MaterialItem[];
+        const promes = data.promes || {};
+        protaData = prota.map(item => ({
+            ...item,
+            distribution: getDistributions(item.id, promes)
+        }));
+    } else {
+        const q = query(
+            collection(db, 'teachingPrograms'),
+            where('userId', '==', user.uid),
+            where('gradeLevel', '==', selectedGrade),
+            where('subject', '==', selectedSubject),
+            where('academicYear', '==', academicYear),
+            where('semester', '==', activeSemester),
+            where('type', '!=', 'atp_document')
+        );
+        const qSnap = await getDocs(q);
+        if (!qSnap.empty) {
+            const data = qSnap.docs[0].data();
+            const prota = (data.prota || []) as MaterialItem[];
+            const promes = data.promes || {};
+            protaData = prota.map(item => ({
+                ...item,
+                distribution: getDistributions(item.id, promes)
+            }));
+        }
+    }
+    return protaData;
+}
+
+async function fetchAtpMaterialsData(deps: FetchDeps): Promise<MaterialItem[]> {
+    const { user, selectedGrade, selectedSubject, academicYear, activeSemester, subjects } = deps;
+    const subjectData = subjects.find(s => s.id === selectedSubject);
+    const subjectName = subjectData?.name || selectedSubject;
+    const yearId = academicYear.replace('/', '-');
+
+    const atpId = `${user.uid}_${subjectName}_${selectedGrade}_${yearId}_${activeSemester}_ATP`;
+    const atpSnap = await getDoc(doc(db, 'teachingPrograms', atpId));
+
+    const mainDocId = `${user.uid}_${subjectName}_${selectedGrade}_${yearId}_${activeSemester}`;
+    const mainDocSnap = await getDoc(doc(db, 'teachingPrograms', mainDocId));
+    const promes = mainDocSnap.exists() ? mainDocSnap.data().promes || {} : {};
+
+    if (atpSnap.exists() && atpSnap.data().atpItems) {
+        const items = atpSnap.data().atpItems as MaterialItem[];
+        return items.map((item, index) => {
+            const protaId = index + 1;
+            return {
+                ...item,
+                id: protaId,
+                distribution: getDistributions(protaId, promes)
+            };
+        });
+    }
+    return [];
+}
+
+function getBarClass(i: number, step: number): string {
+    if (i === step) return 'w-8 bg-blue-600';
+    if (i < step) return 'w-3 bg-blue-300';
+    return 'w-1.5 bg-gray-200 dark:bg-gray-700';
+}
+
+function renderMaterialList(
+    sourceType: 'promes' | 'atp',
+    atpMaterials: MaterialItem[],
+    promesMaterials: MaterialItem[],
+    selectedMaterial: MaterialItem | null,
+    setSelectedMaterial: (m: MaterialItem) => void,
+    setManualKd: (s: string) => void,
+    setManualMateri: (s: string) => void,
+): React.ReactNode {
+    if (sourceType === 'atp') {
+        if (atpMaterials.length > 0) {
+            return atpMaterials.map((m) => (
+                <button key={m.id || m.tp || m.materi} onClick={() => { setSelectedMaterial(m); setManualKd(m.tp || ''); setManualMateri(m.materi || ''); }}
+                    className={`w-full text-left p-3 transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/10 ${selectedMaterial === m ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold border-l-4 border-purple-500' : 'text-gray-600 dark:text-gray-400'}`}
+                >
+                    <div className="text-[10px] uppercase font-bold opacity-60 mb-1">{m.elemen}</div>
+                    <div className="text-xs line-clamp-2 leading-relaxed">{m.tp}</div>
+                    <div className="mt-1 flex items-center justify-between">
+                        <span className="text-[9px] bg-purple-50 dark:bg-purple-900/40 px-1.5 py-0.5 rounded text-purple-600">{m.jp} JP</span>
+                        {m.materi && <span className="text-[9px] italic opacity-70">L. Materi: {m.materi}</span>}
+                    </div>
+                </button>
+            ));
+        }
+        return (
+            <div className="p-6 text-center">
+                <p className="text-xs text-gray-400">Data ATP tidak ditemukan.</p>
+                <p className="text-[10px] text-gray-400 mt-1">Pastikan Anda sudah menyusun ATP di halaman Program Mengajar.</p>
+            </div>
+        );
+    }
+    if (promesMaterials.length > 0) {
+        return promesMaterials.map((m) => (
+            <button key={m.id || m.materi} onClick={() => { setSelectedMaterial(m); setManualKd(m.kd || ''); setManualMateri(m.materi || ''); }}
+                className={`w-full text-left p-3 text-sm transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 ${selectedMaterial?.id === m.id ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold' : 'text-gray-600 dark:text-gray-400'}`}
+            >{m.materi}</button>
+        ));
+    }
+    return (
+        <div className="p-6 text-center">
+            <p className="text-xs text-gray-400">Data Promes tidak ditemukan.</p>
+        </div>
+    );
+}
+
+function renderHistoryList(
+    filteredRPPs: SavedRPP[],
+    generatedRPP: string,
+    viewingRPP: SavedRPP | null,
+    filterSubject: string,
+    setters: {
+        setViewingRPP: (r: SavedRPP | null) => void;
+        setGeneratedRPP: (s: string) => void;
+    },
+    handleDelete: (id: string) => void,
+    navigate: (path: string) => void,
+): React.ReactNode {
+    if (filteredRPPs.length === 0) {
+        return (
+            <p className="text-center text-xs text-gray-400 py-10">
+                {filterSubject === 'all' ? 'Belum ada RPP tersimpan.' : 'Tidak ada RPP untuk mapel ini.'}
+            </p>
+        );
+    }
+    return filteredRPPs.map((plan) => (
+        <div key={plan.id} className="group relative bg-gray-50 dark:bg-gray-900/40 p-3 rounded-xl border dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-800 transition-all">
+            <div className="flex justify-between items-start">
+                <button type="button" className="cursor-pointer flex-1 text-left bg-transparent border-none p-0"
+                    onClick={() => { setters.setViewingRPP(plan); if (!generatedRPP || viewingRPP?.id !== plan.id) { setters.setGeneratedRPP(''); } }}
+                >
+                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{plan.gradeLevel} - {plan.subject}</p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">{plan.topic}</p>
+                    <p className="text-[10px] text-gray-500 mt-1">{plan.createdAt?.toDate ? formatDate(plan.createdAt.toDate()) : 'N/A'}</p>
+                </button>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={(e) => { e.stopPropagation(); navigate('/penilaian-kktp'); }}
+                        className="text-blue-400 hover:text-blue-600 p-1" title="Lakukan Penilaian Digital"
+                    ><ClipboardList size={14} /></button>
+                    <button onClick={() => handleDelete(plan.id)} className="text-red-400 hover:text-red-600 p-1">
+                        <Trash2 size={14} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    ));
+}
+
+interface DisplayContentState {
+    isGenerating: boolean;
+    generatedRPP: string;
+    viewingRPP: SavedRPP | null;
+    isSaving: boolean;
+    generationProgress: string;
+    progressSteps: string[];
+    generationStep: number;
+    selectedMaterial: MaterialItem | null;
+    userProfile: { name: string; nip: string; principalName: string; principalNip: string };
+    signingLocation: string;
+}
+
+interface DisplayContentCallbacks {
+    handleDownloadDocx: () => void;
+    handleSave: () => void;
+}
+
+function renderDisplayContent(
+    state: DisplayContentState,
+    callbacks: DisplayContentCallbacks,
+): React.ReactNode {
+    const { isGenerating, generatedRPP, viewingRPP, isSaving, generationProgress, progressSteps, generationStep, selectedMaterial, userProfile, signingLocation } = state;
+    const { handleDownloadDocx, handleSave } = callbacks;
+    if (isGenerating) {
+        return (
+            <div className="card-glass rounded-3xl p-8 lg:p-12 shadow-xl border-2 border-dashed border-blue-200 dark:border-blue-900 flex flex-col items-center justify-center space-y-6 min-h-[500px] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-full -mr-16 -mt-16 blur-3xl animate-pulse" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-50 dark:bg-purple-900/20 rounded-full -ml-16 -mb-16 blur-3xl animate-pulse" />
+                <div className="relative z-10">
+                    <div className="p-6 bg-blue-50 dark:bg-blue-900/30 rounded-full relative">
+                        <Loader2 className="animate-spin text-blue-500" size={80} strokeWidth={1} />
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 card-glass p-3 rounded-full shadow-lg">
+                            <Sparkles className="text-blue-600 animate-bounce" size={32} />
+                        </div>
+                    </div>
+                </div>
+                <div className="text-center space-y-2 z-10 w-full max-w-md">
+                    <h2 className="text-xl lg:text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">Membangun RPP Masa Depan</h2>
+                    <div className="space-y-4">
+                        <p className="text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/40 px-6 py-2.5 rounded-2xl border border-blue-100 dark:border-blue-800 animate-pulse text-sm lg:text-base">
+                            {generationProgress}
+                        </p>
+                        <div className="flex justify-center gap-1.5 pt-2">
+                            {progressSteps.map((step, i) => (
+                                <div key={step} className={`h-1.5 rounded-full transition-all duration-500 ${getBarClass(i, generationStep)}`} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 w-full max-w-sm z-10 pt-4">
+                    <div className="bg-gray-50 dark:bg-gray-900/40 p-3 rounded-2xl border dark:border-gray-700 flex items-center gap-3">
+                        <div className="text-xs font-bold text-gray-400">STATUS</div>
+                        <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest animate-pulse">Processing</div>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-900/40 p-3 rounded-2xl border dark:border-gray-700 flex items-center gap-3">
+                        <div className="text-xs font-bold text-gray-400">ALREADY</div>
+                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{Math.round(((generationStep + 1) / progressSteps.length) * 100)}%</div>
+                    </div>
+                </div>
+                <p className="text-gray-400 text-xs text-center max-w-xs z-10 leading-relaxed italic">
+                    &quot;Guru yang baik memberikan sesuatu yang bisa dipikirkan oleh siswa di rumah.&quot; - Smart Teaching AI
+                </p>
+            </div>
+        );
+    }
+    if (generatedRPP || viewingRPP) {
+        return (
+            <div id="printable-area" className="card-glass rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full print:m-0 print:p-0 print:block print:h-auto print:shadow-none print:border-none">
+                <div className="p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center no-print sticky top-0 z-20">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-600 rounded-lg"><FileText className="text-white" size={20} /></div>
+                        <div>
+                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 block">Pratinjau RPP</span>
+                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{viewingRPP ? viewingRPP.topic : selectedMaterial?.materi}</span>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={handleDownloadDocx} className="p-2.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all text-blue-600 dark:text-blue-400 hover:shadow-md" title="Download Word (.docx)"><Download size={18} /></button>
+                        {generatedRPP && (
+                            <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 font-bold text-sm transition-all disabled:opacity-50 shadow-md hover:shadow-lg">
+                                {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Simpan RPP
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <div className={`p-8 lg:p-12 overflow-y-auto flex-1 rpp-prose max-w-none print:p-0 print:overflow-visible custom-scrollbar ${getRegionFromSubject(viewingRPP?.subject || selectedMaterial?.subject || '') === 'Jawa' ? 'font-carakan' : ''}`}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                        {generatedRPP || (viewingRPP ? viewingRPP.content : '')}
+                    </ReactMarkdown>
+                    <div id="signature-section" className="mt-12 pt-8 border-t border-transparent no-break-inside avoid-page-break">
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p>Mengetahui,</p>
+                                <p className="font-bold mb-16">Kepala Sekolah</p>
+                                <p className="font-bold underline">{userProfile.principalName || '.....................................'}</p>
+                                <p>NIP. {userProfile.principalNip || '...................'}</p>
+                            </div>
+                            <div></div>
+                            <div>
+                                <p>{signingLocation || 'Jakarta'}, {formatDate(new Date())}</p>
+                                <p className="font-bold mb-16">Guru Mata Pelajaran</p>
+                                <p className="font-bold underline">{userProfile.name || '.....................................'}</p>
+                                <p>NIP. {userProfile.name ? userProfile.nip : '...................'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    return (
+        <div className="card-glass rounded-3xl p-12 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center space-y-6 text-center">
+            <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-full"><BookOpen className="text-blue-600" size={64} /></div>
+            <div className="space-y-2">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Mulai Susun RPP Deep Learning</h2>
+                <p className="text-gray-500 dark:text-gray-400 max-w-md">
+                    Pilih materi pokok dari data Program Semester di sebelah kiri, lalu klik tombol **Generate** untuk menyusun RPP berbasis prinsip **Mindful, Meaningful, & Joyful**.
+                </p>
+            </div>
+            <div className="flex gap-4">
+                <div className="flex items-center gap-2 text-xs text-gray-400 italic"><Sparkles size={14} /> Berbasis Kurikulum Deep Learning</div>
+                <div className="flex items-center gap-2 text-xs text-gray-400 italic"><History size={14} /> Tersimpan Otomatis</div>
+            </div>
+        </div>
+    );
+}
+
 const LessonPlanPage: React.FC = () => {
     const { user } = useAuth();
     const { activeSemester, academicYear, geminiModel } = useSettings();
@@ -189,7 +500,7 @@ const LessonPlanPage: React.FC = () => {
                     getDocs(subjectsQuery)
                 ]);
 
-                const uniqueLevels = [...new Set(classesSnap.docs.map(doc => doc.data().level as string))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+                const uniqueLevels = [...new Set(classesSnap.docs.map(doc => String(doc.data().level)))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
                 const fetchedSubjects = subjectsSnap.docs.map(doc => ({ id: doc.id, name: doc.data().name as string })).sort((a, b) => a.name.localeCompare(b.name));
 
                 setLevels(uniqueLevels);
@@ -218,7 +529,7 @@ const LessonPlanPage: React.FC = () => {
     }, [user]);
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(globalThis.location.search);
         const qGrade = params.get('grade');
         const qSubject = params.get('subject');
         const qTopic = params.get('topic');
@@ -242,116 +553,30 @@ const LessonPlanPage: React.FC = () => {
     }, [selectedMaterial]);
 
     useEffect(() => {
-        const fetchMaterials = async () => {
-            if (!user || !selectedGrade || !selectedSubject) return;
+        if (!user) return;
+        if (!selectedGrade) return;
+        if (!selectedSubject) return;
 
-            if (aiTask.status === 'idle') {
-                setSelectedMaterial(null);
-                setGeneratedRPP('');
+        if (aiTask.status === 'idle') {
+            setSelectedMaterial(null);
+            setGeneratedRPP('');
+        }
+
+        const deps: FetchDeps = { user, selectedGrade, selectedSubject, academicYear, activeSemester, subjects };
+        const isPromes = sourceType === 'promes';
+        const fetchFn = isPromes ? fetchPromesMaterialsData : fetchAtpMaterialsData;
+        const setter = isPromes ? setPromesMaterials : setAtpMaterials;
+
+        fetchFn(deps).then(data => {
+            setter(data);
+            const topic = aiTask.params?.topic;
+            if (typeof topic === 'string' && data.length > 0) {
+                const match = data.find(m => m.materi === topic);
+                if (match) setSelectedMaterial(match);
             }
-
-            if (sourceType === 'promes') {
-                try {
-                    const subjectDataInner = subjects.find(s => s.id === selectedSubject);
-                    const subjectNameInner = subjectDataInner?.name || selectedSubject;
-                    const yearId = academicYear.replace('/', '-');
-                    const programId = `${user.uid}_${subjectNameInner}_${selectedGrade}_${yearId}_${activeSemester}`;
-                    const programDoc = await getDoc(doc(db, 'teachingPrograms', programId));
-
-                    let protaData: MaterialItem[] = [];
-                    if (programDoc.exists()) {
-                        const data = programDoc.data();
-                        const prota = (data.prota || []) as MaterialItem[];
-                        const promes = data.promes || {};
-                        protaData = prota.map(item => {
-                            const distributions: number[] = [];
-                            Object.keys(promes).forEach(key => {
-                                if (key.startsWith(`${item.id}_`)) {
-                                    const val = Number.parseInt(promes[key], 10);
-                                    if (val > 0) distributions.push(val);
-                                }
-                            });
-                            return { ...item, distribution: distributions };
-                        });
-                    } else {
-                        const q = query(
-                            collection(db, 'teachingPrograms'),
-                            where('userId', '==', user.uid),
-                            where('gradeLevel', '==', selectedGrade),
-                            where('subject', '==', selectedSubject),
-                            where('academicYear', '==', academicYear),
-                            where('semester', '==', activeSemester),
-                            where('type', '!=', 'atp_document')
-                        );
-                        const qSnap = await getDocs(q);
-                        if (!qSnap.empty) {
-                            const data = qSnap.docs[0].data();
-                            const prota = (data.prota || []) as MaterialItem[];
-                            const promes = data.promes || {};
-                            protaData = prota.map(item => {
-                                const distributions: number[] = [];
-                                Object.keys(promes).forEach(key => {
-                                    if (key.startsWith(`${item.id}_`)) {
-                                        const val = Number.parseInt(promes[key], 10);
-                                        if (val > 0) distributions.push(val);
-                                    }
-                                });
-                                return { ...item, distribution: distributions };
-                            });
-                        }
-                    }
-
-                    setPromesMaterials(protaData);
-
-                    if (aiTask.params?.topic && protaData.length > 0) {
-                        const match = protaData.find(m => m.materi === String(aiTask.params!.topic));
-                        if (match) setSelectedMaterial(match);
-                    }
-
-                } catch (error) {
-                    console.error("Error fetching promes:", error);
-                }
-            } else {
-                try {
-                    const subjectDataInner = subjects.find(s => s.id === selectedSubject);
-                    const subjectNameInner = subjectDataInner?.name || selectedSubject;
-                    const yearId = academicYear.replace('/', '-');
-
-                    const atpId = `${user.uid}_${subjectNameInner}_${selectedGrade}_${yearId}_${activeSemester}_ATP`;
-                    const atpSnap = await getDoc(doc(db, 'teachingPrograms', atpId));
-
-                    const mainDocId = `${user.uid}_${subjectNameInner}_${selectedGrade}_${yearId}_${activeSemester}`;
-                    const mainDocSnap = await getDoc(doc(db, 'teachingPrograms', mainDocId));
-                    const promes = mainDocSnap.exists() ? mainDocSnap.data().promes || {} : {};
-
-                    if (atpSnap.exists() && atpSnap.data().atpItems) {
-                        const items = atpSnap.data().atpItems as MaterialItem[];
-
-                        const enhancedAtp = items.map((item, index) => {
-                            const protaId = index + 1;
-                            const distributions: number[] = [];
-                            Object.keys(promes).forEach(key => {
-                                if (key.startsWith(`${protaId}_`)) {
-                                    const val = Number.parseInt(promes[key], 10);
-                                    if (val > 0) distributions.push(val);
-                                }
-                            });
-                            return { ...item, id: protaId, distribution: distributions };
-                        });
-
-                        setAtpMaterials(enhancedAtp);
-
-                        if (aiTask.params?.topic) {
-                            const match = enhancedAtp.find(m => m.materi === String(aiTask.params!.topic));
-                            if (match) setSelectedMaterial(match);
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error fetching ATP:", error);
-                }
-            }
-        };
-        fetchMaterials();
+        }).catch(error => {
+            console.error("Error fetching materials:", error);
+        });
     }, [selectedGrade, selectedSubject, activeSemester, academicYear, sourceType, subjects, aiTask.status, aiTask.params, user]);
 
     const fetchRPPHistory = useCallback(async () => {
@@ -365,7 +590,7 @@ const LessonPlanPage: React.FC = () => {
             const querySnapshot = await getDocs(q);
             const plans = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SavedRPP));
 
-            const sortedPlans = plans.sort((a, b) => {
+            const sortedPlans = plans.toSorted((a, b) => {
                 const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
                 const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
                 return bTime - aTime;
@@ -396,18 +621,7 @@ const LessonPlanPage: React.FC = () => {
         setGenerationProgress(progressSteps[0]);
         setViewingRPP(null);
 
-        let stepInterval: ReturnType<typeof setInterval> | undefined;
-        const startSimulation = () => {
-            stepInterval = setInterval(() => {
-                setGenerationStep(prev => {
-                    if (prev < progressSteps.length - 1) return prev + 1;
-                    return prev;
-                });
-            }, 3500);
-        };
-
         try {
-            // 1. Fetch Auto-matching Book Context
             let bookContext = null;
             const matchedBook = findAutoMatchingBook(userProfile?.schoolLevel || 'SMP', subjectName, selectedGrade);
             if (matchedBook) {
@@ -415,7 +629,6 @@ const LessonPlanPage: React.FC = () => {
             }
 
             await startGeneration('lessonPlan', async (context) => {
-                startSimulation();
                 return await generateLessonPlan({
                     kd: manualKd || selectedMaterial.kd || selectedMaterial.tp || '',
                     materi: manualMateri || selectedMaterial.materi,
@@ -437,7 +650,7 @@ const LessonPlanPage: React.FC = () => {
                     elemen: selectedMaterial.elemen || '',
                     profilLulusan: selectedMaterial.profilLulusan || '',
                     studentCharacteristics: studentCharacteristics,
-                    bookContext: bookContext, // Pass book context to AI
+                    bookContext: bookContext,
                     onProgress: context.onProgress
                 });
             }, {
@@ -447,8 +660,6 @@ const LessonPlanPage: React.FC = () => {
             });
         } catch {
             // Handled by context
-        } finally {
-            if (stepInterval) clearInterval(stepInterval);
         }
     };
 
@@ -611,6 +822,21 @@ const LessonPlanPage: React.FC = () => {
         }
     };
 
+    const materialListContent = renderMaterialList(
+        sourceType, atpMaterials, promesMaterials, selectedMaterial,
+        setSelectedMaterial, setManualKd, setManualMateri,
+    );
+
+    const historyListContent = renderHistoryList(
+        filteredRPPs, generatedRPP, viewingRPP, filterSubject,
+        { setViewingRPP, setGeneratedRPP }, handleDelete, navigate,
+    );
+
+    const displayContent = renderDisplayContent(
+        { isGenerating, generatedRPP, viewingRPP, isSaving, generationProgress, progressSteps, generationStep, selectedMaterial, userProfile, signingLocation },
+        { handleDownloadDocx, handleSave },
+    );
+
     return (
         <div className="max-w-[1500px] mx-auto px-4 py-4 lg:py-8 min-h-screen print:m-0 print:p-0 print:max-w-none">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 lg:mb-8 no-print">
@@ -651,7 +877,7 @@ const LessonPlanPage: React.FC = () => {
                         </StyledSelect>
 
                         <div className="space-y-1.5">
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1 flex justify-between items-center">
+                            <div className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1 flex justify-between items-center">
                                 <span>Materi Pokok / ATP</span>
                                 <div className="flex bg-gray-100 dark:bg-gray-700 p-0.5 rounded-lg border dark:border-gray-600 scale-90 origin-right">
                                     <button
@@ -663,63 +889,18 @@ const LessonPlanPage: React.FC = () => {
                                         className={`px-2 py-1 rounded-md text-[10px] uppercase font-bold transition-all ${sourceType === 'atp' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-500'}`}
                                     >ATP</button>
                                 </div>
-                            </label>
+                            </div>
                             <div className="max-h-64 overflow-y-auto border dark:border-gray-600 rounded-xl divide-y dark:divide-gray-700">
-                                {sourceType === 'atp' ? (
-                                    atpMaterials.length > 0 ? (
-                                        atpMaterials.map((m, idx) => (
-                                            <button
-                                                key={idx}
-                                                onClick={() => {
-                                                    setSelectedMaterial(m);
-                                                    setManualKd(m.tp || '');
-                                                    setManualMateri(m.materi || '');
-                                                }}
-                                                className={`w-full text-left p-3 transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/10 ${selectedMaterial === m ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold border-l-4 border-purple-500' : 'text-gray-600 dark:text-gray-400'}`}
-                                            >
-                                                <div className="text-[10px] uppercase font-bold opacity-60 mb-1">{m.elemen}</div>
-                                                <div className="text-xs line-clamp-2 leading-relaxed">{m.tp}</div>
-                                                <div className="mt-1 flex items-center justify-between">
-                                                    <span className="text-[9px] bg-purple-50 dark:bg-purple-900/40 px-1.5 py-0.5 rounded text-purple-600">{m.jp} JP</span>
-                                                    {m.materi && <span className="text-[9px] italic opacity-70">L. Materi: {m.materi}</span>}
-                                                </div>
-                                            </button>
-                                        ))
-                                    ) : (
-                                        <div className="p-6 text-center">
-                                            <p className="text-xs text-gray-400">Data ATP tidak ditemukan.</p>
-                                            <p className="text-[10px] text-gray-400 mt-1">Pastikan Anda sudah menyusun ATP di halaman Program Mengajar.</p>
-                                        </div>
-                                    )
-                                ) : (
-                                    promesMaterials.length > 0 ? (
-                                        promesMaterials.map((m, idx) => (
-                                            <button
-                                                key={idx}
-                                                onClick={() => {
-                                                    setSelectedMaterial(m);
-                                                    setManualKd(m.kd || '');
-                                                    setManualMateri(m.materi || '');
-                                                }}
-                                                className={`w-full text-left p-3 text-sm transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 ${selectedMaterial?.id === m.id ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold' : 'text-gray-600 dark:text-gray-400'}`}
-                                            >
-                                                {m.materi}
-                                            </button>
-                                        ))
-                                    ) : (
-                                        <div className="p-6 text-center">
-                                            <p className="text-xs text-gray-400">Data Promes tidak ditemukan.</p>
-                                        </div>
-                                    )
-                                )}
+                                {materialListContent}
                             </div>
                         </div>
 
                         {selectedMaterial && (
                             <div className="space-y-4 animate-fade-in">
                                 <div className="space-y-1.5">
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Kompetensi Dasar / CP (Dapat Diedit)</label>
+                                    <label htmlFor="kd-textarea" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Kompetensi Dasar / CP (Dapat Diedit)</label>
                                     <textarea
+                                        id="kd-textarea"
                                         value={manualKd}
                                         onChange={(e) => setManualKd(e.target.value)}
                                         rows={3}
@@ -728,8 +909,9 @@ const LessonPlanPage: React.FC = () => {
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Materi Pokok (Dapat Diedit)</label>
+                                    <label htmlFor="materi-textarea" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Materi Pokok (Dapat Diedit)</label>
                                     <textarea
+                                        id="materi-textarea"
                                         value={manualMateri}
                                         onChange={(e) => setManualMateri(e.target.value)}
                                         rows={2}
@@ -741,8 +923,9 @@ const LessonPlanPage: React.FC = () => {
                         )}
 
                         <div className="space-y-1.5">
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Karakteristik Peserta Didik (Opsional)</label>
+                            <label htmlFor="student-char-textarea" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Karakteristik Peserta Didik (Opsional)</label>
                             <textarea
+                                id="student-char-textarea"
                                 value={studentCharacteristics}
                                 onChange={(e) => setStudentCharacteristics(e.target.value)}
                                 rows={3}
@@ -777,9 +960,10 @@ const LessonPlanPage: React.FC = () => {
                         </StyledSelect>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 ml-1">Kota (Tanda Tangan)</label>
+                            <label htmlFor="signing-location" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 ml-1">Kota (Tanda Tangan)</label>
                             <div className="flex gap-2">
                                 <input
+                                    id="signing-location"
                                     type="text"
                                     className="w-full p-2 border rounded-xl dark:bg-gray-700 dark:border-gray-600 text-sm"
                                     value={signingLocation}
@@ -837,42 +1021,8 @@ const LessonPlanPage: React.FC = () => {
                         <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
                             {loadingHistory ? (
                                 <div className="flex justify-center p-4"><Loader2 className="animate-spin text-gray-300" /></div>
-                            ) : filteredRPPs.length > 0 ? (
-                                filteredRPPs.map((plan) => (
-                                    <div key={plan.id} className="group relative bg-gray-50 dark:bg-gray-900/40 p-3 rounded-xl border dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-800 transition-all">
-                                        <div className="flex justify-between items-start">
-                                            <div className="cursor-pointer flex-1" onClick={() => {
-                                                setViewingRPP(plan);
-                                                if (!generatedRPP || viewingRPP?.id !== plan.id) {
-                                                    setGeneratedRPP('');
-                                                }
-                                            }}>
-                                                <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{plan.gradeLevel} - {plan.subject}</p>
-                                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">{plan.topic}</p>
-                                                <p className="text-[10px] text-gray-500 mt-1">{plan.createdAt?.toDate ? formatDate(plan.createdAt.toDate()) : 'N/A'}</p>
-                                            </div>
-                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate('/penilaian-kktp');
-                                                    }}
-                                                    className="text-blue-400 hover:text-blue-600 p-1"
-                                                    title="Lakukan Penilaian Digital"
-                                                >
-                                                    <ClipboardList size={14} />
-                                                </button>
-                                                <button onClick={() => handleDelete(plan.id)} className="text-red-400 hover:text-red-600 p-1">
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
                             ) : (
-                                <p className="text-center text-xs text-gray-400 py-10">
-                                    {filterSubject === 'all' ? 'Belum ada RPP tersimpan.' : 'Tidak ada RPP untuk mapel ini.'}
-                                </p>
+                                historyListContent
                             )}
                         </div>
                     </div>
@@ -880,134 +1030,7 @@ const LessonPlanPage: React.FC = () => {
 
                 {/* Display Area */}
                 <div className="lg:col-span-3 flex flex-col h-[600px] lg:h-auto print:h-auto print:block print:w-full">
-                    {isGenerating ? (
-                        <div className="card-glass rounded-3xl p-8 lg:p-12 shadow-xl border-2 border-dashed border-blue-200 dark:border-blue-900 flex flex-col items-center justify-center space-y-6 min-h-[500px] relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-full -mr-16 -mt-16 blur-3xl animate-pulse" />
-                            <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-50 dark:bg-purple-900/20 rounded-full -ml-16 -mb-16 blur-3xl animate-pulse" />
-
-                            <div className="relative z-10">
-                                <div className="p-6 bg-blue-50 dark:bg-blue-900/30 rounded-full relative">
-                                    <Loader2 className="animate-spin text-blue-500" size={80} strokeWidth={1} />
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 card-glass p-3 rounded-full shadow-lg">
-                                        <Sparkles className="text-blue-600 animate-bounce" size={32} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="text-center space-y-2 z-10 w-full max-w-md">
-                                <h2 className="text-xl lg:text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">
-                                    Membangun RPP Masa Depan
-                                </h2>
-                                <div className="space-y-4">
-                                    <p className="text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/40 px-6 py-2.5 rounded-2xl border border-blue-100 dark:border-blue-800 animate-pulse text-sm lg:text-base">
-                                        {generationProgress}
-                                    </p>
-
-                                    <div className="flex justify-center gap-1.5 pt-2">
-                                        {progressSteps.map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className={`h-1.5 rounded-full transition-all duration-500 ${i === generationStep ? 'w-8 bg-blue-600' : i < generationStep ? 'w-3 bg-blue-300' : 'w-1.5 bg-gray-200 dark:bg-gray-700'}`}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 w-full max-w-sm z-10 pt-4">
-                                <div className="bg-gray-50 dark:bg-gray-900/40 p-3 rounded-2xl border dark:border-gray-700 flex items-center gap-3">
-                                    <div className="text-xs font-bold text-gray-400">STATUS</div>
-                                    <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest animate-pulse">Processing</div>
-                                </div>
-                                <div className="bg-gray-50 dark:bg-gray-900/40 p-3 rounded-2xl border dark:border-gray-700 flex items-center gap-3">
-                                    <div className="text-xs font-bold text-gray-400">ALREADY</div>
-                                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{Math.round(((generationStep + 1) / progressSteps.length) * 100)}%</div>
-                                </div>
-                            </div>
-
-                            <p className="text-gray-400 text-xs text-center max-w-xs z-10 leading-relaxed italic">
-                                &quot;Guru yang baik memberikan sesuatu yang bisa dipikirkan oleh siswa di rumah.&quot; - Smart Teaching AI
-                            </p>
-                        </div>
-                    ) : (generatedRPP || viewingRPP) ? (
-                        <div id="printable-area" className="card-glass rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full print:m-0 print:p-0 print:block print:h-auto print:shadow-none print:border-none">
-                            <div className="p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center no-print sticky top-0 z-20">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-blue-600 rounded-lg">
-                                        <FileText className="text-white" size={20} />
-                                    </div>
-                                    <div>
-                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 block">
-                                            Pratinjau RPP
-                                        </span>
-                                        <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
-                                            {viewingRPP ? viewingRPP.topic : selectedMaterial?.materi}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-2">
-                                    <button onClick={handleDownloadDocx} className="p-2.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all text-blue-600 dark:text-blue-400 hover:shadow-md" title="Download Word (.docx)">
-                                        <Download size={18} />
-                                    </button>
-
-                                    {generatedRPP && (
-                                        <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 font-bold text-sm transition-all disabled:opacity-50 shadow-md hover:shadow-lg">
-                                            {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                                            Simpan RPP
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                            <div className={`p-8 lg:p-12 overflow-y-auto flex-1 rpp-prose max-w-none print:p-0 print:overflow-visible custom-scrollbar ${getRegionFromSubject(viewingRPP?.subject || selectedMaterial?.subject || '') === 'Jawa' ? 'font-carakan' : ''}`}>
-                                <ReactMarkdown
-                                    remarkPlugins={[remarkGfm, remarkMath]}
-                                    rehypePlugins={[rehypeKatex]}
-                                >
-                                    {generatedRPP || (viewingRPP ? viewingRPP.content : '')}
-                                </ReactMarkdown>
-
-                                {/* Signature Section */}
-                                <div id="signature-section" className="mt-12 pt-8 border-t border-transparent no-break-inside avoid-page-break">
-                                    <div className="grid grid-cols-3 gap-4 text-center">
-                                        <div>
-                                            <p>Mengetahui,</p>
-                                            <p className="font-bold mb-16">Kepala Sekolah</p>
-                                            <p className="font-bold underline">{userProfile.principalName || '.....................................'}</p>
-                                            <p>NIP. {userProfile.principalNip || '...................'}</p>
-                                        </div>
-                                        <div></div>
-                                        <div>
-                                            <p>{signingLocation || 'Jakarta'}, {formatDate(new Date())}</p>
-                                            <p className="font-bold mb-16">Guru Mata Pelajaran</p>
-                                            <p className="font-bold underline">{userProfile.name || '.....................................'}</p>
-                                            <p>NIP. {userProfile.name ? userProfile.nip : '...................'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="card-glass rounded-3xl p-12 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center space-y-6 text-center">
-                            <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                                <BookOpen className="text-blue-600" size={64} />
-                            </div>
-                            <div className="space-y-2">
-                                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Mulai Susun RPP Deep Learning</h2>
-                                <p className="text-gray-500 dark:text-gray-400 max-w-md">
-                                    Pilih materi pokok dari data Program Semester di sebelah kiri, lalu klik tombol **Generate** untuk menyusun RPP berbasis prinsip **Mindful, Meaningful, & Joyful**.
-                                </p>
-                            </div>
-                            <div className="flex gap-4">
-                                <div className="flex items-center gap-2 text-xs text-gray-400 italic">
-                                    <Sparkles size={14} /> Berbasis Kurikulum Deep Learning
-                                </div>
-                                <div className="flex items-center gap-2 text-xs text-gray-400 italic">
-                                    <History size={14} /> Tersimpan Otomatis
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {displayContent}
                 </div>
             </div>
 

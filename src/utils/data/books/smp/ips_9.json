@@ -2,9 +2,9 @@
   "bookId": "smp-ips-9",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Manusia dan Perubahan", "pages": "1-62", "semester": "Ganjil", "sub_topics": ["Perubahan Sosial Budaya", "Globalisasi", "Dampak Modernisasi"] },
-    { "no": 2, "title": "Perkembangan Ekonomi Digital", "pages": "63-124", "semester": "Ganjil", "sub_topics": ["Uang dan Lembaga Keuangan", "Perdagangan Internasional", "Ekonomi Kreatif Digital"] },
-    { "no": 3, "title": "Tantangan Pembangunan Indonesia", "pages": "125-180", "semester": "Genap", "sub_topics": ["Pembangunan Infrastruktur", "Kualitas SDM", "Bonus Demografi"] },
-    { "no": 4, "title": "Kerja Sama Dunia", "pages": "181-240", "semester": "Genap", "sub_topics": ["Politik Luar Negeri Bebas Aktif", "Organisasi Internasional", "Peran Indonesia di Dunia"] }
+    { "no": 1, "title": "Manusia dan Perubahan", "pages": "1-62", "semester": "Ganjil", "sub_topics": ["Perubahan Sosial Budaya", "Globalisasi", "Dampak Modernisasi"], "key_terms": ["Perubahan", "Globalisasi", "Modernisasi", "Budaya"] },
+    { "no": 2, "title": "Perkembangan Ekonomi Digital", "pages": "63-124", "semester": "Ganjil", "sub_topics": ["Uang dan Lembaga Keuangan", "Perdagangan Internasional", "Ekonomi Kreatif Digital"], "key_terms": ["Uang", "Perdagangan", "Ekonomi", "Digital"] },
+    { "no": 3, "title": "Tantangan Pembangunan Indonesia", "pages": "125-180", "semester": "Genap", "sub_topics": ["Pembangunan Infrastruktur", "Kualitas SDM", "Bonus Demografi"], "key_terms": ["Infrastruktur", "SDM", "Demografi", "Pembangunan"] },
+    { "no": 4, "title": "Kerja Sama Dunia", "pages": "181-240", "semester": "Genap", "sub_topics": ["Politik Luar Negeri Bebas Aktif", "Organisasi Internasional", "Peran Indonesia di Dunia"], "key_terms": ["Politik", "Internasional", "PBB", "Diplomasi"] }
   ]
 }

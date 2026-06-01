@@ -201,12 +201,48 @@ export const getSemesterKey = (semester: unknown): string => {
 };
 
 /**
- * Normalizes subject name to key.
+ * Normalizes subject name to BSKAP key.
  */
-export const getSubjectKey = (subject: string): string => {
+const SUBJECT_ALIASES: Record<string, string> = {
+    "ipa": "IPA",
+    "ilmu pengetahuan alam": "IPA",
+    "ips": "IPS",
+    "ilmu pengetahuan sosial": "IPS",
+    "pai": "Pendidikan Agama Islam",
+    "pendidikan agama islam dan budi pekerti": "Pendidikan Agama Islam",
+    "pkn": "Pendidikan Pancasila",
+    "mtk": "Matematika",
+    "matematika lanjutan": "Matematika Tingkat Lanjut",
+    "matematika tingkat lanjut": "Matematika Tingkat Lanjut",
+    "seni budaya": "Seni Rupa",
+    "sbk": "Seni Rupa",
+    "penjaskes": "PJOK",
+    "penjas": "PJOK",
+    "biologi": "Biologi",
+    "fisika": "Fisika",
+    "kimia": "Kimia",
+    "ekonomi": "Ekonomi",
+    "geografi": "Geografi",
+    "sosiologi": "Sosiologi",
+    "sejarah": "Sejarah",
+    "antropologi": "Antropologi",
+    "informatika": "Informatika",
+    "tik": "Informatika",
+    "prakarya": "Prakarya",
+};
+
+export const normalizeSubjectName = (subject: string): string => {
     if (!subject) return "";
-    if (subject.startsWith("Bahasa Daerah")) return "Bahasa Daerah";
-    return subject;
+    const trimmed = subject.trim();
+    const lower = trimmed.toLowerCase();
+    if (SUBJECT_ALIASES[lower]) return SUBJECT_ALIASES[lower];
+    if (lower.startsWith("bahasa daerah")) return "Bahasa Daerah";
+    if (lower.startsWith("pendidikan agama")) return trimmed.replace(/dan budi pekerti/i, "").trim();
+    return trimmed;
+};
+
+export const getSubjectKey = (subject: string): string => {
+    return normalizeSubjectName(subject);
 };
 
 /**

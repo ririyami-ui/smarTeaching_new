@@ -1,4 +1,5 @@
 import booksIndex from './data/books/index.json';
+import { normalizeSubjectName } from './ai/base';
 
 export interface BookMetadata {
   id: string;
@@ -28,9 +29,10 @@ export interface BookContent {
 export const findAutoMatchingBook = (jenjang: string, mapel: string, kelas: string): BookMetadata | null => {
   if (!jenjang || !mapel || !kelas) return null;
 
+  const normalizedMapel = normalizeSubjectName(mapel).toLowerCase();
   return booksIndex.find(book => 
     book.jenjang.toLowerCase() === jenjang.toLowerCase() &&
-    mapel.toLowerCase().includes(book.mapel.toLowerCase()) &&
+    normalizedMapel.includes(book.mapel.toLowerCase()) &&
     book.kelas.toString() === kelas.toString()
   ) || null;
 };

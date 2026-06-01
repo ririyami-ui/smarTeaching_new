@@ -1,0 +1,121 @@
+﻿{
+    "publisher":  "Kemendikbudristek",
+    "bookId":  "sma-bio-11",
+    "chapters":  [
+                     {
+                         "no":  1,
+                         "pages":  "1-26",
+                         "sub_topics":  [
+                                            "Struktur Sel",
+                                            "Organel Sel",
+                                            "Sel Tumbuhan",
+                                            "Sel Hewan",
+                                            "Perbedaan Sel"
+                                        ],
+                         "key_terms":  [
+                                           "Sel",
+                                           "Organel",
+                                           "Membran",
+                                           "Inti"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Sel"
+                     },
+                     {
+                         "no":  2,
+                         "pages":  "27-55",
+                         "sub_topics":  [
+                                            "Jaringan Meristem",
+                                            "Jaringan Dewasa",
+                                            "Jaringan Epitel",
+                                            "Jaringan Otot",
+                                            "Jaringan Saraf"
+                                        ],
+                         "key_terms":  [
+                                           "Jaringan",
+                                           "Meristem",
+                                           "Epitel",
+                                           "Otot"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Jaringan Tumbuhan dan Hewan"
+                     },
+                     {
+                         "no":  3,
+                         "pages":  "56-87",
+                         "sub_topics":  [
+                                            "Rangka Manusia",
+                                            "Tulang",
+                                            "Sendi",
+                                            "Otot",
+                                            "Gangguan Gerak"
+                                        ],
+                         "key_terms":  [
+                                           "Gerak",
+                                           "Rangka",
+                                           "Otot",
+                                           "Sendi"
+                                       ],
+                         "semester":  "Ganjil",
+                         "title":  "Sistem Gerak"
+                     },
+                     {
+                         "no":  4,
+                         "pages":  "88-110",
+                         "sub_topics":  [
+                                            "Jantung",
+                                            "Pembuluh Darah",
+                                            "Golongan Darah",
+                                            "Sistem Limfatik",
+                                            "Gangguan Peredaran Darah"
+                                        ],
+                         "key_terms":  [
+                                           "Darah",
+                                           "Jantung",
+                                           "Pembuluh",
+                                           "Limfa"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Sistem Peredaran Darah"
+                     },
+                     {
+                         "no":  5,
+                         "pages":  "111-136",
+                         "sub_topics":  [
+                                            "Organ Pencernaan",
+                                            "Enzim Pencernaan",
+                                            "Proses Pencernaan",
+                                            "Gizi dan Makanan",
+                                            "Gangguan Pencernaan"
+                                        ],
+                         "key_terms":  [
+                                           "Pencernaan",
+                                           "Enzim",
+                                           "Gizi",
+                                           "Organ"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Sistem Pencernaan"
+                     },
+                     {
+                         "no":  6,
+                         "pages":  "137-165",
+                         "sub_topics":  [
+                                            "Alat Pernapasan",
+                                            "Mekanisme Pernapasan",
+                                            "Kapasitas Paru",
+                                            "Gangguan Pernapasan",
+                                            "Pertukaran Gas"
+                                        ],
+                         "key_terms":  [
+                                           "Pernapasan",
+                                           "Paru",
+                                           "Oksigen",
+                                           "Karbondioksida"
+                                       ],
+                         "semester":  "Genap",
+                         "title":  "Sistem Pernapasan"
+                     }
+                 ],
+    "isbn":  "978-623-194-729-7"
+}
