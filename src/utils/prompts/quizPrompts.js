@@ -51,29 +51,66 @@ export const getAdvancedQuizPrompt = ({ topic, context, gradeLevel, subject, bat
            - **Eksploratif**: Berikan ruang untuk berbagai kemungkinan jawaban atau solusi kreatif.
         6. Pilihan jawaban (untuk PG) wajib ${optionCount} opsi (${optionLabel}).
             - **indicator**: Indikator soal (Format: Disajikan [konteks/stimulus], siswa dapat [KKO] [materi]). Harus SINGKAT dan PADAT.
-        7. **IMAGE HINT (OPTIONAL)**: Jika soal sangat membutuhkan dukungan visual (seperti diagram, grafik, peta, anatomi, atau ilustrasi situasi), Anda WAJIB menyertakan field **"image_hint"**. 
-           - Isi dengan instruksi spesifik: "[Tempatkan Gambar: {deskripsi visual}]".
-           - Tambahkan referensi pencarian: "Referensi: {keyword pencarian gambar yang akurat}".
-           - Jika soal bisa dipahami tanpa gambar, kosongkan ("").
-        8. **KEPATUHAN TIPE SOAL (CRITICAL)**: Field "type" pada JSON output **HARUS SAMA PERSIS** dengan instruksi tipe pada "TUGAS UTAMA". Dilarang keras menciptakan, menambah, atau membuang tipe soal yang ditentukan.
+         7. **IMAGE HINT (OPTIONAL)**: Jika soal sangat membutuhkan dukungan visual (seperti diagram, grafik, peta, anatomi, atau ilustrasi situasi), Anda WAJIB menyertakan field **"image_hint"**. 
+            - Isi dengan instruksi spesifik: "[Tempatkan Gambar: {deskripsi visual}]".
+            - Tambahkan referensi pencarian: "Referensi: {keyword pencarian gambar yang akurat}".
+            - Jika soal bisa dipahami tanpa gambar, kosongkan ("").
+         8. **VISUALIZATION (OPTIONAL - 5% SOAL)**: Hanya 5% dari total soal yang PERLU visualisasi. Jika soal membutuhkan grafik/diagram/infografis, tambahkan field **"visualization"**:
+            - **Chart (grafik data)**: Gunakan untuk soal yang membutuhkan grafik fungsi, data statistik, perbandingan.
+              ```json
+              "visualization": {
+                "type": "chart",
+                "config": {
+                  "type": "line" | "bar" | "scatter",
+                  "title": "Judul grafik",
+                  "xLabel": "Label sumbu X",
+                  "yLabel": "Label sumbu Y",
+                  "data": [{"x": nilai, "y": nilai}, ...]
+                }
+              }
+              ```
+            - **Diagram (flowchart/timeline)**: Gunakan untuk soal algoritma, urutan, hubungan.
+              ```json
+              "visualization": {
+                "type": "diagram",
+                "config": {
+                  "type": "flowchart" | "timeline" | "graph",
+                  "diagram": "mermaid code di sini"
+                }
+              }
+              ```
+            - **Image (infografis)**: Gunakan untuk soal perbandingan visual, struktur.
+              ```json
+              "visualization": {
+                "type": "image",
+                "config": {
+                  "description": "[Tempatkan Gambar: ...]",
+                  "position": "left" | "right" | "center",
+                  "width": "45%"
+                }
+              }
+              ```
+            - Jika soal tidak butuh visualisasi, kosongkan field ini.
+         9. **KEPATUHAN TIPE SOAL (CRITICAL)**: Field "type" pada JSON output **HARUS SAMA PERSIS** dengan instruksi tipe pada "TUGAS UTAMA". Dilarang keras menciptakan, menambah, atau membuang tipe soal yang ditentukan.
         9. **TIDAK ADA SUBSTITUSI TIPE (MANDATORY)**: Anda WAJIB menggunakan tepat kerangka/struktur JSON milik tipe soal yang bersangkutan sesuai panduan. JANGAN PERNAH mengubah tipe soal A menjadi tipe B dengan argumen kemiripan wujud/logika materi (Misal: merubah \`pg_matrix\` ke format \`true_false\`, \`essay\` ke \`short_answer\`, dsb). Konsekuensi struktural akan fatal jika ini dilanggar!
         
-        STRUKTUR JSON PER TIPE (INPUT HARUS SESUAI):
-        - **Wajib Ada di Setiap Soal**: 
-          "pedagogical_materi": "Materi spesifik soal ini (max 5 kata)",
-          "competency": "Intisari CP relevan (Singkat)", 
-          "indicator": "Indikator operasional (Singkat)", 
-          "cognitive_level": "L1/L2/L3/L4/L5/L6",
-          "stimulus": "Teks stimulus/kasus untuk soal ini (kosongkan jika mode tanpa stimulus)",
-          "image_hint": "Instruksi gambar (Opsional, gunakan [] jika ada)"
-        - **pg**: {"type": "pg", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["A...", "B..."], "answer": "A...", "explanation": "..."}
-        - **pg_complex**: {"type": "pg_complex", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["1...", "2..."], "answer": ["1...", "3..."], "explanation": "..."}
-         - **pg_matrix**: {"type": "pg_matrix", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "rows": ["Pernyataan 1", "Pernyataan 2"], "columns": ["Kategori A", "Kategori B"], "answer": [{"row": "Pernyataan 1", "column": "Kategori A"}], "explanation": "..."}
-         - **matching**: {"type": "matching", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "left_side": ["Pernyataan A", "Pernyataan B"], "right_side": ["Jawaban 2", "Jawaban 1", "Jawaban 3"], "pairs": [{"left": "Pernyataan A", "right": "Jawaban 1"}], "explanation": "..."}
-         - **true_false**: {"type": "true_false", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "statements": [{"text": "S1", "isCorrect": true}], "explanation": "..."}
-         - **short_answer**: {"type": "short_answer", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "answer": "Kunci jawaban (Singkat 1-3 kata)", "explanation": "..."}
-         - **sequencing**: {"type": "sequencing", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "items": ["Langkah A", "Langkah B", "Langkah C"], "correct_order": ["Langkah B", "Langkah A", "Langkah C"], "explanation": "..."}
-         - **essay/uraian**: {"type": "essay", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "answer": "Kunci jawaban (WAJIB SINGKAT & PADAT)", "grading_guide": "Pedoman penskoran ringkas", "explanation": "Penjelasan singkat"}
+         STRUKTUR JSON PER TIPE (INPUT HARUS SESUAI):
+         - **Wajib Ada di Setiap Soal**: 
+           "pedagogical_materi": "Materi spesifik soal ini (max 5 kata)",
+           "competency": "Intisari CP relevan (Singkat)", 
+           "indicator": "Indikator operasional (Singkat)", 
+           "cognitive_level": "L1/L2/L3/L4/L5/L6",
+           "stimulus": "Teks stimulus/kasus untuk soal ini (kosongkan jika mode tanpa stimulus)",
+           "image_hint": "Instruksi gambar (Opsional, gunakan [] jika ada)",
+           "visualization": "Visualisasi (Opsional, 5% soal)"
+         - **pg**: {"type": "pg", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["A...", "B..."], "answer": "A...", "explanation": "..."}
+         - **pg_complex**: {"type": "pg_complex", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["1...", "2..."], "answer": ["1...", "3..."], "explanation": "..."}
+          - **pg_matrix**: {"type": "pg_matrix", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "rows": ["Pernyataan 1", "Pernyataan 2"], "columns": ["Kategori A", "Kategori B"], "answer": [{"row": "Pernyataan 1", "column": "Kategori A"}], "explanation": "..."}
+          - **matching**: {"type": "matching", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "left_side": ["Pernyataan A", "Pernyataan B"], "right_side": ["Jawaban 2", "Jawaban 1", "Jawaban 3"], "pairs": [{"left": "Pernyataan A", "right": "Jawaban 1"}], "explanation": "..."}
+          - **true_false**: {"type": "true_false", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "statements": [{"text": "S1", "isCorrect": true}], "explanation": "..."}
+          - **short_answer**: {"type": "short_answer", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "answer": "Kunci jawaban (Singkat 1-3 kata)", "explanation": "..."}
+          - **sequencing**: {"type": "sequencing", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "items": ["Langkah A", "Langkah B", "Langkah C"], "correct_order": ["Langkah B", "Langkah A", "Langkah C"], "explanation": "..."}
+          - **essay/uraian**: {"type": "essay", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "answer": "Kunci jawaban (WAJIB SINGKAT & PADAT)", "grading_guide": "Pedoman penskoran ringkas", "explanation": "Penjelasan singkat"}
 
         FORMAT OUTPUT TOTAL (JSON):
         {
