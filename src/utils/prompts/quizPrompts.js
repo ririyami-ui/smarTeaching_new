@@ -23,17 +23,22 @@ export const getStimulusModeInstruction = (stimulusMode, batchSize) => {
         - DILARANG memberikan semua soal stimulus atau semua soal tanpa stimulus.`;
 };
 
-export const getAdvancedQuizPrompt = ({ topic, context, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty, stimulusMode = 'auto' }) => `
-        LANDASAN REGULASI: **BSKAP No. 46 Tahun 2025** (Standar Nasional Kurikulum Merdeka).
-        STANDAR PEDAGOGIS: **Buku Teks Utama Kemendikbudristek** (Mindful, Meaningful, Joyful).
+export const getAdvancedQuizPrompt = ({ topic, context, bookContext, BSKAP_DATA, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty, stimulusMode = 'auto' }) => `
+        LANDASAN REGULASI: **${BSKAP_DATA?.standards?.regulation || 'BSKAP No. 46 Tahun 2025'}** (Standar Nasional Kurikulum Merdeka).
+        STANDAR PEDAGOGIS: **${BSKAP_DATA?.standards?.philosophy?.name || 'Deep Learning'}** (${BSKAP_DATA?.standards?.philosophy?.pillars?.map(p => p.name).join(', ') || 'Mindful, Meaningful, Joyful'}).
         
         TUGAS: Buatlah ${batchInstructions.split('\n').length} butir soal untuk:
         - Mapel: ${subject} | Kelas: ${gradeLevel} | Topik: ${topic}
-        - Konteks: "${context || 'INPUT MANUAL/MINIM'}" 
-        ${!context ? '(WAJIB: Gunakan Database Internal Kurikulum Merdeka & BSKAP 46/2025 Anda untuk menentukan CP/Kompetensi yang relevan secara mandiri)' : '(WAJIB JADI SUMBER UTAMA)'}
+        
+        ${bookContext ? `**SUMBER KEBENARAN MATERI (SOURCE OF TRUTH) DARI BUKU TEKS UTAMA KEMENDIKBUDRISTEK:**\n${bookContext}` : ''}
+        
+        - Konteks Tambahan: "${context || 'INPUT MANUAL/MINIM'}" 
+        ${!context && !bookContext ? '(WAJIB: Gunakan Database Internal Kurikulum Merdeka & BSKAP 46/2025 Anda untuk menentukan CP/Kompetensi yang relevan secara mandiri)' : '(WAJIB JADIKAN SUMBER UTAMA)'}
         - HOTS Meter: ${difficulty}% (Proporsi tingkat kesulitan. ${difficulty}% dari total soal WAJIB berlevel kognitif HOTS yakni L4, L5, atau L6. Sisanya adalah LOTS/MOTS yakni L1, L2, atau L3.)
         - Status: Batch ${batchNum} dari ${batches.length}
-        ${allQuestions.length > 0 ? `- TOPIK YANG SUDAH DICAKUP: [${allQuestions.map(q => q.pedagogical_materi).join(', ')}] (HINDARI pengulangan materi yang sama jika konteks masih luas)` : ''}
+        ${allQuestions.length > 0 ? `- SOAL SEBELUMNYA (DILARANG DITIRU FORMATNYA):
+${allQuestions.map((q, i) => `  ${i+1}. [${q.pedagogical_materi}] ${q.question}`).join('\n')}
+(ATURAN KETAT: Anda DILARANG KERAS membuat soal baru yang mirip secara kalimat/struktur dengan soal-soal di atas. Jangan hanya sekadar mengganti angka, nama, atau besaran fisis. Gunakan sudut pandang, konsep turunan, stimulus, dan gaya bertanya yang 100% berbeda!)` : ''}
 
         TUGAS UTAMA: 
         1. Analisis SELURUH materi dalam "Konteks".
@@ -93,6 +98,7 @@ export const getAdvancedQuizPrompt = ({ topic, context, gradeLevel, subject, bat
             - Jika soal tidak butuh visualisasi, kosongkan field ini.
          9. **KEPATUHAN TIPE SOAL (CRITICAL)**: Field "type" pada JSON output **HARUS SAMA PERSIS** dengan instruksi tipe pada "TUGAS UTAMA". Dilarang keras menciptakan, menambah, atau membuang tipe soal yang ditentukan.
         9. **TIDAK ADA SUBSTITUSI TIPE (MANDATORY)**: Anda WAJIB menggunakan tepat kerangka/struktur JSON milik tipe soal yang bersangkutan sesuai panduan. JANGAN PERNAH mengubah tipe soal A menjadi tipe B dengan argumen kemiripan wujud/logika materi (Misal: merubah \`pg_matrix\` ke format \`true_false\`, \`essay\` ke \`short_answer\`, dsb). Konsekuensi struktural akan fatal jika ini dilanggar!
+        10. **ANTI-MONOTON (WAJIB)**: Jangan mengulang tipe cerita, tokoh, format perhitungan, atau gaya bahasa yang sama berulang-ulang dari soal sebelumnya. Pastikan variasi yang kaya dan dinamis pada setiap butir soal!
         
          STRUKTUR JSON PER TIPE (INPUT HARUS SESUAI):
          - **Wajib Ada di Setiap Soal**: 

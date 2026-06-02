@@ -99,7 +99,7 @@ const QuizGeneratorPage: React.FC = () => {
     // Form State
     const [sourceType, setSourceType] = useState('rpp');
     const [sourceData, setSourceData] = useState<SourceDoc[]>([]);
-    const [selectedContextId, setSelectedContextId] = useState('');
+    const [selectedContextIds, setSelectedContextIds] = useState<string[]>([]);
     const [contextContent, setContextContent] = useState('');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -162,58 +162,84 @@ const QuizGeneratorPage: React.FC = () => {
         }
     };
 
-    const handleSourceChange = (id: string) => {
-        setSelectedContextId(id);
-        const foundDoc = sourceData.find(d => d.id === id);
-        if (foundDoc) {
-            setSubject(foundDoc.subject || '');
-            setGradeLevel(foundDoc.gradeLevel || foundDoc.grade || '');
-            setTopic(foundDoc.materi || foundDoc.topic || '');
+    const handleSourceChange = (ids: string[]) => {
+        setSelectedContextIds(ids);
+        
+        let combinedSummary = "";
+        let firstDoc: SourceDoc | null = null;
 
-            const extractSectionFromHtml = (html: string, sectionHeader: string) => {
-                if (!html) return null;
-                const normalized = html
-                    .replace(/<\/li>/gi, '\n')
-                    .replace(/<\/p>/gi, '\n')
-                    .replace(/<br\s*\/?>/gi, '\n')
-                    .replace(/<[^>]*>/g, '');
+        ids.forEach(id => {
+            const foundDoc = sourceData.find(d => d.id === id);
+            if (foundDoc) {
+                if (!firstDoc) firstDoc = foundDoc;
 
-                const lines = normalized.split('\n').map(l => l.trim()).filter(Boolean);
-                const startIdx = lines.findIndex(l => l.toLowerCase().includes(sectionHeader.toLowerCase()));
-                if (startIdx === -1) return null;
+                const extractSectionFromHtml = (html: string, sectionHeader: string) => {
+                    if (!html) return null;
+                    const normalized = html
+                        .replace(/<\/li>/gi, '\n')
+                        .replace(/<\/p>/gi, '\n')
+                        .replace(/<br\s*\/?>/gi, '\n')
+                        .replace(/<[^>]*>/g, '');
 
-                const sectionLines: string[] = [];
-                const headerPrefixes = [
-                    'langkah', 'kegiatan pembelajaran', 'asesmen', 'penilaian', 'penutup',
-                    'media', 'sarana', 'sumber belajar', 'refleksi', 'pengayaan', 'remedial',
-                    'glosarium', 'daftar pustaka', 'lampiran'
-                ];
+                    const lines = normalized.split('\n').map(l => l.trim()).filter(Boolean);
+                    const startIdx = lines.findIndex(l => l.toLowerCase().includes(sectionHeader.toLowerCase()));
+                    if (startIdx === -1) return null;
 
-                for (let i = startIdx + 1; i < lines.length; i++) {
-                    const lineLower = lines[i].toLowerCase();
-                    const isHeaderPrefix = headerPrefixes.some(k => lineLower.startsWith(k) || lineLower.match(new RegExp(`^[0-9a-z]\\.\\s*${k}`)));
-                    const isMarkdownHeader = /^#*\s*\d*\.?\s*(glosarium|daftar pustaka|lampiran|asesmen|penilaian|refleksi|langkah)/.test(lineLower);
-                    const isSignatureBlock = lineLower.includes('...........') || lineLower.includes('mengetahui') || lineLower.includes('kepala sekolah') || lineLower.startsWith('nip.') || lineLower.includes('| mengetahui,');
+                    const sectionLines: string[] = [];
+                    const headerPrefixes = [
+                        'langkah', 'kegiatan pembelajaran', 'asesmen', 'penilaian', 'penutup',
+                        'media', 'sarana', 'sumber belajar', 'refleksi', 'pengayaan', 'remedial',
+                        'glosarium', 'daftar pustaka', 'lampiran'
+                    ];
 
-                    if (isHeaderPrefix || isMarkdownHeader || isSignatureBlock) break;
+                    for (let i = startIdx + 1; i < lines.length; i++) {
+                        const lineLower = lines[i].toLowerCase();
+                        const isHeaderPrefix = headerPrefixes.some(k => lineLower.startsWith(k) || lineLower.match(new RegExp(`^[0-9a-z]\\.\\s*${k}`)));
+                        const isMarkdownHeader = /^#*\s*\d*\.?\s*(glosarium|daftar pustaka|lampiran|asesmen|penilaian|refleksi|langkah)/.test(lineLower);
+                        const isSignatureBlock = lineLower.includes('...........') || lineLower.includes('mengetahui') || lineLower.includes('kepala sekolah') || lineLower.startsWith('nip.') || lineLower.includes('| mengetahui,');
 
-                    sectionLines.push(lines[i]);
-                    if (sectionLines.length >= 60) break;
-                }
-                return sectionLines.join('\n').trim() || null;
-            };
+                        if (isHeaderPrefix || isMarkdownHeader || isSignatureBlock) break;
 
-            const rppContent = foundDoc.content || '';
-            const materiAjar = extractSectionFromHtml(rppContent, 'Materi Ajar');
+                        sectionLines.push(lines[i]);
+                        if (sectionLines.length >= 60) break;
+                    }
+                    return sectionLines.join('\n').trim() || null;
+                };
 
-            const summary = [
-                `Materi Pokok: ${foundDoc.topic || foundDoc.materi || '-'}`,
-                `Kompetensi Dasar (KD/TP): ${foundDoc.kd || foundDoc.tp || '-'}`,
-                materiAjar ? `\nMateri Ajar Mendetail:\n${materiAjar}` : ''
-            ].filter(Boolean).join('\n');
+                const rppContent = foundDoc.content || '';
+                const materiAjar = extractSectionFromHtml(rppContent, 'Materi Ajar');
 
-            setContextContent(summary);
+                const summary = [
+                    `Materi Pokok: ${foundDoc.topic || foundDoc.materi || '-'}`,
+                    `Kompetensi Dasar (KD/TP): ${foundDoc.kd || foundDoc.tp || '-'}`,
+                    materiAjar ? `\nMateri Ajar Mendetail:\n${materiAjar}` : ''
+                ].filter(Boolean).join('\n');
+
+                combinedSummary += `--- DOKUMEN: ${foundDoc.topic || foundDoc.materi || id} ---\n${summary}\n\n`;
+            }
+        });
+
+        if (firstDoc && ids.length === 1) {
+            setSubject(firstDoc.subject || '');
+            setGradeLevel(firstDoc.gradeLevel || firstDoc.grade || '');
+            setTopic(firstDoc.materi || firstDoc.topic || '');
+        } else if (ids.length > 1) {
+            const combinedTopics = ids
+                .map(id => {
+                    const doc = sourceData.find(d => d.id === id);
+                    return doc?.topic || doc?.materi || '';
+                })
+                .filter(Boolean)
+                .join(', ');
+            setTopic(combinedTopics);
+            setSubject(prev => prev || (firstDoc?.subject || ''));
+            setGradeLevel(prev => prev || (firstDoc?.gradeLevel || firstDoc?.grade || ''));
+        } else if (ids.length === 0) {
+            setContextContent('');
+            setTopic('');
         }
+
+        setContextContent(combinedSummary);
     };
 
     const updateTypeCount = (typeId: string, count: string) => {
@@ -408,9 +434,9 @@ const QuizGeneratorPage: React.FC = () => {
 
                 <div className="lg:col-span-3 space-y-6">
                     <QuizForm
-                        sourceType={sourceType} setSourceType={setSourceType}
+                        sourceType={sourceType} setSourceType={(t: string) => { setSourceType(t); setSelectedContextIds([]); }}
                         sourceData={sourceData} loading={loading}
-                        selectedContextId={selectedContextId} handleSourceChange={handleSourceChange}
+                        selectedContextIds={selectedContextIds} handleSourceChange={handleSourceChange}
                         subject={subject} setSubject={setSubject} subjects={subjects}
                         gradeLevel={gradeLevel} setGradeLevel={setGradeLevel} classes={classes}
                         topic={topic} setTopic={setTopic}

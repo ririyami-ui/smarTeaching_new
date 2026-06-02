@@ -8,6 +8,7 @@ import {
 import { getAdvancedQuizPrompt, getQuizFromImagePrompt } from "../prompts/quizPrompts";
 import { BSKAP_DATA } from "../bskapData";
 import { STRICT_DOCUMENT_BRAIN } from "../prompts/smarttyPrompts";
+import { findAutoMatchingBook, loadBookContent, getJenjangFromGrade } from "../bookUtils";
 
 const BATCH_SIZE = 3;
 
@@ -41,6 +42,23 @@ interface QuizParams {
 export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject, typeCounts, difficulty, modelName, stimulusMode = 'auto', onProgress = () => { } }: QuizParams) {
     try {
         onProgress({ stage: 'preparing', message: 'Mempersiapkan parameter kuis...', percentage: 5 });
+        
+        let bookContext = "";
+        const jenjang = getJenjangFromGrade(gradeLevel);
+        if (jenjang) {
+            onProgress({ stage: 'preparing', message: 'Mencari referensi buku resmi...', percentage: 10 });
+            const matchedBook = findAutoMatchingBook(jenjang, subject, String(gradeLevel));
+            if (matchedBook) {
+                const bookContent = await loadBookContent(matchedBook.path);
+                if (bookContent) {
+                    bookContext = `SUMBER BUKU RESMI: ${matchedBook.title} (${bookContent.publisher})\n`;
+                    bookContent.chapters.forEach(ch => {
+                        bookContext += `Bab ${ch.no}: ${ch.title}\n- Sub-topik: ${ch.sub_topics.join(', ')}\n- Istilah Kunci: ${ch.key_terms.join(', ')}\n`;
+                    });
+                }
+            }
+        }
+
         const flattened: string[] = [];
         Object.entries(typeCounts).forEach(([type, count]) => { for (let i = 0; i < count; i++) flattened.push(type); });
 
@@ -67,7 +85,7 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
             }
 
             const batchInstructions = batches[i].map((type, idx) => `- Soal No ${allQuestions.length + idx + 1}: Tipe **${type}**`).join('\n');
-            const prompt = getAdvancedQuizPrompt({ topic, context, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty, stimulusMode });
+            const prompt = getAdvancedQuizPrompt({ topic, context, bookContext, BSKAP_DATA, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty, stimulusMode });
 
             const model = await getModel(modelName, true, STRICT_DOCUMENT_BRAIN);
             const result = await retryWithBackoff(() => model.generateContent(prompt));
@@ -75,7 +93,12 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
 
             if (parsed.questions) {
                 allQuestions = [...allQuestions, ...parsed.questions.map((q: QuizQuestion) => {
-                    if (['pg', 'pg_complex'].includes(q.type)) return { ...q, options: shuffleArray(q.options ?? []) };
+                    if (q.type === 'matching' && Array.isArray(q.right_side)) {
+                        return { ...q, right_side: shuffleArray(q.right_side as string[]) };
+                    }
+                    if (q.type === 'sequencing' && Array.isArray(q.items)) {
+                        return { ...q, items: shuffleArray(q.items as string[]) };
+                    }
                     return q;
                 })];
                 if (!quizTitle && parsed.title) quizTitle = parsed.title;

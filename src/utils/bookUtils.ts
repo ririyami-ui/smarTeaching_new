@@ -10,6 +10,14 @@ export interface BookMetadata {
   path: string;
 }
 
+export const getJenjangFromGrade = (gradeLevel: string | number): string => {
+  const g = String(gradeLevel).toLowerCase().trim();
+  if (g.match(/^(1|2|3|4|5|6)$/) || g.includes('sd') || g.includes('mi')) return 'SD';
+  if (g.match(/^(7|8|9)$/) || g.includes('smp') || g.includes('mts')) return 'SMP';
+  if (g.match(/^(10|11|12)$/) || g.includes('sma') || g.includes('smk') || g.includes('ma')) return 'SMA';
+  return '';
+};
+
 export interface BookContent {
   bookId: string;
   isbn: string;

@@ -38,8 +38,8 @@ interface QuizFormProps {
   setSourceType: (type: string) => void;
   sourceData: SourceDataItem[];
   loading: boolean;
-  selectedContextId: string;
-  handleSourceChange: (id: string) => void;
+  selectedContextIds: string[];
+  handleSourceChange: (ids: string[]) => void;
   subject: string;
   setSubject: (subject: string) => void;
   subjects: SubjectItem[];
@@ -72,7 +72,7 @@ interface QuizFormProps {
 const QuizForm: React.FC<QuizFormProps> = ({
     sourceType, setSourceType,
     sourceData, loading,
-    selectedContextId, handleSourceChange,
+    selectedContextIds, handleSourceChange,
     subject, setSubject, subjects,
     gradeLevel, setGradeLevel, classes,
     topic, setTopic,
@@ -88,6 +88,8 @@ const QuizForm: React.FC<QuizFormProps> = ({
     generationProgress,
     QUESTION_TYPES
 }) => {
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const normalizeGrade = (val: string) => String(val || '').replace(/\D/g, '');
     const totalQuestions = Object.values(typeCounts).reduce<number>((sum, c) => sum + (parseInt(c as string) || 0), 0);
 
     return (
@@ -97,55 +99,8 @@ const QuizForm: React.FC<QuizFormProps> = ({
                 <div className="space-y-4">
                     <h3 className="font-semibold text-lg flex items-center gap-2"><FileText size={18} /> Konteks & Materi</h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Sumber Data</label>
-                            <StyledSelect value={sourceType} onChange={(e) => setSourceType(e.target.value)}>
-                                <option value="rpp">Modul Ajar / RPP</option>
-                                <option value="promes">Program Semester</option>
-                                <option value="manual">Input Manual</option>
-                                <option value="image">Upload Gambar (Vision)</option>
-                            </StyledSelect>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Pilih Dokumen</label>
-                            <StyledSelect
-                                value={selectedContextId}
-                                onChange={(e) => handleSourceChange(e.target.value)}
-                                disabled={sourceType === 'manual' || sourceType === 'image'}
-                            >
-                                <option value="">{loading ? 'Memuat...' : '-- Pilih --'}</option>
-                                {sourceData
-                                    .filter(d => !subject || (d.subject && d.subject.toLowerCase() === subject.toLowerCase()))
-                                    .map(d => (
-                                        <option key={d.id} value={d.id}>
-                                            {sourceType === 'rpp'
-                                                ? `${d.gradeLevel || 'Kelas'} - ${d.materi || d.topic} (${d.academicYear || ''})`
-                                                : `${d.subject} - ${d.gradeLevel || d.grade} (${d.semester})`
-                                            }
-                                        </option>
-                                    ))}
-                            </StyledSelect>
-                            {subject && sourceData.filter(d => d.subject && d.subject.toLowerCase() === subject.toLowerCase()).length === 0 && (
-                                <p className="text-[10px] text-amber-600 mt-1">Tidak ada {sourceType.toUpperCase()} untuk mapel ini.</p>
-                            )}
-                        </div>
-                    </div>
-
+                    {/* Row 1: Kelas & Mata Pelajaran */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Mata Pelajaran</label>
-                            <StyledSelect
-                                value={subjects.find(s => s.name === subject)?.id || ''}
-                                onChange={(e) => {
-                                    const s = subjects.find(sub => sub.id === e.target.value);
-                                    setSubject(s ? s.name : e.target.value);
-                                }}
-                            >
-                                <option value="">Pilih Mapel</option>
-                                {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                            </StyledSelect>
-                        </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">Kelas (Level)</label>
                             <StyledSelect
@@ -160,6 +115,110 @@ const QuizForm: React.FC<QuizFormProps> = ({
                                 }).map(level => <option key={level} value={level}>{level}</option>)}
                             </StyledSelect>
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Mata Pelajaran</label>
+                            <StyledSelect
+                                value={subjects.find(s => s.name === subject)?.id || ''}
+                                onChange={(e) => {
+                                    const s = subjects.find(sub => sub.id === e.target.value);
+                                    setSubject(s ? s.name : e.target.value);
+                                }}
+                            >
+                                <option value="">Pilih Mapel</option>
+                                {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                            </StyledSelect>
+                        </div>
+                    </div>
+
+                    {/* Row 2: Sumber Data */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Sumber Data</label>
+                        <StyledSelect value={sourceType} onChange={(e) => setSourceType(e.target.value)}>
+                            <option value="rpp">Modul Ajar / RPP</option>
+                            <option value="promes">Program Semester</option>
+                            <option value="manual">Input Manual</option>
+                            <option value="image">Upload Gambar (Vision)</option>
+                        </StyledSelect>
+                    </div>
+
+                    {/* Row 3: Pilih Dokumen */}
+                    <div className="flex flex-col">
+                        <label className="block text-sm font-medium mb-1">Pilih Dokumen (Berdasarkan filter Kelas & Mapel)</label>
+                        {sourceType === 'manual' || sourceType === 'image' ? (
+                            <StyledSelect disabled>
+                                <option>-- Pilih --</option>
+                            </StyledSelect>
+                        ) : (
+                            <div className="flex flex-col border rounded-lg dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-700 h-[140px]">
+                                <div className="p-1.5 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex justify-between items-center gap-2">
+                                    <input 
+                                        type="text"
+                                        placeholder="Cari..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full text-xs px-2 py-1 rounded border dark:bg-gray-900 dark:border-gray-700 outline-none focus:ring-1 focus:ring-blue-500"
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={() => {
+                                            const filtered = sourceData
+                                                .filter(d => !subject || (d.subject && d.subject.toLowerCase() === subject.toLowerCase()))
+                                                .filter(d => !gradeLevel || normalizeGrade(d.gradeLevel || d.grade || '') === normalizeGrade(gradeLevel));
+                                            if (selectedContextIds.length === filtered.length && filtered.length > 0) {
+                                                handleSourceChange([]);
+                                            } else {
+                                                handleSourceChange(filtered.map(d => d.id));
+                                            }
+                                        }}
+                                        className="text-[10px] font-medium text-blue-600 hover:text-blue-700 whitespace-nowrap px-1"
+                                    >
+                                        {selectedContextIds.length > 0 ? 'Batal Semua' : 'Pilih Semua'}
+                                    </button>
+                                </div>
+                                <div className="overflow-y-auto p-1.5 space-y-1 flex-1">
+                                    {loading ? (
+                                        <p className="text-gray-500 text-center py-2 text-xs">Memuat...</p>
+                                    ) : sourceData.length === 0 ? (
+                                        <p className="text-gray-500 text-center py-2 text-xs">Tidak ada data</p>
+                                    ) : (
+                                        sourceData
+                                            .filter(d => !subject || (d.subject && d.subject.toLowerCase() === subject.toLowerCase()))
+                                            .filter(d => !gradeLevel || normalizeGrade(d.gradeLevel || d.grade || '') === normalizeGrade(gradeLevel))
+                                            .filter(d => {
+                                                const text = sourceType === 'rpp'
+                                                    ? `${d.gradeLevel || ''} ${d.materi || d.topic || ''} ${d.academicYear || ''}`
+                                                    : `${d.subject || ''} ${d.gradeLevel || d.grade || ''}`;
+                                                return text.toLowerCase().includes(searchQuery.toLowerCase());
+                                            })
+                                            .map(d => (
+                                                <label key={d.id} className="flex items-start gap-2 p-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 rounded cursor-pointer transition-colors">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        checked={selectedContextIds.includes(d.id)}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                handleSourceChange([...selectedContextIds, d.id]);
+                                                            } else {
+                                                                handleSourceChange(selectedContextIds.filter(id => id !== d.id));
+                                                            }
+                                                        }}
+                                                    />
+                                                    <span className="leading-tight text-[11px] text-gray-700 dark:text-gray-300">
+                                                        {sourceType === 'rpp'
+                                                            ? `${d.gradeLevel || 'Kelas'} - ${d.materi || d.topic} (${d.academicYear || ''})`
+                                                            : `${d.subject} - ${d.gradeLevel || d.grade} (${d.semester})`
+                                                        }
+                                                    </span>
+                                                </label>
+                                            ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        {subject && sourceData.filter(d => d.subject && d.subject.toLowerCase() === subject.toLowerCase()).filter(d => !gradeLevel || normalizeGrade(d.gradeLevel || d.grade || '') === normalizeGrade(gradeLevel)).length === 0 && (
+                            <p className="text-[10px] text-amber-600 mt-1">Tidak ada {sourceType.toUpperCase()} untuk filter mapel & kelas ini.</p>
+                        )}
                     </div>
 
                     <div>
