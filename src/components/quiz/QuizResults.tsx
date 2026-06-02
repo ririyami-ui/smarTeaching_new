@@ -131,14 +131,8 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                         )}
 
                                         {q.image_hint && (
-                                            <div className="my-4 p-6 border-2 border-dashed border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl flex flex-col items-center justify-center text-center group hover:border-blue-400 transition-colors">
-                                                <div className="w-12 h-12 card-glass rounded-full flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
-                                                    <ImageIcon className="text-blue-500" size={24} />
-                                                </div>
-                                                <div className="text-sm font-bold text-blue-700 dark:text-blue-400 mb-1">PLACEHOLDER GAMBAR</div>
-                                                <div className="text-xs text-blue-600/70 dark:text-blue-500/70 max-w-md italic leading-relaxed">
-                                                    {q.image_hint}
-                                                </div>
+                                            <div className="my-2 text-sm text-gray-500 italic">
+                                                [{q.image_hint}]
                                             </div>
                                         )}
 

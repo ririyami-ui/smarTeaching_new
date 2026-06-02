@@ -249,15 +249,8 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
   if (visualization.type === 'image') {
     const imageConfig = visualization.config as ImageConfig;
     return (
-      <div className="my-4 p-6 border-2 border-dashed border-blue-200 rounded-2xl flex flex-col items-center justify-center text-center group hover:border-blue-400 transition-colors"
-        style={{ width: imageConfig.width || '100%' }}>
-        <div className="w-12 h-12 card-glass rounded-full flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
-          <ImageIcon className="text-blue-500" size={24} />
-        </div>
-        <div className="text-sm font-bold text-blue-700 mb-1">PLACEHOLDER GAMBAR</div>
-        <div className="text-xs text-blue-600/70 max-w-md italic leading-relaxed">
-          <ReactMarkdown>{imageConfig.description}</ReactMarkdown>
-        </div>
+      <div className="my-2 text-sm text-gray-500 italic">
+        [{imageConfig.description}]
       </div>
     );
   }
