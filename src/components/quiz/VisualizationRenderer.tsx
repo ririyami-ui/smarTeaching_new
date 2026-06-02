@@ -288,7 +288,7 @@ const ScratchRenderer: React.FC<{ code: string }> = ({ code }) => {
   
   return (
     <div className="my-4 p-4 border-2 border-blue-200 rounded-2xl bg-white flex justify-center overflow-x-auto">
-      <pre ref={ref} id={uniqueId} className="scratchcode hidden"></pre>
+      <pre ref={ref} id={uniqueId} className="scratchcode"></pre>
     </div>
   );
 };
