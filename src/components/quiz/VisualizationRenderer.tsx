@@ -204,9 +204,31 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
 
     return (
       <div className="my-4 p-6 border-2 border-blue-200 rounded-2xl bg-white">
-        {chartConfig.type === 'line' && <Line data={chartData} options={chartOptions} />}
-        {chartConfig.type === 'bar' && <Bar data={chartData} options={chartOptions} />}
-        {chartConfig.type === 'scatter' && <Scatter data={chartData} options={chartOptions} />}
+        <div className="mb-4">
+          {chartConfig.type === 'line' && <Line data={chartData} options={chartOptions} />}
+          {chartConfig.type === 'bar' && <Bar data={chartData} options={chartOptions} />}
+          {chartConfig.type === 'scatter' && <Scatter data={chartData} options={chartOptions} />}
+        </div>
+        
+        {/* AUTOMATIC DATA TABLE FOR ANALYSIS */}
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full text-sm text-left border-collapse border border-gray-200">
+            <thead className="bg-blue-50 text-blue-800">
+              <tr>
+                <th className="p-2 border border-blue-100 text-center">{chartConfig.xLabel || 'X'}</th>
+                <th className="p-2 border border-blue-100 text-center">{chartConfig.yLabel || 'Y'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {chartConfig.data.map((row, idx) => (
+                <tr key={idx} className="hover:bg-gray-50">
+                  <td className="p-2 border border-gray-200 text-center">{row.x}</td>
+                  <td className="p-2 border border-gray-200 text-center">{row.y}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
