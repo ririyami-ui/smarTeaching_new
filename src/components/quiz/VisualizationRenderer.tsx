@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Line, Bar, Scatter } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -11,6 +11,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { Mafs, Coordinates, Plot, Point, Text, Theme } from 'mafs';
+import 'mafs/core.css';
 import mermaid from 'mermaid';
 import { ImageIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -35,6 +37,18 @@ interface ChartConfig {
   formula?: string;
 }
 
+interface FunctionChartConfig {
+  type: 'function';
+  expression: string;       // e.g. "-x*x + 4*x + 5"
+  title?: string;           // e.g. "h(t) = -t² + 4t + 5"
+  xLabel?: string;          // e.g. "Waktu (detik)"
+  yLabel?: string;          // e.g. "Ketinggian (cm)"
+  xRange?: [number, number]; // e.g. [-1, 5]
+  yRange?: [number, number]; // e.g. [-2, 10]
+  points?: Array<{ x: number; y: number; label?: string }>;
+  color?: string;
+}
+
 interface MermaidConfig {
   type: 'flowchart' | 'timeline' | 'graph';
   diagram: string;
@@ -47,21 +61,97 @@ interface ImageConfig {
 }
 
 interface VisualizationConfig {
-  type: 'chart' | 'diagram' | 'image';
-  config: ChartConfig | MermaidConfig | ImageConfig | Record<string, unknown>;
+  type: 'chart' | 'function' | 'diagram' | 'image';
+  config: ChartConfig | FunctionChartConfig | MermaidConfig | ImageConfig | Record<string, unknown>;
 }
 
 interface VisualizationRendererProps {
   visualization: VisualizationConfig;
 }
 
+// Safely evaluate a math expression string into a JS function
+function buildMathFn(expression: string): ((x: number) => number) | null {
+  try {
+    // Basic sanitization — allow only math-safe characters
+    const safe = expression.replace(/[^0-9x+\-*/^().Math\s]/g, '');
+    // Replace ^ with ** for exponentiation
+    const normalized = safe.replace(/\^/g, '**');
+    // eslint-disable-next-line no-new-func
+    const fn = new Function('x', `"use strict"; return (${normalized});`) as (x: number) => number;
+    // Test it
+    const test = fn(1);
+    if (typeof test !== 'number' || !isFinite(test)) return null;
+    return fn;
+  } catch {
+    return null;
+  }
+}
+
 const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualization }) => {
-  useEffect(() => {
+  React.useEffect(() => {
     if (visualization.type === 'diagram') {
       mermaid.contentLoaded();
     }
   }, [visualization]);
 
+  // ── MATHEMATICAL FUNCTION GRAPH (Mafs) ─────────────────────────────────
+  if (visualization.type === 'function') {
+    const cfg = visualization.config as FunctionChartConfig;
+    const mathFn = buildMathFn(cfg.expression);
+    const xRange = cfg.xRange ?? [-5, 5];
+    const yRange = cfg.yRange ?? [-5, 10];
+    const color = cfg.color ?? Theme.blue;
+
+    return (
+      <div className="my-4 rounded-2xl border-2 border-blue-200 dark:border-blue-900/50 overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
+        {cfg.title && (
+          <div className="px-4 pt-3 pb-1 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+            {cfg.title}
+          </div>
+        )}
+        <Mafs
+          viewBox={{ x: xRange, y: yRange }}
+          height={260}
+          preserveAspectRatio={false}
+        >
+          <Coordinates.Cartesian
+            xAxis={{ labels: (n) => String(n), lines: 1 }}
+            yAxis={{ labels: (n) => String(n), lines: 1 }}
+          />
+          {mathFn && (
+            <Plot.OfX
+              y={mathFn}
+              color={color}
+              weight={2.5}
+            />
+          )}
+          {cfg.points?.map((pt, i) => (
+            <React.Fragment key={i}>
+              <Point x={pt.x} y={pt.y} color={Theme.red} />
+              {pt.label && (
+                <Text x={pt.x + 0.15} y={pt.y + 0.4} size={14}>
+                  {pt.label}
+                </Text>
+              )}
+            </React.Fragment>
+          ))}
+        </Mafs>
+        {(cfg.xLabel || cfg.yLabel) && (
+          <div className="flex justify-between px-6 pb-2 text-[10px] text-gray-400">
+            <span>{cfg.yLabel && `↑ ${cfg.yLabel}`}</span>
+            <span>{cfg.xLabel && `${cfg.xLabel} →`}</span>
+          </div>
+        )}
+        {!mathFn && (
+          <p className="text-center text-xs text-red-400 pb-2">
+            ⚠ Ekspresi fungsi tidak valid: <code>{cfg.expression}</code>
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // ── DATA CHART (Chart.js) ───────────────────────────────────────────────
   if (visualization.type === 'chart') {
     const chartConfig = visualization.config as ChartConfig;
     
@@ -79,27 +169,12 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     const chartOptions = {
       responsive: true,
       plugins: {
-        title: {
-          display: true,
-          text: chartConfig.title,
-        },
-        legend: {
-          display: true,
-        },
+        title: { display: true, text: chartConfig.title },
+        legend: { display: true },
       },
       scales: {
-        x: {
-          title: {
-            display: true,
-            text: chartConfig.xLabel || 'X Axis',
-          },
-        },
-        y: {
-          title: {
-            display: true,
-            text: chartConfig.yLabel || 'Y Axis',
-          },
-        },
+        x: { title: { display: true, text: chartConfig.xLabel || 'X Axis' } },
+        y: { title: { display: true, text: chartConfig.yLabel || 'Y Axis' } },
       },
     };
 
@@ -112,6 +187,7 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     );
   }
 
+  // ── MERMAID DIAGRAM ─────────────────────────────────────────────────────
   if (visualization.type === 'diagram') {
     const mermaidConfig = visualization.config as MermaidConfig;
     return (
@@ -123,6 +199,7 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     );
   }
 
+  // ── IMAGE PLACEHOLDER ───────────────────────────────────────────────────
   if (visualization.type === 'image') {
     const imageConfig = visualization.config as ImageConfig;
     return (
@@ -143,3 +220,4 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
 };
 
 export default VisualizationRenderer;
+

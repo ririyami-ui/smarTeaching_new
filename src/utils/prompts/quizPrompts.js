@@ -61,41 +61,17 @@ ${allQuestions.map((q, i) => `  ${i+1}. [${q.pedagogical_materi}] ${q.question}`
             - Tambahkan referensi pencarian: "Referensi: {keyword pencarian gambar yang akurat}".
             - Jika soal bisa dipahami tanpa gambar, kosongkan ("").
          8. **VISUALIZATION (OPTIONAL - 5% SOAL)**: Hanya 5% dari total soal yang PERLU visualisasi. Jika soal membutuhkan grafik/diagram/infografis, tambahkan field **"visualization"**:
-            - **Chart (grafik data)**: Gunakan untuk soal yang membutuhkan grafik fungsi, data statistik, perbandingan.
-              ```json
-              "visualization": {
-                "type": "chart",
-                "config": {
-                  "type": "line" | "bar" | "scatter",
-                  "title": "Judul grafik",
-                  "xLabel": "Label sumbu X",
-                  "yLabel": "Label sumbu Y",
-                  "data": [{"x": nilai, "y": nilai}, ...]
-                }
-              }
-              ```
-            - **Diagram (flowchart/timeline)**: Gunakan untuk soal algoritma, urutan, hubungan.
-              ```json
-              "visualization": {
-                "type": "diagram",
-                "config": {
-                  "type": "flowchart" | "timeline" | "graph",
-                  "diagram": "mermaid code di sini"
-                }
-              }
-              ```
-            - **Image (infografis)**: Gunakan untuk soal perbandingan visual, struktur.
-              ```json
-              "visualization": {
-                "type": "image",
-                "config": {
-                  "description": "[Tempatkan Gambar: ...]",
-                  "position": "left" | "right" | "center",
-                  "width": "45%"
-                }
-              }
-              ```
-            - Jika soal tidak butuh visualisasi, kosongkan field ini.
+             - **Function (grafik fungsi matematika)**: WAJIB digunakan jika soal menyebutkan fungsi matematis seperti h(t)=-t²+4t+5, f(x)=2x+1, y=sin(x), dll.
+               "visualization": { "type": "function", "config": { "expression": "-x*x + 4*x + 5", "title": "h(t) = -t\u00b2 + 4t + 5", "xLabel": "Waktu (detik)", "yLabel": "Ketinggian (cm)", "xRange": [-1, 5], "yRange": [-2, 10], "points": [{"x": 2, "y": 9, "label": "Maks"}] } }
+               Catatan: "expression" harus ekspresi JavaScript valid (x=variabel, * untuk kali, ** untuk pangkat).
+             - **Chart (grafik data statistik)**: Gunakan untuk grafik batang/garis/scatter dari data diskrit.
+               "visualization": { "type": "chart", "config": { "type": "line", "title": "Judul", "xLabel": "X", "yLabel": "Y", "data": [{"x": 1, "y": 2}] } }
+             - **Diagram (flowchart/timeline)**: Gunakan untuk soal algoritma, urutan, hubungan.
+               "visualization": { "type": "diagram", "config": { "type": "flowchart", "diagram": "mermaid code" } }
+             - **Image (infografis)**: Gunakan untuk soal perbandingan visual, struktur.
+               "visualization": { "type": "image", "config": { "description": "[Tempatkan Gambar: ...]", "position": "center", "width": "45%" } }
+             - Jika soal tidak butuh visualisasi, kosongkan field ini.
+
          9. **KEPATUHAN TIPE SOAL (CRITICAL)**: Field "type" pada JSON output **HARUS SAMA PERSIS** dengan instruksi tipe pada "TUGAS UTAMA". Dilarang keras menciptakan, menambah, atau membuang tipe soal yang ditentukan.
         9. **TIDAK ADA SUBSTITUSI TIPE (MANDATORY)**: Anda WAJIB menggunakan tepat kerangka/struktur JSON milik tipe soal yang bersangkutan sesuai panduan. JANGAN PERNAH mengubah tipe soal A menjadi tipe B dengan argumen kemiripan wujud/logika materi (Misal: merubah \`pg_matrix\` ke format \`true_false\`, \`essay\` ke \`short_answer\`, dsb). Konsekuensi struktural akan fatal jika ini dilanggar!
         10. **ANTI-MONOTON (WAJIB)**: Jangan mengulang tipe cerita, tokoh, format perhitungan, atau gaya bahasa yang sama berulang-ulang dari soal sebelumnya. Pastikan variasi yang kaya dan dinamis pada setiap butir soal!

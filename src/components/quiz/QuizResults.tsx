@@ -29,7 +29,7 @@ interface QuizQuestion {
   explanation?: string;
   competency?: string;
   visualization?: {
-    type: 'chart' | 'diagram' | 'image';
+    type: 'chart' | 'function' | 'diagram' | 'image';
     config: Record<string, unknown>;
   };
 }
