@@ -18,3 +18,8 @@ declare module "react-big-calendar" {
   export const Calendar: ComponentType<object>;
   export const momentLocalizer: (moment: unknown) => unknown;
 }
+
+declare module "scratchblocks";
+declare module "smiles-drawer";
+declare module "wavedrom";
+declare module "abcjs";
