@@ -130,11 +130,14 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                             <VisualizationRenderer visualization={q.visualization} />
                                         )}
 
-                                        {q.image_hint && (
-                                            <div className="my-2 text-sm text-gray-500 italic">
-                                                [{q.image_hint}]
-                                            </div>
-                                        )}
+                                        {q.image_hint && (() => {
+                                            const cleanText = q.image_hint.trim().replace(/^\[+/, '').replace(/\]+$/, '');
+                                            return (
+                                                <div className="my-2 text-sm text-gray-500 italic">
+                                                    [{cleanText}]
+                                                </div>
+                                            );
+                                        })()}
 
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm, remarkMath]}

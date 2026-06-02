@@ -248,9 +248,10 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
   // ── IMAGE PLACEHOLDER ───────────────────────────────────────────────────
   if (visualization.type === 'image') {
     const imageConfig = visualization.config as ImageConfig;
+    const cleanText = (imageConfig.description || '').trim().replace(/^\[+/, '').replace(/\]+$/, '');
     return (
       <div className="my-2 text-sm text-gray-500 italic">
-        [{imageConfig.description}]
+        [{cleanText}]
       </div>
     );
   }
