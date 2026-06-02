@@ -1,5 +1,24 @@
 import toast from 'react-hot-toast';
 
+const withLightMode = async (fn) => {
+    const root = window.document.documentElement;
+    const hasDark = root.classList.contains('dark');
+    if (hasDark) {
+        root.classList.remove('dark');
+        root.classList.add('light');
+        // Force a small reflow to let style changes compute
+        void root.offsetHeight;
+    }
+    try {
+        return await fn();
+    } finally {
+        if (hasDark) {
+            root.classList.remove('light');
+            root.classList.add('dark');
+        }
+    }
+};
+
 /**
  * Formats a quiz answer based on question type.
  */
@@ -55,116 +74,155 @@ export const formatAnswer = (q) => {
 export const exportWord = async ({ quizResult, subject, gradeLevel, topic, userProfile, signingLocation }) => {
     const { asBlob } = await import("html-docx-js-typescript");
     const { saveAs } = await import("file-saver");
+    const { default: html2canvas } = await import("html2canvas");
     if (!quizResult) return;
 
-    let html = `
-        <h1>${quizResult.title || 'Soal Ujian'}</h1>
-        <p><strong>Mapel:</strong> ${subject || '-'} | <strong>Kelas:</strong> ${gradeLevel || '-'}</p>
-        <p><strong>Topik:</strong> ${topic || '-'}</p>
-        <hr/>
-    `;
-
-    quizResult.questions.forEach((q, idx) => {
-        html += `<div style="margin-bottom: 20px;">`;
-        let combinedText = '';
-        if (q.stimulus) {
-            combinedText += `${q.stimulus.replace(/\n/g, '<br/>')}<br/><br/>`;
+    return withLightMode(async () => {
+        // Pre-capture visualizations
+        const visImages = {};
+        for (let idx = 0; idx < quizResult.questions.length; idx++) {
+            const visEl = document.getElementById(`quiz-visualization-${idx}`);
+            if (visEl) {
+                try {
+                    const canvas = await html2canvas(visEl, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff'
+                    });
+                    visImages[idx] = canvas.toDataURL('image/png');
+                } catch (e) {
+                    console.error("Failed to render visualization for Word export", idx, e);
+                }
+            }
         }
-        if (q.image_hint) {
-            combinedText += `
-                <div style="margin: 15px 0; border: 2px dashed #3B82F6; border-radius: 10px; background-color: #f8fafc; padding: 20px; text-align: center;">
-                    <p style="margin: 0; color: #1d4ed8; font-weight: bold; font-size: 10pt;">[ TEMPAT GAMBAR ]</p>
-                    <p style="margin: 5px 0 0 0; color: #475569; font-size: 9pt; font-style: italic;">Instruksi: ${q.image_hint}</p>
-                </div>
-            `;
-        }
-        combinedText += q.question;
-        html += `<p><strong>${idx + 1}.</strong> ${combinedText}</p>`;
 
-        if (q.type === 'pg' || q.type === 'pg_complex') {
-            html += '<ul>';
-            q.options.forEach((opt, oIdx) => {
-                html += `<li>${String.fromCharCode(65 + oIdx)}. ${opt}</li>`;
-            });
-            html += '</ul>';
-        } else if (q.type === 'pg_matrix') {
-            html += '<table border="1" style="border-collapse: collapse; width: 100%; margin-top: 10px;">';
-            html += '<tr style="background-color: #f3f4f6;">';
-            html += '<th style="border: 1px solid #000; padding: 5px;">Pernyataan</th>';
-            q.columns.forEach(col => {
-                html += `<th style="border: 1px solid #000; padding: 5px; text-align: center;">${col}</th>`;
-            });
-            html += '</tr>';
-            q.rows.forEach(row => {
-                html += '<tr>';
-                html += `<td style="border: 1px solid #000; padding: 5px;">${row}</td>`;
-                q.columns.forEach(() => {
-                    html += '<td style="border: 1px solid #000; padding: 5px; text-align: center;">[ ]</td>';
+        let html = `
+            <h1>${quizResult.title || 'Soal Ujian'}</h1>
+            <p><strong>Mapel:</strong> ${subject || '-'} | <strong>Kelas:</strong> ${gradeLevel || '-'}</p>
+            <p><strong>Topik:</strong> ${topic || '-'}</p>
+            <hr/>
+        `;
+
+        quizResult.questions.forEach((q, idx) => {
+            html += `<div style="margin-bottom: 20px;">`;
+            let combinedText = '';
+            if (q.stimulus) {
+                combinedText += `${q.stimulus.replace(/\n/g, '<br/>')}<br/><br/>`;
+            }
+
+            if (q.visualization && q.visualization.type === 'image') {
+                const desc = q.visualization.config?.description || '';
+                const cleanDesc = desc.replace(/^\[+/, '').replace(/\]+$/, '');
+                combinedText += `
+                    <div style="margin: 15px 0; border: 2px dashed #3B82F6; border-radius: 10px; background-color: #f8fafc; padding: 20px; text-align: center;">
+                        <p style="margin: 0; color: #1d4ed8; font-weight: bold; font-size: 10pt;">[ TEMPAT GAMBAR ]</p>
+                        <p style="margin: 5px 0 0 0; color: #475569; font-size: 9pt; font-style: italic;">Instruksi: ${cleanDesc}</p>
+                    </div><br/>
+                `;
+            } else if (visImages[idx]) {
+                combinedText += `
+                    <div style="margin: 15px 0; text-align: center;">
+                        <img src="${visImages[idx]}" style="max-width: 100%; height: auto;" />
+                    </div><br/>
+                `;
+            } else if (q.image_hint) {
+                const cleanHint = q.image_hint.replace(/^\[+/, '').replace(/\]+$/, '');
+                combinedText += `
+                    <div style="margin: 15px 0; border: 2px dashed #3B82F6; border-radius: 10px; background-color: #f8fafc; padding: 20px; text-align: center;">
+                        <p style="margin: 0; color: #1d4ed8; font-weight: bold; font-size: 10pt;">[ TEMPAT GAMBAR ]</p>
+                        <p style="margin: 5px 0 0 0; color: #475569; font-size: 9pt; font-style: italic;">Instruksi: ${cleanHint}</p>
+                    </div><br/>
+                `;
+            }
+
+            combinedText += q.question;
+            html += `<p><strong>${idx + 1}.</strong> ${combinedText}</p>`;
+
+            if (q.type === 'pg' || q.type === 'pg_complex') {
+                html += '<ul>';
+                q.options.forEach((opt, oIdx) => {
+                    html += `<li>${String.fromCharCode(65 + oIdx)}. ${opt}</li>`;
+                });
+                html += '</ul>';
+            } else if (q.type === 'pg_matrix') {
+                html += '<table border="1" style="border-collapse: collapse; width: 100%; margin-top: 10px;">';
+                html += '<tr style="background-color: #f3f4f6;">';
+                html += '<th style="border: 1px solid #000; padding: 5px;">Pernyataan</th>';
+                q.columns.forEach(col => {
+                    html += `<th style="border: 1px solid #000; padding: 5px; text-align: center;">${col}</th>`;
                 });
                 html += '</tr>';
-            });
-            html += '</table>';
-        } else if (q.type === 'matching') {
-            html += `<table style="width:100%; border:none;"><tr>`;
-            html += `<td style="vertical-align:top; width:45%;">`;
-            q.left_side.forEach((l, i) => html += `<p>${i + 1}. ${l}</p>`);
-            html += `</td><td style="width:10%;"></td><td style="vertical-align:top; width:45%;">`;
-            q.right_side.forEach((r, i) => html += `<p>${String.fromCharCode(65 + i)}. ${r}</p>`);
-            html += `</td></tr></table>`;
-        } else if (q.type === 'true_false') {
-            html += `<table border="1" style="border-collapse:collapse; width:100%;"><tr><th>Pernyataan</th><th>Benar</th><th>Salah</th></tr>`;
-            q.statements.forEach(s => {
-                html += `<tr><td>${s.text}</td><td style="text-align:center;"></td><td style="text-align:center;"></td></tr>`;
-            });
-            html += `</table>`;
-        } else if (q.type === 'short_answer') {
-            html += `<p style="margin-left: 10px; border-bottom: 1px dotted #ccc; width: 300px; padding-bottom: 5px; color: #888;">Jawab: ............................................................</p>`;
-        } else if (q.type === 'sequencing' && q.items) {
-            html += `<ul style="list-style-type: decimal;">`;
-            q.items.forEach(item => {
-                html += `<li style="margin-bottom: 5px;">${item}</li>`;
-            });
-            html += `</ul>`;
+                q.rows.forEach(row => {
+                    html += '<tr>';
+                    html += `<td style="border: 1px solid #000; padding: 5px;">${row}</td>`;
+                    q.columns.forEach(() => {
+                        html += '<td style="border: 1px solid #000; padding: 5px; text-align: center;">[ ]</td>';
+                    });
+                    html += '</tr>';
+                });
+                html += '</table>';
+            } else if (q.type === 'matching') {
+                html += `<table style="width:100%; border:none;"><tr>`;
+                html += `<td style="vertical-align:top; width:45%;">`;
+                q.left_side.forEach((l, i) => html += `<p>${i + 1}. ${l}</p>`);
+                html += `</td><td style="width:10%;"></td><td style="vertical-align:top; width:45%;">`;
+                q.right_side.forEach((r, i) => html += `<p>${String.fromCharCode(65 + i)}. ${r}</p>`);
+                html += `</td></tr></table>`;
+            } else if (q.type === 'true_false') {
+                html += `<table border="1" style="border-collapse:collapse; width:100%;"><tr><th>Pernyataan</th><th>Benar</th><th>Salah</th></tr>`;
+                q.statements.forEach(s => {
+                    html += `<tr><td>${s.text}</td><td style="text-align:center;"></td><td style="text-align:center;"></td></tr>`;
+                });
+                html += `</table>`;
+            } else if (q.type === 'short_answer') {
+                html += `<p style="margin-left: 10px; border-bottom: 1px dotted #ccc; width: 300px; padding-bottom: 5px; color: #888;">Jawab: ............................................................</p>`;
+            } else if (q.type === 'sequencing' && q.items) {
+                html += `<ul style="list-style-type: decimal;">`;
+                q.items.forEach(item => {
+                    html += `<li style="margin-bottom: 5px;">${item}</li>`;
+                });
+                html += `</ul>`;
+            }
+            html += `</div>`;
+        });
+
+        html += `<br/><br/><hr/><h3>Kunci Jawaban</h3>`;
+        quizResult.questions.forEach((q, idx) => {
+            html += `<p><strong>${idx + 1}.</strong> ${formatAnswer(q)} (${q.type})</p>`;
+        });
+
+        const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        if (userProfile) {
+            html += `
+                <br/><br/>
+                <table style="width: 100%; border: none; margin-top: 30px;">
+                    <tr>
+                        <td align="center" style="border: none; width: 50%;">
+                            Mengetahui,<br/>Kepala Sekolah
+                            <br/><br/><br/><br/>
+                            <strong>${userProfile.principalName || '.....................................'}</strong><br/>
+                            NIP. ${userProfile.principalNip || '...................'}
+                        </td>
+                        <td align="center" style="border: none; width: 50%;">
+                            ${signingLocation || 'Jakarta'}, ${dateStr}<br/>Guru Mata Pelajaran
+                            <br/><br/><br/><br/>
+                            <strong>${userProfile.name || '.....................................'}</strong><br/>
+                            NIP. ${userProfile.nip || '...................'}
+                        </td>
+                    </tr>
+                </table>
+            `;
         }
-        html += `</div>`;
+
+        try {
+            const blob = await asBlob(html);
+            saveAs(blob, `Soal-${topic}-${gradeLevel}.docx`);
+            toast.success("Download Word Berhasil");
+        } catch (e) {
+            console.error(e);
+            toast.error("Gagal export Word");
+        }
     });
-
-    html += `<br/><br/><hr/><h3>Kunci Jawaban</h3>`;
-    quizResult.questions.forEach((q, idx) => {
-        html += `<p><strong>${idx + 1}.</strong> ${formatAnswer(q)} (${q.type})</p>`;
-    });
-
-    const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    if (userProfile) {
-        html += `
-            <br/><br/>
-            <table style="width: 100%; border: none; margin-top: 30px;">
-                <tr>
-                    <td align="center" style="border: none; width: 50%;">
-                        Mengetahui,<br/>Kepala Sekolah
-                        <br/><br/><br/><br/>
-                        <strong>${userProfile.principalName || '.....................................'}</strong><br/>
-                        NIP. ${userProfile.principalNip || '...................'}
-                    </td>
-                    <td align="center" style="border: none; width: 50%;">
-                        ${signingLocation || 'Jakarta'}, ${dateStr}<br/>Guru Mata Pelajaran
-                        <br/><br/><br/><br/>
-                        <strong>${userProfile.name || '.....................................'}</strong><br/>
-                        NIP. ${userProfile.nip || '...................'}
-                    </td>
-                </tr>
-            </table>
-        `;
-    }
-
-    try {
-        const blob = await asBlob(html);
-        saveAs(blob, `Soal-${topic}-${gradeLevel}.docx`);
-        toast.success("Download Word Berhasil");
-    } catch (e) {
-        console.error(e);
-        toast.error("Gagal export Word");
-    }
 };
 
 /**
@@ -175,83 +233,85 @@ export const exportPDF = async ({ quizResult, subject, gradeLevel, topic, userPr
     const { default: html2canvas } = await import("html2canvas");
     if (!quizResult) return;
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    let yPos = 20;
+    return withLightMode(async () => {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        let yPos = 20;
 
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text(quizResult.title || 'Soal Ujian', pageWidth / 2, yPos, { align: 'center' });
-    yPos += 12;
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text(quizResult.title || 'Soal Ujian', pageWidth / 2, yPos, { align: 'center' });
+        yPos += 12;
 
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Mapel: ${subject || userProfile?.school || '-'} | Kelas: ${gradeLevel || '-'} | Topik: ${topic || '-'}`, pageWidth / 2, yPos, { align: 'center' });
-    yPos += 6;
-    doc.line(20, yPos, pageWidth - 20, yPos);
-    yPos += 10;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Mapel: ${subject || userProfile?.school || '-'} | Kelas: ${gradeLevel || '-'} | Topik: ${topic || '-'}`, pageWidth / 2, yPos, { align: 'center' });
+        yPos += 6;
+        doc.line(20, yPos, pageWidth - 20, yPos);
+        yPos += 10;
 
-    for (let idx = 0; idx < quizResult.questions.length; idx++) {
-        const el = document.getElementById(`quiz-question-${idx}`);
-        if (el) {
-            try {
-                const canvas = await html2canvas(el, {
-                    scale: 2,
-                    useCORS: true,
-                    backgroundColor: '#ffffff'
-                });
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = pageWidth - 40;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        for (let idx = 0; idx < quizResult.questions.length; idx++) {
+            const el = document.getElementById(`quiz-question-${idx}`);
+            if (el) {
+                try {
+                    const canvas = await html2canvas(el, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff'
+                    });
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = pageWidth - 40;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-                if (yPos + imgHeight > pageHeight - 20) {
-                    doc.addPage();
-                    yPos = 20;
+                    if (yPos + imgHeight > pageHeight - 20) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+
+                    doc.addImage(imgData, 'PNG', 20, yPos, imgWidth, imgHeight);
+                    yPos += imgHeight + 10;
+                } catch (e) {
+                    console.error("Failed to capture question", idx, e);
+                    doc.text(`${idx + 1}. [Gagal memuat visual soal]`, 20, yPos);
+                    yPos += 10;
                 }
-
-                doc.addImage(imgData, 'PNG', 20, yPos, imgWidth, imgHeight);
-                yPos += imgHeight + 10;
-            } catch (e) {
-                console.error("Failed to capture question", idx, e);
-                doc.text(`${idx + 1}. [Gagal memuat visual soal]`, 20, yPos);
-                yPos += 10;
             }
         }
-    }
 
-    doc.addPage();
-    yPos = 20;
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Kunci Jawaban', 20, yPos);
-    yPos += 10;
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    quizResult.questions.forEach((q, idx) => {
-        if (yPos > 280) { doc.addPage(); yPos = 20; }
-        doc.text(`${idx + 1}. ${formatAnswer(q)} (${q.type})`, 20, yPos);
-        yPos += 6;
+        doc.addPage();
+        yPos = 20;
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Kunci Jawaban', 20, yPos);
+        yPos += 10;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        quizResult.questions.forEach((q, idx) => {
+            if (yPos > 280) { doc.addPage(); yPos = 20; }
+            doc.text(`${idx + 1}. ${formatAnswer(q)} (${q.type})`, 20, yPos);
+            yPos += 6;
+        });
+
+        // Add signatures
+        if (userProfile) {
+            if (yPos > pageHeight - 50) { doc.addPage(); yPos = 20; }
+            yPos += 15;
+            const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            const leftX = 40, rightX = pageWidth - 40;
+            doc.text('Mengetahui,', leftX, yPos, { align: 'center' });
+            doc.text('Kepala Sekolah', leftX, yPos + 5, { align: 'center' });
+            doc.setFont('helvetica', 'bold').text(userProfile.principalName || '.......................', leftX, yPos + 25, { align: 'center' });
+            doc.setFont('helvetica', 'normal').text(`NIP. ${userProfile.principalNip || '-'}`, leftX, yPos + 30, { align: 'center' });
+            doc.text(`${signingLocation || 'Jakarta'}, ${dateStr}`, rightX, yPos, { align: 'center' });
+            doc.text('Guru Mata Pelajaran', rightX, yPos + 5, { align: 'center' });
+            doc.setFont('helvetica', 'bold').text(userProfile.name || '.......................', rightX, yPos + 25, { align: 'center' });
+            doc.setFont('helvetica', 'normal').text(`NIP. ${userProfile.nip || '-'}`, rightX, yPos + 30, { align: 'center' });
+        }
+
+        doc.save(`Soal-${(topic || 'Kuis').replace(/\s+/g, '_')}-${gradeLevel || 'Global'}.pdf`);
+        toast.success("Download PDF Berhasil");
     });
-
-    // Add signatures
-    if (userProfile) {
-        if (yPos > pageHeight - 50) { doc.addPage(); yPos = 20; }
-        yPos += 15;
-        const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-        const leftX = 40, rightX = pageWidth - 40;
-        doc.text('Mengetahui,', leftX, yPos, { align: 'center' });
-        doc.text('Kepala Sekolah', leftX, yPos + 5, { align: 'center' });
-        doc.setFont('helvetica', 'bold').text(userProfile.principalName || '.......................', leftX, yPos + 25, { align: 'center' });
-        doc.setFont('helvetica', 'normal').text(`NIP. ${userProfile.principalNip || '-'}`, leftX, yPos + 30, { align: 'center' });
-        doc.text(`${signingLocation || 'Jakarta'}, ${dateStr}`, rightX, yPos, { align: 'center' });
-        doc.text('Guru Mata Pelajaran', rightX, yPos + 5, { align: 'center' });
-        doc.setFont('helvetica', 'bold').text(userProfile.name || '.......................', rightX, yPos + 25, { align: 'center' });
-        doc.setFont('helvetica', 'normal').text(`NIP. ${userProfile.nip || '-'}`, rightX, yPos + 30, { align: 'center' });
-    }
-
-    doc.save(`Soal-${(topic || 'Kuis').replace(/\s+/g, '_')}-${gradeLevel || 'Global'}.pdf`);
-    toast.success("Download PDF Berhasil");
 };
 
 /**
@@ -389,113 +449,152 @@ export const exportKartuSoalPDF = async ({ quizResult, topic, subject, gradeLeve
 export const exportKartuSoalWord = async ({ quizResult, topic, subject, gradeLevel, userProfile, signingLocation }) => {
     const { asBlob } = await import("html-docx-js-typescript");
     const { saveAs } = await import("file-saver");
+    const { default: html2canvas } = await import("html2canvas");
     if (!quizResult) return;
 
-    let html = `
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>
-                    @page {size: A4 landscape; margin: 1cm; mso-page-orientation: landscape;}
-                    body {font-family: 'Times New Roman', serif; font-size: 11pt; }
-                    table {width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
-                    th, td {border: 1px solid black; padding: 10px; vertical-align: top; word-wrap: break-word; }
-                    .no-border, .no-border td {border: none !important; }
-                    .bg-gray {background-color: #f3f4f6; }
-                </style>
-            </head>
-            <body>
-    `;
+    return withLightMode(async () => {
+        // Pre-capture visualizations
+        const visImages = {};
+        for (let idx = 0; idx < quizResult.questions.length; idx++) {
+            const visEl = document.getElementById(`quiz-visualization-${idx}`);
+            if (visEl) {
+                try {
+                    const canvas = await html2canvas(visEl, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff'
+                    });
+                    visImages[idx] = canvas.toDataURL('image/png');
+                } catch (e) {
+                    console.error("Failed to render visualization for Word export", idx, e);
+                }
+            }
+        }
 
-    quizResult.questions.forEach((q, idx) => {
-        html += `
-            <div style="page-break-after: always;">
-                <h3 style="text-align:center;">KARTU SOAL</h3>
-                <table class="no-border">
-                    <tr><td>Jenis Sekolah: ${userProfile.school}</td><td>Kurikulum: Merdeka</td><td>Penyusun: ${userProfile.name}</td></tr>
-                    <tr><td>Kelas: ${gradeLevel}</td><td>Mapel: ${subject}</td><td>Unit: ${userProfile.school}</td></tr>
-                </table>
-                <table>
-                    <tr class="bg-gray">
-                        <td width="25%"><strong>Deskripsi Pedagogis</strong></td>
-                        <td width="20%"><strong>No. Soal & Kunci</strong></td>
-                        <td><strong>Rumusan Butir Soal</strong></td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>Kompetensi:</strong><br/>${q.competency || '-'}<br/><br/>
-                            <strong>Materi:</strong><br/>${q.pedagogical_materi || topic || '-'}<br/><br/>
-                            <strong>Indikator:</strong><br/>${q.indicator || '-'}<br/><br/>
-                            <strong>Level:</strong> ${q.cognitive_level || '-'}
-                        </td>
-                        <td align="center" style="font-size:24pt;"><strong>${idx + 1}</strong></td>
-                        <td>
-                            ${(() => {
-                let innerHtml = '';
-                if (q.stimulus && q.stimulus.trim() !== '' && !q.stimulus.includes('Lihat stimulus')) {
-                    innerHtml += `<div style="margin-bottom:10px; font-style:italic;">${q.stimulus}</div>`;
-                }
-                if (q.image_hint) {
-                    innerHtml += `
-                        <div style="margin: 10px 0; border: 2px dashed #2563eb; background: #f1f5f9; padding: 10px; text-align: center;">
-                            <strong style="color: #1d4ed8; font-size: 9pt;">[ TEMPAT GAMBAR ]</strong><br/>
-                            <span style="font-size: 8pt; color: #64748b; font-style: italic;">${q.image_hint}</span>
-                        </div>
-                    `;
-                }
-                innerHtml += `<div style="margin-bottom:10px;"><strong>${q.question}</strong></div>`;
-                if ((q.type === 'pg' || q.type === 'pg_complex') && q.options && q.options.length > 0) {
-                    innerHtml += '<div><strong>OPSI JAWABAN:</strong><br/>';
-                    q.options.forEach((opt, oIdx) => { innerHtml += `${String.fromCharCode(65 + oIdx)}. ${opt}<br/>`; });
-                    innerHtml += '</div>';
-                }
-                if (q.type === 'matching' && q.left_side && q.right_side) {
-                    innerHtml += '<div style="margin-top:10px;"><strong>KOLOM KIRI:</strong><br/>';
-                    q.left_side.forEach((l, i) => innerHtml += `${i + 1}. ${l}<br/>`);
-                    innerHtml += '<br/><strong>KOLOM KANAN:</strong><br/>';
-                    q.right_side.forEach((r, i) => innerHtml += `${String.fromCharCode(65 + i)}. ${r}<br/>`);
-                    innerHtml += '</div>';
-                }
-                if (q.type === 'true_false' && q.statements && q.statements.length > 0) {
-                    innerHtml += '<div style="margin-top:10px;"><strong>PERNYATAAN:</strong><br/>';
-                    q.statements.forEach((s, i) => innerHtml += `${i + 1}. ${s.text}<br/>`);
-                    innerHtml += '</div>';
-                }
-                return innerHtml;
-            })()}
-                        </td>
-                    </tr>
-                    <tr class="bg-gray"><td align="center"><strong>Kunci</strong></td></tr>
-                    <tr><td align="center"><strong>${formatAnswer(q)}</strong></td></tr>
-                </table>
-            </div>
+        let html = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        @page {size: A4 landscape; margin: 1cm; mso-page-orientation: landscape;}
+                        body {font-family: 'Times New Roman', serif; font-size: 11pt; }
+                        table {width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
+                        th, td {border: 1px solid black; padding: 10px; vertical-align: top; word-wrap: break-word; }
+                        .no-border, .no-border td {border: none !important; }
+                        .bg-gray {background-color: #f3f4f6; }
+                    </style>
+                </head>
+                <body>
         `;
+
+        quizResult.questions.forEach((q, idx) => {
+            html += `
+                <div style="page-break-after: always;">
+                    <h3 style="text-align:center;">KARTU SOAL</h3>
+                    <table class="no-border">
+                        <tr><td>Jenis Sekolah: ${userProfile.school}</td><td>Kurikulum: Merdeka</td><td>Penyusun: ${userProfile.name}</td></tr>
+                        <tr><td>Kelas: ${gradeLevel}</td><td>Mapel: ${subject}</td><td>Unit: ${userProfile.school}</td></tr>
+                    </table>
+                    <table>
+                        <tr class="bg-gray">
+                            <td width="25%"><strong>Deskripsi Pedagogis</strong></td>
+                            <td width="20%"><strong>No. Soal & Kunci</strong></td>
+                            <td><strong>Rumusan Butir Soal</strong></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Kompetensi:</strong><br/>${q.competency || '-'}<br/><br/>
+                                <strong>Materi:</strong><br/>${q.pedagogical_materi || topic || '-'}<br/><br/>
+                                <strong>Indikator:</strong><br/>${q.indicator || '-'}<br/><br/>
+                                <strong>Level:</strong> ${q.cognitive_level || '-'}
+                            </td>
+                            <td align="center" style="font-size:24pt;"><strong>${idx + 1}</strong></td>
+                            <td>
+                                ${(() => {
+                                    let innerHtml = '';
+                                    if (q.stimulus && q.stimulus.trim() !== '' && !q.stimulus.includes('Lihat stimulus')) {
+                                        innerHtml += `<div style="margin-bottom:10px; font-style:italic;">${q.stimulus}</div>`;
+                                    }
+
+                                    if (q.visualization && q.visualization.type === 'image') {
+                                        const desc = q.visualization.config?.description || '';
+                                        const cleanDesc = desc.replace(/^\[+/, '').replace(/\]+$/, '');
+                                        innerHtml += `
+                                            <div style="margin: 10px 0; border: 2px dashed #2563eb; background: #f1f5f9; padding: 10px; text-align: center;">
+                                                <strong style="color: #1d4ed8; font-size: 9pt;">[ TEMPAT GAMBAR ]</strong><br/>
+                                                <span style="font-size: 8pt; color: #64748b; font-style: italic;">${cleanDesc}</span>
+                                            </div>
+                                        `;
+                                    } else if (visImages[idx]) {
+                                        innerHtml += `
+                                            <div style="margin: 10px 0; text-align: center;">
+                                                <img src="${visImages[idx]}" style="max-width: 100%; height: auto;" />
+                                            </div>
+                                        `;
+                                    } else if (q.image_hint) {
+                                        const cleanHint = q.image_hint.replace(/^\[+/, '').replace(/\]+$/, '');
+                                        innerHtml += `
+                                            <div style="margin: 10px 0; border: 2px dashed #2563eb; background: #f1f5f9; padding: 10px; text-align: center;">
+                                                <strong style="color: #1d4ed8; font-size: 9pt;">[ TEMPAT GAMBAR ]</strong><br/>
+                                                <span style="font-size: 8pt; color: #64748b; font-style: italic;">${cleanHint}</span>
+                                            </div>
+                                        `;
+                                    }
+
+                                    innerHtml += `<div style="margin-bottom:10px;"><strong>${q.question}</strong></div>`;
+                                    if ((q.type === 'pg' || q.type === 'pg_complex') && q.options && q.options.length > 0) {
+                                        innerHtml += '<div><strong>OPSI JAWABAN:</strong><br/>';
+                                        q.options.forEach((opt, oIdx) => { innerHtml += `${String.fromCharCode(65 + oIdx)}. ${opt}<br/>`; });
+                                        innerHtml += '</div>';
+                                    }
+                                    if (q.type === 'matching' && q.left_side && q.right_side) {
+                                        innerHtml += '<div style="margin-top:10px;"><strong>KOLOM KIRI:</strong><br/>';
+                                        q.left_side.forEach((l, i) => innerHtml += `${i + 1}. ${l}<br/>`);
+                                        innerHtml += '<br/><strong>KOLOM KANAN:</strong><br/>';
+                                        q.right_side.forEach((r, i) => innerHtml += `${String.fromCharCode(65 + i)}. ${r}<br/>`);
+                                        innerHtml += '</div>';
+                                    }
+                                    if (q.type === 'true_false' && q.statements && q.statements.length > 0) {
+                                        innerHtml += '<div style="margin-top:10px;"><strong>PERNYATAAN:</strong><br/>';
+                                        q.statements.forEach((s, i) => innerHtml += `${i + 1}. ${s.text}<br/>`);
+                                        innerHtml += '</div>';
+                                    }
+                                    return innerHtml;
+                                })()}
+                            </td>
+                        </tr>
+                        <tr class="bg-gray"><td align="center"><strong>Kunci</strong></td></tr>
+                        <tr><td align="center"><strong>${formatAnswer(q)}</strong></td></tr>
+                    </table>
+                </div>
+            `;
+        });
+
+        const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        html += `
+            <br/><div style="page-break-inside: avoid; display: flex; justify-content: space-between; margin-top: 30px; font-family: 'Times New Roman', serif;">
+                <div style="float: left; width: 40%; text-align: center;">
+                    <p>Mengetahui,<br/>Kepala Sekolah</p><br/><br/><br/>
+                    <p>( ${userProfile.principalName || '.......................'} )<br/>NIP. ${userProfile.principalNip || '-'}</p>
+                </div>
+                <div style="float: right; width: 40%; text-align: center;">
+                    <p>${signingLocation || 'Jakarta'}, ${dateStr}<br/>Guru Mata Pelajaran</p><br/><br/><br/>
+                    <p>( ${userProfile.name || '.......................'} )<br/>NIP. ${userProfile.nip || '-'}</p>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+        </body></html>`;
+
+        try {
+            const blob = await asBlob(html);
+            saveAs(blob, `Kartu_Soal-${topic.replace(/\s+/g, '_')}.docx`);
+            toast.success("Kartu Soal Word Berhasil");
+        } catch (e) {
+            console.error("Gagal export Word:", e);
+            toast.error("Gagal export Kartu Soal");
+        }
     });
-
-    const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    html += `
-        <br/><div style="page-break-inside: avoid; display: flex; justify-content: space-between; margin-top: 30px; font-family: 'Times New Roman', serif;">
-            <div style="float: left; width: 40%; text-align: center;">
-                <p>Mengetahui,<br/>Kepala Sekolah</p><br/><br/><br/>
-                <p>( ${userProfile.principalName || '.......................'} )<br/>NIP. ${userProfile.principalNip || '-'}</p>
-            </div>
-            <div style="float: right; width: 40%; text-align: center;">
-                <p>${signingLocation || 'Jakarta'}, ${dateStr}<br/>Guru Mata Pelajaran</p><br/><br/><br/>
-                <p>( ${userProfile.name || '.......................'} )<br/>NIP. ${userProfile.nip || '-'}</p>
-            </div>
-            <div style="clear: both;"></div>
-        </div>
-    </body></html>`;
-
-    try {
-        const blob = await asBlob(html);
-        saveAs(blob, `Kartu_Soal-${topic.replace(/\s+/g, '_')}.docx`);
-        toast.success("Kartu Soal Word Berhasil");
-    } catch (e) {
-        console.error("Gagal export Word:", e);
-        toast.error("Gagal export Kartu Soal");
-    }
 };
 
 /**

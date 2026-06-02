@@ -127,7 +127,9 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                                         </ReactMarkdown>
 
                                         {q.visualization && (
-                                            <VisualizationRenderer visualization={q.visualization} />
+                                            <div id={`quiz-visualization-${idx}`} className="quiz-visualization my-4">
+                                                <VisualizationRenderer visualization={q.visualization} />
+                                            </div>
                                         )}
 
                                         {q.image_hint && !q.visualization && (() => {
