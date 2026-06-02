@@ -126,6 +126,21 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     const yRange = cfg.yRange ?? [-5, 10];
     const color = cfg.color ?? Theme.blue;
 
+    const getStepSize = (range: [number, number]) => {
+      const diff = Math.abs(range[1] - range[0]);
+      if (diff <= 2) return 0.5;
+      if (diff <= 5) return 1;
+      if (diff <= 10) return 2;
+      if (diff <= 25) return 5;
+      if (diff <= 50) return 10;
+      if (diff <= 100) return 20;
+      if (diff <= 250) return 50;
+      return Math.ceil(diff / 5);
+    };
+
+    const xStep = getStepSize(xRange);
+    const yStep = getStepSize(yRange);
+
     return (
       <div className="my-4 rounded-2xl border-2 border-blue-200 dark:border-blue-900/50 overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
         {cfg.title && (
@@ -139,8 +154,8 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
           preserveAspectRatio={false}
         >
           <Coordinates.Cartesian
-            xAxis={{ labels: (n) => String(n), lines: 1 }}
-            yAxis={{ labels: (n) => String(n), lines: 1 }}
+            xAxis={{ labels: (n) => String(Math.round(n * 10) / 10), lines: xStep }}
+            yAxis={{ labels: (n) => String(Math.round(n * 10) / 10), lines: yStep }}
           />
           {mathFn && (
             <Plot.OfX
