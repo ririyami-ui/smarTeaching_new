@@ -61,22 +61,22 @@ ${allQuestions.map((q, i) => `  ${i+1}. [${q.pedagogical_materi}] ${q.question}`
             - Tambahkan referensi pencarian: "Referensi: {keyword pencarian gambar yang akurat}".
             - Jika soal bisa dipahami tanpa gambar, kosongkan ("").
          8. **VISUALIZATION (OPTIONAL - 5% SOAL)**: Hanya 5% dari total soal yang PERLU visualisasi. Jika soal membutuhkan grafik/diagram/infografis, tambahkan field **"visualization"**:
-             - **Function (grafik fungsi matematika)**: WAJIB digunakan jika soal menyebutkan fungsi matematis seperti h(t)=-t²+4t+5, f(x)=2x+1, y=sin(x), dll.
+             - **Function (grafik fungsi matematika)**: WAJIB untuk grafik fungsi matematis (h(t)=-t²+4t, f(x)=2x). KUSUS MATEMATIKA/FISIKA. (JANGAN gunakan 'chart' untuk fungsi matematis!).
                "visualization": { "type": "function", "config": { "expression": "-x*x + 4*x + 5", "title": "h(t) = -t\u00b2 + 4t + 5", "xLabel": "Waktu (detik)", "yLabel": "Ketinggian (cm)", "xRange": [-1, 5], "yRange": [-2, 10], "points": [{"x": 2, "y": 9, "label": "Maks"}] } }
                Catatan: "expression" harus ekspresi JavaScript valid (x=variabel, * untuk kali, ** untuk pangkat).
-             - **Chart (grafik data statistik)**: Gunakan untuk grafik batang/garis/scatter dari data diskrit.
+             - **Chart (grafik data statistik)**: Gunakan HANYA untuk diagram batang/garis/scatter dari data diskrit (bukan fungsi aljabar murni).
                "visualization": { "type": "chart", "config": { "type": "line", "title": "Judul", "xLabel": "X", "yLabel": "Y", "data": [{"x": 1, "y": 2}] } }
-             - **Logic (gerbang logika & timing digital)**: Gunakan untuk Informatika/Sistem Komputer.
+             - **Logic (gerbang logika & timing digital)**: KHUSUS INFORMATIKA (Sistem Komputer/Logika). WAJIB gunakan tipe ini, JANGAN gunakan tipe 'diagram'/flowchart untuk sirkuit logika!
                "visualization": { "type": "logic", "config": { "code": { "assign": [["out", ["|", ["&", "A", "B"], "C"]]] } } }
-             - **Scratch (pemrograman visual)**: WAJIB digunakan untuk soal tentang algoritma blok Scratch (JANGAN gunakan 'diagram' untuk Scratch!).
+             - **Scratch (pemrograman visual)**: KHUSUS INFORMATIKA (Algoritma). WAJIB digunakan untuk blok kode Scratch. JANGAN PERNAH gunakan 'diagram' untuk menggambar blok Scratch!
                "visualization": { "type": "scratch", "config": { "code": "when flag clicked\ngo to x: (0) y: (0)\nrepeat (10)\n move (10) steps\nend" } }
-             - **Chemistry (struktur molekul)**: Gunakan untuk Kimia, WAJIB diisi string SMILES yang valid.
+             - **Chemistry (struktur molekul)**: KHUSUS KIMIA/IPA. JANGAN PERNAH gunakan tipe lain untuk menggambar molekul.
                "visualization": { "type": "chemistry", "config": { "smiles": "C1=CC=C(C=C1)O" } }
-             - **Music (not balok)**: Gunakan untuk Seni Budaya, WAJIB diisi notasi ABC yang valid.
+             - **Music (not balok)**: KHUSUS SENI BUDAYA/MUSIK. JANGAN gunakan untuk selain membaca partitur not balok.
                "visualization": { "type": "music", "config": { "abc": "X:1\nT:Notes\nM:C\nL:1/4\nK:C\nC, D, E, F,|G, A, B, C|D E F G|A B c d|e f g a|b c' d' e'|f' g' a' b'|" } }
-             - **Diagram (flowchart/timeline)**: Gunakan untuk soal algoritma, urutan, hubungan (KECUALI algoritma Scratch, itu harus pakai tipe 'scratch').
+             - **Diagram (flowchart/timeline)**: HANYA untuk algoritma umum, siklus biologi, atau sejarah. KECUALI Scratch dan Logika Digital (kedua itu DILARANG keras pakai diagram).
                "visualization": { "type": "diagram", "config": { "type": "flowchart", "diagram": "mermaid code" } }
-             - **Image (infografis)**: Gunakan untuk soal perbandingan visual, struktur.
+             - **Image (infografis)**: Gunakan untuk soal yang HANYA bisa direpresentasikan dengan gambar eksternal (placeholder).
                "visualization": { "type": "image", "config": { "description": "[Tempatkan Gambar: ...]", "position": "center", "width": "45%" } }
              - Jika soal tidak butuh visualisasi, kosongkan field ini.
 
