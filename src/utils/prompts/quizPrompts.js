@@ -66,6 +66,14 @@ ${allQuestions.map((q, i) => `  ${i+1}. [${q.pedagogical_materi}] ${q.question}`
                Catatan: "expression" harus ekspresi JavaScript valid (x=variabel, * untuk kali, ** untuk pangkat).
              - **Chart (grafik data statistik)**: Gunakan untuk grafik batang/garis/scatter dari data diskrit.
                "visualization": { "type": "chart", "config": { "type": "line", "title": "Judul", "xLabel": "X", "yLabel": "Y", "data": [{"x": 1, "y": 2}] } }
+             - **Logic (gerbang logika & timing digital)**: Gunakan untuk Informatika/Sistem Komputer.
+               "visualization": { "type": "logic", "config": { "code": { "assign": [["out", ["|", ["&", "A", "B"], "C"]]] } } }
+             - **Scratch (pemrograman visual)**: Gunakan untuk Informatika algoritma blok Scratch.
+               "visualization": { "type": "scratch", "config": { "code": "when flag clicked\ngo to x: (0) y: (0)\nrepeat (10)\n move (10) steps\nend" } }
+             - **Chemistry (struktur molekul)**: Gunakan untuk Kimia, WAJIB diisi string SMILES yang valid.
+               "visualization": { "type": "chemistry", "config": { "smiles": "C1=CC=C(C=C1)O" } }
+             - **Music (not balok)**: Gunakan untuk Seni Budaya, WAJIB diisi notasi ABC yang valid.
+               "visualization": { "type": "music", "config": { "abc": "X:1\nT:Notes\nM:C\nL:1/4\nK:C\nC, D, E, F,|G, A, B, C|D E F G|A B c d|e f g a|b c' d' e'|f' g' a' b'|" } }
              - **Diagram (flowchart/timeline)**: Gunakan untuk soal algoritma, urutan, hubungan.
                "visualization": { "type": "diagram", "config": { "type": "flowchart", "diagram": "mermaid code" } }
              - **Image (infografis)**: Gunakan untuk soal perbandingan visual, struktur.

@@ -14,6 +14,10 @@ import {
 import { Mafs, Coordinates, Plot, Point, Text, Theme } from 'mafs';
 import 'mafs/core.css';
 import mermaid from 'mermaid';
+import scratchblocks from 'scratchblocks';
+import abcjs from 'abcjs';
+import SmiDrawer from 'smiles-drawer';
+import wavedrom from 'wavedrom';
 import { ImageIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
@@ -60,9 +64,29 @@ interface ImageConfig {
   width?: string;
 }
 
+interface ScratchConfig {
+  type: 'scratch';
+  code: string;
+}
+
+interface LogicConfig {
+  type: 'logic';
+  code: string; // WaveDrom JSON string
+}
+
+interface ChemistryConfig {
+  type: 'chemistry';
+  smiles: string;
+}
+
+interface MusicConfig {
+  type: 'music';
+  abc: string;
+}
+
 interface VisualizationConfig {
-  type: 'chart' | 'function' | 'diagram' | 'image';
-  config: ChartConfig | FunctionChartConfig | MermaidConfig | ImageConfig | Record<string, unknown>;
+  type: 'chart' | 'function' | 'diagram' | 'image' | 'scratch' | 'logic' | 'chemistry' | 'music';
+  config: ChartConfig | FunctionChartConfig | MermaidConfig | ImageConfig | ScratchConfig | LogicConfig | ChemistryConfig | MusicConfig | Record<string, unknown>;
 }
 
 interface VisualizationRendererProps {
@@ -216,7 +240,110 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     );
   }
 
+  // ── SCRATCH BLOCKS ──────────────────────────────────────────────────────
+  if (visualization.type === 'scratch') {
+    const scratchConfig = visualization.config as ScratchConfig;
+    return <ScratchRenderer code={scratchConfig.code} />;
+  }
+
+  // ── LOGIC GATES (WaveDrom) ──────────────────────────────────────────────
+  if (visualization.type === 'logic') {
+    const logicConfig = visualization.config as LogicConfig;
+    return <LogicRenderer code={logicConfig.code} />;
+  }
+
+  // ── CHEMISTRY (SMILES) ──────────────────────────────────────────────────
+  if (visualization.type === 'chemistry') {
+    const chemConfig = visualization.config as ChemistryConfig;
+    return <ChemistryRenderer smiles={chemConfig.smiles} />;
+  }
+
+  // ── MUSIC (ABC Notation) ────────────────────────────────────────────────
+  if (visualization.type === 'music') {
+    const musicConfig = visualization.config as MusicConfig;
+    return <MusicRenderer abc={musicConfig.abc} />;
+  }
+
   return null;
+};
+
+// --- Sub-components for new renderers ---
+
+const ScratchRenderer: React.FC<{ code: string }> = ({ code }) => {
+  const ref = React.useRef<HTMLPreElement>(null);
+  React.useEffect(() => {
+    if (ref.current) {
+      ref.current.textContent = code;
+      try {
+        scratchblocks.renderMatching(ref.current, { style: 'scratch3' });
+      } catch (e) {
+        console.error("Scratch render error", e);
+      }
+    }
+  }, [code]);
+  return (
+    <div className="my-4 p-4 border-2 border-blue-200 rounded-2xl bg-white flex justify-center overflow-x-auto">
+      <pre ref={ref} className="scratchcode hidden"></pre>
+    </div>
+  );
+};
+
+const LogicRenderer: React.FC<{ code: string }> = ({ code }) => {
+  const ref = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (ref.current) {
+      try {
+        const obj = typeof code === 'string' ? JSON.parse(code) : code;
+        const id = 'wavedrom-' + Math.random().toString(36).substring(2, 9);
+        ref.current.id = id;
+        wavedrom.renderWaveForm(id, obj, ref.current);
+      } catch (e) {
+        console.error("WaveDrom render error", e);
+      }
+    }
+  }, [code]);
+  return (
+    <div className="my-4 p-4 border-2 border-blue-200 rounded-2xl bg-white flex justify-center overflow-x-auto">
+      <div ref={ref}></div>
+    </div>
+  );
+};
+
+const ChemistryRenderer: React.FC<{ smiles: string }> = ({ smiles }) => {
+  const ref = React.useRef<HTMLCanvasElement>(null);
+  React.useEffect(() => {
+    if (ref.current) {
+      try {
+        const drawer = new SmiDrawer({});
+        drawer.draw(smiles, ref.current, 'light');
+      } catch (e) {
+        console.error("SMILES render error", e);
+      }
+    }
+  }, [smiles]);
+  return (
+    <div className="my-4 p-4 border-2 border-blue-200 rounded-2xl bg-white flex justify-center">
+      <canvas ref={ref} width={300} height={300}></canvas>
+    </div>
+  );
+};
+
+const MusicRenderer: React.FC<{ abc: string }> = ({ abc }) => {
+  const ref = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (ref.current) {
+      try {
+        abcjs.renderAbc(ref.current, abc, { responsive: 'resize' });
+      } catch (e) {
+        console.error("ABCJS render error", e);
+      }
+    }
+  }, [abc]);
+  return (
+    <div className="my-4 p-4 border-2 border-blue-200 rounded-2xl bg-white overflow-x-auto">
+      <div ref={ref}></div>
+    </div>
+  );
 };
 
 export default VisualizationRenderer;
