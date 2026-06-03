@@ -44,7 +44,7 @@ interface FunctionChartConfig {
 }
 
 interface MermaidConfig {
-  type: 'flowchart' | 'diagram' | 'graph';
+  type: 'flowchart' | 'timeline' | 'graph';
   diagram: string;
 }
 
