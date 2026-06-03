@@ -343,17 +343,23 @@ const QuizGeneratorPage: React.FC = () => {
         if (!quizResult || !user) return;
         setIsSaving(true);
         try {
+            // Sanitize: Firestore rejects `undefined` values in nested objects.
+            // JSON round-trip strips undefined keys and converts the data to a
+            // plain serializable object safe for Firestore.
+            const sanitizedQuiz = JSON.parse(JSON.stringify(quizResult));
+
             await addDoc(collection(db, 'quizzes'), {
                 userId: user.uid,
                 topic,
                 subject,
                 gradeLevel,
-                quiz: quizResult,
+                quiz: sanitizedQuiz,
                 context_semester: activeSemester,
                 createdAt: serverTimestamp()
             });
             toast.success("Kuis disimpan ke riwayat!");
-        } catch {
+        } catch (error) {
+            console.error("Firestore save error:", error);
             toast.error("Gagal menyimpan kuis.");
         } finally {
             setIsSaving(false);
