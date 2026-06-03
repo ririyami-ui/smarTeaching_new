@@ -119,6 +119,33 @@ export const exportWord = async ({ quizResult, subject, gradeLevel, topic, userP
                         <p style="margin: 5px 0 0 0; color: #475569; font-size: 9pt; font-style: italic;">Instruksi: ${cleanDesc}</p>
                     </div><br/>
                 `;
+            } else if (q.visualization && q.visualization.type === 'spreadsheet') {
+                const config = q.visualization.config || {};
+                const data = config.data || [];
+                const colCount = data.length > 0 && data[0].row ? data[0].row.length : 0;
+                
+                let tableHtml = '<table border="1" style="border-collapse: collapse; width: 100%; margin: 15px 0; font-family: monospace; font-size: 10pt;">';
+                
+                // Header (A, B, C...)
+                tableHtml += '<tr style="background-color: #e5e7eb;"><td style="width:30px;"></td>';
+                for(let c = 0; c < colCount; c++) {
+                    const letter = String.fromCharCode((c % 26) + 65);
+                    tableHtml += `<td style="text-align: center; font-weight: bold; padding: 2px;">${letter}</td>`;
+                }
+                tableHtml += '</tr>';
+
+                // Data Rows
+                data.forEach((rowObj, rIdx) => {
+                    tableHtml += '<tr>';
+                    tableHtml += `<td style="background-color: #f3f4f6; text-align: center; font-weight: bold; padding: 2px;">${rIdx + 1}</td>`;
+                    const cells = rowObj.row || [];
+                    for(let c = 0; c < colCount; c++) {
+                        tableHtml += `<td style="padding: 4px;">${cells[c] || ''}</td>`;
+                    }
+                    tableHtml += '</tr>';
+                });
+                tableHtml += '</table><br/>';
+                combinedText += tableHtml;
             } else if (visImages[idx]) {
                 combinedText += `
                     <div style="margin: 15px 0; text-align: center;">
@@ -526,6 +553,32 @@ export const exportKartuSoalWord = async ({ quizResult, topic, subject, gradeLev
                                                 <span style="font-size: 8pt; color: #64748b; font-style: italic;">${cleanDesc}</span>
                                             </div>
                                         `;
+                                    } else if (q.visualization && q.visualization.type === 'spreadsheet') {
+                                        const config = q.visualization.config || {};
+                                        const data = config.data || [];
+                                        const colCount = data.length > 0 && data[0].row ? data[0].row.length : 0;
+                                        
+                                        innerHtml += '<table border="1" style="border-collapse: collapse; width: 100%; margin: 10px 0; font-family: monospace; font-size: 10pt;">';
+                                        
+                                        // Header
+                                        innerHtml += '<tr style="background-color: #e5e7eb;"><td style="width:30px;"></td>';
+                                        for(let c = 0; c < colCount; c++) {
+                                            const letter = String.fromCharCode((c % 26) + 65);
+                                            innerHtml += `<td style="text-align: center; font-weight: bold; padding: 2px;">${letter}</td>`;
+                                        }
+                                        innerHtml += '</tr>';
+
+                                        // Data Rows
+                                        data.forEach((rowObj, rIdx) => {
+                                            innerHtml += '<tr>';
+                                            innerHtml += `<td style="background-color: #f3f4f6; text-align: center; font-weight: bold; padding: 2px;">${rIdx + 1}</td>`;
+                                            const cells = rowObj.row || [];
+                                            for(let c = 0; c < colCount; c++) {
+                                                innerHtml += `<td style="padding: 4px;">${cells[c] || ''}</td>`;
+                                            }
+                                            innerHtml += '</tr>';
+                                        });
+                                        innerHtml += '</table><br/>';
                                     } else if (visImages[idx]) {
                                         innerHtml += `
                                             <div style="margin: 10px 0; text-align: center;">
