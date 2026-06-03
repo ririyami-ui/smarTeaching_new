@@ -265,20 +265,6 @@ const QuizGeneratorPage: React.FC = () => {
                                 code: 'def hitung_luas(p, l):\n    return p * l\n\nprint(hitung_luas(5, 4))'
                             }
                         }
-                    },
-                    {
-                        type: 'pg',
-                        question: 'Perhatikan papan catur berikut. Putih melangkah dan langsung Skakmat. Bidik langkah terbaik!',
-                        options: ['A. Menteri (h5) ke f7', 'B. Kuda ke f7', 'C. Gajah (c4) ke f7', 'D. Rokade panjang'],
-                        answer: 'A. Menteri (h5) ke f7',
-                        explanation: 'Ini adalah pola Scholar\'s Mate (Mati Anak Bawang). Menteri memukul pion f7 dan dilindungi oleh Gajah di c4, menghasilkan skakmat seketika.',
-                        visualization: {
-                            type: 'chess',
-                            config: {
-                                fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4',
-                                arrows: [['c4', 'f7'], ['h5', 'f7']]
-                            }
-                        }
                     }
                 ]
             } as any);
