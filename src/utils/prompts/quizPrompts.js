@@ -67,7 +67,8 @@ ${allQuestions.map((q, i) => `  ${i+1}. [${q.pedagogical_materi}] ${q.question}`
              - **Chart (grafik data statistik)**: Gunakan HANYA untuk diagram batang/garis/scatter dari data diskrit (bukan fungsi aljabar murni).
                "visualization": { "type": "chart", "config": { "type": "line", "title": "Judul", "xLabel": "X", "yLabel": "Y", "data": [{"x": 1, "y": 2}] } }
              - **Logic (gerbang logika & timing digital)**: KHUSUS INFORMATIKA (Sistem Komputer/Logika). WAJIB gunakan tipe ini, JANGAN gunakan tipe 'diagram'/flowchart untuk sirkuit logika!
-               "visualization": { "type": "logic", "config": { "code": { "assign": [["out", ["|", ["&", "A", "B"], "C"]]] } } }
+               "visualization": { "type": "logic", "config": { "code": "{ \"assign\": [[\"out\", [\"|\", [\"&\", \"A\", \"B\"], \"C\"]]] }" } }
+               Catatan: field "code" WAJIB berupa string JSON yang di-escape (bukan objek langsung) untuk menghindari error database.
              - **Scratch (pemrograman visual)**: KHUSUS INFORMATIKA (Algoritma). WAJIB digunakan untuk blok kode Scratch. JANGAN PERNAH gunakan 'diagram' untuk menggambar blok Scratch!
                "visualization": { "type": "scratch", "config": { "code": "when flag clicked\ngo to x: (0) y: (0)\nrepeat (10)\n move (10) steps\nend" } }
              - **Chemistry (struktur molekul)**: KHUSUS KIMIA/IPA. JANGAN PERNAH gunakan tipe lain untuk menggambar molekul.
@@ -77,8 +78,8 @@ ${allQuestions.map((q, i) => `  ${i+1}. [${q.pedagogical_materi}] ${q.question}`
              - **Diagram (flowchart/timeline)**: HANYA untuk algoritma umum, siklus biologi, atau sejarah. KECUALI Scratch dan Logika Digital (kedua itu DILARANG keras pakai diagram).
                "visualization": { "type": "diagram", "config": { "type": "flowchart", "diagram": "mermaid code" } }
              - **Spreadsheet (tabel bergaya Excel)**: KHUSUS INFORMATIKA/TIK (soal tentang rumus Excel, pengolahan data spreadsheet, atau simulasi digital). Tampilkan tabel visual bergaya Microsoft Excel lengkap dengan header kolom (A, B, C), nomor baris, dan formula bar. JANGAN gunakan 'chart' atau 'diagram' untuk soal tentang spreadsheet!
-               "visualization": { "type": "spreadsheet", "config": { "title": "Data_Nilai.xlsx", "selectedCell": "C5", "formulaBar": "=AVERAGE(C2:C4)", "data": [["No", "Nama", "Nilai"], ["1", "Budi", "80"], ["2", "Siti", "95"], ["3", "Andi", "70"], ["", "", ""]] } }
-               Catatan: field "data" berupa array 2D string, baris terakhir bisa dikosongkan jika itu sel target soal. "selectedCell" menandai sel yang di-highlight hijau. "formulaBar" menunjukkan isi rumus di baris formula.
+               "visualization": { "type": "spreadsheet", "config": { "title": "Data_Nilai.xlsx", "selectedCell": "C5", "formulaBar": "=AVERAGE(C2:C4)", "data": [{"row": ["No", "Nama", "Nilai"]}, {"row": ["1", "Budi", "80"]}, {"row": ["2", "Siti", "95"]}, {"row": ["3", "Andi", "70"]}, {"row": ["", "", ""]}] } }
+               Catatan: field "data" berupa array dari objek {row: [string]}, baris terakhir bisa dikosongkan jika itu sel target soal. "selectedCell" menandai sel yang di-highlight hijau. "formulaBar" menunjukkan isi rumus di baris formula.
              - **Image (infografis)**: Gunakan untuk soal yang HANYA bisa direpresentasikan dengan gambar eksternal (placeholder).
                "visualization": { "type": "image", "config": { "description": "[Tempatkan Gambar: ...]", "position": "center", "width": "45%" } }
              - Jika soal tidak butuh visualisasi, kosongkan field ini.

@@ -79,7 +79,7 @@ interface SpreadsheetConfig {
   title?: string;
   formulaBar?: string;
   selectedCell?: string;
-  data: string[][];
+  data: Array<{ row: string[] }>;
 }
 
 interface VisualizationConfig {

@@ -5,7 +5,7 @@ export interface SpreadsheetConfig {
   title?: string;
   formulaBar?: string;
   selectedCell?: string; // e.g. "C3"
-  data: string[][];      // 2D grid
+  data: Array<{ row: string[] }>;
 }
 
 // Convert 0 -> A, 1 -> B, etc.
@@ -29,7 +29,7 @@ const isCellSelected = (colIndex: number, rowIndex: number, selected: string | u
 
 const SpreadsheetRenderer: React.FC<{ config: SpreadsheetConfig }> = ({ config }) => {
   const { title = 'Workbook.xlsx', formulaBar = '', selectedCell = 'A1', data = [] } = config;
-  const colCount = data.length > 0 ? data[0].length : 0;
+  const colCount = data.length > 0 && data[0].row ? data[0].row.length : 0;
 
   return (
     <div className="my-4 border border-gray-300 dark:border-gray-700 rounded-xl overflow-hidden shadow-md bg-white dark:bg-gray-900 font-mono text-xs">
@@ -83,7 +83,7 @@ const SpreadsheetRenderer: React.FC<{ config: SpreadsheetConfig }> = ({ config }
             </tr>
           </thead>
           <tbody>
-            {data.map((row, rowIndex) => (
+            {data.map((rowItem, rowIndex) => (
               <tr key={rowIndex}>
                 {/* Row Numbers */}
                 <td className="border border-gray-300 dark:border-gray-700 text-center bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-sans font-medium h-6 select-none">
@@ -91,7 +91,7 @@ const SpreadsheetRenderer: React.FC<{ config: SpreadsheetConfig }> = ({ config }
                 </td>
                 
                 {/* Cells */}
-                {row.map((cellValue, colIndex) => {
+                {(rowItem.row || []).map((cellValue, colIndex) => {
                   const selected = isCellSelected(colIndex, rowIndex, selectedCell);
                   return (
                     <td
