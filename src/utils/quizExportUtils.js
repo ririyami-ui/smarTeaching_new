@@ -149,7 +149,7 @@ export const exportWord = async ({ quizResult, subject, gradeLevel, topic, userP
             } else if (visImages[idx]) {
                 combinedText += `
                     <div style="margin: 15px 0; text-align: center;">
-                        <img src="${visImages[idx]}" style="max-width: 100%; height: auto;" />
+                        <img src="${visImages[idx]}" width="450" style="max-width: 100%; height: auto;" />
                     </div><br/>
                 `;
             } else if (q.image_hint) {
@@ -582,7 +582,7 @@ export const exportKartuSoalWord = async ({ quizResult, topic, subject, gradeLev
                                     } else if (visImages[idx]) {
                                         innerHtml += `
                                             <div style="margin: 10px 0; text-align: center;">
-                                                <img src="${visImages[idx]}" style="max-width: 100%; height: auto;" />
+                                                <img src="${visImages[idx]}" width="350" style="max-width: 100%; height: auto;" />
                                             </div>
                                         `;
                                     } else if (q.image_hint) {
