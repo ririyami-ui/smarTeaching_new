@@ -1,5 +1,5 @@
 import React from 'react';
-import { Line, Bar, Scatter } from 'react-chartjs-2';
+import { Line, Bar, Scatter, Pie, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -7,6 +7,7 @@ import {
   PointElement,
   LineElement,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
@@ -18,13 +19,14 @@ ChartJS.register(
   PointElement,
   LineElement,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend
 );
 
 export interface ChartConfig {
-  type: 'line' | 'bar' | 'scatter';
+  type: 'line' | 'bar' | 'scatter' | 'pie' | 'doughnut';
   title: string;
   xLabel?: string;
   yLabel?: string;
@@ -32,36 +34,68 @@ export interface ChartConfig {
   formula?: string;
 }
 
+const PRESET_COLORS = [
+  'rgba(54, 162, 235, 0.8)',   // Blue
+  'rgba(255, 99, 132, 0.8)',   // Pink/Red
+  'rgba(255, 206, 86, 0.8)',   // Yellow
+  'rgba(75, 192, 192, 0.8)',   // Teal
+  'rgba(153, 102, 255, 0.8)',  // Purple
+  'rgba(255, 159, 64, 0.8)',   // Orange
+  'rgba(74, 222, 128, 0.8)',   // Green
+];
+
+const PRESET_BORDERS = [
+  'rgb(54, 162, 235)',
+  'rgb(255, 99, 132)',
+  'rgb(255, 206, 86)',
+  'rgb(75, 192, 192)',
+  'rgb(153, 102, 255)',
+  'rgb(255, 159, 64)',
+  'rgb(74, 222, 128)',
+];
+
 const ChartRenderer: React.FC<{ config: ChartConfig }> = ({ config }) => {
+  const isPieOrDoughnut = config.type === 'pie' || config.type === 'doughnut';
+
   const chartData = {
     labels: config.data.map(d => d.x),
     datasets: [{
       label: config.title,
       data: config.data.map(d => d.y),
-      borderColor: 'rgb(75, 192, 192)',
-      backgroundColor: 'rgba(75, 192, 192, 0.1)',
+      borderColor: isPieOrDoughnut 
+        ? config.data.map((_, i) => PRESET_BORDERS[i % PRESET_BORDERS.length])
+        : 'rgb(75, 192, 192)',
+      backgroundColor: isPieOrDoughnut
+        ? config.data.map((_, i) => PRESET_COLORS[i % PRESET_COLORS.length])
+        : 'rgba(75, 192, 192, 0.1)',
       tension: 0.1,
+      borderWidth: isPieOrDoughnut ? 1 : 2,
     }],
   };
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       title: { display: true, text: config.title },
       legend: { display: true },
     },
-    scales: {
-      x: { title: { display: true, text: config.xLabel || 'X Axis' } },
-      y: { title: { display: true, text: config.yLabel || 'Y Axis' } },
-    },
+    ...(!isPieOrDoughnut ? {
+      scales: {
+        x: { title: { display: true, text: config.xLabel || 'X Axis' } },
+        y: { title: { display: true, text: config.yLabel || 'Y Axis' } },
+      }
+    } : {})
   };
 
   return (
     <div className="my-4 p-6 border-2 border-blue-200 rounded-2xl bg-white">
-      <div className="mb-4">
+      <div className="mb-4 relative h-[300px] flex justify-center items-center">
         {config.type === 'line' && <Line data={chartData} options={chartOptions} />}
         {config.type === 'bar' && <Bar data={chartData} options={chartOptions} />}
         {config.type === 'scatter' && <Scatter data={chartData} options={chartOptions} />}
+        {config.type === 'pie' && <Pie data={chartData} options={chartOptions} />}
+        {config.type === 'doughnut' && <Doughnut data={chartData} options={chartOptions} />}
       </div>
       
       {/* AUTOMATIC DATA TABLE FOR ANALYSIS */}
@@ -69,8 +103,8 @@ const ChartRenderer: React.FC<{ config: ChartConfig }> = ({ config }) => {
         <table className="w-full text-sm text-left border-collapse border border-gray-200">
           <thead className="bg-blue-50 text-blue-800">
             <tr>
-              <th className="p-2 border border-blue-100 text-center">{config.xLabel || 'X'}</th>
-              <th className="p-2 border border-blue-100 text-center">{config.yLabel || 'Y'}</th>
+              <th className="p-2 border border-blue-100 text-center">{config.xLabel || 'Label'}</th>
+              <th className="p-2 border border-blue-100 text-center">{config.yLabel || 'Value'}</th>
             </tr>
           </thead>
           <tbody>

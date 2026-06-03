@@ -22,7 +22,7 @@ const RenderingSkeleton: React.FC = () => (
 );
 
 interface ChartConfig {
-  type: 'line' | 'bar' | 'scatter';
+  type: 'line' | 'bar' | 'scatter' | 'pie' | 'doughnut';
   title: string;
   xLabel?: string;
   yLabel?: string;
