@@ -10,7 +10,8 @@ const LogicRenderer = React.lazy(() => import('./renderers/LogicRenderer'));
 const ChemistryRenderer = React.lazy(() => import('./renderers/ChemistryRenderer'));
 const MusicRenderer = React.lazy(() => import('./renderers/MusicRenderer'));
 const SpreadsheetRenderer = React.lazy(() => import('./renderers/SpreadsheetRenderer'));
-
+const CodeRenderer = React.lazy(() => import('./renderers/CodeRenderer'));
+const ChessRenderer = React.lazy(() => import('./renderers/ChessRenderer'));
 // Premium skeleton loading fallback
 const RenderingSkeleton: React.FC = () => (
   <div className="my-4 p-6 border-2 border-blue-100 dark:border-blue-900/30 rounded-2xl bg-white dark:bg-gray-900 animate-pulse flex flex-col items-center justify-center min-h-[200px] shadow-sm">
@@ -82,9 +83,22 @@ interface SpreadsheetConfig {
   data: Array<{ row: string[] }>;
 }
 
+interface CodeConfig {
+  type: 'code';
+  code: string;
+  language?: string;
+  showLineNumbers?: boolean;
+}
+
+interface ChessConfig {
+  type: 'chess';
+  fen: string;
+  arrows?: Array<[string, string]>;
+}
+
 interface VisualizationConfig {
-  type: 'chart' | 'function' | 'diagram' | 'image' | 'scratch' | 'logic' | 'chemistry' | 'music' | 'spreadsheet';
-  config: ChartConfig | FunctionChartConfig | MermaidConfig | ImageConfig | ScratchConfig | LogicConfig | ChemistryConfig | MusicConfig | SpreadsheetConfig | Record<string, unknown>;
+  type: 'chart' | 'function' | 'diagram' | 'image' | 'scratch' | 'logic' | 'chemistry' | 'music' | 'spreadsheet' | 'code' | 'chess';
+  config: ChartConfig | FunctionChartConfig | MermaidConfig | ImageConfig | ScratchConfig | LogicConfig | ChemistryConfig | MusicConfig | SpreadsheetConfig | CodeConfig | ChessConfig | Record<string, unknown>;
 }
 
 interface VisualizationRendererProps {
@@ -180,6 +194,26 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     return (
       <Suspense fallback={<RenderingSkeleton />}>
         <SpreadsheetRenderer config={cfg} />
+      </Suspense>
+    );
+  }
+
+  // ── CODE (Syntax Highlighting) ───────────────────────────────────────────
+  if (visualization.type === 'code') {
+    const cfg = visualization.config as CodeConfig;
+    return (
+      <Suspense fallback={<RenderingSkeleton />}>
+        <CodeRenderer config={cfg} />
+      </Suspense>
+    );
+  }
+
+  // ── CHESS (Chessboard) ───────────────────────────────────────────────────
+  if (visualization.type === 'chess') {
+    const cfg = visualization.config as ChessConfig;
+    return (
+      <Suspense fallback={<RenderingSkeleton />}>
+        <ChessRenderer config={cfg} />
       </Suspense>
     );
   }

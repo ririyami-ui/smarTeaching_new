@@ -80,6 +80,10 @@ ${allQuestions.map((q, i) => `  ${i+1}. [${q.pedagogical_materi}] ${q.question}`
              - **Spreadsheet (tabel bergaya Excel)**: KHUSUS INFORMATIKA/TIK (soal tentang rumus Excel, pengolahan data spreadsheet, atau simulasi digital). Tampilkan tabel visual bergaya Microsoft Excel lengkap dengan header kolom (A, B, C), nomor baris, dan formula bar. JANGAN gunakan 'chart' atau 'diagram' untuk soal tentang spreadsheet!
                "visualization": { "type": "spreadsheet", "config": { "title": "Data_Nilai.xlsx", "selectedCell": "C5", "formulaBar": "=AVERAGE(C2:C4)", "data": [{"row": ["No", "Nama", "Nilai"]}, {"row": ["1", "Budi", "80"]}, {"row": ["2", "Siti", "95"]}, {"row": ["3", "Andi", "70"]}, {"row": ["", "", ""]}] } }
                Catatan: field "data" berupa array dari objek {row: [string]}, baris terakhir bisa dikosongkan jika itu sel target soal. "selectedCell" menandai sel yang di-highlight hijau. "formulaBar" menunjukkan isi rumus di baris formula.
+             - **Code (Kode Pemrograman Teks)**: KHUSUS INFORMATIKA (soal mencari bug, output kode, sintaks). Digunakan untuk bahasa pemrograman teks murni (Python, C++, Java, HTML, JS). Jangan gunakan untuk Scratch!
+               "visualization": { "type": "code", "config": { "language": "python", "code": "def hitung_luas(p, l):\n    return p * l\n\nprint(hitung_luas(5, 4))" } }
+             - **Chess (Papan Catur)**: KHUSUS soal Logika Pemecahan Masalah, Ekskul Catur, atau Olahraga Otak. Wajib menyediakan string posisi FEN.
+               "visualization": { "type": "chess", "config": { "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4", "arrows": [["c4", "f7"], ["h5", "f7"]] } }
              - **Image (infografis)**: Gunakan untuk soal yang HANYA bisa direpresentasikan dengan gambar eksternal (placeholder).
                "visualization": { "type": "image", "config": { "description": "[Tempatkan Gambar: ...]", "position": "center", "width": "45%" } }
              - Jika soal tidak butuh visualisasi, kosongkan field ini.

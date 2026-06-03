@@ -249,6 +249,42 @@ const QuizGeneratorPage: React.FC = () => {
     };
 
     const handleGenerate = async () => {
+        if (topic === 'DEBUG_TEST') {
+            setQuizResult({
+                questions: [
+                    {
+                        type: 'pg',
+                        question: 'Perhatikan kode Python berikut. Apa hasil (output) yang akan dicetak di layar?',
+                        options: ['A. 20', 'B. 9', 'C. Error', 'D. None'],
+                        answer: 'A. 20',
+                        explanation: 'Fungsi hitung_luas dipanggil dengan parameter p=5 dan l=4, lalu mengembalikan 5*4 = 20.',
+                        visualization: {
+                            type: 'code',
+                            config: {
+                                language: 'python',
+                                code: 'def hitung_luas(p, l):\n    return p * l\n\nprint(hitung_luas(5, 4))'
+                            }
+                        }
+                    },
+                    {
+                        type: 'pg',
+                        question: 'Perhatikan papan catur berikut. Putih melangkah dan langsung Skakmat. Bidik langkah terbaik!',
+                        options: ['A. Menteri (h5) ke f7', 'B. Kuda ke f7', 'C. Gajah (c4) ke f7', 'D. Rokade panjang'],
+                        answer: 'A. Menteri (h5) ke f7',
+                        explanation: 'Ini adalah pola Scholar\'s Mate (Mati Anak Bawang). Menteri memukul pion f7 dan dilindungi oleh Gajah di c4, menghasilkan skakmat seketika.',
+                        visualization: {
+                            type: 'chess',
+                            config: {
+                                fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4',
+                                arrows: [['c4', 'f7'], ['h5', 'f7']]
+                            }
+                        }
+                    }
+                ]
+            } as any);
+            return;
+        }
+
         if (!topic) return toast.error("Topik harus diisi!");
         const total = Object.values(typeCounts).reduce((sum, c) => sum + (c || 0), 0);
         if (total === 0) return toast.error("Tentukan jumlah soal!");
