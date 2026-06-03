@@ -9,6 +9,7 @@ const ScratchRenderer = React.lazy(() => import('./renderers/ScratchRenderer'));
 const LogicRenderer = React.lazy(() => import('./renderers/LogicRenderer'));
 const ChemistryRenderer = React.lazy(() => import('./renderers/ChemistryRenderer'));
 const MusicRenderer = React.lazy(() => import('./renderers/MusicRenderer'));
+const SpreadsheetRenderer = React.lazy(() => import('./renderers/SpreadsheetRenderer'));
 
 // Premium skeleton loading fallback
 const RenderingSkeleton: React.FC = () => (
@@ -73,9 +74,17 @@ interface MusicConfig {
   abc: string;
 }
 
+interface SpreadsheetConfig {
+  type: 'spreadsheet';
+  title?: string;
+  formulaBar?: string;
+  selectedCell?: string;
+  data: string[][];
+}
+
 interface VisualizationConfig {
-  type: 'chart' | 'function' | 'diagram' | 'image' | 'scratch' | 'logic' | 'chemistry' | 'music';
-  config: ChartConfig | FunctionChartConfig | MermaidConfig | ImageConfig | ScratchConfig | LogicConfig | ChemistryConfig | MusicConfig | Record<string, unknown>;
+  type: 'chart' | 'function' | 'diagram' | 'image' | 'scratch' | 'logic' | 'chemistry' | 'music' | 'spreadsheet';
+  config: ChartConfig | FunctionChartConfig | MermaidConfig | ImageConfig | ScratchConfig | LogicConfig | ChemistryConfig | MusicConfig | SpreadsheetConfig | Record<string, unknown>;
 }
 
 interface VisualizationRendererProps {
@@ -161,6 +170,16 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     return (
       <Suspense fallback={<RenderingSkeleton />}>
         <MusicRenderer config={cfg} />
+      </Suspense>
+    );
+  }
+
+  // ── SPREADSHEET (Excel Grid) ─────────────────────────────────────────────
+  if (visualization.type === 'spreadsheet') {
+    const cfg = visualization.config as SpreadsheetConfig;
+    return (
+      <Suspense fallback={<RenderingSkeleton />}>
+        <SpreadsheetRenderer config={cfg} />
       </Suspense>
     );
   }

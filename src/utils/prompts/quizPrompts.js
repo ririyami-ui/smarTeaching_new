@@ -76,6 +76,9 @@ ${allQuestions.map((q, i) => `  ${i+1}. [${q.pedagogical_materi}] ${q.question}`
                "visualization": { "type": "music", "config": { "abc": "X:1\nT:Notes\nM:C\nL:1/4\nK:C\nC, D, E, F,|G, A, B, C|D E F G|A B c d|e f g a|b c' d' e'|f' g' a' b'|" } }
              - **Diagram (flowchart/timeline)**: HANYA untuk algoritma umum, siklus biologi, atau sejarah. KECUALI Scratch dan Logika Digital (kedua itu DILARANG keras pakai diagram).
                "visualization": { "type": "diagram", "config": { "type": "flowchart", "diagram": "mermaid code" } }
+             - **Spreadsheet (tabel bergaya Excel)**: KHUSUS INFORMATIKA/TIK (soal tentang rumus Excel, pengolahan data spreadsheet, atau simulasi digital). Tampilkan tabel visual bergaya Microsoft Excel lengkap dengan header kolom (A, B, C), nomor baris, dan formula bar. JANGAN gunakan 'chart' atau 'diagram' untuk soal tentang spreadsheet!
+               "visualization": { "type": "spreadsheet", "config": { "title": "Data_Nilai.xlsx", "selectedCell": "C5", "formulaBar": "=AVERAGE(C2:C4)", "data": [["No", "Nama", "Nilai"], ["1", "Budi", "80"], ["2", "Siti", "95"], ["3", "Andi", "70"], ["", "", ""]] } }
+               Catatan: field "data" berupa array 2D string, baris terakhir bisa dikosongkan jika itu sel target soal. "selectedCell" menandai sel yang di-highlight hijau. "formulaBar" menunjukkan isi rumus di baris formula.
              - **Image (infografis)**: Gunakan untuk soal yang HANYA bisa direpresentasikan dengan gambar eksternal (placeholder).
                "visualization": { "type": "image", "config": { "description": "[Tempatkan Gambar: ...]", "position": "center", "width": "45%" } }
              - Jika soal tidak butuh visualisasi, kosongkan field ini.
