@@ -168,7 +168,7 @@ const QuizGeneratorPage: React.FC = () => {
         let combinedSummary = "";
         let firstDoc: SourceDoc | null = null;
 
-        ids.forEach(id => {
+        for (const id of ids) {
             const foundDoc = sourceData.find(d => d.id === id);
             if (foundDoc) {
                 if (!firstDoc) firstDoc = foundDoc;
@@ -217,7 +217,7 @@ const QuizGeneratorPage: React.FC = () => {
 
                 combinedSummary += `--- DOKUMEN: ${foundDoc.topic || foundDoc.materi || id} ---\n${summary}\n\n`;
             }
-        });
+        }
 
         if (firstDoc && ids.length === 1) {
             setSubject(firstDoc.subject || '');
@@ -232,8 +232,10 @@ const QuizGeneratorPage: React.FC = () => {
                 .filter(Boolean)
                 .join(', ');
             setTopic(combinedTopics);
-            setSubject(prev => prev || (firstDoc?.subject || ''));
-            setGradeLevel(prev => prev || (firstDoc?.gradeLevel || firstDoc?.grade || ''));
+            if (firstDoc) {
+                setSubject(prev => prev || (firstDoc.subject || ''));
+                setGradeLevel(prev => prev || (firstDoc.gradeLevel || firstDoc.grade || ''));
+            }
         } else if (ids.length === 0) {
             setContextContent('');
             setTopic('');
