@@ -21,6 +21,7 @@ import ProgressBar from '../components/ProgressBar';
 import DOMPurify from 'dompurify';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../hooks/useAuth';
+import VisualizationRenderer from '../components/quiz/VisualizationRenderer';
 
 interface BSKAPMateriItem {
   materi: string;
@@ -165,7 +166,7 @@ const HandoutGeneratorPage: React.FC = () => {
             <div className="my-10 flex flex-col items-center group w-full">
                 <div
                     className="relative bg-white p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] border border-blue-50/50 hover:shadow-[0_20px_60px_rgba(99,_102,_241,_0.12)] transition-all duration-500 w-full overflow-hidden flex justify-center items-center"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svg) }}
+                    dangerouslySetInnerHTML={{ __html: svg }}
                 />
 
                 <div className="flex gap-3 mt-6 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
@@ -951,10 +952,34 @@ const HandoutGeneratorPage: React.FC = () => {
                                     rehypePlugins={[rehypeKatex]}
                                     components={{
                                         code({ inline, className, children, ...props }: React.ComponentPropsWithoutRef<'code'> & { inline?: boolean }) {
-                                            const match = /language-mermaid/.exec(className || '');
-                                            return !inline && match ? (
-                                                <MermaidRenderer>{children}</MermaidRenderer>
-                                            ) : (
+                                            const matchMermaid = /language-mermaid/.exec(className || '');
+                                            const matchVis = /language-visualization/.exec(className || '');
+                                            const matchScratch = /language-scratch/.exec(className || '');
+                                            
+                                            const codeStr = String(children).trim();
+                                            
+                                            // Smart Detection: If it looks like Scratch but labeled differently
+                                            const isLikelyScratch = !matchMermaid && !matchVis && (
+                                                matchScratch || 
+                                                /When.*Flag|Forever|Repeat|Broadcast|Sprite|If on edge|Bounce|Move.*steps|Wait.*seconds|Start.*Flag/i.test(codeStr)
+                                            );
+
+                                            if (!inline && matchMermaid) {
+                                                return <MermaidRenderer>{children}</MermaidRenderer>;
+                                            }
+                                            
+                                            if (!inline && (matchVis || isLikelyScratch)) {
+                                                const config = matchVis ? JSON.parse(codeStr) : { type: 'scratch', config: { code: codeStr } };
+                                                return (
+                                                    <div className="my-6 w-full flex justify-center">
+                                                        <div className="w-full max-w-3xl">
+                                                            <VisualizationRenderer visualization={config as any} />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+
+                                            return (
                                                 <code className={className} {...props}>
                                                     {children}
                                                 </code>
