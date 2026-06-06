@@ -26,7 +26,18 @@ export default function LoginPage() {
         await signInWithCredential(auth, credential);
       } else {
         const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (popupError: any) {
+          if (popupError?.code === 'auth/popup-blocked') {
+            toast.loading('Popup diblokir, mengalihkan...', { duration: 2000 });
+            const { signInWithRedirect } = await import('firebase/auth');
+            await signInWithRedirect(auth, provider);
+            return; // Exit early as page will redirect
+          } else {
+            throw popupError;
+          }
+        }
       }
       toast.success('Berhasil masuk!');
       navigate('/');
