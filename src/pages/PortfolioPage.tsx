@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Book, Sparkles, Send, Download, Save, RefreshCw, ChevronRight, FileText,
     PieChart, BarChart, ShieldCheck, Zap, Bot, Loader, Trash2, AlertTriangle
@@ -908,7 +908,7 @@ export default function PortfolioPage() {
                                     <h2 className="text-xl font-black text-gray-800 dark:text-white uppercase tracking-tight">
                                         {CHAPTERS.find(c => c.id === activeChapter)?.title}
                                     </h2>
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Draf Editor v1.0 â€¢ Smartty Generated</p>
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Draft Editor v1.0 • Smartty Generated</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">

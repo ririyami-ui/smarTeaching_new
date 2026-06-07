@@ -11,6 +11,11 @@ const ChemistryRenderer = React.lazy(() => import('./renderers/ChemistryRenderer
 const MusicRenderer = React.lazy(() => import('./renderers/MusicRenderer'));
 const SpreadsheetRenderer = React.lazy(() => import('./renderers/SpreadsheetRenderer'));
 const CodeRenderer = React.lazy(() => import('./renderers/CodeRenderer'));
+const GeometryRenderer = React.lazy(() => import('./renderers/GeometryRenderer'));
+const MapRenderer = React.lazy(() => import('./renderers/MapRenderer'));
+const Model3DRenderer = React.lazy(() => import('./renderers/Model3DRenderer'));
+const MindMapRenderer = React.lazy(() => import('./renderers/MindMapRenderer'));
+
 // Premium skeleton loading fallback
 const RenderingSkeleton: React.FC = () => (
   <div className="my-4 p-6 border-2 border-blue-100 dark:border-blue-900/30 rounded-2xl bg-white dark:bg-gray-900 animate-pulse flex flex-col items-center justify-center min-h-[200px] shadow-sm">
@@ -90,8 +95,8 @@ interface CodeConfig {
 }
 
 interface VisualizationConfig {
-  type: 'chart' | 'function' | 'diagram' | 'image' | 'scratch' | 'logic' | 'chemistry' | 'music' | 'spreadsheet' | 'code';
-  config: ChartConfig | FunctionChartConfig | MermaidConfig | ImageConfig | ScratchConfig | LogicConfig | ChemistryConfig | MusicConfig | SpreadsheetConfig | CodeConfig | Record<string, unknown>;
+  type: 'chart' | 'function' | 'diagram' | 'image' | 'scratch' | 'logic' | 'chemistry' | 'music' | 'spreadsheet' | 'code' | 'geometry' | 'map' | '3d_model' | 'mindmap';
+  config: any; // Allow 'any' here as we use dynamic casting below
 }
 
 interface VisualizationRendererProps {
@@ -197,6 +202,42 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     return (
       <Suspense fallback={<RenderingSkeleton />}>
         <CodeRenderer config={cfg} />
+      </Suspense>
+    );
+  }
+
+  // ── GEOMETRY (JSXGraph) ──────────────────────────────────────────────────
+  if (visualization.type === 'geometry') {
+    return (
+      <Suspense fallback={<RenderingSkeleton />}>
+        <GeometryRenderer config={visualization.config} />
+      </Suspense>
+    );
+  }
+
+  // ── MAPS (Leaflet) ───────────────────────────────────────────────────────
+  if (visualization.type === 'map') {
+    return (
+      <Suspense fallback={<RenderingSkeleton />}>
+        <MapRenderer config={visualization.config} />
+      </Suspense>
+    );
+  }
+
+  // ── 3D MODELS (React Three Fiber) ────────────────────────────────────────
+  if (visualization.type === '3d_model') {
+    return (
+      <Suspense fallback={<RenderingSkeleton />}>
+        <Model3DRenderer config={visualization.config} />
+      </Suspense>
+    );
+  }
+
+  // ── MIND MAP (React Flow) ────────────────────────────────────────────────
+  if (visualization.type === 'mindmap') {
+    return (
+      <Suspense fallback={<RenderingSkeleton />}>
+        <MindMapRenderer config={visualization.config} />
       </Suspense>
     );
   }

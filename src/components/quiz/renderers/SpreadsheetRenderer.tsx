@@ -28,6 +28,7 @@ const isCellSelected = (colIndex: number, rowIndex: number, selected: string | u
 };
 
 const SpreadsheetRenderer: React.FC<{ config: SpreadsheetConfig }> = ({ config }) => {
+  if (!config) return null;
   const { title = 'Workbook.xlsx', formulaBar = '', selectedCell = 'A1', data = [] } = config;
   const colCount = data.length > 0 && data[0].row ? data[0].row.length : 0;
 

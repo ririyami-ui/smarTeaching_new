@@ -231,18 +231,31 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const checkUserProfile = async () => {
       if (user && profileStatus === 'loading') {
         try {
-          const userDocRef = doc(db, 'users', user.uid);
-          const docSnap = await withTimeout(getDoc(userDocRef), 15000);
-          if (docSnap.exists()) {
-            setUserProfile(docSnap.data() as UserProfile);
-            setProfileStatus('exists');
-          } else {
-            setProfileStatus('not_exists');
+            const userDocRef = doc(db, 'users', user.uid);
+            // Longer timeout for mobile connections
+            const docSnap = await withTimeout(getDoc(userDocRef), 30000);
+            if (docSnap.exists()) {
+              setUserProfile(docSnap.data() as UserProfile);
+              setProfileStatus('exists');
+            } else {
+              setProfileStatus('not_exists');
+            }
+          } catch (err) {
+            console.error("Profile check failed:", err);
+            // Fallback: try one more time without timeout for stability
+            try {
+              const userDocRef = doc(db, 'users', user.uid);
+              const retrySnap = await getDoc(userDocRef);
+              if (retrySnap.exists()) {
+                setUserProfile(retrySnap.data() as UserProfile);
+                setProfileStatus('exists');
+              } else {
+                setProfileStatus('not_exists');
+              }
+            } catch (retryErr) {
+              setProfileStatus('not_exists');
+            }
           }
-        } catch (err) {
-          console.error("Error checking profile:", err);
-          setProfileStatus('not_exists');
-        }
       }
     };
     checkUserProfile();

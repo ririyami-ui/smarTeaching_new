@@ -344,3 +344,17 @@ body {
 .modal-overlay {
   overscroll-behavior: contain;
 }
+
+/* --- Mobile performance optimizations --- */
+@media (max-width: 767px) {
+  /* Disable heavy animations on low-end mobile */
+  .animate-aurora, .animate-welcome-float {
+    animation: none !important;
+  }
+  
+  /* Use simpler blurs */
+  .backdrop-blur-2xl, .backdrop-blur-md, .backdrop-blur-xl {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+}

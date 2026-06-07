@@ -123,12 +123,12 @@ function AppContent() {
     sessionStorage.setItem('pwa_dismissed', 'true');
   };
 
-  if (isWelcomeVisible) {
-    return <WelcomeScreen />;
-  }
-
-  if (loading && !user && !authTimedOut) {
-    return <PageLoader />;
+  if (isWelcomeVisible || (loading && !user && !authTimedOut)) {
+    return (
+      <div className={isWelcomeVisible ? '' : 'animate-welcome-fade-out'}>
+        <WelcomeScreen />
+      </div>
+    );
   }
 
   return (

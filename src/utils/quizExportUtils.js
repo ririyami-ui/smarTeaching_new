@@ -32,14 +32,18 @@ export const formatAnswer = (q) => {
             return Array.isArray(q.answer) ? q.answer.join(', ') : (q.answer || '-');
         case 'matching':
             if (q.pairs && q.pairs.length > 0) {
+                // Helper to clean labels for comparison (e.g. "1. Item" -> "item")
+                const clean = (str) => str ? str.toString().replace(/^\d+[.\)]\s*/, '').replace(/^[A-Z][.\)]\s*/i, '').trim().toLowerCase() : '';
+                
                 const sortedPairs = [...q.pairs].sort((a, b) => {
-                    const idxA = q.left_side ? q.left_side.indexOf(a.left) : 0;
-                    const idxB = q.left_side ? q.left_side.indexOf(b.left) : 0;
+                    const idxA = q.left_side ? q.left_side.findIndex(l => clean(l) === clean(a.left)) : 0;
+                    const idxB = q.left_side ? q.left_side.findIndex(l => clean(l) === clean(b.left)) : 0;
                     return idxA - idxB;
                 });
+
                 return sortedPairs.map((p) => {
-                    const lIdx = q.left_side ? q.left_side.indexOf(p.left) : -1;
-                    const rIdx = q.right_side ? q.right_side.indexOf(p.right) : -1;
+                    const lIdx = q.left_side ? q.left_side.findIndex(l => clean(l) === clean(p.left)) : -1;
+                    const rIdx = q.right_side ? q.right_side.findIndex(r => clean(r) === clean(p.right)) : -1;
                     const numLabel = lIdx !== -1 ? (lIdx + 1) : '?';
                     const letterLabel = rIdx !== -1 ? String.fromCharCode(65 + rIdx) : '?';
                     return `${numLabel}-${letterLabel}`;

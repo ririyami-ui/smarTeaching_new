@@ -84,8 +84,16 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
                 optionLabel = "A-D";
             }
 
-            const batchInstructions = batches[i].map((type, idx) => `- Soal No ${allQuestions.length + idx + 1}: Tipe **${type}**`).join('\n');
-            const prompt = getAdvancedQuizPrompt({ topic, context, bookContext, BSKAP_DATA, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty, stimulusMode });
+            const currentBatch = batches[i];
+            const batchInstructions = currentBatch.map((type, idx) => `- Soal No ${allQuestions.length + idx + 1}: Tipe **${type}**`).join('\n');
+            const prompt = getAdvancedQuizPrompt({ 
+                topic, context, bookContext, BSKAP_DATA, gradeLevel, subject, 
+                batchNum: i + 1, // Batch number
+                batches, // Total batches
+                allQuestions, // Previous questions for anti-monotony
+                batchInstructions,
+                optionCount, optionLabel, difficulty, stimulusMode 
+            });
 
             const model = await getModel(modelName, true, STRICT_DOCUMENT_BRAIN);
             const result = await retryWithBackoff(() => model.generateContent(prompt));

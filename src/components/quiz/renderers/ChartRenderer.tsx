@@ -55,23 +55,30 @@ const PRESET_BORDERS = [
 ];
 
 const ChartRenderer: React.FC<{ config: ChartConfig }> = ({ config }) => {
+  // Full null guard: if config is missing or malformed, render nothing
+  if (!config || !config.type) return null;
+
   const isPieOrDoughnut = config.type === 'pie' || config.type === 'doughnut';
 
+  // Guard: ensure data is a valid array
+  const safeData = Array.isArray(config.data) ? config.data : [];
+
   const chartData = {
-    labels: config.data.map(d => d.x),
+    labels: safeData.map(d => d.x),
     datasets: [{
       label: config.title,
-      data: config.data.map(d => d.y),
+      data: safeData.map(d => d.y),
       borderColor: isPieOrDoughnut 
-        ? config.data.map((_, i) => PRESET_BORDERS[i % PRESET_BORDERS.length])
+        ? safeData.map((_, i) => PRESET_BORDERS[i % PRESET_BORDERS.length])
         : 'rgb(75, 192, 192)',
       backgroundColor: isPieOrDoughnut
-        ? config.data.map((_, i) => PRESET_COLORS[i % PRESET_COLORS.length])
+        ? safeData.map((_, i) => PRESET_COLORS[i % PRESET_COLORS.length])
         : 'rgba(75, 192, 192, 0.1)',
       tension: 0.1,
       borderWidth: isPieOrDoughnut ? 1 : 2,
     }],
   };
+
 
   const chartOptions = {
     responsive: true,
@@ -108,7 +115,7 @@ const ChartRenderer: React.FC<{ config: ChartConfig }> = ({ config }) => {
             </tr>
           </thead>
           <tbody>
-            {config.data.map((row, idx) => (
+            {safeData.map((row, idx) => (
               <tr key={idx} className="hover:bg-gray-50">
                 <td className="p-2 border border-gray-200 text-center">{row.x}</td>
                 <td className="p-2 border border-gray-200 text-center">{row.y}</td>

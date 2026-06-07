@@ -53,7 +53,7 @@ export default defineConfig({
       workbox: {
         navigationPreload: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webp,avif,json}'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -93,6 +93,7 @@ export default defineConfig({
     },
   },
   build: {
+    chunkSizeWarningLimit: 15000,
     rollupOptions: {
       output: {
         manualChunks: {
