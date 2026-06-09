@@ -83,21 +83,45 @@ const ChartRenderer: React.FC<{ config: ChartConfig }> = ({ config }) => {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    clip: 0, // Pixels to allow outside chart area (0 = clip strictly)
     plugins: {
       title: { display: true, text: config.title },
       legend: { display: true },
+      filler: { propagate: false }, // Prevent fill overflow
     },
     ...(!isPieOrDoughnut ? {
       scales: {
-        x: { title: { display: true, text: config.xLabel || 'X Axis' } },
-        y: { title: { display: true, text: config.yLabel || 'Y Axis' } },
+        x: { 
+          title: { display: true, text: config.xLabel || 'X Axis' },
+          grid: {
+            color: 'rgba(200, 200, 200, 0.2)', // Light grid lines ✅
+            drawBorder: true,
+            drawTicks: true,
+          },
+          ticks: {
+            maxRotation: 0,
+            autoSkip: false, // Show all ticks for balanced spacing
+          }
+        },
+        y: { 
+          title: { display: true, text: config.yLabel || 'Y Axis' },
+          grid: {
+            color: 'rgba(200, 200, 200, 0.2)', // Light grid lines ✅
+            drawBorder: true,
+            drawTicks: true,
+          },
+          ticks: {
+            stepSize: undefined, // Auto-calculate balanced steps
+          }
+        },
       }
     } : {})
   };
 
   return (
-    <div className="my-4 p-6 border-2 border-blue-200 rounded-2xl bg-white">
-      <div className="mb-4 relative h-[300px] flex justify-center items-center">
+    <div className="my-4 p-6 border-2 border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-50 shadow-lg">
+      <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">{config.title}</h3>
+      <div className="mb-4 relative h-[350px] flex justify-center items-center bg-gradient-to-b from-slate-50 to-white dark:from-slate-100 dark:to-white rounded-lg border border-slate-100">
         {config.type === 'line' && <Line data={chartData} options={chartOptions} />}
         {config.type === 'bar' && <Bar data={chartData} options={chartOptions} />}
         {config.type === 'scatter' && <Scatter data={chartData} options={chartOptions} />}

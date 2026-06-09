@@ -1,5 +1,5 @@
-export const getLessonPlanPrompt = (data, BSKAP_DATA, level, cpFullVerbatim, semesterLabel, semesterKey, subjectKey, regionalLanguage) => `
-      Anda adalah "Mesin Intelijen Kurikulum Nasional" yang bekerja berdasarkan repositori data resmi **BSKAP_DATA**. DILARANG memberikan informasi yang bertentangan atau di luar cakupan data JSON tersebut.
+export const getLessonPlanPrompt = (data, BSKAP_DATA, level, cpFullVerbatim, semesterLabel, semesterKey, subjectKey, regionalLanguage) => {
+    const basePrompt = `
       
       **OFFICIAL KNOWLEDGE ENGINE (BSKAP_DATA):**
       - Regulasi Dasar: **${BSKAP_DATA.standards.regulation}**
@@ -348,17 +348,22 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       ### PERTEMUAN [X] (Topik Spesifik: ...)
       *(Catatan: Anda WAJIB mengulangi struktur di bawah ini untuk SETIAP pertemuan yang dijadwalkan)*
       
-      **1. Pendahuluan (Mindful Connection) - [10 menit]:**
-      *   **Ritual Pembuka (Mindful):** Salam pembuka, **Berdoa bersama**, **Presensi/Mengabsen peserta didik**, dan Menanyakan Kabar untuk membangun koneksi awal yang hangat, rasa syukur, and kesadaran penuh.
-      *   **Apersepsi (Meaningful):** Hubungkan materi baru dengan pengalaman atau pengetahuan siswa yang relevan dengan kehidupan nyata mereka.
-      *   **Motivasi & Tujuan (Mindful + Joyful):** Sampaikan tujuan pembelajaran dengan cara yang memotivasi and membuat siswa antusias. Jelaskan MENGAPA materi ini penting untuk mereka.
-      *   **Pemantik (Hook - Joyful):** Berikan pemicu rasa ingin tahu seperti video menarik, pertanyaan tantangan, cerita pendek, atau fenomena mengejutkan yang membuat siswa excited untuk belajar.
-
-      **2. Kegiatan Inti (Penerapan Model & Deep Learning):**
+      **1. Pendahuluan ([X] Menit):**
       
-      *PENTING (MODEL PEMBELAJARAN):* 
-      - Jika input Model Pembelajaran adalah "Otomatis", Anda **WAJIB MEMILIH** dari standar preferred_models: ${JSON.stringify((BSKAP_DATA.pedagogis.preferred_models || []).map(m => m.name))}.
-      - **DILARANG KERAS** menggunakan istilah di luar standar tersebut atau menulis kata "Otomatis". Gunakan sintaks spesifik sebagaimana didefinisikan dalam pedagogis operasional.
+      | Fase / Sintaks | Aktivitas Guru | Aktivitas Peserta Didik |
+      | :--- | :--- | :--- |
+      | **Ritual & Koneksi** | [Mindful] Menyapa dengan ramah, **mengajak berdoa**, dan melakukan **absensi/presensi** untuk membangun kesadaran penuh. | Siswa merespon sapaan, berdoa dengan khidmat, dan mengonfirmasi kehadiran. |
+      | **Apersepsi** | [Meaningful] Menghubungkan materi dengan pengalaman nyata siswa. | Siswa menjawab pertanyaan pemantik dan mengaitkan materi. |
+      | **Motivasi** | [Joyful] Menyampaikan tujuan dan manfaat belajar dengan antusias. | Siswa menyimak target pembelajaran. |
+
+      **2. Kegiatan Inti ([X] Menit):**
+      *(Gunakan sintaks model ${data.teachingModel === 'Otomatis' ? 'pilihan' : data.teachingModel})*
+      
+      | Fase / Sintaks | Aktivitas Guru | Aktivitas Peserta Didik |
+      | :--- | :--- | :--- |
+      | [Nama Sintaks 1] | [Label] Deskripsi detail instruksi dan fasilitasi guru... | Deskripsi tindakan nyata, diskusi, atau eksplorasi siswa... |
+      | [Nama Sintaks 2] | [Label] Deskripsi detail instruksi dan fasilitasi guru... | Deskripsi tindakan nyata, diskusi, atau eksplorasi siswa... |
+      | ...dst | ... | ... |
       
       **INSTRUKSI SANGAT PENTING (NARATIF & MENDALAM):** 
       - Bagian kegiatan inti per pertemuan harus **TEBAL, NARATIF, and MENDETAIL**. 
@@ -389,11 +394,13 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
           - Jelaskan mekanisme presentasi (misal: "Gallery Walk" atau "Presentasi Panel").
           - Sertakan estimasi waktu untuk setiap langkah, misal: "Presentasi Hasil [15 menit]".
 
-      **3. Penutup (Creative Closure - Mindful + Meaningful + Joyful) - [10 menit]:**
-      *   **Rangkuman & Refleksi (Mindful + Meaningful):** Siswa and guru merangkum pembelajaran and melakukan refleksi mendalam tentang makna pembelajaran hari ini.
-      *   **Apresiasi & Motivasi (Joyful):** Berikan apresiasi positif atas partisipasi siswa and motivasi untuk terus belajar.
-      *   **Preview:** Berikan gambaran menarik tentang materi pertemuan berikutnya.
-      *   **Ritual Penutup (Mindful):** WAJIB diakhiri dengan **Doa Syukur** and **Salam Penutup** sebagai tanda syukur atas kelancaran proses belajar.
+      **3. Penutup ([X] Menit):**
+      
+      | Fase / Sintaks | Aktivitas Guru | Aktivitas Peserta Didik |
+      | :--- | :--- | :--- |
+      | **Refleksi** | [Meaningful] Memfasilitasi siswa menyimpulkan poin penting dan merefleksikan makna pembelajaran. | Siswa menyampaikan kesimpulan dan refleksi diri. |
+      | **Apresiasi** | [Joyful] Memberikan apresiasi positif atas partisipasi dan motivasi belajar siswa. | Siswa menyimak motivasi dan preview materi mendatang. |
+      | **Doa & Salam** | [Mindful] **WAJIB**: Mengajak siswa berdoa syukur dan mengucapkan salam penutup. | Siswa berdoa dan menjawab salam. |
 
       **4. Integrasi 6C & Deep Learning (PRINSIP HUTANG BAYAR):**
       - **PRINSIP HUTANG BAYAR**: Setiap Dimensi Profil Lulusan yang Anda pilih di Bagian I **WAJIB** memiliki aktivitas nyata di langkah-langkah pembelajaran ini. DILARANG mencantumkan Dimensi yang tidak diajarkan.
@@ -416,7 +423,8 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       ## III. MEDIA BELAJAR
       (Sebutkan secara spesifik media yang akan digunakan: nama video/platform, jenis infografis, alat peraga konkret, dll. Jangan hanya menulis "video interaktif" tapi sebutkan topik/judulnya).
 
-      ## IV. LAMPIRAN
+      ## IV. LAMPIRAN (LKPD & ASESMEN)
+      *(PENTING: Jika ini adalah PART 4 Generasi, buatlah bagian ini secara SANGAT MENDETAIL mencakup Lembar Kerja yang menantang dan instrumen penilaian Diagnostik, Formatif, serta Sumatif. Jika bukan PART 4, kosongkan atau tulis ringkasan saja).*
       
       ### 1. LKPD (LEMBAR KERJA PESERTA DIDIK)
       
@@ -563,31 +571,27 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       | **Pemahaman Konten** | Mengalami miskonsepsi | Paham sebagian | Paham secara utuh | Paham & mampu mengembangkan |
       | **Aplikasi/Analisis** | Belum bisa menerapkan | Bisa menerapkan dengan bantuan | Bisa menerapkan mandiri | Bisa menganalisis & berinovasi |
 
-      ### 3. MATERI AJAR MENDETAIL (KONSISTENSI TP)
-      **WAJIB DIISI DENGAN KONTEN LENGKAP & RELEVAN!**
-      - **CEK KONSISTENSI:** Pastikan materi yang ditulis di sini **MENJAWAB** seluruh Tujuan Pembelajaran (TP). Jika TP menuntut "Menganalisis", maka materi harus memberikan landasan teori untuk analisis tersebut.
-      - Minimal 3-5 paragraf substantif yang mencakup konsep, teori, contoh konkret, and aplikasi nyata materi ini.
-
-      ### 4. GLOSARIUM
-      **WAJIB DIISI!** Daftar minimal 5-10 istilah penting and definisinya.
-      - **[Istilah]**: Definisi...
-
-      ### 5. DAFTAR PUSTAKA
-      **WAJIB DIISI!** Minimal 3-5 referensi kredibel (Buku, Jurnal, Sumber Digital).
-
-      &nbsp;
-      &nbsp;
-
-      ---
-      **CATATAN PENTING UNTUK AI:**
-      - **WAJIB** ada baris kosong setelah tag pembuka div and sebelum tag penutup div agar tabel Markdown tampil sempurna.
-      - **JANGAN** ada baris kosong di antara baris tabel. Tabel harus rapat.
-      - Gunakan bahasa Indonesia yang **Inspiratif, Profesional, and Terstruktur**.
-      - Pastikan bagian **Materi Ajar Mendetail** benar-benar berisi konten akademis yang kuat.
-      - **WAJIB** gunakan istilah **"Peserta Didik"** pengganti kata "Siswa" di seluruh dokumen.
-      - **JANGAN** membuat bagian Tanda Tangan (Mengetahui Kepala Sekolah/Guru). Bagian ini akan ditambahkan otomatis oleh sistem.
-      - **JANGAN** menggunakan placeholder seperti "NIP. ....................".
-      - **PRINSIP HUTANG BAYAR (AUDIT KONSISTENSI)**: Periksa kembali hasil akhir Anda. Jika Anda mencantumkan "Penalaran Kritis" di Profil Lulusan, pastikan ada kegiatan diskusi atau analisis mendalam di langkah pembelajaran. Jika Anda mencantumkan "Kemampuan Komunikasi", pastikan ada kegiatan presentasi atau berbagi ide. RPP adalah janji yang harus "dibayar" dalam kegiatan nyata.
-
       - Output harus **langsung dalam format Markdown** tanpa komentar pembuka atau penutup dari asisten.
     `;
+
+    const materialPrompt = `
+      ## V. MATERI AJAR MENDETAIL (KONSISTENSI TP)
+      **WAJIB DIISI DENGAN KONTEN LENGKAP & RELEVAN!**
+      - **CEK KONSISTENSI:** Pastikan materi yang ditulis di sini **MENJAWAB** seluruh Tujuan Pembelajaran (TP).
+      - Minimal 3-5 paragraf substantif yang mencakup konsep, teori, contoh konkret, and aplikasi nyata materi ini.
+
+      ## VI. GLOSARIUM
+      **WAJIB DIISI!** Daftar minimal 5-10 istilah penting and definisinya.
+
+      ## VII. DAFTAR PUSTAKA
+      **WAJIB DIISI!** Minimal 3-5 referensi kredibel.
+      
+      ---
+      **CATATAN PENTING:**
+      1. Langsung mulai dari header "## V. MATERI AJAR MENDETAIL".
+      2. Berhenti setelah Daftar Pustaka.
+      3. JANGAN mengulang judul modul atau identitas.
+    `;
+
+    return { basePrompt, materialPrompt };
+};

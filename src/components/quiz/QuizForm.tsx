@@ -149,14 +149,14 @@ const QuizForm: React.FC<QuizFormProps> = ({
                                 <option>-- Pilih --</option>
                             </StyledSelect>
                         ) : (
-                            <div className="flex flex-col border rounded-lg dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-700 h-[140px]">
-                                <div className="p-1.5 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex justify-between items-center gap-2">
+                            <div className="flex flex-col border rounded-lg dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-700 h-[220px] shadow-inner">
+                                <div className="p-2 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex justify-between items-center gap-2">
                                     <input 
                                         type="text"
                                         placeholder="Cari..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full text-xs px-2 py-1 rounded border dark:bg-gray-900 dark:border-gray-700 outline-none focus:ring-1 focus:ring-blue-500"
+                                        className="w-full text-xs px-2 py-1.5 rounded border dark:bg-gray-900 dark:border-gray-700 outline-none focus:ring-1 focus:ring-blue-500"
                                     />
                                     <button 
                                         type="button"
@@ -170,16 +170,16 @@ const QuizForm: React.FC<QuizFormProps> = ({
                                                 handleSourceChange(filtered.map(d => d.id));
                                             }
                                         }}
-                                        className="text-[10px] font-medium text-blue-600 hover:text-blue-700 whitespace-nowrap px-1"
+                                        className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 whitespace-nowrap px-2 py-1 bg-blue-50 dark:bg-blue-900/30 rounded transition-colors"
                                     >
                                         {selectedContextIds.length > 0 ? 'Batal Semua' : 'Pilih Semua'}
                                     </button>
                                 </div>
-                                <div className="overflow-y-auto p-1.5 space-y-1 flex-1">
+                                <div className="overflow-y-auto p-2 space-y-1 flex-1">
                                     {loading ? (
-                                        <p className="text-gray-500 text-center py-2 text-xs">Memuat...</p>
+                                        <p className="text-gray-500 text-center py-4 text-xs">Memuat...</p>
                                     ) : sourceData.length === 0 ? (
-                                        <p className="text-gray-500 text-center py-2 text-xs">Tidak ada data</p>
+                                        <p className="text-gray-500 text-center py-4 text-xs">Tidak ada data</p>
                                     ) : (
                                         sourceData
                                             .filter(d => !subject || (d.subject && d.subject.toLowerCase() === subject.toLowerCase()))
@@ -191,10 +191,10 @@ const QuizForm: React.FC<QuizFormProps> = ({
                                                 return text.toLowerCase().includes(searchQuery.toLowerCase());
                                             })
                                             .map(d => (
-                                                <label key={d.id} className="flex items-start gap-2 p-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 rounded cursor-pointer transition-colors">
+                                                <label key={d.id} className="flex items-start gap-2.5 p-2 hover:bg-blue-50 dark:hover:bg-gray-600 rounded-md cursor-pointer transition-colors border border-transparent hover:border-blue-100 dark:hover:border-gray-500">
                                                     <input 
                                                         type="checkbox" 
-                                                        className="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        className="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
                                                         checked={selectedContextIds.includes(d.id)}
                                                         onChange={(e) => {
                                                             if (e.target.checked) {
@@ -204,7 +204,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
                                                             }
                                                         }}
                                                     />
-                                                    <span className="leading-tight text-[11px] text-gray-700 dark:text-gray-300">
+                                                    <span className="leading-snug text-xs text-gray-700 dark:text-gray-200 font-medium">
                                                         {sourceType === 'rpp'
                                                             ? `${d.gradeLevel || 'Kelas'} - ${d.materi || d.topic} (${d.academicYear || ''})`
                                                             : `${d.subject} - ${d.gradeLevel || d.grade} (${d.semester})`

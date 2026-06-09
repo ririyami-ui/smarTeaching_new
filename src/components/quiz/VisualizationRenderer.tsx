@@ -95,8 +95,8 @@ interface CodeConfig {
 }
 
 interface VisualizationConfig {
-  type: 'chart' | 'function' | 'diagram' | 'image' | 'scratch' | 'logic' | 'chemistry' | 'music' | 'spreadsheet' | 'code' | 'geometry' | 'map' | '3d_model' | 'mindmap';
-  config: any; // Allow 'any' here as we use dynamic casting below
+  type: 'chart' | 'function' | 'diagram' | 'image' | 'scratch' | 'logic' | 'chemistry' | 'music' | 'spreadsheet' | 'code' | 'geometry' | 'map' | '3d_model' | 'mindmap' | 'mermaid' | 'math';
+  config: any; 
 }
 
 interface VisualizationRendererProps {
@@ -104,12 +104,17 @@ interface VisualizationRendererProps {
 }
 
 const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualization }) => {
-  // ── MATHEMATICAL FUNCTION GRAPH (Mafs) ─────────────────────────────────
-  if (visualization.type === 'function') {
-    const cfg = visualization.config as FunctionChartConfig;
+  // Guard against empty/invalid visualization objects from AI
+  if (!visualization || !visualization.type || !visualization.config || Object.keys(visualization.config).length === 0) {
+    return null;
+  }
+
+  console.log("Rendering Visualization:", visualization); // DEBUG: Cek data dari AI
+  // ── MATHEMATICAL & GEOMETRY (JSXGraph/Mafs) ──────────────────────────────
+  if (visualization.type === 'function' || visualization.type === 'geometry' || visualization.type === 'math') {
     return (
       <Suspense fallback={<RenderingSkeleton />}>
-        <MathRenderer config={cfg} />
+        <MathRenderer config={visualization.config} />
       </Suspense>
     );
   }
@@ -124,8 +129,8 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     );
   }
 
-  // ── MERMAID DIAGRAM ─────────────────────────────────────────────────────
-  if (visualization.type === 'diagram') {
+  // ── DIAGRAMS (Mermaid) ──────────────────────────────────────────────────
+  if (visualization.type === 'diagram' || visualization.type === 'mermaid') {
     const cfg = visualization.config as MermaidConfig;
     return (
       <Suspense fallback={<RenderingSkeleton />}>
@@ -156,12 +161,11 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     );
   }
 
-  // ── LOGIC GATES (WaveDrom) ──────────────────────────────────────────────
+  // ── LOGIC GATES (SVG ANSI) ──────────────────────────────────────────────
   if (visualization.type === 'logic') {
-    const cfg = visualization.config as LogicConfig;
     return (
       <Suspense fallback={<RenderingSkeleton />}>
-        <LogicRenderer config={cfg} />
+        <LogicRenderer config={visualization.config} />
       </Suspense>
     );
   }
@@ -202,15 +206,6 @@ const VisualizationRenderer: React.FC<VisualizationRendererProps> = ({ visualiza
     return (
       <Suspense fallback={<RenderingSkeleton />}>
         <CodeRenderer config={cfg} />
-      </Suspense>
-    );
-  }
-
-  // ── GEOMETRY (JSXGraph) ──────────────────────────────────────────────────
-  if (visualization.type === 'geometry') {
-    return (
-      <Suspense fallback={<RenderingSkeleton />}>
-        <GeometryRenderer config={visualization.config} />
       </Suspense>
     );
   }

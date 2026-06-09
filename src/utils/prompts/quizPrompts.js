@@ -1,73 +1,64 @@
 import { mathVisuals } from './visualizations/mathVisuals';
-import { scienceVisuals } from './visualizations/scienceVisuals';
 import { techVisuals } from './visualizations/techVisuals';
-import { artsVisuals } from './visualizations/artsVisuals';
 import { generalVisuals } from './visualizations/generalVisuals';
+import { getSmartVisualRules, getBSKAPContext, getBookMaterial } from './quizIntelligenceRouter';
+import bskapData from '../bskap_2025_intel.json';
+import bookIndex from '../data/books/index.json';
 
-const getSubjectVisualizations = (subjectName) => {
-    if (!subjectName) return generalVisuals;
-    const subject = subjectName.toLowerCase();
-    
-    if (subject.includes('matematika') || subject.includes('fisika')) return mathVisuals;
-    if (subject.includes('kimia') || subject.includes('biologi') || subject.includes('ipa') || subject.includes('sains')) return scienceVisuals;
-    if (subject.includes('informatika') || subject.includes('tik') || subject.includes('komputer')) return techVisuals;
-    if (subject.includes('seni') || subject.includes('musik')) return artsVisuals;
-    
-    return generalVisuals;
-};
+export const getAdvancedQuizPrompt = ({ topic, context, bookContext, BSKAP_DATA, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty, stimulusMode = 'auto' }) => {
+    const smartRules = getSmartVisualRules(subject, topic);
+    const bskapContext = getBSKAPContext(bskapData, gradeLevel, subject);
+    const intelligentBookContext = getBookMaterial(bookIndex, subject, gradeLevel, topic);
 
-export const getStimulusModeInstruction = (stimulusMode, batchSize) => {
-    if (stimulusMode === 'with_stimulus') {
-        return `**ATURAN STIMULUS (MODE: WAJIB ADA STIMULUS)**:
-        - SETIAP soal dalam batch ini WAJIB memiliki teks stimulus di field "stimulus".
-        - Stimulus berupa: wacana ilmiah, narasi studi kasus, data/tabel, kutipan teks, atau skenario nyata.
-        - Field "stimulus" DILARANG kosong ("") atau null untuk semua soal.
-        - Pertanyaan harus mengacu pada stimulus yang diberikan ("Berdasarkan wacana di atas...", "Perhatikan data berikut...", dst).`;
-    }
-    if (stimulusMode === 'no_stimulus') {
-        return `**ATURAN STIMULUS (MODE: TANPA STIMULUS)**:
-        - SEMUA soal dalam batch ini WAJIB mengosongkan field "stimulus" (isi dengan string kosong: "").
-        - Soal harus dirumuskan secara langsung tanpa teks pendahuluan/wacana.
-        - DILARANG menyertakan narasi atau wacana apapun sebelum pertanyaan.`;
-    }
-    const withStimulusCount = Math.ceil(batchSize / 2);
-    const noStimulusCount = batchSize - withStimulusCount;
-    return `**ATURAN STIMULUS (MODE: CAMPURAN TERKONTROL)**:
-        - Distribusi WAJIB: tepat ${withStimulusCount} soal HARUS memiliki stimulus, tepat ${noStimulusCount} soal HARUS tanpa stimulus.
-        - Pola distribusi WAJIB bergantian: soal ganjil (1, 3, 5, ...) ADA stimulus, soal genap (2, 4, 6, ...) TANPA stimulus.
-        - Soal dengan stimulus: field "stimulus" berisi wacana/narasi/data konkret.
-        - Soal tanpa stimulus: field "stimulus" HARUS berupa string kosong "".
-        - DILARANG memberikan semua soal stimulus atau semua soal tanpa stimulus.`;
-};
+    const systemInstruction = `
+[ROLE]
+Anda adalah AI Spesialis Pembuat Soal yang patuh 100% pada Kurikulum Merdeka BSKAP 2025 (Kepka 046/2025).
 
-export const getAdvancedQuizPrompt = ({ topic, context, bookContext, BSKAP_DATA, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty, stimulusMode = 'auto' }) => `
+[SINKRONISASI KONTEKS]
+Mata Pelajaran: ${subject}
+Materi Inti: ${topic}
+Jenjang: Kelas ${gradeLevel} ${bskapContext}
+Tingkat Kesulitan: ${difficulty}% (HOTS Meter)
+Sumber Materi: ${bookContext ? bookContext + "\\n" + intelligentBookContext : intelligentBookContext}
+
+[ATURAN VISUALISASI CERDAS]
+WAJIB diikuti tanpa kecuali:
+- TIPE VISUALISASI YANG DIIZINKAN: ${smartRules.allowed.join(', ')} (PILIH SALAH SATU YANG PALING COCOK)
+- TIPE VISUALISASI YANG DILARANG: ${smartRules.forbidden.join(', ')}
+- INSTRUKSI KHUSUS: ${smartRules.forceInstruction}
+
+[VISUAL TEMPLATE - PILIH SALAH SATU SESUAI KONTEKS SOAL]
+${smartRules.allowed.includes('spreadsheet') ? `[SPREADSHEET] Untuk tabel data: {"type": "spreadsheet", "config": { "selectedCell": "A1", "data": [ {"row": ["Nama", "Skor"]}, {"row": ["Budi", "90"]} ] } }` : ''}
+${smartRules.allowed.includes('logic') ? `[LOGIC] Untuk gerbang logika: {"type": "logic", "config": { "code": "A AND B -> Y" } }` : ''}
+${smartRules.allowed.includes('mermaid') ? `[MERMAID] Untuk alur/proses: {"type": "mermaid", "config": { "diagram": "graph LR\\nA[Mulai] --> B{Kondisi}\\nB -- Ya --> C[Selesai]\\nB -- Tidak --> D[Ulang]" } } (Gunakan "graph LR" agar diagram melebar horizontal dan tidak bertumpuk).` : ''}
+${smartRules.allowed.includes('function') ? `[FUNCTION] Untuk grafik matematika: {"type": "math", "config": { "expression": "y=x", "range": [-10, 10] } }` : ''}
+${smartRules.allowed.includes('scratch') ? `[SCRATCH] Untuk blok algoritma: {"type": "scratch", "config": { "code": "when [Login] clicked\\nif <(password) = [123]> then" } }` : ''}
+${smartRules.allowed.includes('chart') ? `[CHART] Untuk grafik statistik: {"type": "chart", "config": { "type": "bar", "data": [{"x": "A", "y": 10}], "title": "Data" } }` : ''}
+
+[SAYARAT MUTLAK SINKRONISASI]
+Jika teks soal yang Anda buat mengandung kata "tabel", "spreadsheet", "kolom", atau "sel", Anda DIWAJIBKAN 100% menggunakan tipe "spreadsheet" (jika diizinkan) dan DILARANG KERAS menggunakan tipe "mermaid" atau flowchart. Jangan pernah menggambar proses logika jika konteks fisiknya adalah tabel.
+`;
+
+    return `
+${systemInstruction}
         LANDASAN REGULASI: **${BSKAP_DATA?.standards?.regulation || 'BSKAP No. 46 Tahun 2025'}** (Standar Nasional Kurikulum Merdeka).
         STANDAR PEDAGOGIS: **${BSKAP_DATA?.standards?.philosophy?.name || 'Deep Learning'}** (${BSKAP_DATA?.standards?.philosophy?.pillars?.map(p => p.name).join(', ') || 'Mindful, Meaningful, Joyful'}).
+        [ANTI-SPOILER VISUAL]: Visualisasi berfungsi sebagai STIMULUS (Pemberi Masalah) atau KONTEKS. DILARANG KERAS mencantumkan KUNCI JAWABAN atau KESIMPULAN di dalam gambar visualisasi. Biarkan siswa yang menganalisis.
         
-        TUGAS: Buatlah ${batchInstructions.split('\n').length} butir soal untuk:
-        - Mapel: ${subject} | Kelas: ${gradeLevel} | Topik: ${topic}
+        INSTRUKSI UTAMA:
+        1. Buat ${batchNum === batches ? (allQuestions % 5 || 5) : 5} soal kuis (Batch ${batchNum}/${batches}).
+        2. Format: JSON ARRAY of OBJECTS.
+        3. Setiap soal harus unik dan memiliki: question, type, options, answer, explanation, indicator, competency, cognitive_level, stimulus, dan visualization.
+        4. [ATURAN DISTRIBUSI VISUAL]: JANGAN beri visualisasi pada semua soal! HANYA berikan visual (maksimal 30-50% soal) pada pertanyaan yang memang membutuhkan analisis gambar/tabel. Untuk soal teori/konsep murni atau jika Anda ragu, isi field "visualization" dengan null. DILARANG KERAS mengirimkan objek kosong "{}" jika tidak ada data visual konkret.
+        5. [FATAL ERROR RISK] JIKA Anda membuat visualisasi, "type" dan "config" HARUS HANYA dari daftar "TIPE VISUALISASI YANG DIIZINKAN". 
+           [ATURAN SINKRONISASI]: ${smartRules.allowed.includes('spreadsheet') ? `Jika teks soal Anda menyebut "tabel", "spreadsheet", "kolom", atau "sel", Anda WAJIB mengisi "type": "spreadsheet" dan DILARANG KERAS menggunakan "mermaid".` : `Pastikan visual yang Anda pilih selaras dengan konteks benda fisik di dalam soal.`}
+           [ANTI-SPOILER]: Visualisasi TIDAK BOLEH berisi jawaban! Jika visual adalah soal teka-teki/analisis, gunakan tanda tanya ("?") atau biarkan sel kosong pada bagian yang menjadi pertanyaan. Jika melanggar, soal Anda akan dihapus oleh sistem.
+        6. Opsi Jawaban: Gunakan ${optionCount} pilihan dengan label ${optionLabel}.
         
-        ${bookContext ? `**SUMBER KEBENARAN MATERI (SOURCE OF TRUTH) DARI BUKU TEKS UTAMA KEMENDIKBUDRISTEK:**\n${bookContext}` : ''}
-        
-        - Konteks Tambahan: "${context || 'INPUT MANUAL/MINIM'}" 
-        ${!context && !bookContext ? '(WAJIB: Gunakan Database Internal Kurikulum Merdeka & BSKAP 46/2025 Anda untuk menentukan CP/Kompetensi yang relevan secara mandiri)' : '(WAJIB JADIKAN SUMBER UTAMA)'}
-        - HOTS Meter: ${difficulty}%
-        - Status: Batch ${batchNum} dari ${batches.length}
-        ${allQuestions.length > 0 ? `- SOAL SEBELUMNYA: ${allQuestions.map((q, i) => `${i+1}. ${q.question}`).join('\n')}` : ''}
+        Konteks Tambahan Guru: ${context || 'Tidak ada'}
+        ${batchInstructions || ''}
 
-        TUGAS UTAMA: 
-        1. Analisis SELURUH materi dalam "Konteks".
-        2. Buatlah soal yang **BERIMBANG**.
-        ${batchInstructions}
-
-        STRICT RULES:
-        1. ${getStimulusModeInstruction(stimulusMode, batchInstructions.split('\n').length)}
-        2. **VISUALIZATION (SANGAT PENTING - 30% SOAL)**: Minimal 30% soal WAJIB memiliki visualisasi premium yang berwarna-warni (vibrant colors).
-             **[PERINGATAN KERAS UNTUK SEMUA VISUAL DI BAWAH INI]**
-             Contoh JSON berikut hanyalah STRUKTUR/FORMAT. Anda **DILARANG KERAS** menyalin isinya secara mentah (copy-paste)! Anda **WAJIB MENGGANTI** seluruh teks, angka, node diagram, fungsi aljabar, data tabel, dan elemen lainnya agar **100% SINKRON/RELEVAN** dengan teks dan angka pada soal yang sedang Anda buat! JANGAN MALAS!
-${getSubjectVisualizations(subject)}
-
-         STRUKTUR JSON PER TIPE (WAJIB):
+        STRUKTUR JSON PER TIPE (WAJIB):
          - **pg**: {"type": "pg", "pedagogical_materi": "...", "competency": "...", "indicator": "...", "cognitive_level": "...", "stimulus": "...", "question": "...", "options": ["A...", "B..."], "answer": "A...", "explanation": "...", "visualization": {...}}
          - **matching**: {"type": "matching", "stimulus": "...", "question": "...", "left_side": ["A"], "right_side": ["1"], "pairs": [{"left": "A", "right": "1"}], "explanation": "...", "visualization": {...}}
          - **true_false**: {"type": "true_false", "stimulus": "...", "question": "...", "statements": [{"text": "S1", "isCorrect": true}], "explanation": "...", "visualization": {...}}
@@ -80,8 +71,11 @@ ${getSubjectVisualizations(subject)}
           "title": "${topic}",
           "questions": []
         }
-      `;
+        
+        Keluaran harus VALID JSON murni tanpa markdown blocks.
+    `;
+};
 
 export const getQuizFromImagePrompt = ({ count, gradeLevel, subject, topic, BSKAP_DATA }) => `
       Buat ${count} soal PG berdasarkan gambar dan standar BSKAP. Output JSON murni.
-    `;
+`;
