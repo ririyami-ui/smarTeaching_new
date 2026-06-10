@@ -345,7 +345,42 @@ function renderDisplayContent(
                     </div>
                 </div>
                 <div className={`p-8 lg:p-12 overflow-y-auto flex-1 rpp-prose max-w-none print:p-0 print:overflow-visible custom-scrollbar ${getRegionFromSubject(viewingRPP?.subject || selectedMaterial?.subject || '') === 'Jawa' ? 'font-carakan' : ''}`}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                    <ReactMarkdown 
+                        remarkPlugins={[remarkGfm, remarkMath]} 
+                        rehypePlugins={[rehypeKatex]}
+                        components={{
+                            code(props) {
+                                const { inline, className, children, ...rest } = props as any;
+                                const match = /language-(\w+)/.exec(className || '');
+                                const language = match ? match[1] : '';
+                                const content = String(children).replace(/\n$/, '');
+
+                                if (!inline && (language === 'mermaid' || language === 'chart')) {
+                                    try {
+                                        let config = {};
+                                        if (language === 'mermaid') {
+                                            config = { diagram: content };
+                                        } else if (language === 'chart') {
+                                            config = JSON.parse(content);
+                                        }
+                                        return (
+                                            <div className="my-6 no-print">
+                                                <VisualizationRenderer 
+                                                    visualization={{
+                                                        type: language as any,
+                                                        config: config
+                                                    }}
+                                                />
+                                            </div>
+                                        );
+                                    } catch (e) {
+                                        return <code className={className} {...rest}>{children}</code>;
+                                    }
+                                }
+                                return <code className={className} {...rest}>{children}</code>;
+                            }
+                        }}
+                    >
                         {generatedRPP || (viewingRPP ? viewingRPP.content : '')}
                     </ReactMarkdown>
                     <div id="signature-section" className="mt-12 pt-8 border-t border-transparent no-break-inside avoid-page-break">
