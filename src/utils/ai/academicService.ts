@@ -20,19 +20,19 @@ import { BSKAP_DATA, VERBATIM_BSKAP_DATA } from "../bskapData";
 import { STRICT_DOCUMENT_BRAIN } from "../prompts/smarttyPrompts";
 
 interface GenerationInput {
-  gradeLevel: string | number;
-  subject: string;
-  semester: string | number;
-  modelName: string;
-  onProgress?: (msg: string) => void;
+    gradeLevel: string | number;
+    subject: string;
+    semester: string | number;
+    modelName: string;
+    onProgress?: (msg: string) => void;
 }
 
 interface BSKAPSubjectEntry {
-  cp_full?: string;
+    cp_full?: string;
 }
 
 interface BSKAPSubjects {
-  subjects?: Record<string, Record<string, Record<string, BSKAPSubjectEntry>>>;
+    subjects?: Record<string, Record<string, Record<string, BSKAPSubjectEntry>>>;
 }
 
 /**
@@ -46,37 +46,51 @@ export const generateLessonPlan = async (data: GenerationInput & Record<string, 
         const cpFullVerbatim = (VERBATIM_BSKAP_DATA as BSKAPSubjects).subjects?.[level]?.[data.gradeLevel]?.[subjectKey]?.cp_full || "Lihat list elemen dan materi.";
 
         const regionalLanguage = getRegionalLanguage(data.subject);
-        const model = await getModel(data.modelName, false, STRICT_DOCUMENT_BRAIN);
 
-        // PREPARE PROMPTS
-        const { basePrompt, materialPrompt } = getLessonPlanPrompt(data, BSKAP_DATA, level, cpFullVerbatim, getSemesterLabel(data.semester), getSemesterKey(data.semester), subjectKey, regionalLanguage) as any;
+        // SYNC BOOK CONTEXT
+        let bookChapterData = null;
+        try {
+            const booksIndex = JSON.parse(require('fs').readFileSync('f:/app-firebase/Smart Teaching/smart-teaching-manager/src/utils/data/books/index.json', 'utf8'));
+            const matchedBook = booksIndex.find((b: any) => 
+                b.mapel.toLowerCase() === data.subject.toString().toLowerCase() && 
+                b.kelas.toString() === data.gradeLevel.toString()
+            );
+
+            if (matchedBook) {
+                const bookData = JSON.parse(require('fs').readFileSync(`f:/app-firebase/Smart Teaching/smart-teaching-manager/src/utils/data/books/${matchedBook.path}`, 'utf8'));
+                const topic = (data.materi as string || '').toLowerCase();
+                bookChapterData = bookData.chapters.find((ch: any) =>
+                    ch.title?.toLowerCase().includes(topic) ||
+                    ch.sub_topics?.some((st: string) => st.toLowerCase().includes(topic))
+                ) || null;
+            }
+        } catch (e) {
+            console.error("Book sync error:", e);
+        }
+
+        const basePrompt = getLessonPlanPrompt(data, BSKAP_DATA, level, cpFullVerbatim, getSemesterLabel(data.semester), getSemesterKey(data.semester), subjectKey, regionalLanguage, bookChapterData);
+        const model = await getModel(data.modelName, false, STRICT_DOCUMENT_BRAIN);
 
         // PART 1: IDENTIFICATION & SECTION I
         onProgress("Menyusun Identitas & Kompetensi...");
-        const part1Prompt = `${basePrompt}\n\n**INTRUKSI KHUSUS GENERASI PART 1:**\nHanya buat bagian HEADER dan SEKSI I (KOMPETENSI INTI). Berhenti tepat setelah SEKSI I selesai. DILARANG membuat seksi lainnya.`;
+        const part1Prompt = `${basePrompt}\n\n**INTRUKSI KHUSUS GENERASI PART 1:**\nHanya buat bagian HEADER (Identifikasi Pembelajaran) dan SEKSI I (KOMPETENSI INTI). Berhenti tepat setelah SEKSI I selesai. JANGAN buat SEKSI II ke bawah dulu. Fokus pada keakuratan CP dan TP.`;
         const result1 = await retryWithBackoff(() => model.generateContent(part1Prompt));
         const res1Text = result1.response.text();
 
-        // PART 2: SECTION II (Langkah Pembelajaran Presisi)
-        onProgress("Merancang Langkah Pembelajaran (Tabel Guru & Siswa)...");
-        const part2Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK (DILARANG TULIS ULANG):**\n${res1Text}\n\n**INTRUKSI KHUSUS GENERASI PART 2:**\nBuat SEKSI II (LANGKAH-LANGKAH PEMBELAJARAN). \n**KONTROL OUTPUT:** Langsung mulai dari header "## II. LANGKAH-LANGKAH PEMBELAJARAN". DILARANG menulis ulang judul utama, identitas, atau seksi sebelumnya. Wajib gunakan format tabel. Berhenti tepat setelah SEKSI II selesai.`;
+        // PART 2: SECTION II
+        onProgress("Menyusun Langkah Pembelajaran...");
+        const part2Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n\n**INTRUKSI KHUSUS GENERASI PART 2:**\nBerdasarkan Identitas dan Kompetensi di atas, buatlah SEKSI II (LANGKAH-LANGKAH PEMBELAJARAN) saja. \n**KONTROL PANJANG:** Buatlah langkah pembelajaran yang naratif dan mendetail namun **tetap efisien** (Target: sekitar 3-4 halaman per pertemuan). Jangan terlalu berulang. Berhenti tepat setelah SEKSI II selesai.`;
         const result2 = await retryWithBackoff(() => model.generateContent(part2Prompt));
         const res2Text = result2.response.text();
 
-        // PART 3: SECTIONS III & IV (Media & Lampiran/LKPD)
-        onProgress("Menyusun Media & Lampiran (LKPD/Asesmen)...");
-        const part3Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK (DILARANG TULIS ULANG):**\n${res1Text}\n${res2Text}\n\n**INTRUKSI KHUSUS GENERASI PART 3:**\nBuat SEKSI III (MEDIA BELAJAR) dan SEKSI IV (LAMPIRAN/LKPD/ASESMEN). \n**KONTROL OUTPUT:** Langsung mulai dari header "## III. MEDIA BELAJAR". DILARANG menulis ulang judul utama atau seksi sebelumnya. Berhenti tepat setelah SEKSI IV selesai. **PENTING: JANGAN BUAT MATERI AJAR/GLOSARIUM DI SINI.**`;
+        // PART 3: SECTIONS III, IV, V
+        onProgress("Menyusun Lampiran & Materi Ajar...");
+        const part3Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n${res2Text}\n\n**INTRUKSI KHUSUS GENERASI PART 3:**\nLanjutkan dokumen ini dengan membuat SEKSI III (MEDIA BELAJAR), SEKSI IV (LAMPIRAN/LKPD/ASESMEN), dan SEKSI V (MATERI AJAR MENDETAIL/GLOSARIUM/DP). \n**KONTROL PANJANG:** Pastikan LKPD dan Materi Ajar lengkap sesuai target, namun jangan melebar tanpa arah. Selesaikan seluruh dokumen sampai Daftar Pustaka.`;
         const result3 = await retryWithBackoff(() => model.generateContent(part3Prompt));
         const res3Text = result3.response.text();
 
-        // PART 4: SECTION V, VI, VII (MATERI AJAR, GLOSARIUM, DAFTAR PUSTAKA)
-        onProgress("Finalisasi Materi Ajar, Glosarium & Daftar Pustaka...");
-        const part4Prompt = `${materialPrompt}\n\n**KONTEKS UNTUK REFERENSI (DILARANG TULIS ULANG):**\n${res1Text}\n${res2Text}\n${res3Text}\n\n**INTRUKSI KHUSUS GENERASI PART 4 (FINAL):**\nBerdasarkan konteks di atas, buatlah SEKSI V, VI, dan VII secara mendalam.`;
-        const result4 = await retryWithBackoff(() => model.generateContent(part4Prompt));
-        const res4Text = result4.response.text();
-
         // COMBINE
-        return `${res1Text}\n\n${res2Text}\n\n${res3Text}\n\n${res4Text}`;
+        return `${res1Text}\n\n${res2Text}\n\n${res3Text}`;
     } catch (error) {
         throw new Error(handleGeminiError(error, "generateLessonPlan"));
     }
@@ -116,7 +130,7 @@ export async function generateLKPDFromRPP(rppContent: string, assessmentModel: s
 export async function extractKKTPFromRPP(rppContent: string, modelName: string): Promise<Record<string, unknown>> {
     try {
         const prompt = getExtractKKTPPrompt(rppContent);
-        const model = await getModel(modelName, true, STRICT_DOCUMENT_BRAIN); 
+        const model = await getModel(modelName, true, STRICT_DOCUMENT_BRAIN);
         const result = await retryWithBackoff(() => model.generateContent(prompt));
         const textResponse = result.response.text();
         return extractJSON(textResponse);
@@ -143,8 +157,8 @@ export async function generateATP(data: Record<string, unknown>, modelName: stri
         let finalPrompt = prompt;
         if (data.bookContext) {
             const book: { chapters?: Array<{ title: string }> } = data.bookContext as any;
-            const chaptersText = book.chapters?.map((c: any) => `- ${c.title}`).join('\n') || '';
-            if (chaptersText) {
+            if (book.chapters) {
+                const chaptersText = book.chapters.map((c: any) => `- ${c.title}`).join('\n');
                 finalPrompt += `\n\n**KONTEKS MATERI BUKU TEKS:**\n${chaptersText}\n\nInstruksi: Gunakan urutan topik dari buku teks di atas sebagai panduan alur (sequence) materi. Pastikan cakupan materi tidak melenceng dari buku siswa, namun fokuskan output pada kompetensi Kurikulum Merdeka (CP/TP). JANGAN sertakan nomor halaman atau nomor bab dalam teks hasil akhir.`;
             }
         }
