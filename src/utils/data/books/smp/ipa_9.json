@@ -2,12 +2,68 @@
   "bookId": "smp-ipa-9",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Pertumbuhan dan Perkembangan", "pages": "1-32", "semester": "Ganjil", "sub_topics": ["Pertumbuhan Hewan", "Pertumbuhan Tumbuhan", "Pertumbuhan Manusia"], "key_terms": ["Pertumbuhan", "Perkembangan", "Metamorfosis", "Germinasi"] },
-    { "no": 2, "title": "Sistem Koordinasi, Reproduksi, dan Homeostasis", "pages": "33-90", "semester": "Ganjil", "sub_topics": ["Sistem Saraf", "Alat Indera", "Sistem Hormon", "Sistem Reproduksi", "Homeostasis"], "key_terms": ["Saraf", "Hormon", "Indera", "Homeostasis"] },
-    { "no": 3, "title": "Tekanan", "pages": "91-120", "semester": "Ganjil", "sub_topics": ["Tekanan Zat Padat", "Tekanan Zat Cair (Pascal, Archimedes)", "Tekanan Gas"], "key_terms": ["Tekanan", "Pascal", "Archimedes", "Hukum"] },
-    { "no": 4, "title": "Listrik, Magnet, dan Sumber Energi Alternatif", "pages": "121-160", "semester": "Genap", "sub_topics": ["Listrik Statis & Dinamis", "Kemagnetan", "Energi Terbarukan"], "key_terms": ["Listrik", "Magnet", "Energi", "Terbarukan"] },
-    { "no": 5, "title": "Reaksi-Reaksi Kimia dan Dinamikanya", "pages": "161-190", "semester": "Genap", "sub_topics": ["Ciri Reaksi Kimia", "Laju Reaksi", "Asam dan Basa"], "key_terms": ["Reaksi", "Laju", "Asam", "Basa"] },
-    { "no": 6, "title": "Pewarisan Sifat dan Bioteknologi", "pages": "191-220", "semester": "Genap", "sub_topics": ["Materi Genetik", "Hukum Mendel", "Bioteknologi Konvensional & Modern"], "key_terms": ["Genetik", "Mendel", "Bioteknologi", "DNA"] },
-    { "no": 7, "title": "Isu-Isu Lingkungan", "pages": "221-250", "semester": "Genap", "sub_topics": ["Pemanasan Global", "Pencemaran Lingkungan", "Solusi Krisis Energi"], "key_terms": ["Lingkungan", "Polusi", "Energi", "Global"] }
+    { 
+      "no": 1, 
+      "title": "Pertumbuhan dan Perkembangan", 
+      "pages": "1-32", 
+      "semester": "Ganjil", 
+      "sub_topics": ["Pertumbuhan Hewan", "Pertumbuhan Tumbuhan", "Pertumbuhan Manusia"], 
+      "key_terms": ["Pertumbuhan", "Perkembangan", "Metamorfosis", "Germinasi"],
+      "visual_hint": "mermaid_cycle"
+    },
+    { 
+      "no": 2, 
+      "title": "Sistem Koordinasi, Reproduksi, dan Homeostasis", 
+      "pages": "33-90", 
+      "semester": "Ganjil", 
+      "sub_topics": ["Sistem Saraf", "Alat Indera", "Sistem Hormon", "Sistem Reproduksi", "Homeostasis"], 
+      "key_terms": ["Saraf", "Hormon", "Indera", "Homeostasis"],
+      "visual_hint": "anatomy_diagram"
+    },
+    { 
+      "no": 3, 
+      "title": "Tekanan", 
+      "pages": "91-120", 
+      "semester": "Ganjil", 
+      "sub_topics": ["Tekanan Zat Padat", "Tekanan Zat Cair (Pascal, Archimedes)", "Tekanan Gas"], 
+      "key_terms": ["Tekanan", "Pascal", "Archimedes", "Hukum"],
+      "visual_hint": "physics_diagram"
+    },
+    { 
+      "no": 4, 
+      "title": "Listrik, Magnet, dan Sumber Energi Alternatif", 
+      "pages": "121-160", 
+      "semester": "Genap", 
+      "sub_topics": ["Listrik Statis & Dinamis", "Kemagnetan", "Energi Terbarukan"], 
+      "key_terms": ["Listrik", "Magnet", "Energi", "Terbarukan"],
+      "visual_hint": "circuit_diagram"
+    },
+    { 
+      "no": 5, 
+      "title": "Reaksi-Reaksi Kimia dan Dinamikanya", 
+      "pages": "161-190", 
+      "semester": "Genap", 
+      "sub_topics": ["Ciri Reaksi Kimia", "Laju Reaksi", "Asam dan Basa"], 
+      "key_terms": ["Reaksi", "Laju", "Asam", "Basa"],
+      "visual_hint": "chemistry_formula"
+    },
+    { 
+      "no": 6, 
+      "title": "Pewarisan Sifat dan Bioteknologi", 
+      "pages": "191-220", 
+      "semester": "Genap", 
+      "sub_topics": ["Materi Genetik", "Hukum Mendel", "Bioteknologi Konvensional & Modern"], 
+      "key_terms": ["Genetik", "Mendel", "Bioteknologi", "DNA"],
+      "visual_hint": "genetics_diagram"
+    },
+    { 
+      "no": 7, 
+      "title": "Isu-Isu Lingkungan", 
+      "pages": "221-250", 
+      "semester": "Genap", 
+      "sub_topics": ["Pemanasan Global", "Pencemaran Lingkungan", "Solusi Krisis Energi"], 
+      "key_terms": ["Lingkungan", "Polusi", "Energi", "Global"],
+      "visual_hint": "mindmap"
+    }
   ]
 }

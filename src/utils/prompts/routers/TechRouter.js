@@ -30,10 +30,13 @@ export const routeTech = (subject, topic, syncRule) => {
   
   // 4. Algorithms / Programming
   if (t.includes('algoritma') || t.includes('pemrograman') || t.includes('coding') || t.includes('program') || t.includes('scratch') || t.includes('berpikir komputasional')) {
+    const isScratch = t.includes('scratch') || t.includes('visual');
     return { 
-      allowed: ['scratch', 'mermaid', 'code'], 
+      allowed: isScratch ? ['scratch'] : ['scratch', 'mermaid', 'code'], 
       forbidden: ['logic', 'spreadsheet'], 
-      forceInstruction: `${syncRule} Gunakan blok visual (Scratch), diagram alir algoritma (Mermaid), atau potongan kode (Code).` 
+      forceInstruction: isScratch 
+        ? `${syncRule} WAJIB gunakan blok visual (Scratch). Gunakan sintaks scratchblocks yang VALID (misal: "when green flag clicked", "move (10) steps", "say [Halo] for (2) secs"). JANGAN pakai diagram mermaid untuk materi ini.`
+        : `${syncRule} Gunakan blok visual (Scratch), diagram alir algoritma (Mermaid), atau potongan kode (Code).` 
     };
   }
 

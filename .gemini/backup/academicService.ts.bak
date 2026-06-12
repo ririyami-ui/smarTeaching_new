@@ -50,28 +50,19 @@ export const generateLessonPlan = async (data: GenerationInput & Record<string, 
         // SYNC BOOK CONTEXT
         let bookChapterData = null;
         try {
-            const path = require('path');
-            const fs = require('fs');
-            const booksIndexPath = path.join(process.cwd(), 'src', 'utils', 'data', 'books', 'index.json');
-            
-            if (fs.existsSync(booksIndexPath)) {
-                const booksIndex = JSON.parse(fs.readFileSync(booksIndexPath, 'utf8'));
-                const matchedBook = booksIndex.find((b: any) => 
-                    b.mapel.toLowerCase() === data.subject.toString().toLowerCase() && 
-                    b.kelas.toString() === data.gradeLevel.toString()
-                );
+            const booksIndex = JSON.parse(require('fs').readFileSync('f:/app-firebase/Smart Teaching/smart-teaching-manager/src/utils/data/books/index.json', 'utf8'));
+            const matchedBook = booksIndex.find((b: any) => 
+                b.mapel.toLowerCase() === data.subject.toString().toLowerCase() && 
+                b.kelas.toString() === data.gradeLevel.toString()
+            );
 
-                if (matchedBook) {
-                    const bookFilePath = path.join(process.cwd(), 'src', 'utils', 'data', 'books', matchedBook.path);
-                    if (fs.existsSync(bookFilePath)) {
-                        const bookData = JSON.parse(fs.readFileSync(bookFilePath, 'utf8'));
-                        const topic = (data.materi as string || '').toLowerCase();
-                        bookChapterData = bookData.chapters.find((ch: any) =>
-                            ch.title?.toLowerCase().includes(topic) ||
-                            ch.sub_topics?.some((st: string) => st.toLowerCase().includes(topic))
-                        ) || null;
-                    }
-                }
+            if (matchedBook) {
+                const bookData = JSON.parse(require('fs').readFileSync(`f:/app-firebase/Smart Teaching/smart-teaching-manager/src/utils/data/books/${matchedBook.path}`, 'utf8'));
+                const topic = (data.materi as string || '').toLowerCase();
+                bookChapterData = bookData.chapters.find((ch: any) =>
+                    ch.title?.toLowerCase().includes(topic) ||
+                    ch.sub_topics?.some((st: string) => st.toLowerCase().includes(topic))
+                ) || null;
             }
         } catch (e) {
             console.error("Book sync error:", e);
@@ -92,20 +83,14 @@ export const generateLessonPlan = async (data: GenerationInput & Record<string, 
         const result2 = await retryWithBackoff(() => model.generateContent(part2Prompt));
         const res2Text = result2.response.text();
 
-        // PART 3: SECTIONS III & IV (Media & Lampiran/LKPD)
-        onProgress("Menyusun Media & Lampiran (LKPD/Asesmen)...");
-        const part3Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n${res2Text}\n\n**INTRUKSI KHUSUS GENERASI PART 3:**\nLanjutkan dengan membuat SEKSI III (MEDIA BELAJAR) dan SEKSI IV (LAMPIRAN/LKPD/ASESMEN). Berhenti tepat setelah SEKSI IV selesai. JANGAN buat Materi Ajar dulu.`;
+        // PART 3: SECTIONS III, IV, V
+        onProgress("Menyusun Lampiran & Materi Ajar...");
+        const part3Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n${res2Text}\n\n**INTRUKSI KHUSUS GENERASI PART 3:**\nLanjutkan dokumen ini dengan membuat SEKSI III (MEDIA BELAJAR), SEKSI IV (LAMPIRAN/LKPD/ASESMEN), dan SEKSI V (MATERI AJAR MENDETAIL/GLOSARIUM/DP). \n**KONTROL PANJANG:** Pastikan LKPD dan Materi Ajar lengkap sesuai target, namun jangan melebar tanpa arah. Selesaikan seluruh dokumen sampai Daftar Pustaka.`;
         const result3 = await retryWithBackoff(() => model.generateContent(part3Prompt));
         const res3Text = result3.response.text();
 
-        // PART 4: SECTIONS V, VI, VII (MATERI AJAR & FINALISASI)
-        onProgress("Menguraikan Materi Ajar Mendetail...");
-        const part4Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n${res2Text}\n${res3Text}\n\n**INTRUKSI KHUSUS GENERASI PART 4:**\nBerdasarkan langkah pembelajaran di atas, uraikan SEKSI V (MATERI AJAR MENDETAIL) secara sangat mendalam (minimal 5-8 paragraf), diikuti SEKSI VI (GLOSARIUM) dan SEKSI VII (DAFTAR PUSTAKA).`;
-        const result4 = await retryWithBackoff(() => model.generateContent(part4Prompt));
-        const res4Text = result4.response.text();
-
         // COMBINE
-        return `${res1Text}\n\n${res2Text}\n\n${res3Text}\n\n${res4Text}`;
+        return `${res1Text}\n\n${res2Text}\n\n${res3Text}`;
     } catch (error) {
         throw new Error(handleGeminiError(error, "generateLessonPlan"));
     }

@@ -8,46 +8,39 @@ export const routeSocialLanguage = (subject, topic, syncRule) => {
   const isReligion = s.includes('agama') || s.includes('pai');
   const isPE = s.includes('pjok');
 
-  // 1. Language
+  // 1. Language (Bahasa Indonesia/Inggris/Daerah)
   if (isLanguage) {
-    if (t.includes('puisi') || t.includes('cerita') || t.includes('teks')) {
-      return { allowed: ['mindmap', 'diagram'], forbidden: ['logic', 'scratch', 'function', 'geometry', 'spreadsheet'], forceInstruction: `${syncRule} Gunakan peta konsep (mindmap) untuk menganalisis teks.` };
+    if (t.match(/puisi|pantun|syair|prosa|sastra/i)) {
+      return { allowed: ['image', 'mindmap'], forbidden: ['spreadsheet', 'logic'], forceInstruction: `${syncRule} Gunakan gambar ilustrasi suasana atau peta konsep makna.` };
     }
-    return { allowed: ['image', 'mindmap'], forbidden: ['logic', 'scratch', 'function'], forceInstruction: `${syncRule} Gunakan visualisasi teks atau gambar.` };
+    if (t.match(/teks|paragraf|struktur|narasi|eksposisi|rekon/i)) {
+      return { allowed: ['mindmap', 'mermaid'], forbidden: ['chart', 'logic'], forceInstruction: `${syncRule} Gunakan diagram alir (Mermaid) untuk struktur teks atau Peta Konsep.` };
+    }
+    return { allowed: ['image', 'mindmap'], forbidden: ['logic', 'scratch'], forceInstruction: `${syncRule} Gunakan visualisasi teks atau gambar pendukung.` };
   }
 
-  // 2. Social Studies & Civics
+  // 2. Social Studies (IPS, Sejarah, Geografi, Ekonomi)
   if (isSocial) {
-    if (t.includes('peta') || t.includes('lokasi') || t.includes('wilayah')) {
-      return { allowed: ['map', 'diagram'], forbidden: ['logic', 'function'], forceInstruction: `${syncRule} Gunakan peta atau diagram spasial.` };
+    if (t.match(/peta|lokasi|wilayah|geografis|negara|batas/i)) {
+      return { allowed: ['map', 'image'], forbidden: ['logic', 'function'], forceInstruction: `${syncRule} WAJIB gunakan Peta atau citra satelit wilayah terkait.` };
     }
-    if (t.includes('sejarah') || t.includes('kronologi') || t.includes('waktu')) {
-      return { allowed: ['mermaid'], forbidden: ['spreadsheet', 'logic'], forceInstruction: `${syncRule} Gunakan diagram timeline (Mermaid) untuk urutan waktu.` };
+    if (t.match(/sejarah|kronologi|peristiwa|kerajaan|perang|waktu/i)) {
+      return { allowed: ['mermaid'], forbidden: ['spreadsheet', 'logic'], forceInstruction: `${syncRule} WAJIB gunakan diagram timeline (Mermaid LR) untuk urutan kronologi sejarah.` };
     }
-    if (t.includes('ekonomi') || t.includes('uang') || t.includes('harga') || t.includes('pasar')) {
-      return { allowed: ['chart', 'spreadsheet'], forbidden: ['logic', 'scratch'], forceInstruction: `${syncRule} Gunakan grafik (chart) atau tabel (spreadsheet) untuk data ekonomi.` };
+    if (t.match(/ekonomi|uang|harga|pasar|permintaan|penawaran|inflasi/i)) {
+      return { allowed: ['chart', 'spreadsheet', 'function'], forbidden: ['logic', 'scratch'], forceInstruction: `${syncRule} Gunakan kurva permintaan/penawaran (function) atau tabel data (spreadsheet).` };
     }
-    if (t.includes('masyarakat') || t.includes('sosial') || t.includes('konstitusi')) {
-      return { allowed: ['mindmap', 'mermaid'], forbidden: ['logic', 'function'], forceInstruction: `${syncRule} Gunakan peta konsep (mindmap) atau hierarki (mermaid).` };
+    if (t.match(/masyarakat|sosial|budaya|konstitusi|hukum|pancasila/i)) {
+      return { allowed: ['mindmap', 'mermaid'], forbidden: ['logic', 'function'], forceInstruction: `${syncRule} Gunakan Peta Konsep (mindmap) untuk hubungan antar norma/nilai.` };
     }
   }
 
-  // 3. Arts (Seni Budaya)
-  if (isArts) {
-    if (t.includes('musik') || t.includes('nada') || t.includes('lagu')) {
-      return { allowed: ['music'], forbidden: ['logic', 'function'], forceInstruction: `${syncRule} Gunakan notasi musik (ABC).` };
+  // 3. Arts & Religion
+  if (isArts || isReligion) {
+    if (t.match(/musik|nada|lagu|notasi|ritme/i)) {
+      return { allowed: ['music'], forbidden: ['logic', 'function'], forceInstruction: `${syncRule} WAJIB gunakan Notasi Musik (ABC) yang valid.` };
     }
-    return { allowed: ['image', 'diagram'], forbidden: ['logic', 'function'], forceInstruction: `${syncRule} Gunakan sketsa atau gambar.` };
-  }
-
-  // 4. Physical Education (PJOK)
-  if (isPE) {
-    return { allowed: ['diagram', 'image', 'mermaid'], forbidden: ['logic', 'function', 'scratch', 'spreadsheet'], forceInstruction: `${syncRule} Gunakan diagram formasi atau alur gerakan.` };
-  }
-
-  // 5. Religion (PAI)
-  if (isReligion) {
-    return { allowed: ['mindmap', 'diagram'], forbidden: ['logic', 'function', 'scratch', 'spreadsheet'], forceInstruction: `${syncRule} Gunakan peta konsep (mindmap).` };
+    return { allowed: ['image', 'mindmap'], forbidden: ['logic', 'scratch'], forceInstruction: `${syncRule} Gunakan gambar karya seni atau peta konsep ajaran.` };
   }
 
   // Social Default

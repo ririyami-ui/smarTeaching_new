@@ -2,11 +2,11 @@
   "bookId": "smp-mat-8",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Bilangan Berpangkat", "pages": "1-56", "semester": "Ganjil", "sub_topics": ["Sifat-sifat Eksponen", "Bentuk Akar", "Notasi Ilmiah (Bentuk Baku)"], "key_terms": ["Eksponen", "Akar", "Notasi Ilmiah", "Pangkat"] },
-    { "no": 2, "title": "Teorema Pythagoras", "pages": "57-102", "semester": "Ganjil", "sub_topics": ["Menemukan Konsep Pythagoras", "Tripel Pythagoras", "Segitiga Istimewa", "Penerapan Teorema Pythagoras"], "key_terms": ["Pythagoras", "Segitiga Siku", "Tripel", "Hipotenusa"] },
-    { "no": 3, "title": "Persamaan Linear Dua Variabel", "pages": "103-148", "semester": "Ganjil", "sub_topics": ["Konsep SPLDV", "Penyelesaian dengan Grafik", "Penyelesaian dengan Substitusi", "Penyelesaian dengan Eliminasi"], "key_terms": ["SPLDV", "Substitusi", "Eliminasi", "Grafik"] },
-    { "no": 4, "title": "Relasi dan Fungsi", "pages": "149-180", "semester": "Genap", "sub_topics": ["Konsep Relasi", "Ciri-ciri Fungsi", "Rumus Fungsi", "Grafik Fungsi"], "key_terms": ["Relasi", "Fungsi", "Domain", "Kodomain"] },
-    { "no": 5, "title": "Persamaan Garis Lurus", "pages": "181-210", "semester": "Genap", "sub_topics": ["Kemiringan Garis (Gradien)", "Persamaan Garis Lurus", "Garis Sejajar dan Tegak Lurus"], "key_terms": ["Gradien", "Garis Lurus", "Sejajar", "Tegak Lurus"] },
-    { "no": 6, "title": "Statistika", "pages": "211-240", "semester": "Genap", "sub_topics": ["Pemusatan Data (Mean, Median, Modus)", "Penyebaran Data (Jangkauan, Kuartil)", "Distribusi Data"], "key_terms": ["Mean", "Median", "Modus", "Kuartil"] }
+    { "no": 1, "title": "Bilangan Berpangkat", "pages": "1-40", "semester": "Ganjil", "sub_topics": ["Bilangan Berpangkat Bulat", "Bentuk Akar", "Penulisan Bentuk Baku"], "key_terms": ["Pangkat", "Akar", "Eksponen"], "visual_hint": "diagram" },
+    { "no": 2, "title": "Teorema Pythagoras", "pages": "41-70", "semester": "Ganjil", "sub_topics": ["Konsep Pythagoras", "Tripel Pythagoras", "Penerapan Teorema"], "key_terms": ["Pythagoras", "Sisi Miring", "Segitiga Siku-siku"], "visual_hint": "geometry" },
+    { "no": 3, "title": "Persamaan Linier dan Pertidaksamaan Linier", "pages": "71-110", "semester": "Ganjil", "sub_topics": ["Persamaan Linier Satu Variabel", "Pertidaksamaan Linier"], "key_terms": ["Persamaan", "Pertidaksamaan", "Variabel"], "visual_hint": "function" },
+    { "no": 4, "title": "Relasi dan Fungsi", "pages": "111-150", "semester": "Genap", "sub_topics": ["Memahami Relasi", "Fungsi atau Pemetaan", "Korespondensi Satu-satu"], "key_terms": ["Relasi", "Fungsi", "Domain", "Kodomain"], "visual_hint": "function" },
+    { "no": 5, "title": "Persamaan Garis Lurus", "pages": "151-190", "semester": "Genap", "sub_topics": ["Grafik Persamaan Garis Lurus", "Kemiringan Garis (Gradien)"], "key_terms": ["Garis Lurus", "Gradien", "Titik Potong"], "visual_hint": "function" },
+    { "no": 6, "title": "Statistika", "pages": "191-220", "semester": "Genap", "sub_topics": ["Penyajian Data", "Pemusatan Data", "Penyebaran Data"], "key_terms": ["Statistika", "Quartil", "Simpangan"], "visual_hint": "chart" }
   ]
 }

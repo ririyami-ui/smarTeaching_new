@@ -5,7 +5,7 @@ import { getSmartVisualRules, getBSKAPContext, getBookMaterial } from './quizInt
 import bskapData from '../bskap_2025_intel.json';
 import bookIndex from '../data/books/index.json';
 
-export const getAdvancedQuizPrompt = ({ topic, context, bookContext, BSKAP_DATA, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty, stimulusMode = 'auto' }) => {
+export const getAdvancedQuizPrompt = ({ topic, context, bookContext, BSKAP_DATA, gradeLevel, subject, batchNum, batches, allQuestions, batchInstructions, optionCount, optionLabel, difficulty, stimulusMode = 'auto', chapterVisualHint }) => {
     const smartRules = getSmartVisualRules(subject, topic);
     const bskapContext = getBSKAPContext(bskapData, gradeLevel, subject);
     const intelligentBookContext = getBookMaterial(bookIndex, subject, gradeLevel, topic);
@@ -22,6 +22,7 @@ Tingkat Kesulitan: ${difficulty}% (HOTS Meter)
 Sumber Materi: ${bookContext ? bookContext + "\\n" + intelligentBookContext : intelligentBookContext}
 
 [ATURAN VISUALISASI CERDAS]
+${chapterVisualHint ? `[PRIORITAS VISUAL]: Berdasarkan Buku Kurikulum, Anda WAJIB memprioritaskan tipe visualisasi: **${chapterVisualHint}**.` : ''}
 WAJIB diikuti tanpa kecuali:
 - TIPE VISUALISASI YANG DIIZINKAN: ${smartRules.allowed.join(', ')} (PILIH SALAH SATU YANG PALING COCOK)
 - TIPE VISUALISASI YANG DILARANG: ${smartRules.forbidden.join(', ')}
@@ -32,7 +33,7 @@ ${smartRules.allowed.includes('spreadsheet') ? `[SPREADSHEET] Untuk tabel data: 
 ${smartRules.allowed.includes('logic') ? `[LOGIC] Untuk gerbang logika: {"type": "logic", "config": { "code": "A AND B -> Y" } }` : ''}
 ${smartRules.allowed.includes('mermaid') ? `[MERMAID] Untuk alur/proses: {"type": "mermaid", "config": { "diagram": "graph LR\\nA[Mulai] --> B{Kondisi}\\nB -- Ya --> C[Selesai]\\nB -- Tidak --> D[Ulang]" } } (Gunakan "graph LR" agar diagram melebar horizontal dan tidak bertumpuk).` : ''}
 ${smartRules.allowed.includes('function') ? `[FUNCTION] Untuk grafik matematika: {"type": "math", "config": { "expression": "y=x", "range": [-10, 10] } }` : ''}
-${smartRules.allowed.includes('scratch') ? `[SCRATCH] Untuk blok algoritma: {"type": "scratch", "config": { "code": "when [Login] clicked\\nif <(password) = [123]> then" } }` : ''}
+${smartRules.allowed.includes('scratch') ? `[SCRATCH] Untuk blok algoritma: {"type": "scratch", "config": { "code": "when green flag clicked\\nforever\\nif <key [space] pressed?> then\\nmove (10) steps\\nend\\nend" } }` : ''}
 ${smartRules.allowed.includes('chart') ? `[CHART] Untuk grafik statistik: {"type": "chart", "config": { "type": "bar", "data": [{"x": "A", "y": 10}], "title": "Data" } }` : ''}
 
 [SAYARAT MUTLAK SINKRONISASI]

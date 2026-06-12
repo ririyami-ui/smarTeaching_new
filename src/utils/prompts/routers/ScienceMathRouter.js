@@ -36,20 +36,29 @@ export const routeScienceMath = (subject, topic, syncRule) => {
 
   // 3. Chemistry
   if (isChemistry) {
-    if (t.includes('molekul') || t.includes('senyawa') || t.includes('ikatan') || t.includes('karbon')) {
-      return { allowed: ['chemistry'], forbidden: ['logic', 'function'], forceInstruction: `${syncRule} Gunakan struktur molekul (chemistry / SMILES).` };
+    if (t.match(/molekul|senyawa|ikatan|karbon|kimia organik/i)) {
+      return { 
+        allowed: ['model3d', 'chemistry'], 
+        forbidden: ['logic', 'function'], 
+        forceInstruction: `${syncRule} Tampilkan struktur molekul dalam format 3D (model3d) atau 2D (chemistry).` 
+      };
     }
-    return { allowed: ['diagram', 'chemistry'], forbidden: ['logic', 'scratch'], forceInstruction: `${syncRule} Gunakan diagram reaksi atau struktur molekul.` };
+    return { allowed: ['diagram', 'chemistry'], forbidden: ['logic', 'scratch'], forceInstruction: `${syncRule} Gunakan diagram reaksi kimia.` };
   }
 
-  // 4. Biology & IPAS (General Science)
+  // 4. Biology & IPAS
   if (isBiology || isIPAS) {
-    if (t.includes('ekosistem') || t.includes('rantai makanan') || t.includes('siklus') || t.includes('sistem')) {
-      return { allowed: ['mermaid', 'mindmap'], forbidden: ['logic', 'function', 'geometry'], forceInstruction: `${syncRule} Gunakan diagram alir (Mermaid) untuk rantai makanan atau siklus.` };
+    if (t.match(/anatomi|sel|organ|jantung|paru-paru|tulang/i)) {
+      return { 
+        allowed: ['model3d', 'diagram'], 
+        forbidden: ['logic', 'scratch'], 
+        forceInstruction: `${syncRule} WAJIB tampilkan model 3D (model3d) untuk anatomi organ tubuh agar interaktif.` 
+      };
     }
-    if (t.includes('anatomi') || t.includes('sel') || t.includes('organ')) {
-      return { allowed: ['diagram', 'image'], forbidden: ['logic', 'scratch'], forceInstruction: `${syncRule} Gunakan diagram anatomi berlabel.` };
+    if (t.match(/ekosistem|rantai makanan|siklus|metamorfosis/i)) {
+      return { allowed: ['mermaid', 'mindmap'], forbidden: ['logic', 'function'], forceInstruction: `${syncRule} Gunakan diagram alir (Mermaid).` };
     }
+    return { allowed: ['diagram', 'image'], forbidden: ['logic', 'scratch'], forceInstruction: `${syncRule} Gunakan diagram biologi.` };
   }
 
   // Science Default

@@ -44,6 +44,7 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
         onProgress({ stage: 'preparing', message: 'Mempersiapkan parameter kuis...', percentage: 5 });
         
         let bookContext = "";
+        let chapterVisualHint = "";
         const jenjang = getJenjangFromGrade(gradeLevel);
         if (jenjang) {
             onProgress({ stage: 'preparing', message: 'Mencari referensi buku resmi...', percentage: 10 });
@@ -54,6 +55,10 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
                     bookContext = `SUMBER BUKU RESMI: ${matchedBook.title} (${bookContent.publisher})\n`;
                     bookContent.chapters.forEach(ch => {
                         bookContext += `Bab ${ch.no}: ${ch.title}\n- Sub-topik: ${ch.sub_topics.join(', ')}\n- Istilah Kunci: ${ch.key_terms.join(', ')}\n`;
+                        // Cari visual_hint jika topik cocok dengan judul bab
+                        if (topic.toLowerCase().includes(ch.title.toLowerCase()) || ch.title.toLowerCase().includes(topic.toLowerCase())) {
+                          if (ch.visual_hint) chapterVisualHint = ch.visual_hint;
+                        }
                     });
                 }
             }
@@ -92,7 +97,8 @@ export async function generateAdvancedQuiz({ topic, context, gradeLevel, subject
                 batches, // Total batches
                 allQuestions, // Previous questions for anti-monotony
                 batchInstructions,
-                optionCount, optionLabel, difficulty, stimulusMode 
+                optionCount, optionLabel, difficulty, stimulusMode,
+                chapterVisualHint // Pass the hint from book JSON
             });
 
             const model = await getModel(modelName, true, STRICT_DOCUMENT_BRAIN);

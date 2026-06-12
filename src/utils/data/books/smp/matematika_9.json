@@ -2,9 +2,10 @@
   "bookId": "smp-mat-9",
   "publisher": "Kemendikbudristek",
   "chapters": [
-    { "no": 1, "title": "Persamaan Kuadrat", "pages": "1-64", "semester": "Ganjil", "sub_topics": ["Bentuk Umum Persamaan Kuadrat", "Akar-akar Persamaan Kuadrat", "Menyusun Persamaan Kuadrat"], "key_terms": ["Kuadrat", "Akar", "Diskriminan", "Rumus ABC"] },
-    { "no": 2, "title": "Fungsi Kuadrat", "pages": "65-128", "semester": "Ganjil", "sub_topics": ["Grafik Fungsi Kuadrat", "Sumbu Simetri dan Titik Puncak", "Aplikasi Fungsi Kuadrat"], "key_terms": ["Fungsi", "Parabola", "Simetri", "Titik Puncak"] },
-    { "no": 3, "title": "Transformasi Geometri", "pages": "129-170", "semester": "Genap", "sub_topics": ["Translasi (Pergeseran)", "Refleksi (Pencerminan)", "Rotasi (Perputaran)", "Dilatasi (Perkalian)"], "key_terms": ["Transformasi", "Translasi", "Refleksi", "Rotasi", "Dilatasi"] },
-    { "no": 4, "title": "Peluang dan Statistika", "pages": "171-210", "semester": "Genap", "sub_topics": ["Ruang Sampel dan Kejadian", "Peluang Empirik dan Teoretik", "Statistika Lanjutan"], "key_terms": ["Peluang", "Statistika", "Sampel", "Kejadian"] }
+    { "no": 1, "title": "Sistem Persamaan Linier Dua Variabel", "pages": "1-45", "semester": "Ganjil", "sub_topics": ["Penyelesaian SPLDV", "Metode Substitusi & Eliminasi", "Aplikasi SPLDV"], "key_terms": ["SPLDV", "Eliminasi", "Substitusi"], "visual_hint": "function" },
+    { "no": 2, "title": "Persamaan dan Fungsi Kuadrat", "pages": "46-90", "semester": "Ganjil", "sub_topics": ["Akar Persamaan Kuadrat", "Grafik Fungsi Kuadrat", "Aplikasi Fungsi Kuadrat"], "key_terms": ["Kuadrat", "Parabola", "Diskriminan", "Titik Puncak"], "visual_hint": "function" },
+    { "no": 3, "title": "Transformasi Geometri", "pages": "91-130", "semester": "Ganjil", "sub_topics": ["Translasi", "Refleksi", "Rotasi", "Dilatasi"], "key_terms": ["Transformasi", "Pergeseran", "Pencerminan", "Perputaran"], "visual_hint": "geometry" },
+    { "no": 4, "title": "Peluang", "pages": "131-160", "semester": "Genap", "sub_topics": ["Ruang Sampel", "Peluang Empirik", "Peluang Teoretik"], "key_terms": ["Peluang", "Sampel", "Kejadian"], "visual_hint": "chart" },
+    { "no": 5, "title": "Bangun Ruang Sisi Lengkung", "pages": "161-200", "semester": "Genap", "sub_topics": ["Tabung", "Kerucut", "Bola"], "key_terms": ["Tabung", "Kerucut", "Bola", "Volume", "Luas Permukaan"], "visual_hint": "geometry" }
   ]
 }

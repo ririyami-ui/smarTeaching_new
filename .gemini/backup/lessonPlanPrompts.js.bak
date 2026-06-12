@@ -571,16 +571,16 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
       | **Pemahaman Konten** | Mengalami miskonsepsi | Paham sebagian | Paham secara utuh | Paham & mampu mengembangkan |
       | **Aplikasi/Analisis** | Belum bisa menerapkan | Bisa menerapkan dengan bantuan | Bisa menerapkan mandiri | Bisa menganalisis & berinovasi |
 
-      ## V. MATERI AJAR MENDETAIL (KONSISTENSI TP)
-      **WAJIB DIISI DENGAN KONTEN LENGKAP, MENDALAM & RELEVAN!**
+      ### 3. MATERI AJAR MENDETAIL (KONSISTENSI TP)
+      **WAJIB DIISI DENGAN KONTEN LENGKAP & RELEVAN!**
       - **CEK KONSISTENSI:** Pastikan materi yang ditulis di sini **MENJAWAB** seluruh Tujuan Pembelajaran (TP). Jika TP menuntut "Menganalisis", maka materi harus memberikan landasan teori untuk analisis tersebut.
-      - **KEDALAMAN**: Minimal 5-8 paragraf substantif yang menguraikan konsep secara komprehensif, teori pendukung, contoh kasus nyata, dan aplikasi praktis. JANGAN meringkas materi.
+      - Minimal 3-5 paragraf substantif yang mencakup konsep, teori, contoh konkret, and aplikasi nyata materi ini.
 
-      ## VI. GLOSARIUM
+      ### 4. GLOSARIUM
       **WAJIB DIISI!** Daftar minimal 5-10 istilah penting and definisinya.
       - **[Istilah]**: Definisi...
 
-      ## VII. DAFTAR PUSTAKA
+      ### 5. DAFTAR PUSTAKA
       **WAJIB DIISI!** Minimal 3-5 referensi kredibel (Buku, Jurnal, Sumber Digital).
 
       &nbsp;

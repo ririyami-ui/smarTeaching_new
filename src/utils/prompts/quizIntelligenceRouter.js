@@ -50,8 +50,12 @@ export const getBookMaterial = (booksData, subject, grade, topic) => {
   );
 
   if (targetBook) {
-    return `[SUMBER BUKU WAJIB]: Anda WAJIB menggunakan silabus dan istilah dari buku resmi "${targetBook.title}". Pastikan topik "${topic}" sejalan dengan buku ini.`;
+    // Cari bab yang paling relevan dengan topik
+    let visualInstruction = "";
+    // Note: In a real scenario, we might want to load the actual book JSON here to get chapters.
+    // For now, we will signal to the service to pass this info.
+    return `[SUMBER BUKU WAJIB]: Anda WAJIB menggunakan silabus dari buku resmi "${targetBook.title}".`;
   }
 
-  return `Gunakan referensi Buku Paket ${subject} Kelas ${grade}. Gunakan istilah standar yang ada di materi ${topic}.`;
+  return `Gunakan referensi Buku Paket ${subject} Kelas ${grade}.`;
 };
