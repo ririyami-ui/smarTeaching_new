@@ -3,6 +3,7 @@ import { useSettings } from '../utils/SettingsContext';
 import { useAuth } from '../hooks/useAuth';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas';
 import {
     collection,
     query,
@@ -38,6 +39,7 @@ import 'katex/dist/katex.min.css';
 import { asBlob } from 'html-docx-js-typescript';
 import { saveAs } from 'file-saver';
 import { generateLessonPlan } from '../utils/gemini';
+import VisualizationRenderer from '../components/quiz/VisualizationRenderer';
 import { findAutoMatchingBook, loadBookContent } from '../utils/bookUtils';
 import { useAI } from '../utils/AIContext';
 import BSKAP_DATA from '../utils/bskap_2025_intel.json';
@@ -349,25 +351,67 @@ function renderDisplayContent(
                         remarkPlugins={[remarkGfm, remarkMath]} 
                         rehypePlugins={[rehypeKatex]}
                         components={{
+                            p: ({ children, ...rest }) => {
+                                const content = String(children).trim();
+                                // Deteksi pola JSON visualisasi
+                                if (content.startsWith('{"type":') && content.endsWith('}')) {
+                                    try {
+                                        // Robust Repair: Ganti newline asli dengan \n agar JSON.parse tidak error
+                                        const repaired = content.replace(/\n/g, '\\n');
+                                        const parsed = JSON.parse(repaired);
+                                        
+                                        if (parsed.type && parsed.config) {
+                                            return (
+                                                <div className="my-6 visualization-container">
+                                                    <VisualizationRenderer 
+                                                        visualization={{
+                                                            type: parsed.type as any,
+                                                            config: parsed.config
+                                                        }}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+                                    } catch (e) {
+                                        // Gagal parse, biarkan sebagai teks
+                                    }
+                                }
+                                return <p className="mb-4 text-gray-700 dark:text-gray-300 leading-relaxed text-justify" {...rest}>{children}</p>;
+                            },
                             code(props) {
                                 const { inline, className, children, ...rest } = props as any;
                                 const match = /language-(\w+)/.exec(className || '');
                                 const language = match ? match[1] : '';
                                 const content = String(children).replace(/\n$/, '');
 
-                                if (!inline && (language === 'mermaid' || language === 'chart')) {
+                                if (!inline && (language === 'mermaid' || language === 'chart' || language === 'json')) {
                                     try {
                                         let config = {};
+                                        let finalType = language;
+                                        
                                         if (language === 'mermaid') {
                                             config = { diagram: content };
-                                        } else if (language === 'chart') {
-                                            config = JSON.parse(content);
+                                        } else if (language === 'chart' || language === 'json') {
+                                            // Robust Repair untuk blok kode juga
+                                            const repaired = content.replace(/\n/g, '\\n');
+                                            const parsed = JSON.parse(repaired);
+                                            if (language === 'json') {
+                                                if (parsed.type && parsed.config) {
+                                                    finalType = parsed.type;
+                                                    config = parsed.config;
+                                                } else {
+                                                    return <code className={className} {...rest}>{children}</code>;
+                                                }
+                                            } else {
+                                                config = parsed;
+                                            }
                                         }
+                                        
                                         return (
-                                            <div className="my-6 no-print">
+                                            <div className="my-6 visualization-container">
                                                 <VisualizationRenderer 
                                                     visualization={{
-                                                        type: language as any,
+                                                        type: finalType as any,
                                                         config: config
                                                     }}
                                                 />
@@ -782,11 +826,43 @@ const LessonPlanPage: React.FC = () => {
 
         const clone = content.cloneNode(true) as HTMLElement;
 
-        const uiElements = clone.querySelectorAll('button, .no-print');
-        uiElements.forEach(el => el.remove());
+        // Tangkap semua visualisasi yang aktif di layar
+        const visualContainers = content.querySelectorAll('.visualization-container');
+        const visualImages: string[] = [];
+        
+        for (const container of Array.from(visualContainers)) {
+            try {
+                const canvas = await html2canvas(container as HTMLElement, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+                visualImages.push(canvas.toDataURL('image/png'));
+            } catch (e) {
+                console.error("Failed to capture visualization:", e);
+                visualImages.push('');
+            }
+        }
 
-        const onScreenSig = clone.querySelector('#signature-section');
-        if (onScreenSig) onScreenSig.remove();
+        // Ganti elemen visual di clone dengan gambar yang sudah ditangkap
+        const cloneVisuals = clone.querySelectorAll('.visualization-container');
+        cloneVisuals.forEach((el, index) => {
+            if (visualImages[index]) {
+                const img = document.createElement('img');
+                img.src = visualImages[index];
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.margin = '10px 0';
+                img.style.display = 'block';
+                el.parentNode?.replaceChild(img, el);
+            } else {
+                el.remove();
+            }
+        });
+
+        // Hapus elemen UI lainnya dan tanda tangan layar (agar tidak double)
+        const uiElements = clone.querySelectorAll('button, .no-print, #signature-section');
+        uiElements.forEach(el => el.remove());
 
         const htmlString = `
             <!DOCTYPE html>
@@ -841,16 +917,31 @@ const LessonPlanPage: React.FC = () => {
 
         try {
             const subjectData = subjects.find(s => s.id === selectedSubject);
-            const subjectName = subjectData?.name || selectedSubject;
+            const subjectName = subjectData?.name || selectedSubject || 'Mapel';
             const topicName = (viewingRPP ? viewingRPP.topic : manualMateri || selectedMaterial?.materi || 'Materi').substring(0, 30);
 
-            const safeSubject = subjectName.replace(/[/\\?%*:|"<>]/g, '-');
-            const safeTopic = topicName.replace(/[/\\?%*:|"<>]/g, '-');
-            const safeGrade = String(selectedGrade).replace(/[/\\?%*:|"<>]/g, '-');
+            // Sanitasi nama file
+            const safeSubject = subjectName.replace(/[^a-z0-9]/gi, '_');
+            const safeTopic = topicName.replace(/[^a-z0-9]/gi, '_');
+            const safeGrade = String(selectedGrade).replace(/[^a-z0-9]/gi, '_');
+            const fileName = `RPP_${safeSubject}_G${safeGrade}_${safeTopic}.docx`;
 
-            const converted = await asBlob(htmlString);
-            const fileName = `RPP_${safeSubject}_${safeGrade}_${safeTopic}.docx`;
-            saveAs(converted, fileName);
+            const result = await asBlob(htmlString);
+            const blob = result instanceof Blob ? result : new Blob([result as any], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+            // Gunakan FileReader untuk membuat Data URI (Lebih ampuh memaksa nama file di localhost)
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target?.result as string;
+                const link = document.createElement('a');
+                link.href = dataUrl;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+            reader.readAsDataURL(blob);
+            
             toast.success("RPP sedang didownload (.docx)");
         } catch (error) {
             console.error("Download error:", error);

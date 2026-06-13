@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { saveAs } from 'file-saver';
 import { AlertCircle, FileDown, ShieldAlert, TrendingDown } from 'lucide-react';
 import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
 
 import StyledInput from './StyledInput';
 import StyledSelect from './StyledSelect';
@@ -25,6 +26,7 @@ interface ClassItem {
 
 interface RekapViolationTabProps {
   classes: ClassItem[];
+  subjects: { id: string; name: string }[];
   schoolName: string;
   teacherName: string;
   userProfile: UserProfile | null;
@@ -32,6 +34,7 @@ interface RekapViolationTabProps {
 
 const RekapViolationTab = ({
   classes,
+  subjects,
   schoolName,
   teacherName,
   userProfile
@@ -43,6 +46,7 @@ const RekapViolationTab = ({
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
   interface StudentDoc {
     id: string;
     name: string;
@@ -139,19 +143,48 @@ const RekapViolationTab = ({
       const fetchedViolations = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ViolationDoc));
       const fetchedAttendance = attendanceSnapshot.docs.map(doc => doc.data());
 
+      // Inisialisasi rekapitulasi siswa di awal agar bisa diakses oleh loop kehadiran
+      const studentRecap: Record<string, {
+        absen?: string;
+        nis?: string;
+        name: string;
+        gender?: string;
+        violationCount: number;
+        violationsDetail: ViolationDoc[];
+        totalAlpha: number;
+        totalAttendanceRecords: number;
+      }> = {};
+      
+      students.forEach(student => {
+        studentRecap[student.id] = {
+          absen: student.absen,
+          nis: student.nis,
+          name: student.name,
+          gender: student.gender,
+          violationCount: 0,
+          violationsDetail: [],
+          totalAlpha: 0,
+          totalAttendanceRecords: 0,
+        };
+      });
+
       // Tambahkan kehadiran Alpha sebagai pelanggaran virtual
       fetchedAttendance.forEach(att => {
-        if (att.status === 'Alpha') {
-          fetchedViolations.push({
-            id: `virtual-alpha-${att.studentId}-${att.date}`,
-            studentId: att.studentId,
-            studentName: att.studentName || '',
-            classId: att.classId || selectedClass,
-            infractionType: 'Alpha (Tanpa Keterangan)',
-            points: 5,
-            date: att.date,
-            description: 'Absen tanpa keterangan (Bolos)'
-          });
+        if (studentRecap[att.studentId]) {
+          studentRecap[att.studentId].totalAttendanceRecords += 1;
+          if (att.status === 'Alpha') {
+            studentRecap[att.studentId].totalAlpha += 1;
+            fetchedViolations.push({
+              id: `virtual-alpha-${att.studentId}-${att.date}`,
+              studentId: att.studentId,
+              studentName: att.studentName || '',
+              classId: att.classId || selectedClass,
+              infractionType: 'Alpha (Tanpa Keterangan)',
+              points: 0, 
+              date: att.date,
+              description: 'Absen tanpa keterangan (Bolos)'
+            });
+          }
         }
       });
 
@@ -163,25 +196,6 @@ const RekapViolationTab = ({
       }, {} as Record<string, number>);
       setViolationStats(Object.entries(statsMap).map(([name, value]) => ({ name, value })));
 
-      const studentRecap: Record<string, {
-        absen?: string;
-        nis?: string;
-        name: string;
-        gender?: string;
-        violationCount: number;
-        violationsDetail: ViolationDoc[];
-      }> = {};
-      students.forEach(student => {
-        studentRecap[student.id] = {
-          absen: student.absen,
-          nis: student.nis,
-          name: student.name,
-          gender: student.gender,
-          violationCount: 0,
-          violationsDetail: [],
-        };
-      });
-
       fetchedViolations.forEach(violation => {
         if (studentRecap[violation.studentId]) {
           studentRecap[violation.studentId].violationCount++;
@@ -191,13 +205,22 @@ const RekapViolationTab = ({
 
       const finalRecapData = Object.values(studentRecap).map(data => {
         const totalPointsDeducted = data.violationsDetail.reduce((acc: number, curr: ViolationDoc) => acc + (curr.points || 0), 0);
-        const currentScore = Math.max(0, 100 - totalPointsDeducted);
+        
+        const totalSessions = data.totalAttendanceRecords || 1;
+        const alphaRate = (data.totalAlpha / totalSessions) * 100;
+        
+        const currentScore = Math.max(0, 100 - totalPointsDeducted - alphaRate);
         const nilaiSikap = calculateNilaiSikap(currentScore);
-        const deskripsi = generateDeskripsi(data.name, data.violationsDetail, currentScore, nilaiSikap);
+        
+        let deskripsi = generateDeskripsi(data.name, data.violationsDetail, currentScore.toFixed(0) as any, nilaiSikap);
+        if (data.totalAlpha > 0) {
+          deskripsi += ` Tingkat ketidakhadiran (Alpha) mencapai ${alphaRate.toFixed(0)}% dari ${totalSessions} pertemuan.`;
+        }
+
         return {
           ...data,
           totalPointsDeducted,
-          currentScore,
+          currentScore: Math.round(currentScore),
           nilaiSikap,
           deskripsi,
         };
@@ -218,7 +241,8 @@ const RekapViolationTab = ({
       return;
     }
     const classObj = classes.find(c => c.id === selectedClass);
-    (generateViolationRecapPDF as (data: StudentRecap[], schoolName: string, startDate: string, endDate: string, teacherName: string, className: string, userProfile: UserProfile | null) => void)(recapData, schoolName, startDate, endDate, teacherName, classObj?.rombel || selectedClass, userProfile);
+    const subjectObj = subjects.find(s => s.id === selectedSubject);
+    (generateViolationRecapPDF as any)(recapData, schoolName, startDate, endDate, teacherName, classObj?.rombel || selectedClass, userProfile, subjectObj?.name || '');
   };
 
   const handleExcelExport = () => {
@@ -226,11 +250,11 @@ const RekapViolationTab = ({
       toast.error('Tidak ada data pelanggaran untuk diekspor ke Excel.');
       return;
     }
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Pelanggaran');
-    const headers = ['No. Absen','NIS','Nama Siswa','Total Pelanggaran','Total Poin (-)','Skor Akhir','Nilai Sikap','Deskripsi'];
-    worksheet.columns = headers.map(h => ({ header: h, key: h, width: 15 }));
-    recapData.forEach(item => worksheet.addRow({
+
+    const classObj = classes.find(c => c.id === selectedClass);
+    const subjectObj = subjects.find(s => s.id === selectedSubject);
+
+    const exportData = recapData.map(item => ({
       'No. Absen': item.absen,
       'NIS': item.nis,
       'Nama Siswa': item.name,
@@ -240,11 +264,13 @@ const RekapViolationTab = ({
       'Nilai Sikap': item.nilaiSikap,
       'Deskripsi': item.deskripsi,
     }));
-    workbook.xlsx.writeBuffer().then(buffer => {
-      const data = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const classObj = classes.find(c => c.id === selectedClass);
-      saveAs(data, `Rekapitulasi_Pelanggaran_${classObj?.rombel || selectedClass}_${startDate}_${endDate}.xlsx`);
-    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Pelanggaran');
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(data, `Rekapitulasi_Pelanggaran_${classObj?.rombel || selectedClass}_${subjectObj?.name || 'Semua'}_${startDate}_${endDate}.xlsx`);
   };
 
   const pelanggaranColumns = [
@@ -260,7 +286,14 @@ const RekapViolationTab = ({
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Mata Pelajaran</label>
+            <StyledSelect value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}>
+              <option value="">-- Semua --</option>
+              {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </StyledSelect>
+          </div>
+          <div className="lg:col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Kelas</label>
             <StyledSelect value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
               <option value="">-- Pilih Kelas --</option>

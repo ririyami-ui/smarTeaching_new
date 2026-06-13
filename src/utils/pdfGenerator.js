@@ -717,7 +717,7 @@ export const generateClassAgreementPDF = async ({ classData, agreementData, user
   doc.save(fileName);
 };
 
-export const generateViolationRecapPDF = async (data, schoolName, startDate, endDate, teacherName, selectedClass, userProfile) => {
+export const generateViolationRecapPDF = async (data, schoolName, startDate, endDate, teacherName, selectedClass, userProfile, subjectName) => {
   const { jsPDF } = await import("jspdf");
     await import("jspdf-autotable");
     const doc = new jsPDF();
@@ -756,7 +756,7 @@ export const generateViolationRecapPDF = async (data, schoolName, startDate, end
   doc.autoTable({
     head: [tableColumn],
     body: tableRows,
-    startY: 70,
+    startY: 55,
     theme: 'grid',
     styles: {
       fontSize: 8,

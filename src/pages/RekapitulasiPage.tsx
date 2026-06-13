@@ -202,6 +202,7 @@ const RekapitulasiPage = () => {
         {activeTab === 'pelanggaran' && (
           <RekapViolationTab
             classes={classes as unknown as { id: string; rombel: string }[]}
+            subjects={subjects as unknown as { id: string; name: string }[]}
             schoolName={schoolName}
             teacherName={teacherName}
             userProfile={userProfile as unknown as import('../types').UserProfile}

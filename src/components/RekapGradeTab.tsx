@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { saveAs } from 'file-saver';
 import { Award, TrendingUp, FileDown, CheckCircle, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
 
 import StyledInput from './StyledInput';
 import StyledSelect from './StyledSelect';
@@ -175,6 +176,7 @@ const RekapGradeTab = ({
         totalPointsDeducted: number;
         totalStars: number;
         totalAlpha: number;
+        totalAttendanceRecords: number;
       }
 
       const recapitulation: Record<string, RecapitulationData> = {};
@@ -193,6 +195,7 @@ const RekapGradeTab = ({
           totalPointsDeducted: 0,
           totalStars: 0,
           totalAlpha: 0,
+          totalAttendanceRecords: 0,
         };
       });
 
@@ -225,8 +228,11 @@ const RekapGradeTab = ({
       });
 
       rawAttendance.forEach(att => {
-        if (recapitulation[att.studentId] && att.status === 'Alpha') {
-          recapitulation[att.studentId].totalAlpha += 1;
+        if (recapitulation[att.studentId]) {
+          recapitulation[att.studentId].totalAttendanceRecords += 1;
+          if (att.status === 'Alpha') {
+            recapitulation[att.studentId].totalAlpha += 1;
+          }
         }
       });
 
@@ -290,8 +296,10 @@ const RekapGradeTab = ({
         else if (Pengetahuan_avg > 0) academicAvg = Pengetahuan_avg;
         else if (Praktik_avg > 0) academicAvg = Praktik_avg;
 
-        const alphaPenalty = studentData.totalAlpha * 5;
-        const attitudeScore = 100 - studentData.totalPointsDeducted - alphaPenalty + (studentData.totalStars * 2);
+        const totalSessions = studentData.totalAttendanceRecords || 1;
+        const alphaRate = (studentData.totalAlpha / totalSessions) * 100;
+        
+        const attitudeScore = 100 - studentData.totalPointsDeducted - alphaRate + (studentData.totalStars * 2);
         const finalAttitudeScore = Math.min(100, Math.max(0, attitudeScore));
         const NA = (academicAvg * academicWeight / 100) + (finalAttitudeScore * attitudeWeight / 100);
 
@@ -336,18 +344,40 @@ const RekapGradeTab = ({
     (generateNilaiRecapPDF as (data: NilaiRow[], schoolName: string, startDate: string, endDate: string, teacherName: string, className: string, subjectName: string, userProfile: UserProfile | null) => void)(nilaiData, schoolName, nilaiStartDate, nilaiEndDate, teacherName, classObj?.rombel || selectedNilaiClass, subjectObj?.name || selectedNilaiSubject, userProfile);
   };
 
-    const handleExcelExport = () => {
-        if (exportData.length === 0) {
-            toast.error('Tidak ada data nilai untuk diekspor ke Excel.');
-            return;
-        }
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Nilai');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        saveAs(data, `Rekapitulasi_Nilai_${classObj?.rombel || selectedNilaiClass}_${subjectObj?.name || selectedNilaiSubject}_${nilaiStartDate}_${nilaiEndDate}.xlsx`);
-    };
+  const handleExcelExport = () => {
+    if (nilaiData.length === 0) {
+      toast.error('Tidak ada data nilai untuk diekspor ke Excel.');
+      return;
+    }
+
+    const classObj = classes.find(c => c.id === selectedNilaiClass);
+    const subjectObj = subjects.find(s => s.id === selectedNilaiSubject);
+
+    // Format data untuk Excel: Gunakan label header yang manusiawi
+    const exportData = nilaiData.map(row => ({
+      'No. Absen': row.absen,
+      'NIS': row.nis,
+      'Nama Siswa': row.name,
+      'Rata NH': row.NH_avg,
+      'Formatif': row.Formatif_avg,
+      'Sumatif': row.Sumatif_avg,
+      'PTS': row.PTS_avg,
+      'PAS': row.PAS_avg,
+      'Praktik': row.Praktik_avg,
+      'Akademik': row.academicAvg,
+      'Sikap': row.nilaiSikap,
+      'Bintang (+)': row.totalStars,
+      'Pelanggaran (-)': row.totalPointsDeducted,
+      'Nilai Akhir (NA)': row.NA
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Nilai');
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(data, `Rekapitulasi_Nilai_${classObj?.rombel || selectedNilaiClass}_${subjectObj?.name || selectedNilaiSubject}_${nilaiStartDate}_${nilaiEndDate}.xlsx`);
+  };
 
   const nilaiColumns = [
     { header: { label: 'No. Absen' }, accessor: 'absen' },

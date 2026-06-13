@@ -46,61 +46,32 @@ export const generateLessonPlan = async (data: GenerationInput & Record<string, 
         const cpFullVerbatim = (VERBATIM_BSKAP_DATA as BSKAPSubjects).subjects?.[level]?.[data.gradeLevel]?.[subjectKey]?.cp_full || "Lihat list elemen dan materi.";
 
         const regionalLanguage = getRegionalLanguage(data.subject);
-
-        // SYNC BOOK CONTEXT
-        let bookChapterData = null;
-        try {
-            const path = require('path');
-            const fs = require('fs');
-            const booksIndexPath = path.join(process.cwd(), 'src', 'utils', 'data', 'books', 'index.json');
-            
-            if (fs.existsSync(booksIndexPath)) {
-                const booksIndex = JSON.parse(fs.readFileSync(booksIndexPath, 'utf8'));
-                const matchedBook = booksIndex.find((b: any) => 
-                    b.mapel.toLowerCase() === data.subject.toString().toLowerCase() && 
-                    b.kelas.toString() === data.gradeLevel.toString()
-                );
-
-                if (matchedBook) {
-                    const bookFilePath = path.join(process.cwd(), 'src', 'utils', 'data', 'books', matchedBook.path);
-                    if (fs.existsSync(bookFilePath)) {
-                        const bookData = JSON.parse(fs.readFileSync(bookFilePath, 'utf8'));
-                        const topic = (data.materi as string || '').toLowerCase();
-                        bookChapterData = bookData.chapters.find((ch: any) =>
-                            ch.title?.toLowerCase().includes(topic) ||
-                            ch.sub_topics?.some((st: string) => st.toLowerCase().includes(topic))
-                        ) || null;
-                    }
-                }
-            }
-        } catch (e) {
-            console.error("Book sync error:", e);
-        }
+        const bookChapterData = data.bookChapterData || null;
 
         const basePrompt = getLessonPlanPrompt(data, BSKAP_DATA, level, cpFullVerbatim, getSemesterLabel(data.semester), getSemesterKey(data.semester), subjectKey, regionalLanguage, bookChapterData);
         const model = await getModel(data.modelName, false, STRICT_DOCUMENT_BRAIN);
 
         // PART 1: IDENTIFICATION & SECTION I
         onProgress("Menyusun Identitas & Kompetensi...");
-        const part1Prompt = `${basePrompt}\n\n**INTRUKSI KHUSUS GENERASI PART 1:**\nHanya buat bagian HEADER (Identifikasi Pembelajaran) dan SEKSI I (KOMPETENSI INTI). Berhenti tepat setelah SEKSI I selesai. JANGAN buat SEKSI II ke bawah dulu. Fokus pada keakuratan CP dan TP.`;
+        const part1Prompt = `${basePrompt}\n\n**INTRUKSI KHUSUS GENERASI PART 1:**\nHanya buat bagian HEADER (Identifikasi Pembelajaran) dan SEKSI I (KOMPETENSI INTI). Berhenti tepat setelah SEKSI I selesai. JANGAN buat SEKSI II ke bawah dulu. Fokus pada keakuratan CP dan TP. \n\n**DILARANG KERAS:** Jangan sertakan visualisasi JSON dalam bagian ini.`;
         const result1 = await retryWithBackoff(() => model.generateContent(part1Prompt));
         const res1Text = result1.response.text();
 
         // PART 2: SECTION II
         onProgress("Menyusun Langkah Pembelajaran...");
-        const part2Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n\n**INTRUKSI KHUSUS GENERASI PART 2:**\nBerdasarkan Identitas dan Kompetensi di atas, buatlah SEKSI II (LANGKAH-LANGKAH PEMBELAJARAN) saja. \n**KONTROL PANJANG:** Buatlah langkah pembelajaran yang naratif dan mendetail namun **tetap efisien** (Target: sekitar 3-4 halaman per pertemuan). Jangan terlalu berulang. Berhenti tepat setelah SEKSI II selesai.`;
+        const part2Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n\n**INTRUKSI KHUSUS GENERASI PART 2:**\nBerdasarkan Identitas dan Kompetensi di atas, buatlah SEKSI II (LANGKAH-LANGKAH PEMBELAJARAN) saja. \n**KONTROL PANJANG:** Buatlah langkah pembelajaran yang naratif dan mendetail namun **tetap efisien** (Target: sekitar 3-4 halaman per pertemuan). Jangan terlalu berulang. Berhenti tepat setelah SEKSI II selesai. \n\n**DILARANG KERAS:** Jangan sertakan visualisasi JSON dalam bagian ini.`;
         const result2 = await retryWithBackoff(() => model.generateContent(part2Prompt));
         const res2Text = result2.response.text();
 
         // PART 3: SECTIONS III & IV (Media & Lampiran/LKPD)
         onProgress("Menyusun Media & Lampiran (LKPD/Asesmen)...");
-        const part3Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n${res2Text}\n\n**INTRUKSI KHUSUS GENERASI PART 3:**\nLanjutkan dengan membuat SEKSI III (MEDIA BELAJAR) dan SEKSI IV (LAMPIRAN/LKPD/ASESMEN). Berhenti tepat setelah SEKSI IV selesai. JANGAN buat Materi Ajar dulu.`;
+        const part3Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n${res2Text}\n\n**INTRUKSI KHUSUS GENERASI PART 3:**\nLanjutkan dengan membuat SEKSI III (MEDIA BELAJAR) dan SEKSI IV (LAMPIRAN/LKPD/ASESMEN). Berhenti tepat setelah SEKSI IV selesai. JANGAN buat Materi Ajar dulu. \n\n**DILARANG KERAS:** Jangan sertakan visualisasi JSON dalam bagian ini.`;
         const result3 = await retryWithBackoff(() => model.generateContent(part3Prompt));
         const res3Text = result3.response.text();
 
         // PART 4: SECTIONS V, VI, VII (MATERI AJAR & FINALISASI)
         onProgress("Menguraikan Materi Ajar Mendetail...");
-        const part4Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n${res2Text}\n${res3Text}\n\n**INTRUKSI KHUSUS GENERASI PART 4:**\nBerdasarkan langkah pembelajaran di atas, uraikan SEKSI V (MATERI AJAR MENDETAIL) secara sangat mendalam (minimal 5-8 paragraf), diikuti SEKSI VI (GLOSARIUM) dan SEKSI VII (DAFTAR PUSTAKA).`;
+        const part4Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n${res2Text}\n${res3Text}\n\n**INTRUKSI KHUSUS GENERASI PART 4:**\nBerdasarkan langkah pembelajaran di atas, uraikan SEKSI V (MATERI AJAR MENDETAIL) secara sangat mendalam (minimal 5-8 paragraf), diikuti SEKSI VI (GLOSARIUM) dan SEKSI VII (DAFTAR PUSTAKA).\n\n**AKTIVASI VISUAL:** SEKARANG SAATNYA Anda menyisipkan 1-2 visualisasi interaktif (JSON) di dalam SEKSI V sesuai instruksi Sistem Visualisasi Cerdas.`;
         const result4 = await retryWithBackoff(() => model.generateContent(part4Prompt));
         const res4Text = result4.response.text();
 

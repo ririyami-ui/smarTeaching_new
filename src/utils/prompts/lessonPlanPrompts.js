@@ -1,4 +1,8 @@
-export const getLessonPlanPrompt = (data, BSKAP_DATA, level, cpFullVerbatim, semesterLabel, semesterKey, subjectKey, regionalLanguage, bookChapterData) => `
+import { getSmartVisualRules } from './quizIntelligenceRouter';
+
+export const getLessonPlanPrompt = (data, BSKAP_DATA, level, cpFullVerbatim, semesterLabel, semesterKey, subjectKey, regionalLanguage, bookChapterData) => {
+      const smartRules = getSmartVisualRules(data.subject, data.materi);
+      return `
       Anda adalah "Mesin Intelijen Kurikulum Nasional" yang bekerja berdasarkan repositori data resmi **BSKAP_DATA**. DILARANG memberikan informasi yang bertentangan atau di luar cakupan data JSON tersebut.
       
       **OFFICIAL KNOWLEDGE ENGINE (BSKAP_DATA):**
@@ -13,7 +17,33 @@ export const getLessonPlanPrompt = (data, BSKAP_DATA, level, cpFullVerbatim, sem
       - KD/CP: ${data.kd}
       - Materi Pokok: ${data.materi}
       ${data.studentCharacteristics ? `- Karakteristik Peserta Didik (Manual): ${data.studentCharacteristics}` : ''}
+
+      **[SISTEM VISUALISASI CERDAS - PENDUKUNG DEEP LEARNING]**
+      WAJIB diikuti tanpa kecuali untuk memperkuat pemahaman visual:
+      - TIPE VISUALISASI YANG DIIZINKAN: ${smartRules.allowed.join(', ')}
+      - TIPE VISUALISASI YANG DILARANG: ${smartRules.forbidden.join(', ')}
+      - INSTRUKSI KHUSUS: ${smartRules.forceInstruction}
+
+      [INSTRUKSI PENEMPATAN VISUAL]:
+      Anda DIWAJIBKAN menyisipkan minimal 1-2 visualisasi interaktif **HANYA** di bagian **"V. MATERI AJAR MENDETAIL"**. 
       
+      [SYARAT MUTLAK]: Visualisasi **WAJIB** dibungkus dengan markdown code block khusus bertipe json. 
+      DILARANG menuliskan JSON secara langsung/telanjang di dalam teks.
+      
+      Format yang WAJIB digunakan (CONTOH):
+      \`\`\`json
+      { "type": "scratch", "config": { "code": "..." } }
+      \`\`\`
+      
+      [TEMPLATE VISUAL - PILIH YANG PALING RELEVAN]:
+      ${smartRules.allowed.includes('mermaid') ? `- **MERMAID**: \`\`\`json\n{"type": "mermaid", "config": { "diagram": "graph LR\nA-->B" } }\n\`\`\`` : ''}
+      ${smartRules.allowed.includes('scratch') ? `- **SCRATCH**: \`\`\`json\n{"type": "scratch", "config": { "code": "when green flag clicked\nmove (10) steps" } }\n\`\`\`` : ''}
+      ${smartRules.allowed.includes('math') ? `- **MATH**: \`\`\`json\n{"type": "math", "config": { "expression": "y=x^2" } }\n\`\`\`` : ''}
+
+      **PANTANGAN**: JANGAN menulis visualisasi dalam bentuk teks narasi atau JSON tanpa pembungkus \`\`\`json. Jika tidak ada yang relevan, jangan paksakan visualisasi.
+
+
+
       **SMART CP EXTRACTION (MANDATORY - BSKAP 46/2025 COMPLIANCE):**
       Berikut adalah CP LENGKAP untuk referensi: 
       ${cpFullVerbatim}
@@ -599,3 +629,4 @@ ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${
 
       - Output harus **langsung dalam format Markdown** tanpa komentar pembuka atau penutup dari asisten.
     `;
+};
