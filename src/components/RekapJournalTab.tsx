@@ -14,6 +14,7 @@ import EmptyState from './EmptyState';
 import QuickDateFilter from './QuickDateFilter';
 import LoadingSpinner from './LoadingSpinner';
 import { generateJurnalRecapPDF } from '../utils/pdfGenerator';
+import * as XLSX from 'xlsx';
 import { UserProfile } from '../types';
 
 interface ClassItem {
@@ -74,12 +75,21 @@ const RekapJournalTab: React.FC<RekapJournalTabProps> = ({
         }
         setIsLoading(true);
         try {
-            const journalsQuery = query(
+            let journalsQuery = query(
                 collection(db, 'teachingJournals'),
                 where('userId', '==', user?.uid || ''),
                 where('date', '>=', jurnalStartDate),
                 where('date', '<=', jurnalEndDate)
             );
+
+            if (selectedJurnalClass) {
+                journalsQuery = query(journalsQuery, where('classId', '==', selectedJurnalClass));
+            }
+
+            if (selectedJurnalSubject) {
+                journalsQuery = query(journalsQuery, where('subjectId', '==', selectedJurnalSubject));
+            }
+
             const querySnapshot = await getDocs(journalsQuery);
             const fetchedJournals = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JournalDoc)).sort((a: JournalDoc, b: JournalDoc) => new Date(b.date).getTime() - new Date(a.date).getTime());
             setJurnalData(fetchedJournals);
@@ -119,7 +129,9 @@ const RekapJournalTab: React.FC<RekapJournalTabProps> = ({
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Jurnal');
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        saveAs(data, `Rekapitulasi_Jurnal_${jurnalStartDate}_${jurnalEndDate}.xlsx`);
+        const classObj = classes.find(c => c.id === selectedJurnalClass);
+        const subjectObj = subjects.find(s => s.id === selectedJurnalSubject);
+        saveAs(data, `Rekapitulasi_Jurnal_${classObj?.rombel || 'Semua'}_${subjectObj?.name || 'Semua'}_${jurnalStartDate}_${jurnalEndDate}.xlsx`);
     };
 
     const jurnalColumns = [
@@ -202,15 +214,10 @@ const RekapJournalTab: React.FC<RekapJournalTabProps> = ({
                         <StyledTable headers={jurnalColumns.map(c => c.header)}>
                             {jurnalData
                                 .filter(item => {
-                                    const searchTermMatch = !jurnalSearchTerm ||
+                                    return !jurnalSearchTerm ||
                                         item.material?.toLowerCase().includes(jurnalSearchTerm.toLowerCase()) ||
                                         item.className?.toLowerCase().includes(jurnalSearchTerm.toLowerCase()) ||
                                         item.subjectName?.toLowerCase().includes(jurnalSearchTerm.toLowerCase());
-
-                                    const classMatch = !selectedJurnalClass || item.classId === selectedJurnalClass;
-                                    const subjectMatch = !selectedJurnalSubject || item.subjectId === selectedJurnalSubject;
-
-                                    return searchTermMatch && classMatch && subjectMatch;
                                 })
                                 .map((row, index) => {
                                     const r = row as unknown as Record<string, unknown>;
