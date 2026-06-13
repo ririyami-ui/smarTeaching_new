@@ -8,8 +8,8 @@ import 'moment/locale/id';
  */
 export const fmtDate = (date) => {
     if (!date) return '-';
-    // Provide formats to avoid deprecation warning for non-ISO strings (e.g. Indonesian dates)
-    return moment(date, ['YYYY-MM-DD', 'D MMMM YYYY', 'D MMM YYYY'], 'id', true).format('DD MMMM YYYY');
+    // Ensure locale is set to Indonesian and use explicit formatting
+    return moment(date, ['YYYY-MM-DD', 'D MMMM YYYY', 'D MMM YYYY'], true).locale('id').format('DD MMMM YYYY');
 };
 
 /**

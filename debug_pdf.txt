@@ -1,0 +1,40 @@
+  // Add table
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: 40,
+    theme: 'striped', // Changed to striped for alternate colors
+    styles: {
+      fontSize: 8, // Smaller font for table content
+      cellPadding: 2,
+    },
+    alternateRowStyles: {
+      fillColor: [240, 240, 240], // Light gray for alternate rows
+    },
+    headStyles: {
+      fillColor: [50, 50, 50], // Darker header for better contrast
+      textColor: [255, 255, 255],
+      fontStyle: 'bold',
+      lineColor: [50, 50, 50],
+    },
+    columnStyles: {
+      // Adjusted for A4 Landscape (Total ~277mm width)
+      0: { cellWidth: 25 }, // Tanggal - widen slightly for 'DD MMMM YYYY'
+      1: { cellWidth: 15 }, // Kelas
+      2: { cellWidth: 30 }, // Mata Pelajaran
+      3: { cellWidth: 45 }, // Materi
+      4: { cellWidth: 42 }, // Tujuan Pembelajaran - slight reduce
+      5: { cellWidth: 42 }, // Kegiatan Pembelajaran
+      6: { cellWidth: 40 }, // Status & Catatan
+      7: { cellWidth: 35 }, // Tindak Lanjut
+    },
+    didDrawCell: (data) => {
+      if (data.column.index === 6 && data.cell.section === 'body') {
+        const text = data.cell.text.join('\n');
+        if (text.includes('Sakit:')) data.doc.setTextColor(180, 130, 0);
+        else if (text.includes('Ijin:')) data.doc.setTextColor(37, 99, 235);
+        else if (text.includes('Alpha:')) data.doc.setTextColor(220, 38, 38);
+      }
+    },
+  });
+

@@ -3,6 +3,14 @@ import 'moment/locale/id';
 // dynamic import jspdf inside functions
 import { fmtDate, getSignatureCity } from './generalUtils';
 
+const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+const formatIndo = (dateStr) => {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return `${String(d.getDate()).padStart(2, '0')} ${bulanIndo[d.getMonth()]} ${d.getFullYear()}`;
+};
+
 // Helper to group grades by Topic/Material (Mirrors TopicMasteryHeatmap logic)
 const groupGradesByTopic = (grades = []) => {
   const stats = {};
@@ -264,11 +272,24 @@ export const generateJurnalRecapPDF = async (jurnalData, startDate, endDate, tea
 
   // Header
   doc.setFontSize(16);
-  doc.text("JURNAL MENGAJAR", doc.internal.pageSize.width / 2, 20, { align: "center" });
+  doc.setFont("helvetica", "bold");
+  doc.text("JURNAL MENGAJAR", doc.internal.pageSize.width / 2, 15, { align: "center" });
 
-  // Sub-header
-  doc.setFontSize(12);
-  doc.text(`Periode tanggal: ${fmtDate(startDate)} sampai tanggal: ${fmtDate(endDate)}`, doc.internal.pageSize.width / 2, 30, { align: "center" });
+  // Metadata Header
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  const schoolName = userProfile?.school || 'Sekolah';
+  const subjectName = jurnalData[0]?.subjectName || '-';
+  const academicYear = userProfile?.academicYear || '-';
+  const semester = userProfile?.activeSemester || '-';
+
+  doc.text(`Sekolah: ${schoolName}`, 14, 25);
+  doc.text(`Mata Pelajaran: ${subjectName}`, 14, 30);
+  doc.text(`Periode: ${formatIndo(startDate)} s.d ${formatIndo(endDate)}`, 14, 35);
+  
+  doc.text(`Tahun Ajaran: ${academicYear}`, doc.internal.pageSize.width - 14, 25, { align: "right" });
+  doc.text(`Semester: ${semester}`, doc.internal.pageSize.width - 14, 30, { align: "right" });
+  doc.text(`Guru: ${teacherName}`, doc.internal.pageSize.width - 14, 35, { align: "right" });
 
   // Prepare table data
   const tableColumn = ["Tanggal", "Kelas", "Mapel", "Materi", "Tujuan", "Kegiatan", "Status & Catatan", "Tindak Lanjut"];
@@ -279,14 +300,22 @@ export const generateJurnalRecapPDF = async (jurnalData, startDate, endDate, tea
 
   sortedJurnalData.forEach(jurnal => {
     // Format Status String
-    let statusString = "Terlaksana";
-    if (jurnal.isImplemented === false) { // Explicit check as undefined might default to true in some legacy data
-      statusString = `Tidak Terlaksana
-Ket: ${jurnal.challenges || '-'}`;
+    let statusString = jurnal.isImplemented !== false ? "Terlaksana" : "Tidak Terlaksana";
+    
+    // Add Challenges/Hambatan
+    const challenges = jurnal.challenges || jurnal.hambatan;
+    if (jurnal.isImplemented === false && challenges) {
+      statusString += `\nHambatan: ${challenges}`;
+    }
+    
+    // Add Absensi
+    const absensi = jurnal.absenteeSummary;
+    if (absensi && absensi !== 'Nihil') {
+      statusString += `\n\nAbsensi:\n${absensi}`;
     }
 
     const rowData = [
-      fmtDate(jurnal.date), // ID Format
+      formatIndo(jurnal.date), // ID Format
       jurnal.className,
       jurnal.subjectName,
       jurnal.material,
@@ -302,7 +331,7 @@ Ket: ${jurnal.challenges || '-'}`;
   doc.autoTable({
     head: [tableColumn],
     body: tableRows,
-    startY: 40,
+    startY: 45,
     theme: 'striped', // Changed to striped for alternate colors
     styles: {
       fontSize: 8, // Smaller font for table content
@@ -319,14 +348,14 @@ Ket: ${jurnal.challenges || '-'}`;
     },
     columnStyles: {
       // Adjusted for A4 Landscape (Total ~277mm width)
-      0: { cellWidth: 25 }, // Tanggal - widen slightly for 'DD MMMM YYYY'
-      1: { cellWidth: 15 }, // Kelas
-      2: { cellWidth: 30 }, // Mata Pelajaran
-      3: { cellWidth: 45 }, // Materi
-      4: { cellWidth: 42 }, // Tujuan Pembelajaran - slight reduce
-      5: { cellWidth: 42 }, // Kegiatan Pembelajaran
-      6: { cellWidth: 40 }, // Status & Catatan
-      7: { cellWidth: 35 }, // Tindak Lanjut
+      0: { cellWidth: 20 }, // Tanggal
+      1: { cellWidth: 10 }, // Kelas
+      2: { cellWidth: 25 }, // Mata Pelajaran
+      3: { cellWidth: 30 }, // Materi (Persempit dari 40)
+      4: { cellWidth: 50 }, // Tujuan Pembelajaran (Perlebar dari 38)
+      5: { cellWidth: 50 }, // Kegiatan Pembelajaran (Perlebar dari 40)
+      6: { cellWidth: 60 }, // Status & Catatan
+      7: { cellWidth: 25 }, // Tindak Lanjut
     },
   });
 
