@@ -372,6 +372,8 @@ ${Object.entries(BSKAP_DATA.standards.duration_per_jp || {}).map(([lvl, min]) =>
       - **Meaningful (Bermakna)**: Materi memiliki relevansi dunia nyata dan kedalaman pemahaman.
       - **Joyful (Menggembirakan)**: Suasana positif yang menumbuhkan rasa ingin tahu.
 
+      **WAJIB DETAILKAN SETIAP FASE:** Untuk SETIAP langkah di bawah (Pendahuluan, Inti, Penutup), Anda **HARUS** menuliskan secara naratif dan eksplisit bagaimana prinsip **Mindful, Meaningful, dan Joyful** tersebut diwujudkan secara konkret. JANGAN hanya menulis label "(Mindful)" tapi uraikan ESENSINYA dalam bentuk aktivitas nyata.
+
       **STRATEGI DIFERENSIASI (WAJIB TERAPKAN):**
 ${(BSKAP_DATA.pedagogis.differentiation_strategies || []).map(s => `      - **${s.aspect}**: ${s.method}`).join('\n')}
       Uraikan secara spesifik dalam langkah pembelajaran bagaimana Anda melakukan diferensiasi ini untuk melayani keberagaman peserta didik.

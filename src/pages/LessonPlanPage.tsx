@@ -354,29 +354,48 @@ function renderDisplayContent(
                             p: ({ children, ...rest }) => {
                                 const content = String(children).trim();
                                 // Deteksi pola JSON visualisasi
-                                if (content.startsWith('{"type":') && content.endsWith('}')) {
-                                    try {
-                                        // Robust Repair: Ganti newline asli dengan \n agar JSON.parse tidak error
-                                        const repaired = content.replace(/\n/g, '\\n');
-                                        const parsed = JSON.parse(repaired);
+                                    // AGGRESSIVE JSON EXTRACTION
+                                    const jsonPattern = /\{[\s\S]*?"type"[\s\S]*?"config"[\s\S]*?\}/;
+                                    const match = content.match(jsonPattern);
+                                    
+                                    if (match) {
+                                        let rawJson = match[0];
+                                        const textPart = content.replace(rawJson, '').trim();
                                         
-                                        if (parsed.type && parsed.config) {
-                                            return (
-                                                <div className="my-6 visualization-container">
-                                                    <VisualizationRenderer 
-                                                        visualization={{
-                                                            type: parsed.type as any,
-                                                            config: parsed.config
-                                                        }}
-                                                    />
-                                                </div>
-                                            );
+                                        // Fix common AI JSON errors (unquoted newlines)
+                                        const sanitizedJson = rawJson.replace(/"code":\s*?"([\s\S]*?)"/g, (m, p1) => {
+                                            return `"code": "${p1.replace(/\n/g, '\\n')}"`;
+                                        });
+
+                                        try {
+                                            const parsed = JSON.parse(sanitizedJson);
+                                            if (parsed.type && parsed.config) {
+                                                let finalConfig = { ...parsed.config };
+                                                if (parsed.type === 'spreadsheet' && Array.isArray(finalConfig.data)) {
+                                                    if (finalConfig.data.length > 0 && Array.isArray(finalConfig.data[0])) {
+                                                        finalConfig.data = finalConfig.data.map((row: any) => ({ row }));
+                                                    }
+                                                }
+
+                                                return (
+                                                    <div className="my-6">
+                                                        {textPart && <p className="mb-4 text-black dark:text-gray-100 leading-relaxed text-justify">{textPart}</p>}
+                                                        <div className="visualization-container">
+                                                            <VisualizationRenderer 
+                                                                visualization={{
+                                                                    type: parsed.type as any,
+                                                                    config: finalConfig
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                        } catch (e) {
+                                            console.warn("JSON Parse failed in paragraph", e);
                                         }
-                                    } catch (e) {
-                                        // Gagal parse, biarkan sebagai teks
                                     }
-                                }
-                                return <p className="mb-4 text-gray-700 dark:text-gray-300 leading-relaxed text-justify" {...rest}>{children}</p>;
+                                return <p className="mb-4 text-black dark:text-gray-100 leading-relaxed text-justify" {...rest}>{children}</p>;
                             },
                             code(props) {
                                 const { inline, className, children, ...rest } = props as any;
@@ -392,13 +411,19 @@ function renderDisplayContent(
                                         if (language === 'mermaid') {
                                             config = { diagram: content };
                                         } else if (language === 'chart' || language === 'json') {
-                                            // Robust Repair untuk blok kode juga
-                                            const repaired = content.replace(/\n/g, '\\n');
-                                            const parsed = JSON.parse(repaired);
+                                            const parsed = JSON.parse(content);
                                             if (language === 'json') {
                                                 if (parsed.type && parsed.config) {
                                                     finalType = parsed.type;
-                                                    config = parsed.config;
+                                                    config = { ...parsed.config };
+
+                                                    // Normalize spreadsheet data in code blocks
+                                                    if (finalType === 'spreadsheet' && Array.isArray((config as any).data)) {
+                                                        const cfg = config as any;
+                                                        if (cfg.data.length > 0 && Array.isArray(cfg.data[0])) {
+                                                            cfg.data = cfg.data.map((row: any) => ({ row }));
+                                                        }
+                                                    }
                                                 } else {
                                                     return <code className={className} {...rest}>{children}</code>;
                                                 }
@@ -427,7 +452,7 @@ function renderDisplayContent(
                     >
                         {generatedRPP || (viewingRPP ? viewingRPP.content : '')}
                     </ReactMarkdown>
-                    <div id="signature-section" className="mt-12 pt-8 border-t border-transparent no-break-inside avoid-page-break">
+                    <div id="signature-section" className="mt-12 pt-8 border-t border-transparent no-break-inside avoid-page-break text-black">
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                                 <p>Mengetahui,</p>

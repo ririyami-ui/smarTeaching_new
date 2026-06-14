@@ -71,7 +71,7 @@ export const generateLessonPlan = async (data: GenerationInput & Record<string, 
 
         // PART 4: SECTIONS V, VI, VII (MATERI AJAR & FINALISASI)
         onProgress("Menguraikan Materi Ajar Mendetail...");
-        const part4Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n${res2Text}\n${res3Text}\n\n**INTRUKSI KHUSUS GENERASI PART 4:**\nBerdasarkan langkah pembelajaran di atas, uraikan SEKSI V (MATERI AJAR MENDETAIL) secara sangat mendalam (minimal 5-8 paragraf), diikuti SEKSI VI (GLOSARIUM) dan SEKSI VII (DAFTAR PUSTAKA).\n\n**AKTIVASI VISUAL:** SEKARANG SAATNYA Anda menyisipkan 1-2 visualisasi interaktif (JSON) di dalam SEKSI V sesuai instruksi Sistem Visualisasi Cerdas.`;
+        const part4Prompt = `${basePrompt}\n\n**KONTEKS YANG SUDAH TERBENTUK:**\n${res1Text}\n${res2Text}\n${res3Text}\n\n**INTRUKSI KHUSUS GENERASI PART 4:**\nBerdasarkan langkah pembelajaran di atas, uraikan SEKSI V (MATERI AJAR MENDETAIL) secara sangat mendalam (minimal 5-8 paragraf), diikuti SEKSI VI (GLOSARIUM) dan SEKSI VII (DAFTAR PUSTAKA).\n\n**DILARANG KERAS:** Jangan mengulang header utama '# MODUL AJAR DEEP LEARNING (STANDARD 2026)' atau bagian 'IDENTIFIKASI PEMBELAJARAN'. Mulai langsung dari SEKSI V (MATERI AJAR MENDETAIL).\n\n**AKTIVASI VISUAL:** SEKARANG SAATNYA Anda menyisipkan 1-2 visualisasi interaktif (JSON) di dalam SEKSI V sesuai instruksi Sistem Visualisasi Cerdas.`;
         const result4 = await retryWithBackoff(() => model.generateContent(part4Prompt));
         const res4Text = result4.response.text();
 
