@@ -61,6 +61,15 @@ const AnalisisKelasPage: React.FC = () => {
     };
   } | null>(null);
   const { activeSemester, academicYear, geminiModel, userProfile } = useSettings();
+  const [activeMode, setActiveMode] = useState<'ai' | 'tp'>('ai');
+  const [tpMastery, setTpMastery] = useState<Array<{
+    material: string;
+    total: number;
+    passed: number;
+    failed: number;
+    percentage: number;
+    failedStudents: string[];
+  }>>([]);
 
   const [currentUser, setCurrentUser] = useState<{ uid: string } | null>(null);
 
@@ -356,6 +365,33 @@ if (attendance.length > 0) {
 
       setAnalysisData({ ...classData, stats });
 
+      // Calculate TP Mastery
+      const tpMap: Record<string, { total: number, passed: number, failed: number, failedStudents: string[] }> = {};
+      grades.forEach(g => {
+        const mat = g.material || 'Umum';
+        if (!tpMap[mat]) tpMap[mat] = { total: 0, passed: 0, failed: 0, failedStudents: [] };
+        
+        const score = parseFloat(g.score as string);
+        tpMap[mat].total++;
+        if (score >= 78) {
+          tpMap[mat].passed++;
+        } else {
+          tpMap[mat].failed++;
+          tpMap[mat].failedStudents.push(g.studentName);
+        }
+      });
+
+      const tpMasteryData = Object.entries(tpMap).map(([material, d]) => ({
+        material,
+        total: d.total,
+        passed: d.passed,
+        failed: d.failed,
+        percentage: parseFloat(((d.passed / d.total) * 100).toFixed(1)),
+        failedStudents: d.failedStudents
+      })).sort((a, b) => a.percentage - b.percentage);
+
+      setTpMastery(tpMasteryData);
+
       const dataHash = generateDataHash({ ...classData, isConcise, geminiModel, activeSemester, academicYear });
       const cacheKey = `class-analysis-${classId}-${dataHash}`;
       const cachedReport = localStorage.getItem(cacheKey);
@@ -443,6 +479,23 @@ if (attendance.length > 0) {
           </div>
         )}
       </div>
+
+      {analysisData && (
+        <div className="flex gap-2 mb-6 p-1 bg-gray-200/50 dark:bg-gray-800 rounded-xl w-fit">
+          <button 
+            onClick={() => setActiveMode('ai')}
+            className={`px-6 py-2 rounded-lg font-bold transition-all ${activeMode === 'ai' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-500 hover:bg-white/50'}`}
+          >
+            Analisis AI & Grafik
+          </button>
+          <button 
+            onClick={() => setActiveMode('tp')}
+            className={`px-6 py-2 rounded-lg font-bold transition-all ${activeMode === 'tp' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-500 hover:bg-white/50'}`}
+          >
+            Ketuntasan TP (Materi)
+          </button>
+        </div>
+      )}
 
       {report && !loading && analysisData && (
         <div className="space-y-8 animate-fade-in-up">
@@ -574,10 +627,35 @@ if (attendance.length > 0) {
                   </div>
                 </div>
                 <div className="p-6 flex-1 overflow-y-auto max-h-[400px] scrollbar-thin">
-                  <div id="ai-analysis-report" className="prose dark:prose-invert max-w-none prose-xs prose-p:leading-relaxed">
+                  <div id="ai-analysis-report" className="prose dark:prose-invert max-w-none prose-xs prose-p:leading-relaxed text-black">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm, remarkMath]}
                       rehypePlugins={[rehypeKatex]}
+                      components={{
+                        p: ({ children, ...rest }) => {
+                            const content = String(children).trim();
+                            const jsonPattern = /\{[\s\S]*?"type"[\s\S]*?"config"[\s\S]*?\}/;
+                            const match = content.match(jsonPattern);
+                            
+                            if (match) {
+                                let rawJson = match[0];
+                                const textPart = content.replace(rawJson, '').trim();
+                                const sanitizedJson = rawJson.replace(/"code":\s*?"([\s\S]*?)"/g, (m, p1) => {
+                                    return `"code": "${p1.replace(/\n/g, '\\n')}"`;
+                                });
+
+                                try {
+                                    const parsed = JSON.parse(sanitizedJson);
+                                    if (parsed.type && parsed.config) {
+                                        import('../components/quiz/VisualizationRenderer').then(mod => {
+                                            // Dynamic import for visual if needed in analysis
+                                        });
+                                    }
+                                } catch (e) {}
+                            }
+                            return <p className="mb-4 text-black dark:text-gray-100 leading-relaxed text-justify" {...rest}>{children}</p>;
+                        }
+                      }}
                     >
                       {report}
                     </ReactMarkdown>
